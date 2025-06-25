@@ -1,0 +1,209 @@
+/* Root Variables for Default (Light Theme) */
+:root {
+    --bg-color: #fff;
+    --primary-color: #004c9d;
+    --secondary-color: #6c757d;
+    --border-color: #888;
+    --post-bg: #f0f0f0;
+    --button-text: #fff;
+    --input-bg:#fdfdfd;
+    --shadow: 1px 1px 1px #ccc;
+    --text-color: #222;
+    --card-bg: #f9f9f9;
+    --card-border: #ddd;
+    --accent-color: #0073e6;
+    --accent-hover: #005bb5;
+    --delete-color: #e63946;
+    --delete-hover: #c02433;
+    --font-family: Breezesans, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Open Sans, Helvetica Neue, sans-serif;
+}
+
+/* 🌙 Dark Mode */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-color: #121212;
+        --text-color: #f0f0f0;
+        --primary-color: #bb86fc;
+        --secondary-color: #03dac6;
+        --accent-color: #ff4081;
+    }
+}
+
+/* 📖 Sepia Theme */
+[data-theme="sepia"] {
+    --bg-color: #f5e8d0;
+    --text-color: #5b4636;
+    --primary-color: #a67c52;
+    --secondary-color: #8b5a2b;
+    --accent-color: #d17c24;
+}
+
+/* 🌟 High Contrast Mode */
+[data-theme="high-contrast"] {
+    --bg-color: #000000;
+    --text-color: #ffffff;
+    --primary-color: #ffcc00;
+    --secondary-color: #00ffff;
+    --accent-color: #ff00ff;
+}
+
+/* 🌎 Base Styles */
+body {
+    line-height: 1.6;
+    min-height: 100vh;
+    -webkit-user-select: none;
+    user-select: none;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: var(--font-family);
+    transition: background 0.3s, color 0.3s;
+}
+
+/* Basic Button Styling */
+/* button {
+    background-color: var(--primary-color);
+    color: var(--bg-color);
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background-color: var(--accent-color);
+} */
+
+/* ─────────────────────────── */
+/* 📏 Responsive Media Queries */
+/* ─────────────────────────── */
+
+/* Small Devices (phones, up to 600px) */
+@media (max-width: 600px) {
+    body {
+        font-size: 14px;
+    }
+}
+
+/* Medium Devices (Tablets, 601px - 1024px) */
+@media (min-width: 601px) and (max-width: 1024px) {
+    body {
+        font-size: 16px;
+    }
+}
+
+/* Large Devices (Desktops, 1025px and up) */
+@media (min-width: 1025px) {
+    body {
+        font-size: 18px;
+    }
+}
+
+/* 📱 Device Orientation */
+/* @media (orientation: portrait) {
+    body {
+        background-color: var(--bg-color);
+    }
+}
+
+@media (orientation: landscape) {
+    body {
+        background-color: var(--secondary-color);
+    }
+} */
+
+/* 🎭 Motion Preferences */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* 🖱️ Hover Support */
+@media (hover: hover) {
+    a:hover {
+        text-decoration: underline;
+    }
+}
+
+/* 🖲️ Pointer Accuracy */
+@media (pointer: coarse) {
+    button {
+        padding: 15px 25px;
+    }
+}
+
+/* 🏴 Right-to-Left Support */
+html[dir="rtl"] {
+    direction: rtl;
+    text-align: right;
+}
+
+/* 🔀 Custom Theme Switching via JavaScript */
+.theme-toggle {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    padding: 10px;
+    background: var(--primary-color);
+    color: var(--bg-color);
+    border: none;
+    cursor: pointer;
+}
+
+/* ─────────────────────────── */
+/* 📱 Mobile Devices (Up to 480px) */
+@media (max-width: 480px) {
+    body {
+        font-size: 14px;
+    }
+}
+
+/* 📲 Small Phones & Portrait Phones (481px - 600px) */
+@media (min-width: 481px) and (max-width: 600px) {
+    body {
+        font-size: 15px;
+    }
+}
+
+/* 📱 Larger Phones & Small Tablets (601px - 768px) */
+@media (min-width: 601px) and (max-width: 768px) {
+    body {
+        font-size: 16px;
+    }
+}
+
+/* 💻 Tablets & iPads (769px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+    body {
+        font-size: 17px;
+    }
+}
+
+/* 🖥️ Small Laptops & Notebooks (1025px - 1280px) */
+@media (min-width: 1025px) and (max-width: 1280px) {
+    body {
+        font-size: 18px;
+    }
+}
+
+/* 🖥️ Standard Desktops (1281px - 1600px) */
+@media (min-width: 1281px) and (max-width: 1600px) {
+    body {
+        font-size: 19px;
+    }
+}
+
+/* 🖥️ Large Screens (1601px - 1920px) */
+@media (min-width: 1601px) and (max-width: 1920px) {
+    body {
+        font-size: 20px;
+    }
+}
+
+/* 🖥️ Extra Large / 4K Screens (1921px and above) */
+@media (min-width: 1921px) {
+    body {
+        font-size: 22px;
+    }
+}

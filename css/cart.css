@@ -1,0 +1,27 @@
+.cart-tabs button.active {
+    background: #4caf50;
+    color: white;
+  }
+  .quantity-control {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .quantity-control button {
+    width: 2rem;
+    height: 2rem;
+    font-size: 1.2rem;
+  }
+  .quantity-value {
+    width: 1.5rem;
+    text-align: center;
+  }
+  .back-button {
+    margin-bottom: 1rem;
+    padding: 0.5rem 1rem;
+    background-color: #eee;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+  

@@ -1,0 +1,9 @@
+import { displayFarm } from "../../services/crops/farm/farmDisplay.js";
+
+async function Farm(isLoggedIn, farmID, contentContainer) {
+    contentContainer.innerHTML = '';
+    alert("grh");
+    displayFarm(contentContainer, farmID, isLoggedIn);
+}
+
+export { Farm };

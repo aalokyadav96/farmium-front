@@ -1,0 +1,123 @@
+/* Flexbox Utilities */
+.flex {
+    display: flex;
+}
+
+.flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.vflex {
+    display: flex;
+    flex-direction: column;
+}
+
+.hflex-sb {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.hflex-wrap {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+/* Grid Utilities */
+.grid {
+    display: grid;
+    gap: 10px;
+}
+
+.grid-two-columns {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-three-columns {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+}
+
+/* Text Alignment */
+.text-center {
+    text-align: center;
+}
+
+.text-left {
+    text-align: left;
+}
+
+.text-right {
+    text-align: right;
+}
+
+/* Spacing */
+.m-0 {
+    margin: 0;
+}
+
+.m-10 {
+    margin: 10px;
+}
+
+.p-10 {
+    padding: 10px;
+}
+
+.p-20 {
+    padding: 20px;
+}
+
+/* Display */
+.d-block {
+    display: block;
+}
+
+.d-inline {
+    display: inline;
+}
+
+.d-inline-block {
+    display: inline-block;
+}
+
+.d-none {
+    display: none;
+}
+
+/* Width & Height */
+.w-100 {
+    width: 100%;
+}
+
+.h-100 {
+    height: 100%;
+}
+
+.max-w-600 {
+    max-width: 600px;
+}
+
+.max-w-full {
+    max-width: 100%;
+}
+
+/* Responsive Utilities */
+@media (max-width: 768px) {
+    .mobile-hidden {
+        display: none;
+    }
+
+    .mobile-center {
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .mobile-full-width {
+        width: 100%;
+    }
+}

@@ -1,0 +1,67 @@
+import { state, setState } from '../../state/state.js';
+import { apiFetch } from "../../api/api.js";
+import Snackbar from '../../components/ui/Snackbar.mjs';
+import { fetchProfile } from './fetchProfile.js';
+
+function toggleFollow(userId, followButton, profile) {
+    if (!state.token) {
+        Snackbar("Please log in to follow users.", 3000);
+        return;
+    }
+
+    if (!followButton) {
+        Snackbar("Follow button not found.", 3000);
+        return;
+    }
+
+    if (!profile) {
+        console.warn("Profile object not provided.");
+        Snackbar("Profile data is unavailable.", 3000);
+        return;
+    }
+
+    const action = followButton.textContent === 'Follow' ? 'PUT' : 'DELETE';
+    const apiEndpoint = `/follows/${userId}`;
+
+    const originalText = followButton.textContent;
+    const originalClass = followButton.className;
+    const isFollowAction = action === 'PUT';
+
+    // Optimistically update the UI
+    followButton.disabled = true;
+    followButton.textContent = isFollowAction ? 'Unfollow' : 'Follow';
+    followButton.classList.toggle('following', isFollowAction);
+    profile.isFollowing = isFollowAction;
+
+    apiFetch(apiEndpoint, action)
+        .then((response) => {
+            followButton.disabled = false;
+            if (!response.ok) {
+                throw new Error(`Server responded with ${response.status}`);
+            }
+        })
+        .catch((error) => {
+            // Revert changes on failure
+            followButton.textContent = originalText;
+            followButton.className = originalClass;
+            profile.isFollowing = !isFollowAction;
+
+            followButton.disabled = false;
+            console.error("Error toggling follow status:", error);
+            Snackbar(`Failed to update follow status: ${error.message}`, 3000);
+        });
+    // Store tokens & user data securely
+    setState(
+        {
+            userProfile: fetchProfile(),
+        },
+        true // Persist in localStorage
+    );
+
+    Snackbar(
+        `You have ${isFollowAction ? 'followed' : 'unfollowed'} ${profile.username || 'the user'}.`,
+        3000
+    );
+}
+
+export {toggleFollow};

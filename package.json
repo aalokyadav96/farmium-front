@@ -1,0 +1,19 @@
+{
+  "name": "naevis",
+  "version": "1.0.0",
+  "description": "Gallium",
+  "main": "js/inapp.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^6.3.5"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "terser": "^5.43.1"
+  }
+}

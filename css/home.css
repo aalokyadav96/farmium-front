@@ -1,0 +1,55 @@
+/* Header & Feed Toggle */
+.header {
+    background: #ededed;
+    color: #000;
+    padding: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.feed-toggle {
+    font-size: 0.9em;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    width: 100%;
+}
+
+.feed-toggle input {
+    width: 2rem;
+}
+
+.feed-toggle label {
+    width: 100%;
+    flex-grow: 1;
+}
+
+
+/* Card Styles */
+.card {
+    background: var(--card-bg);
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+/* Load More Button */
+.load-more {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px 0;
+}
+.load-more:hover {
+    background: #0056b3;
+}
+.load-more:disabled {
+    background: #bbb;
+    cursor: not-allowed;
+}

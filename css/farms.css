@@ -1,0 +1,484 @@
+/* .farm-page {
+    .farm__layout {
+      display: flex;
+      gap: 2rem;
+    }
+    .farm__main {
+      flex: 3;
+    }
+    .farm__side {
+      flex: 1;
+    }
+    .farm__controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .farm__grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+  } */
+/* Core layout */
+/* #content {
+    padding: 2rem;
+    max-width: 1000px;
+    margin: auto;
+    font-family: sans-serif;
+} */
+
+.farm-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+
+.breadcrumbs {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.buttonx.button {
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.farm-banner img {
+    width: 100%;
+    height: auto;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+}
+
+/* Farm Detail Section */
+.farm-detail {
+    background-color: #f9f9f9;
+    border-radius: 6px;
+    padding: 1.5rem;
+    box-shadow: 0 0 3px rgba(0,0,0,0.1);
+    margin-bottom: 1.5rem;
+}
+
+.farm-detail h2 {
+    margin-top: 0;
+}
+
+.farm-detail p {
+    margin: 0.3rem 0;
+}
+
+.farm-actions {
+    margin-top: 1rem;
+}
+
+.farm-actions button {
+    margin-right: 0.5rem;
+}
+
+/* Crop Summary */
+.crop-summary {
+    background-color: #eaf7ea;
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+}
+
+.crop-summary p {
+    margin: 0.3rem 0;
+}
+
+/* Crop Distribution */
+.crop-distribution {
+    background-color: #fffbe6;
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+}
+
+.crop-distribution h4 {
+    margin-top: 0;
+}
+
+/* Crop List */
+.crop-sort-select {
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+}
+
+.crop-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.crop-card {
+    flex: 1 1 200px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 1rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    text-align: center;
+}
+
+.crop-card img {
+    max-width: 100%;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+}
+
+.crop-card h4 {
+    margin: 0.5rem 0;
+}
+
+.crop-card p {
+    margin: 0.3rem 0;
+    font-size: 0.9rem;
+}
+
+.buy-btn {
+    margin-top: 0.5rem;
+    background-color: #d4edda;
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* Add Crop Button */
+.add-crop-btn {
+    background-color: #e0e0ff;
+    border: none;
+    padding: 0.7rem 1.2rem;
+    font-size: 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    display: block;
+    margin: 0 auto 2rem auto;
+}
+
+/* Review Block */
+.review-block {
+    background-color: #f0f0f0;
+    padding: 1rem;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.review-block p {
+    margin-bottom: 1rem;
+}
+
+.review-block button {
+    margin: 0 0.5rem;
+    border: 1px solid #ccc;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+}
+  /***/
+  /* === Layout === */
+.farm-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    font-family: sans-serif;
+}
+
+.farm__layout {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+}
+
+/* === Columns === */
+.farm__main {
+    flex: 1 1 68%;
+}
+
+.farm__side {
+    flex: 1 1 28%;
+}
+
+@media (max-width: 900px) {
+    .farm__layout {
+        flex-direction: column;
+    }
+
+    .farm__side {
+        order: -1;
+    }
+}
+
+/* === Controls === */
+.farm__controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.farm__controls input,
+.farm__controls select {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    flex-grow: 1;
+    flex-shrink: 1;
+    height: 34px;
+}
+.farm__controls > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    flex-basis: 20%;
+}
+.farm__controls label {
+    font-size: 0.8rem;
+    color: #555;
+    font-weight: 600;
+}
+
+/* === Grid and Cards === */
+.farm__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+.farm__card {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 1rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+/* === Card Content === */
+.farm__header {
+    margin-bottom: 0.5rem;
+}
+
+.farm__header h3 {
+    margin: 0;
+}
+
+.farm__location {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.farm__meta p {
+    margin: 0.3rem 0;
+    font-size: 0.9rem;
+}
+
+.farm__badges {
+    margin-bottom: 0.5rem;
+}
+
+.farm__badge {
+    background-color: #def;
+    color: #036;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    margin-right: 0.3rem;
+}
+
+/* === Crops Preview === */
+.farm__crops-preview h4 {
+    margin: 0.5rem 0;
+}
+
+.crop__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.crop__card {
+    background-color: #f9f9f9;
+    border-radius: 4px;
+    padding: 0.5rem;
+    text-align: center;
+    flex: 1 1 45%;
+    max-width: 120px;
+}
+
+.crop__image {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+    margin-bottom: 0.3rem;
+}
+
+.crop__info {
+    font-size: 0.8rem;
+}
+
+.crop__badge {
+    display: inline-block;
+    margin-top: 0.3rem;
+    padding: 0.2rem 0.4rem;
+    font-size: 0.7rem;
+    border-radius: 3px;
+}
+
+.crop__badge.featured {
+    background-color: #ffe58f;
+    color: #664d03;
+}
+
+.crop__badge.out {
+    background-color: #fdd;
+    color: #a00;
+}
+
+/* === Actions === */
+.farm__actions {
+    margin-top: 1rem;
+}
+
+.farm__button {
+    padding: 0.5rem 1rem;
+    background-color: #e6f7ff;
+    border: 1px solid #91d5ff;
+    color: #0050b3;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.farm__button:hover {
+    background-color: #bae7ff;
+}
+
+/* === Load More === */
+.farm__load-more-btn {
+    display: block;
+    margin: 2rem auto;
+    padding: 0.7rem 2rem;
+    font-size: 1rem;
+    background-color: #f0f0f0;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+/* === Side Widgets === */
+.farm__widgets section {
+    background-color: #f8f8f8;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.05);
+}
+
+.farm__featured-photo {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+    margin: 0.5rem 0;
+}
+
+.farm__featured-rating {
+    font-size: 0.9rem;
+    color: #444;
+    margin-bottom: 0.5rem;
+}
+
+/* === Typography === */
+.farm__widgets h3 {
+    margin-top: 0;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.farm__widgets p {
+    font-size: 0.9rem;
+    margin: 0.3rem 0;
+}
+.crop-card {
+    border: 1px solid #ccc;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    width: 100%;
+    max-width: 280px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.crop-card img.crop-card-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+}
+.filter-panel {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    align-items: flex-end;
+}
+
+.filter-panel label {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.filter-panel input[type="number"],
+.filter-panel input[type="text"] {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    min-width: 120px;
+}
+
+.filter-panel input[type="checkbox"] {
+    margin-top: 6px;
+    width: 18px;
+    height: 18px;
+}
+
+.filter-panel button {
+    padding: 8px 14px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.filter-panel button:hover {
+    background-color: #0056b3;
+}
+
+@media (max-width: 600px) {
+    .filter-panel {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-panel label,
+    .filter-panel button {
+        width: 100%;
+    }
+}
