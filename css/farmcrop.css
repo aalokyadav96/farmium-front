@@ -1,0 +1,115 @@
+/* === Farm Page === */
+.farm__layout {
+    display: flex;
+    gap: 2rem;
+    margin: 2rem;
+  }
+  
+  .farm__main {
+    flex: 2;
+  }
+  
+  .farm__controls select,
+  .farm__controls input {
+    margin: 0.5rem 1rem 1rem 0;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+  }
+  
+  .farm__card {
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 1rem;
+    background: #fff;
+  }
+  
+  .farm__sidebar {
+    background: #f9f9f9;
+    padding: 1rem;
+    border-left: 1px solid #ddd;
+  }
+  
+  /* === Farm Detail Page === */
+  .farm-layout {
+    display: flex;
+    gap: 1.5rem;
+    margin: 2rem;
+  }
+  
+  .farm-main {
+    flex: 3;
+  }
+  
+  .farm-aside {
+    flex: 1;
+    background: #fcfcfc;
+    border-left: 1px solid #eee;
+    padding: 1rem;
+  }
+  
+  .crop-card {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin: 1rem 0;
+    padding: 1rem;
+  }
+  
+  .add-crop-btn {
+    margin-top: 1rem;
+    padding: 0.6rem 1.2rem;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+  }
+  
+  /* === Listings Page (tomato) === */
+  .listings-container.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+  
+  .listing-card {
+    padding: 1rem;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .quantity-control {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  /* === Catalogue Page === */
+  .catalogue-layout {
+    display: flex;
+    gap: 2rem;
+    margin: 2rem;
+  }
+  
+  .catalogue-main {
+    flex: 3;
+  }
+  
+  .catalogue-aside {
+    flex: 1;
+    background: #f0f8ff;
+    border-left: 1px solid #ccc;
+    padding: 1rem;
+  }
+  
+  .tab-content {
+    margin-top: 1rem;
+  }
+  
+  .crop-card {
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background-color: #fff;
+    margin-bottom: 1rem;
+  }
+  

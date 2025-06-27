@@ -1,202 +1,409 @@
-
 import Button from "../../../components/base/Button.js";
 import { createElement } from "../../../components/createElement.js";
-import { SRC_URL, apiFetch } from "../../../api/api.js";
-
-import { showCategoryBrowser } from "./browseByCategory.js";
+import { apiFetch } from "../../../api/api.js";
 import {
-    renderFarmCards,
-    renderFeaturedFarm,
-    renderWeatherWidget,
-    renderFarmStats,
-    replaceOrAppend, 
+  renderFarmCards,
+  renderFeaturedFarm,
+  renderWeatherWidget,
+  renderFarmStats,
 } from "./farmListHelpers.js";
 
-let currentPage = 1;
-const pageSize = 10;
-let cachedPages = {};
+// Config
+const PAGE_SIZE = 10;
 
-export async function displayFarms(container, isLoggedIn) {
-    container.textContent = "";
-    let farms = [];
+// State
+const state = {
+  farms: [],
+  page: 1,
+  isLoading: false,
+  favorites: new Set(JSON.parse(localStorage.getItem("favFarms") || "[]")),
+};
 
-    const layout = createElement("div", { class: "farm-page" });
+let currentSidebar, isLoggedIn;
 
-    const gridLayout = createElement("div", { class: "farm__layout" });
-    const mainCol = createElement("div", { class: "farm__main" });
-    const sideCol = createElement("aside", { class: "farm__side" });
-
-    layout.appendChild(gridLayout);
-    gridLayout.append(mainCol, sideCol);
-    container.appendChild(layout);
-    const searchInput = createElement("input", {
-        type: "text",
-        placeholder: "🔍 Search by name or location",
-        class: "farm__search-input",
-        id: "search-farm"
-    });
-    const searchLabel = createElement("label", {
-        for: "search-farm"
-    }, ["Search"]);
-
-    const locationSelect = createElement("select", {
-        class: "farm__location-select",
-        id: "select-location"
-    }, [
-        createElement("option", { value: "" }, ["All Locations"])
-    ]);
-    const locationLabel = createElement("label", {
-        for: "select-location"
-    }, ["Location"]);
-
-    const cropSelect = createElement("select", {
-        class: "farm__crop-select",
-        id: "select-crop"
-    }, [
-        createElement("option", { value: "" }, ["All Crops"])
-    ]);
-    const cropLabel = createElement("label", {
-        for: "select-crop"
-    }, ["Crop"]);
-
-    const sortSelect = createElement("select", {
-        class: "farm__sort-select",
-        id: "select-sort"
-    }, [
-        createElement("option", { value: "" }, ["Sort By"]),
-        createElement("option", { value: "name" }, ["Name"]),
-        createElement("option", { value: "location" }, ["Location"]),
-        createElement("option", { value: "owner" }, ["Owner"])
-    ]);
-    const sortLabel = createElement("label", {
-        for: "select-sort"
-    }, ["Sort"]);
-
-    const farmGrid = createElement("div", { class: "farm__grid" });
-    const loadMoreBtn = createElement("button", { class: "farm__load-more-btn" }, ["Load More"]);
-
-    const controls = createElement("div", { class: "farm__controls" }, [
-        createElement("div", {}, [searchLabel, searchInput]),
-        createElement("div", {}, [locationLabel, locationSelect]),
-        createElement("div", {}, [cropLabel, cropSelect]),
-        createElement("div", {}, [sortLabel, sortSelect])
-    ]);
-
-    mainCol.append(controls, farmGrid, loadMoreBtn);
-
-    const sidebarWidgets = createElement("div", { class: "farm__widgets" });
-    sideCol.appendChild(sidebarWidgets);
-
-    function showLoader() {
-        farmGrid.textContent = "";
-        for (let i = 0; i < 6; i++) {
-            farmGrid.appendChild(createElement("div", { class: "farm__card skeleton" }));
-        }
-    }
-
-    async function loadFarms(page = 1) {
-        if (cachedPages[page]) return cachedPages[page];
-        const res = await apiFetch(`/farms?page=${page}&limit=${pageSize}`);
-        const data = res?.farms || [];
-        cachedPages[page] = data;
-        return data;
-    }
-
-    const debounce = (fn, delay = 300) => {
-        let timer;
-        return (...args) => {
-            clearTimeout(timer);
-            timer = setTimeout(() => fn(...args), delay);
-        };
-    };
-
-    async function refreshDisplay() {
-        const query = searchInput.value.toLowerCase();
-        const sortKey = sortSelect.value;
-        const locationFilter = locationSelect.value;
-        const cropFilter = cropSelect.value;
-
-        let filtered = farms.filter(f =>
-            f.name.toLowerCase().includes(query) ||
-            f.location.toLowerCase().includes(query)
-        );
-
-        if (locationFilter) filtered = filtered.filter(f => f.location === locationFilter);
-        if (cropFilter) {
-            filtered = filtered.filter(f =>
-                f.crops?.some(c => c.name.toLowerCase() === cropFilter.toLowerCase())
-            );
-        }
-
-        if (sortKey) {
-            filtered.sort((a, b) => (a[sortKey] || "").localeCompare(b[sortKey] || ""));
-        }
-
-        populateDropdowns(farms);
-        renderFarmCards(filtered, farmGrid, isLoggedIn);
-        renderCTAWidget(sidebarWidgets, mainCol);
-        renderWeatherWidget(sidebarWidgets);
-        renderFeaturedFarm(sidebarWidgets, filtered[0]);
-        renderFarmStats(sidebarWidgets, farms);
-    }
-
-    function populateDropdowns(list) {
-        const locations = new Set();
-        const crops = new Set();
-
-        list.forEach(f => {
-            if (f.location) locations.add(f.location);
-            (f.crops || []).forEach(c => crops.add(c.name));
-        });
-
-        fillSelect(locationSelect, ["All Locations", ...[...locations].sort()]);
-        fillSelect(cropSelect, ["All Crops", ...[...crops].sort()]);
-    }
-
-    function fillSelect(selectEl, options) {
-        const currentValue = selectEl.value;
-        selectEl.innerHTML = "";
-        for (const val of options) {
-            const opt = createElement("option", {
-                value: val.startsWith("All ") ? "" : val,
-                selected: val === currentValue
-            }, [val]);
-            selectEl.appendChild(opt);
-        }
-    }
-
-    searchInput.addEventListener("input", debounce(refreshDisplay));
-    locationSelect.addEventListener("change", refreshDisplay);
-    cropSelect.addEventListener("change", refreshDisplay);
-    sortSelect.addEventListener("change", refreshDisplay);
-
-    loadMoreBtn.addEventListener("click", async () => {
-        currentPage++;
-        showLoader();
-        const moreFarms = await loadFarms(currentPage);
-        if (!moreFarms.length) loadMoreBtn.disabled = true;
-        farms.push(...moreFarms);
-        refreshDisplay();
-    });
-
-    try {
-        showLoader();
-        farms = await loadFarms(currentPage);
-        refreshDisplay();
-    } catch {
-        container.textContent = "⚠️ Failed to load farms.";
-    }
+// Fetch farms
+async function fetchFarms(page) {
+  const res = await apiFetch(`/farms?page=${page}&limit=${PAGE_SIZE}`);
+  return res?.farms || [];
 }
 
-function renderCTAWidget(container, main) {
-    const section = createElement("section", { class: "farm__cta" }, [
-        Button("View by Category", 'view-by-cat-btn', {
-            click: () => { showCategoryBrowser(main) }
-        }, "buttonx"),
-        Button("View by Farm", 'view-by-farm-btn', {
-            click: () => { displayFarms(document.getElementById('content'), true) }
-        }),
-    ]);
+// Grid
+function Grid() {
+  const container = createElement("div", { class: "farm__grid" });
 
-    replaceOrAppend(container, ".farm__cta", section);
+  return {
+    container,
+    render(farms) {
+      container.innerHTML = "";
+      if (!farms.length) {
+        container.appendChild(createElement("p", {}, ["No farms found."]));
+      } else {
+        renderFarmCards(farms, container, isLoggedIn, toggleFavorite);
+      }
+    }
+  };
 }
+
+// Sidebar
+function Sidebar() {
+  const container = createElement("div", { class: "farm__sidebar" });
+
+  return {
+    container,
+    render(allFarms) {
+      container.innerHTML = "";
+      renderWeatherWidget(container);
+      renderFeaturedFarm(container, allFarms[0]);
+      renderFarmStats(container, allFarms);
+      renderFavorites(container);
+      renderMap(container);
+      renderRatings(container, allFarms);
+    }
+  };
+}
+
+function renderFavorites(container) {
+  if (!isLoggedIn) return;
+
+  const section = createElement("section", { class: "farm__favorites" }, [
+    createElement("h3", {}, ["Favorites"]),
+  ]);
+
+  if (state.favorites.size === 0) {
+    section.appendChild(createElement("p", {}, ["None yet. Click ❤ on a card."]));
+  } else {
+    const list = createElement("ul");
+    state.favorites.forEach(id => {
+      const farm = state.farms.find(f => f.id === id);
+      if (farm) list.appendChild(createElement("li", {}, [farm.name]));
+    });
+    section.appendChild(list);
+  }
+
+  container.appendChild(section);
+}
+
+function renderMap(container) {
+  const section = createElement("section", { class: "farm__map" }, [
+    createElement("h3", {}, ["Farm Map"]),
+    createElement("div", { class: "farm__map-placeholder" }, ["Map integration point"])
+  ]);
+  container.appendChild(section);
+}
+
+function renderRatings(container, farms) {
+  const section = createElement("section", { class: "farm__ratings" }, [
+    createElement("h3", {}, ["Top Rated"])
+  ]);
+
+  const top = farms.filter(f => typeof f.rating === "number")
+                   .sort((a, b) => b.rating - a.rating)
+                   .slice(0, 3);
+
+  if (!top.length) {
+    section.appendChild(createElement("p", {}, ["No ratings yet."]));
+  } else {
+    top.forEach(f => {
+      const stars = "★".repeat(Math.round(f.rating)) + "☆".repeat(5 - Math.round(f.rating));
+      section.appendChild(createElement("div", { class: "rating" }, [
+        createElement("strong", {}, [f.name]),
+        createElement("span", {}, [stars])
+      ]));
+    });
+  }
+
+  container.appendChild(section);
+}
+
+function toggleFavorite(farmId) {
+  if (state.favorites.has(farmId)) {
+    state.favorites.delete(farmId);
+  } else {
+    state.favorites.add(farmId);
+  }
+  localStorage.setItem("favFarms", JSON.stringify([...state.favorites]));
+  if (currentSidebar) currentSidebar.render(state.farms);
+}
+
+// Main
+export async function displayFarms(container, loggedIn) {
+  container.innerHTML = "";
+  isLoggedIn = loggedIn;
+
+  const layout = createElement("div", { class: "farm-page" });
+  const main   = createElement("div", { class: "farm__main" });
+  const side   = createElement("aside", { class: "farm__side" });
+  layout.append(createElement("div", { class: "farm__layout" }, [main, side]));
+  container.appendChild(layout);
+
+  const grid     = Grid();
+  const sidebar  = Sidebar();
+  const sentinel = createElement("div", { class: "farm__sentinel" });
+
+  currentSidebar = sidebar;
+
+  main.append(grid.container, sentinel);
+  side.appendChild(sidebar.container);
+
+  const observer = new IntersectionObserver(onIntersect, { rootMargin: "200px" });
+  observer.observe(sentinel);
+
+  await loadNextPage();
+  renderAll();
+
+  async function loadNextPage() {
+    if (state.isLoading) return;
+    state.isLoading = true;
+    const batch = await fetchFarms(state.page);
+    if (batch.length) {
+      state.farms.push(...batch);
+      state.page++;
+    } else {
+      observer.disconnect();
+    }
+    state.isLoading = false;
+  }
+
+  function renderAll() {
+    grid.render(state.farms);
+    sidebar.render(state.farms);
+  }
+
+  async function onIntersect(entries) {
+    if (entries.some(e => e.isIntersecting)) {
+      await loadNextPage();
+      renderAll();
+    }
+  }
+}
+
+
+// import Button from "../../../components/base/Button.js";
+// import { createElement } from "../../../components/createElement.js";
+// import { apiFetch } from "../../../api/api.js";
+
+// const pageSize = 10;
+// let allFarms = [];
+
+// function renderCropItem(crop) {
+//     const isOutOfStock = crop.quantity === 0;
+//     const cropItem = createElement('li', {
+//         class: `crop-item${isOutOfStock ? ' out-of-stock' : ''}`
+//     }, [
+//         createElement('img', {
+//             src: crop.imageUrl,
+//             alt: `${crop.name} image`,
+//             class: 'crop-image',
+//             loading: 'lazy'
+//         }),
+//         createElement('div', { class: 'crop-info' }, [
+//             createElement('strong', {}, [crop.name]),
+//             createElement('p', {}, [
+//                 isOutOfStock ? 'Out of Stock' : `${crop.quantity} ${crop.unit} at ₹${crop.price}`
+//             ]),
+//             crop.notes ? createElement('p', {}, [`📝 ${crop.notes}`]) : null
+//         ].filter(Boolean))
+//     ]);
+
+//     return cropItem;
+// }
+
+// function renderFarmCard(farm, isLoggedIn) {
+//     const farmInfo = [
+//         createElement('h2', { class: 'farm-name' }, [farm.name]),
+//         createElement('img', {
+//             src: farm.photo,
+//             alt: `${farm.name} image`,
+//             class: 'farm-photo',
+//             loading: 'lazy'
+//         }),
+//         farm.location ? createElement('p', {}, [`📍 ${farm.location}`]) : null,
+//         farm.owner ? createElement('p', {}, [`👤 Owner: ${farm.owner}`]) : null,
+//         farm.availabilityTiming ? createElement('p', {}, [`🕒 Timing: ${farm.availabilityTiming}`]) : null,
+//         farm.contact ? createElement('p', {}, [`📞 Contact: ${farm.contact}`]) : null,
+//         farm.description ? createElement('p', {}, [farm.description]) : null
+//     ].filter(Boolean);
+
+//     const actionButtons = isLoggedIn
+//         ? createElement('div', { class: 'farm-actions' }, [
+//             Button('View Details', () => alert(`Viewing farm: ${farm.name}`)),
+//             Button('Edit', () => alert(`Editing farm: ${farm.name}`)),
+//             Button('Request Visit', () => alert(`Contacting farm: ${farm.name}`))
+//         ])
+//         : null;
+
+//     const farmCard = createElement('div', { class: 'farm-card' }, [
+//         ...farmInfo,
+//         actionButtons
+//     ]);
+
+//     if (farm.crops?.length) {
+//         const cropsTitle = createElement('h4', {}, ['🌾 Crops Available:']);
+//         const cropsList = createElement('ul', { class: 'crops-list' });
+
+//         // Optional: sort crops by price ascending
+//         const sortedCrops = [...farm.crops].sort((a, b) => a.price - b.price);
+//         sortedCrops.forEach(crop => cropsList.appendChild(renderCropItem(crop)));
+
+//         farmCard.appendChild(cropsTitle);
+//         farmCard.appendChild(cropsList);
+//     }
+
+//     return farmCard;
+// }
+
+// function createPagination(currentPage, totalPages, onPageChange) {
+//     const wrapper = createElement('div', { class: 'pagination' });
+//     for (let i = 1; i <= totalPages; i++) {
+//         const btn = Button(i.toString(), () => onPageChange(i));
+//         if (i === currentPage) btn.classList.add('active');
+//         wrapper.appendChild(btn);
+//     }
+//     return wrapper;
+// }
+
+// function createSearchBar(onSearch) {
+//     const input = createElement('input', {
+//         type: 'text',
+//         placeholder: 'Search farms or crops...',
+//         oninput: (e) => onSearch(e.target.value.trim().toLowerCase())
+//     });
+
+//     return createElement('div', { class: 'search-bar' }, [input]);
+// }
+
+// function filterFarmsByQuery(farms, query) {
+//     if (!query) return farms;
+//     return farms.filter(f =>
+//         f.name.toLowerCase().includes(query) ||
+//         f.crops?.some(c => c.name.toLowerCase().includes(query))
+//     );
+// }
+
+// async function loadFarms(page = 1) {
+//     const res = await apiFetch(`/farms?page=${page}&limit=${pageSize}`);
+//     return {
+//         farms: res?.farms || [],
+//         total: res?.total || 0,
+//         page: res?.page || 1
+//     };
+// }
+
+// export async function setupFarmsPage(container, isLoggedIn) {
+//     const res = await apiFetch(`/farms?page=1&limit=1000`);
+//     allFarms = res?.farms || [];
+
+//     const wrapper = createElement('div', { class: 'farms-wrapper' });
+//     const farmsContainer = createElement('div', { class: 'farms-container' });
+
+//     const searchBar = createSearchBar(query => {
+//         const filtered = filterFarmsByQuery(allFarms, query);
+//         farmsContainer.innerHTML = '';
+//         filtered.forEach(farm => farmsContainer.appendChild(renderFarmCard(farm, isLoggedIn)));
+//     });
+
+//     wrapper.appendChild(searchBar);
+//     wrapper.appendChild(farmsContainer);
+//     container.innerHTML = ''; // Clear container
+//     container.appendChild(wrapper);
+
+//     displayFarms(farmsContainer, isLoggedIn, 1);
+// }
+
+// export async function displayFarms(container, isLoggedIn, page = 1) {
+//     const { farms, total } = await loadFarms(page);
+//     const totalPages = Math.ceil(total / pageSize);
+
+//     container.innerHTML = '';
+
+//     if (!farms.length) {
+//         container.textContent = 'No farms available at the moment.';
+//         return;
+//     }
+
+//     farms.forEach(farm => container.appendChild(renderFarmCard(farm, isLoggedIn)));
+
+//     if (totalPages > 1) {
+//         container.appendChild(createPagination(page, totalPages, newPage => displayFarms(container, isLoggedIn, newPage)));
+//     }
+// }
+
+// // import Button from "../../../components/base/Button.js";
+// // import { createElement } from "../../../components/createElement.js";
+// // import { apiFetch } from "../../../api/api.js";
+
+// // const pageSize = 10;
+// // const cachedPages = {};
+
+// // async function loadFarms(page = 1) {
+// //     if (cachedPages[page]) return cachedPages[page];
+// //     const res = await apiFetch(`/farms?page=${page}&limit=${pageSize}`);
+// //     const data = res?.farms || [];
+// //     cachedPages[page] = data;
+// //     return data;
+// // }
+
+// // export async function displayFarms(container, isLoggedIn) {
+// //     const farms = await loadFarms(1);
+
+// //     container.innerHTML = '';
+
+// //     if (!farms.length) {
+// //         container.textContent = 'No farms available at the moment.';
+// //         return;
+// //     }
+
+// //     farms.forEach(farm => {
+// //         const farmInfo = [
+// //             createElement('h2', { class: 'farm-name' }, [farm.name]),
+// //             createElement('img', {
+// //                 src: farm.photo,
+// //                 alt: `${farm.name} image`,
+// //                 class: 'farm-photo'
+// //             }),
+// //             farm.location ? createElement('p', {}, [`📍 ${farm.location}`]) : null,
+// //             farm.owner ? createElement('p', {}, [`👤 Owner: ${farm.owner}`]) : null,
+// //             farm.availabilityTiming ? createElement('p', {}, [`🕒 Timing: ${farm.availabilityTiming}`]) : null,
+// //             farm.contact ? createElement('p', {}, [`📞 Contact: ${farm.contact}`]) : null,
+// //             farm.description ? createElement('p', {}, [farm.description]) : null
+// //         ].filter(Boolean);
+
+// //         const cardButtons = isLoggedIn
+// //             ? createElement('div', { class: 'farm-actions' }, [
+// //                   Button('View Details', () => alert(`Viewing farm: ${farm.name}`)),
+// //                   Button('Edit', () => alert(`Editing farm: ${farm.name}`))
+// //               ])
+// //             : null;
+
+// //         const farmCard = createElement('div', { class: 'farm-card' }, [
+// //             ...farmInfo,
+// //             cardButtons
+// //         ]);
+
+// //         if (farm.crops?.length) {
+// //             const cropsTitle = createElement('h4', {}, ['🌾 Crops Available:']);
+// //             const cropsList = createElement('ul', { class: 'crops-list' });
+
+// //             farm.crops.forEach(crop => {
+// //                 const cropDetails = createElement('li', { class: 'crop-item' }, [
+// //                     createElement('img', {
+// //                         src: crop.imageUrl,
+// //                         alt: `${crop.name} image`,
+// //                         class: 'crop-image'
+// //                     }),
+// //                     createElement('div', { class: 'crop-info' }, [
+// //                         createElement('strong', {}, [crop.name]),
+// //                         createElement('p', {}, [`${crop.quantity} ${crop.unit} at ₹${crop.price}`]),
+// //                         crop.notes ? createElement('p', {}, [`📝 ${crop.notes}`]) : null
+// //                     ])
+// //                 ]);
+// //                 cropsList.appendChild(cropDetails);
+// //             });
+
+// //             farmCard.appendChild(cropsTitle);
+// //             farmCard.appendChild(cropsList);
+// //         }
+
+// //         container.appendChild(farmCard);
+// //     });
+// // }

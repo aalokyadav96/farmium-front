@@ -2,11 +2,11 @@
 
 /******* */
 
-// const API_URL = "http://localhost:4000/api";
-// const SRC_URL = "http://localhost:4000/static";
+const API_URL = "http://localhost:4000/api";
+const SRC_URL = "http://localhost:4000/static";
 
-const SRC_URL       = "https://farmium.onrender.com/static";
-const API_URL       = "https://farmium.onrender.com/api";
+// const SRC_URL       = "https://farmium.onrender.com/static";
+// const API_URL       = "https://farmium.onrender.com/api";
 
 // State management
 const state = {
