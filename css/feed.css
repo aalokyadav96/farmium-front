@@ -1,0 +1,259 @@
+/* Container */
+/* .container {
+    max-width: 650px;
+    margin: auto;
+    padding: 10px;
+} */
+
+/* Post Composer */
+.post-compose {
+    /* background-color: var(--card-bg); */
+    padding: 15px;
+    border-radius: 8px;
+    /* box-shadow: 0 4px 8px rgba(0,0,0,0.1); */
+    margin-bottom: 20px;
+    border: 1px solid var(--text-color);
+    width: fit-content;
+}
+
+/* Post Header */
+/* .post-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+} */
+
+.user-icon img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+/* Post Type Selector */
+/* .post-type-selector {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+} */
+
+/* Media Upload */
+.media-upload input {
+    display: none;
+}
+
+/* Post Button */
+.post-button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.post-button:hover {
+    background: #0056b3;
+}
+
+/* Post Feed */
+.postsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    /* width: fit-content; */
+}
+
+/* Feed Item */
+.feed-item {
+    /* background-color: var(--card-bg); */
+    /* padding: 5px; */
+    border-radius: 8px;
+    border: 1px solid var(--text-color);
+    flex: 2;
+    width: 100%;
+    /* box-shadow: 0 4px 8px rgba(0,0,0,0.1); */
+}
+
+/* Responsive Video */
+.video-container {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+}
+
+.video-player {
+    width: 100%;
+    border-radius: 6px;
+}
+
+/* Like, Comment Buttons */
+/* .post-actions {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 10px;
+} */
+
+.like, .comment {
+    cursor: pointer;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.like:hover, .comment:hover {
+    text-decoration: underline;
+}
+
+/* Delete Button */
+.delete-btn {
+    background: #dc3545;
+    color: white;
+}
+
+.delete-btn:hover {
+    background: #c82333;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    .container {
+        padding: 5px;
+    }
+
+    .post-compose {
+        padding: 10px;
+    }
+
+    /* .feed-item {
+        padding: 10px;
+    } */
+
+    .post-actions {
+        /* flex-direction: column; */
+        align-items: flex-start;
+    }
+}
+
+
+/* Profile Picture */
+/* .user-icon img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--border-color);
+} */
+
+/* Username & Timestamp */
+.user-time {
+    flex-grow: 1;
+  }
+  
+  .user-icon {
+    width: 40px;
+    height: 40px;
+  }
+  /* 
+  .username {
+    font-weight: bold;
+    color: var(--text-color);
+  } */
+  
+  .timestamp {
+    font-size: 0.8rem;
+    color: var(--border-color);
+  }
+  
+  /* 🖼️ Post Media (Images & Videos) */
+  .post-media {
+    padding: 10px;
+  }
+  
+  /* .preview_image_wrap__Q29V8 {
+    display: grid;
+    gap: 8px;
+  } */
+  
+  /* Dynamic Grid for Images */
+  /* .preview_image_wrap__Q29V8.PostPreviewImageView_-one__-6MMx { grid-template-columns: 1fr; }
+  .preview_image_wrap__Q29V8.PostPreviewImageView_-two__WP8GL { grid-template-columns: 1fr 1fr; }
+  .preview_image_wrap__Q29V8.PostPreviewImageView_-three__HLsVN { grid-template-columns: repeat(3, 1fr); }
+  .preview_image_wrap__Q29V8.PostPreviewImageView_-four__fYIRN { grid-template-columns: repeat(2, 1fr); }
+  .preview_image_wrap__Q29V8.PostPreviewImageView_-five__RZvWx { grid-template-columns: repeat(3, 1fr); }
+  .preview_image_wrap__Q29V8.PostPreviewImageView_-six__EG45r { grid-template-columns: repeat(3, 1fr); } */
+  
+  /* Image Styling */
+  /* .post-image {
+    width: 100%;
+    transition: transform 0.2s ease-in-out;
+  } */
+  
+  .buttcon {
+    margin: 8px 0;
+    gap: 8px;
+  }
+  
+  /* ❤️ Like & Comment Actions */
+  .post-actions {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    border-top: 1px solid #666;
+  }
+  
+  .post-actions span {
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 5px;
+  }
+  
+  .post-actions .like:hover {
+    background: var(--hover-bg);
+  }
+  
+  .post-actions .comment:hover {
+    background: var(--hover-bg);
+  }
+  
+  /* 🗑️ Delete Button */
+  /* .delete-btn {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .delete-btn:hover {
+    background: var(--hover-bg);
+  } */
+  
+  /* 📱 Responsive Design */
+  /* @media (max-width: 768px) {
+    .feed {
+      max-width: 95%;
+    }
+  
+  } */
+  
+  .media-preview-item img {
+    max-width: 200px;
+  }
+  
+  .comment-form {
+    display: flex;
+    padding: 4px;
+    gap: 4px;
+  }
+
+  .comment-form input {
+    flex: 11;
+  }
+  
+  .comment-form button {
+    flex: 2;
+    font-size: 1rem;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+  }
+
+  

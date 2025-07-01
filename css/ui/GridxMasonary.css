@@ -1,0 +1,13 @@
+.gallery-masonry {
+    position: relative;
+}
+
+.gallery-item {
+    position: absolute;
+    box-sizing: border-box;
+    margin: 0;
+    background: #eee;
+    padding: 1rem;
+    border-radius: 4px;
+    transition: transform 0.3s ease;
+}

@@ -39,4 +39,29 @@ async function init() {
   });
 }
 
+// // if ("serviceWorker" in navigator && "PushManager" in window) {
+// //   navigator.serviceWorker.register("/service-worker.js").then(async registration => {
+// //     console.log("Service Worker registered:", registration);
+
+// //     // Ask for notification permission
+// //     const permission = await Notification.requestPermission();
+// //     if (permission === "granted") {
+// //       console.log("Notification permission granted.");
+// //     } else {
+// //       console.warn("Notification permission denied.");
+// //     }
+// //   }).catch(err => console.error("Service Worker registration failed:", err));
+// // } else {
+// //   console.warn("Push messaging is not supported.");
+// // }
+// if ("serviceWorker" in navigator) {
+//   navigator.serviceWorker.getRegistrations().then(registrations => {
+//     for (let registration of registrations) {
+//       registration.unregister().then(() => {
+//         console.log("Service Worker unregistered");
+//       });
+//     }
+//   });
+// }
+
 init();

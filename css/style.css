@@ -1,15 +1,29 @@
-@import url("allstyles.css");
-@import url("auth.css");
 @import url("base.css");
-@import url("checkout.css");
-@import url("cart.css");
-@import url("crops.css");
-@import url("farm.css");
-/* @import url("farmcrop.css"); */
-@import url("custom.css");
-@import url("fixed.css");
-@import url("layout.css");
+@import url("allstyles.css");
 @import url("morestyles.css");
-@import url("nav.css");
+@import url("custom.css");
+@import url("feedimages.css");
+@import url("feed.css");
+@import url("chat.css");
+@import url("events.css");
+@import url("eventpage.css");
+@import url("farm.css");
+@import url("crops.css");
+@import url("croptoolspro.css");
+/* @import url("farmcrop.css"); */
+/* @import url("farming.css"); */
+@import url("checkout.css");
 @import url("newhome.css");
+@import url("itinerary2.css");
+@import url("layout.css");
+@import url("place.css");
 @import url("payment.css");
+@import url("udataTabs.css");
+@import url("fixed.css");
+@import url("artist.css");
+@import url("nav.css");
+@import url("forum.css");
+@import url("admin.css");
+@import url("auth.css");
+@import url("posts.css");
+@import url("baitocss.css");

@@ -1,0 +1,123 @@
+/* General Styles */
+#audio-player-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #222;
+    padding: 10px;
+    border-radius: 8px;
+    width: fit-content;
+    max-width: 400px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Thumbnail */
+.audio-poster {
+    width: 40px;
+    height: 40px;
+    border-radius: 5px;
+    object-fit: cover;
+}
+
+/* Buffered Progress */
+.buffered-progress {
+    position: absolute;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 5px;
+}
+
+/* Controls */
+.controls-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Play/Pause Button */
+.play-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: white;
+    transition: transform 0.1s;
+}
+
+.play-btn:hover {
+    transform: scale(1.1);
+}
+
+/* Seek Bar */
+.seek-bar {
+    width: 100px;
+    height: 5px;
+    appearance: none;
+    background: #666;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.seek-bar::-webkit-slider-thumb {
+    appearance: none;
+    width: 10px;
+    height: 10px;
+    background: white;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+/* Volume Container */
+.volume-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Mute Button */
+.mute-btn {
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    color: white;
+    transition: transform 0.1s;
+}
+
+.mute-btn:hover {
+    transform: scale(1.1);
+}
+
+/* Volume Slider */
+.volume-slider {
+    width: 60px;
+    height: 5px;
+    appearance: none;
+    background: #666;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.volume-slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 8px;
+    height: 8px;
+    background: white;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+/* Speed Select */
+.speed-select {
+    background: #333;
+    color: white;
+    border: none;
+    padding: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    outline: none;
+}
+
+.speed-select:hover {
+    background: #444;
+}

@@ -1,0 +1,63 @@
+.zoombox-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.zoombox-content {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* overflow: scroll; */
+}
+
+
+.zoombox-content img {
+  display: block;
+  max-width: 100%;
+  max-height: 100vh;
+  cursor: grab;
+  transition: transform 0.3s ease-in-out;
+}
+
+.zoombox-content img:active {
+  cursor: grabbing;
+}
+
+.zoombox-prev-btn,
+.zoombox-next-btn,
+.zoombox-close-btn {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.zoombox-prev-btn {
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.zoombox-next-btn {
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.zoombox-close-btn {
+  top: 10px;
+  right: 10px;
+}

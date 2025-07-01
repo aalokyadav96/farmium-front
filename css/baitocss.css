@@ -1,0 +1,147 @@
+/* 📦 DASH CONTAINER BASE */
+.application-list,
+.baito-admin-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+/* 🧑‍💼 APPLICATION CARD (Applicant View) */
+.application-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  transition: transform 0.1s ease;
+}
+
+.application-card:hover {
+  transform: translateY(-2px);
+}
+
+.application-card h4 {
+  margin: 0 0 0.5rem;
+  color: #333;
+}
+
+.application-card p {
+  margin: 0.3rem 0;
+  color: #555;
+}
+
+.application-card .meta {
+  font-size: 0.9rem;
+  color: #777;
+}
+
+/* 👨‍💼 EMPLOYER JOB CARD */
+.baito-admin-card {
+  background: #fdfdfd;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  border: 1px solid #dcdcdc;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  position: relative;
+}
+
+.baito-admin-card h4 {
+  margin-bottom: 0.3rem;
+}
+
+.baito-admin-card p {
+  font-size: 0.95rem;
+  color: #444;
+  margin: 0.2rem 0 0.6rem;
+}
+
+.baito-admin-card .btn {
+  font-size: 0.9rem;
+  padding: 0.4rem 0.8rem;
+}
+
+/* 📋 APPLICANT LIST INSIDE MODAL */
+.applicant-list {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.app-card {
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #f9f9f9;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.app-card:hover {
+  background-color: #eef5ff;
+}
+
+.app-card strong {
+  color: #222;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.app-card .muted {
+  color: #777;
+  font-size: 0.85rem;
+}
+
+/* 🪟 MODAL STYLING */
+/* .modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 10px;
+  padding: 1.5rem;
+  max-width: 500px;
+  width: 90%;
+  position: relative;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+
+.modal h3 {
+  margin-top: 0;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.modal-close {
+  position: absolute;
+  top: 8px; right: 12px;
+  font-size: 1.2rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.modal p {
+  margin-bottom: 0.5rem;
+  color: #333;
+} */
+
+/* 🚨 UTILITY STATES */
+.error {
+  color: crimson;
+}
+
+.empty-state {
+  color: #777;
+  font-style: italic;
+  margin-top: 1rem;
+}

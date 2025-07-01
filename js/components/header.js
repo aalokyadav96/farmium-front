@@ -2,7 +2,7 @@
 import { SRC_URL, state } from "../state/state.js";
 import { navigate } from "../routes/index.js";
 import { logout } from "../services/auth/authService.js";
-import { cartSVG, notifSVG } from "./svgs.js";
+import { cartSVG, notifSVG, searchSVG } from "./svgs.js";
 import { isAdmin } from "../state/state.js";
 import { createElement } from "../components/createElement.js";
 
@@ -81,6 +81,7 @@ const createProfileDropdown = (user) => {
 
     const links = [
         { href: "/profile", text: "Profile" },
+        { href: "/admin", text: "Admin" },
     ];
     if (isAdmin()) { links.push({ href: "/admin", text: "Admin" }) }
     links.forEach(({ href, text }) => {
@@ -125,9 +126,14 @@ const createheader = (isLoggedIn) => {
     topRightDiv.className = "hflex-sb";
     header.appendChild(topRightDiv);
 
+    const searchspan = createElement('a', { class: "flex-center", id: "chatNotif" }, []);
+    searchspan.innerHTML = searchSVG;
+    searchspan.href = "/search";
+    const searchLink = createElement('div', { class: "top-svg" }, [searchspan]);
+    topRightDiv.appendChild(searchLink);
+
     let lynx = [
         { href: "/create-farm", text: "Farm" },
-        { href: "/create-crop", text: "Crop" },
     ]
 
     topRightDiv.appendChild(createDropdown("create-menu", "Create", lynx));

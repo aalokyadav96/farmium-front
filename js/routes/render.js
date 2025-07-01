@@ -21,20 +21,45 @@ async function renderPageContent(isLoggedIn, path, contentContainer) {
             contentContainer.innerHTML = "";
             Auth(isLoggedIn, contentContainer);
         },
-        "/cart": async () => {
-            const { Cart } = await import("../pages/cart/cart.js");
+        "/chats": async () => {
+            const { Chats } = await import("../pages/userchat/chats.js");
             contentContainer.innerHTML = "";
-            Cart(isLoggedIn, contentContainer);
+            Chats(isLoggedIn, contentContainer);
+        },
+        "/livechat": async () => {
+            const { LiveChats } = await import("../pages/livechat/chats.js");
+            contentContainer.innerHTML = "";
+            LiveChats(isLoggedIn, contentContainer);
         },
         "/profile": async () => {
             const { MyProfile } = await import("../pages/profile/userProfile.js");
             contentContainer.innerHTML = "";
             MyProfile(isLoggedIn, contentContainer);
         },
+        "/settings": async () => {
+            const { Settings } = await import("../pages/profile/settings.js");
+            contentContainer.innerHTML = "";
+            Settings(isLoggedIn, contentContainer);
+        },
+        "/cart": async () => {
+            const { Cart } = await import("../pages/cart/cart.js");
+            contentContainer.innerHTML = "";
+            Cart(isLoggedIn, contentContainer);
+        },
         "/farms": async () => {
             const { Farms } = await import("../pages/farm/farms.js");
             contentContainer.innerHTML = "";
             Farms(isLoggedIn, contentContainer);
+        },
+        "/tools": async () => {
+            const { Tools } = await import("../pages/farm/tools.js");
+            contentContainer.innerHTML = "";
+            Tools(isLoggedIn, contentContainer);
+        },
+        "/products": async () => {
+            const { Products } = await import("../pages/farm/products.js");
+            contentContainer.innerHTML = "";
+            Products(isLoggedIn, contentContainer);
         },
         "/crops": async () => {
             const { Crops } = await import("../pages/crop/crops.js");
@@ -46,11 +71,6 @@ async function renderPageContent(isLoggedIn, path, contentContainer) {
             contentContainer.innerHTML = "";
             Create(isLoggedIn, contentContainer);
         },
-        "/create-crop": async () => {
-            const { Create } = await import("../pages/crop/createCrop.js");
-            contentContainer.innerHTML = "";
-            Create(isLoggedIn, contentContainer);
-        },
     };
 
     const dynamicRoutes = [
@@ -59,6 +79,30 @@ async function renderPageContent(isLoggedIn, path, contentContainer) {
             handler: async ([, id]) => {
                 const { UserProfile } = await import("../pages/profile/userProfile.js");
                 UserProfile(isLoggedIn, contentContainer, id);
+            },
+        },
+        {
+            pattern: /^\/chat\/([\w-]+)$/,
+            handler: async ([, id]) => {
+                const { Chat } = await import("../pages/userchat/chat.js");
+                try {
+                    contentContainer.innerHTML = "";
+                    Chat(isLoggedIn, id, contentContainer);
+                } catch {
+                    contentContainer.innerHTML = `<h1>Chat Not Found</h1>`;
+                }
+            },
+        },
+        {
+            pattern: /^\/livechat\/([\w-]+)$/,
+            handler: async ([, id]) => {
+                const { LiveChat } = await import("../pages/livechat/chat.js");
+                try {
+                    contentContainer.innerHTML = "";
+                    LiveChat(isLoggedIn, id, contentContainer);
+                } catch {
+                    contentContainer.innerHTML = `<h1>Chat Not Found</h1>`;
+                }
             },
         },
         {

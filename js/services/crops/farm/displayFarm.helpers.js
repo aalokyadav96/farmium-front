@@ -107,6 +107,42 @@ export async function renderCrops(
 }
 
 // ─────────── Individual crop card ───────────
+// function createCropCard(crop, farm, farmId, mainContainer, isLoggedIn, isCreator) {
+//   const card = createElement("div", { class: "crop-card" });
+
+//   if (crop.imageUrl) {
+//     card.appendChild(createElement("img", {
+//       src: `${SRC_URL}${crop.imageUrl}`,
+//       alt: crop.name
+//     }));
+//   }
+
+//   const ageDesc       = crop.createdAt ? `${getAgeInDays(crop.createdAt)} days old` : "Unknown age";
+//   const perishable    = crop.expiryDate ? `🧊 Expires: ${crop.expiryDate}` : "Stable";
+//   const stockStatus   = crop.quantity <= 0 ? "❌ Out of Stock" : "✅ Available";
+
+//   card.append(
+//     createElement("h4", {}, [crop.name]),
+//     createElement("p", {}, [`💰 ${crop.price} per ${crop.unit}`]),
+//     createElement("p", {}, [`📦 Stock: ${crop.quantity}`]),
+//     createElement("p", {}, [`📅 Harvested: ${crop.harvestDate || "Unknown"}`]),
+//     createElement("p", {}, [`📆 ${perishable}`]),
+//     createElement("p", {}, [`🕓 ${ageDesc}`]),
+//     createElement("p", {}, [`📌 ${stockStatus}`])
+//   );
+
+//   if (crop.history?.length > 1) {
+//     card.append(...createPriceHistoryToggle(crop.history));
+//   }
+
+//   if (isCreator) {
+//     card.append(...createCreatorControls(crop, farmId, mainContainer));
+//   } else {
+//     card.append(...createUserControls(crop, farm.name, isLoggedIn));
+//   }
+
+//   return card;
+// }
 function createCropCard(crop, farm, farmId, mainContainer, isLoggedIn, isCreator) {
   const card = createElement("div", { class: "crop-card" });
 
@@ -117,15 +153,30 @@ function createCropCard(crop, farm, farmId, mainContainer, isLoggedIn, isCreator
     }));
   }
 
-  const ageDesc       = crop.createdAt ? `${getAgeInDays(crop.createdAt)} days old` : "Unknown age";
-  const perishable    = crop.expiryDate ? `🧊 Expires: ${crop.expiryDate}` : "Stable";
-  const stockStatus   = crop.quantity <= 0 ? "❌ Out of Stock" : "✅ Available";
+  const formatDate = (isoStr) =>
+    isoStr ? new Date(isoStr).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric"
+    }) : "Unknown";
+
+  const harvestDate  = formatDate(crop.harvestDate);
+  const expiryDate   = formatDate(crop.expiryDate);
+  const ageDesc      = crop.createdAt ? `${getAgeInDays(crop.harvestDate)} days old` : "Unknown age";
+  const perishable   = crop.expiryDate ? `🧊 Expires: ${expiryDate}` : "Stable";
+  const stockStatus  = crop.quantity <= 0 ? "❌ Out of Stock" : "✅ Available";
+
+  const price = new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0
+  }).format(crop.price);
 
   card.append(
     createElement("h4", {}, [crop.name]),
-    createElement("p", {}, [`💰 ${crop.price} per ${crop.unit}`]),
+    createElement("p", {}, [`💰 ${price} per ${crop.unit}`]),
     createElement("p", {}, [`📦 Stock: ${crop.quantity}`]),
-    createElement("p", {}, [`📅 Harvested: ${crop.harvestDate || "Unknown"}`]),
+    createElement("p", {}, [`📅 Harvested: ${harvestDate}`]),
     createElement("p", {}, [`📆 ${perishable}`]),
     createElement("p", {}, [`🕓 ${ageDesc}`]),
     createElement("p", {}, [`📌 ${stockStatus}`])
@@ -158,7 +209,7 @@ function createCreatorControls(crop, farmId, mainContainer) {
   const editBtn = createElement("button", { class: "edit-btn" }, ["✏️ Edit"]);
   editBtn.onclick = () => {
     mainContainer.textContent = "";
-    editCrop(true, farmId, crop, mainContainer);
+    editCrop(farmId, crop, mainContainer);
   };
 
   const deleteBtn = createElement("button", { class: "btn btn-danger" }, ["🗑️ Delete"]);

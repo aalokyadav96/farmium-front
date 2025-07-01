@@ -1,13 +1,7 @@
-// cartCategory.js
 import { apiFetch } from "../../api/api.js";
-import { createElement } from "./domUtils.js";
+import Button from "../../components/base/Button.js";
+import { createElement } from "../../components/createElement.js";
 
-/**
- * Render one cart category: tab button + panel with table, controls, and checkout.
- * - `cart` is the shared in-memory cart object.
- * - `updateGrandTotal` should recompute overall total.
- * - Removing all items auto-removes its tab/panel.
- */
 export function renderCartCategory({
   cart,
   category,
@@ -22,10 +16,9 @@ export function renderCartCategory({
 
   // ——— Tab Button ———
   const tabBtn = createElement("button", {
-    textContent: `${category[0].toUpperCase()}${category.slice(1)} (${items.length})`,
     className: tabBar.children.length === 0 ? "active" : "",
     onclick: () => activateTab()
-  });
+  }, [`${category[0].toUpperCase()}${category.slice(1)} (${items.length})`]);
   tabBar.appendChild(tabBtn);
 
   // ——— Panel ———
@@ -36,22 +29,23 @@ export function renderCartCategory({
   });
   tabPanels.appendChild(panel);
 
-  // Build table skeleton
+  // Table
   const table = createElement("table");
   const thead = createElement("thead");
   const headerRow = createElement("tr");
+
   const cols = ["Item", ...(category === "crops" ? ["Farm"] : []), "Qty", "Price", "Subtotal", ""];
-  cols.forEach(c => headerRow.appendChild(createElement("th", { textContent: c })));
+  cols.forEach(c => headerRow.appendChild(createElement("th", {}, [c])));
   thead.appendChild(headerRow);
   table.appendChild(thead);
+
   const tbody = createElement("tbody");
   table.appendChild(tbody);
 
-  // Subtotal + Checkout button
+  // Subtotal + Checkout
   const subtotalDisplay = createElement("p");
-  const checkoutBtn = createElement("button", {
-    textContent: `Checkout ${category}`,
-    onclick: () => {
+  const checkoutBtn = Button(`Checkout ${category}`,"chutbtn", {
+    click: () => {
       apiFetch("/cart/checkout", "POST", JSON.stringify({ category, items }))
         .then(() => displayCheckout(contentContainer))
         .catch(e => console.error("Checkout failed:", e));
@@ -59,10 +53,12 @@ export function renderCartCategory({
   });
 
   panel.append(createElement("div", { className: "cart-section" }, [
-    table, subtotalDisplay, checkoutBtn
+    table,
+    subtotalDisplay,
+    checkoutBtn
   ]));
 
-  // ——— Sync helper ———
+  // ——— Sync Helper ———
   async function syncCategory() {
     try {
       await apiFetch("/cart/update", "POST", JSON.stringify({ category, items }));
@@ -76,29 +72,25 @@ export function renderCartCategory({
     tbody.innerHTML = "";
 
     if (items.length === 0) {
-      // Remove this category entirely
       delete cart[category];
       tabBar.removeChild(tabBtn);
       tabPanels.removeChild(panel);
       delete sectionTotals[category];
       updateGrandTotal();
-      // activate first remaining tab
-      if (tabBar.firstChild) {
-        tabBar.firstChild.click();
-      }
+      if (tabBar.firstChild) tabBar.firstChild.click();
       return;
     }
 
     items.forEach((it, i) => {
       const row = createElement("tr");
-      row.appendChild(createElement("td", { textContent: it.item }));
+
+      row.appendChild(createElement("td", {}, [it.item]));
       if (category === "crops") {
-        row.appendChild(createElement("td", { textContent: it.farm || "-" }));
+        row.appendChild(createElement("td", {}, [it.farm || "-"]));
       }
 
       // Quantity controls
       const dec = createElement("button", {
-        textContent: "−",
         onclick: async () => {
           if (it.quantity > 1) {
             it.quantity--;
@@ -106,64 +98,64 @@ export function renderCartCategory({
             renderItems();
           }
         }
-      });
+      }, ["−"]);
+
       const inc = createElement("button", {
-        textContent: "+",
         onclick: async () => {
           it.quantity++;
           await syncCategory();
           renderItems();
         }
-      });
+      }, ["+"]);
+
       const qtySpan = createElement("span", {
-        textContent: it.quantity,
         className: "quantity-value"
-      });
+      }, [String(it.quantity)]);
+
       const qtyCell = createElement("td", {}, [
         createElement("div", { className: "quantity-control" }, [dec, qtySpan, inc])
       ]);
       row.appendChild(qtyCell);
 
-      // Price & subtotal
-      row.appendChild(createElement("td", { textContent: `₹${it.price}` }));
-      row.appendChild(createElement("td", { textContent: `₹${it.price * it.quantity}` }));
+      row.appendChild(createElement("td", {}, [`₹${it.price}`]));
+      row.appendChild(createElement("td", {}, [`₹${it.price * it.quantity}`]));
 
-      // Remove button
       const rm = createElement("button", {
-        textContent: "✕",
         onclick: async () => {
           items.splice(i, 1);
           await syncCategory();
           renderItems();
         }
-      });
+      }, ["✕"]);
       row.appendChild(createElement("td", {}, [rm]));
 
       tbody.appendChild(row);
     });
 
-    // update subtotal + grand total
+    // Subtotal + Grand total
     const sub = items.reduce((sum, x) => sum + x.price * x.quantity, 0);
     sectionTotals[category] = sub;
-    subtotalDisplay.innerHTML = `<strong>Subtotal:</strong> ₹${sub}`;
+
+    subtotalDisplay.replaceChildren(
+      createElement("strong", {}, ["Subtotal:"]),
+      ` ₹${sub}`
+    );
+
     updateGrandTotal();
 
-    // refresh tab label count
-    tabBtn.textContent = `${category[0].toUpperCase()}${category.slice(1)} (${items.length})`;
+    tabBtn.replaceChildren(`${category[0].toUpperCase()}${category.slice(1)} (${items.length})`);
   }
 
   function activateTab() {
-    // show/hide panels
     tabPanels.querySelectorAll(".cart-panel").forEach(p => {
       p.style.display = p.dataset.category === category ? "block" : "none";
     });
-    // update active class
     tabBar.querySelectorAll("button").forEach(b => {
       b.classList.toggle("active", b === tabBtn);
     });
   }
 
-  // initial draw
+  // Initial render
   renderItems();
 }
 

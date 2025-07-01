@@ -1,0 +1,99 @@
+/* Container flex layout */
+.admin-wrapper {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  /* Left side: list of grouped reports */
+  .admin-reported-list {
+    flex: 1;
+    max-width: 50%;
+    overflow-y: auto;
+  }
+  
+  /* Right side: entity preview */
+  .admin-entity-preview {
+    flex: 1;
+    border-left: 1px solid #ccc;
+    padding-left: 1rem;
+    background-color: #f9f9f9;
+    white-space: pre-wrap;
+    overflow-y: auto;
+  }
+  
+  /* Filters area */
+  .admin-filters {
+    margin-bottom: 1rem;
+    display: flex;
+    gap: 1rem;
+  }
+  
+  /* Summary area */
+  .admin-summary {
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+  }
+  
+  /* Each grouped report card */
+  .report-card {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background-color: #fff;
+  }
+  
+  /* Header of each card */
+  .report-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  /* Expanded section for individual reports */
+  .report-expanded {
+    margin-top: 0.5rem;
+    border-top: 1px solid #eee;
+    padding-top: 0.5rem;
+  }
+  
+  /* Individual report details */
+  .report-item {
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px dashed #ddd;
+  }
+  
+  /* Update controls area */
+  .update-wrapper {
+    margin-top: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  /* Notification status */
+  .notified-yes {
+    color: green;
+    font-weight: bold;
+  }
+  
+  .notified-pending {
+    color: orange;
+    font-weight: bold;
+  }
+  
+  /* Buttons */
+  .admin-btn {
+    padding: 0.3rem 0.6rem;
+    border: 1px solid #888;
+    background-color: #f0f0f0;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  
+  .admin-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  

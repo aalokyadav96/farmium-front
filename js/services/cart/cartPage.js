@@ -1,21 +1,24 @@
-import { createElement } from "./domUtils.js";
+import { createElement } from "../../components/createElement.js";
 import { renderCartCategory } from "./cartUtils.js";
 import { apiFetch } from "../../api/api.js";
 import { displayCheckout } from "./checkout.js";
 
 export async function displayCart(container, isLoggedIn) {
   if (!isLoggedIn) {
-    container.innerHTML = "<p>Please log in to view your cart.</p>";
+    container.innerHTML = "";
+    container.appendChild(createElement("p", {}, ["Please log in to view your cart."]));
     return;
   }
+
   const grandTotalText = createElement("h3");
-  // Fetch, bucket & merge same as before…
+
   const server = await apiFetch("/cart", "GET");
   const raw = {};
   server.forEach(it => {
     const cat = it.category || "crops";
     (raw[cat] = raw[cat] || []).push(it);
   });
+
   const cart = {};
   for (const cat in raw) {
     const m = {};
@@ -29,24 +32,25 @@ export async function displayCart(container, isLoggedIn) {
 
   const cats = Object.keys(cart).filter(c => cart[c].length);
   if (!cats.length) {
-    container.innerHTML = "<p>Your cart is empty.</p>";
+    container.innerHTML = "";
+    container.appendChild(createElement("p", {}, ["Your cart is empty."]));
     return;
   }
 
   // Build UI scaffold
   container.innerHTML = "";
-  container.append(createElement("button", {
-    textContent: "← Back",
-    className: "back-button",
-    onclick: () => window.history.back()
-  }));
-  container.append(createElement("h2", { textContent: "Your Cart" }));
+  container.append(
+    createElement("button", {
+      class: "back-button",
+      onclick: () => window.history.back()
+    }, ["← Back"]),
+    createElement("h2", {}, ["Your Cart"])
+  );
 
   const tabBar = createElement("div", { className: "cart-tabs" });
   const tabPanels = createElement("div", { className: "cart-tab-panels" });
   const sectionTotals = {};
 
-  // render categories
   cats.forEach(cat => {
     renderCartCategory({
       cart,
@@ -60,15 +64,13 @@ export async function displayCart(container, isLoggedIn) {
     });
   });
 
-  // Grand total box
   const grandBox = createElement("div", {}, [
     grandTotalText,
     createElement("button", {
-      textContent: "Checkout All",
       onclick: () => apiFetch("/cart/checkout", "POST", JSON.stringify(cart))
         .then(() => displayCheckout(container))
         .catch(e => console.error(e))
-    })
+    }, ["Checkout All"])
   ]);
 
   container.append(tabBar, tabPanels, grandBox);
@@ -80,6 +82,7 @@ export async function displayCart(container, isLoggedIn) {
 
   updateGrandTotal();
 }
+
 
 
 // import { displayCheckout } from "./checkout.js";

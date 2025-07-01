@@ -31,8 +31,22 @@ const createNav = (isLoggedIn) => {
     // const isLoggedIn = Boolean(state.token);
     const navItems = [
         { href: "/home", label: "Home" },
+        // { href: "/admin", label: "Admin" },
+        // { href: "/events", label: "Events" },
+        // { href: "/places", label: "Places" },
+        // { href: "/feed", label: "Feed" },
+        // { href: "/itinerary", label: "Itinerary" },
+        // { href: "/baitos", label: "Baito" },
+        // { href: "/posts", label: "Posts" },
         { href: "/farms", label: "Farms" },
         { href: "/crops", label: "Crops" },
+        { href: "/products", label: "Products" },
+        { href: "/tools", label: "Tools" },
+        // { href: "/search", label: "Search" },
+        // { href: "/artists", label: "Artists" },
+        // { href: "/merechats", label: "Merechat" },
+        // { href: "/livechat", label: "LiveChat" },
+        { href: "/chats", label: "Chat" },
 
     ];
 

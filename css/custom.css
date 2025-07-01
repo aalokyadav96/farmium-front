@@ -754,8 +754,8 @@ p span {
 
 /* --- Message Form --- */
 form[enctype="multipart/form-data"] {
-    display: flex;
-    align-items: center;
+    /* display: flex; */
+    /* align-items: center; */
     padding: 0.5rem 1rem;
     border-top: 1px solid #ddd;
     background-color: #fafafa;

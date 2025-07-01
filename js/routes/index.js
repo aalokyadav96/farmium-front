@@ -1,7 +1,13 @@
 import { attachNavEventListeners, createheader } from "../components/header.js";
+// import MegaMenuC from "../components/ui/MegamenuC.mjs";
 import { createNav } from "../components/navigation.js";
+import { secnav } from "../components/secNav.js";
+// import { Footer } from "../components/footer.js";
+// import { FloatingActionButton } from "../components/ui/FAB.mjs";
 import { renderPageContent } from "./render.js";
+// import { renderPageContent } from "./renderPageContent.js";
 import { state } from "../state/state.js";
+import { coffeeSVG } from "../components/svgs.js";
 
 async function loadContent(url) {
     const app = document.getElementById("app");
@@ -17,6 +23,14 @@ async function loadContent(url) {
     app.appendChild(createheader(isLoggedIn));
     app.appendChild(createNav(isLoggedIn));
 
+    /* */
+    // app.appendChild(MegaMenuC());
+    /* */
+
+    const secNavElement = secnav(isLoggedIn);
+    if (secNavElement) {
+        app.appendChild(secNavElement);
+    }
 
     // app.appendChild(secnav(isLoggedIn));
     app.appendChild(main);

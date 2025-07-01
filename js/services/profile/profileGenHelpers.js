@@ -7,7 +7,7 @@ import { generateBannerForm, generateAvatarForm } from "./generators.js";
 import { logout } from "../auth/authService.js";
 import { reportPost } from "../reporting/reporting.js";
 import Button from "../../components/base/Button.js";
-// import { userChatInit } from "../userchat/chatPage.js";
+import { userChatInit } from "../userchat/chatPage.js";
 
 // /* Utility function to append multiple children */
 // function appendChildren(parent, ...children) {
@@ -186,10 +186,10 @@ function createProfileActions(profile, isLoggedIn) {
         followButton.textContent = profile.is_following ? "Unfollow" : "Follow";
         profileActions.appendChild(followButton);
 
-        // const sendMessagebtn = Button("Send Message", 'send-msg', {
-        //     click: () => userChatInit(profile.userid),
-        // }, "buttonx");
-        // profileActions.appendChild(sendMessagebtn);
+        const sendMessagebtn = Button("Send Message", 'send-msg', {
+            click: () => userChatInit(profile.userid),
+        }, "buttonx");
+        profileActions.appendChild(sendMessagebtn);
 
         // // Report button
         // const reportButton = document.createElement("button");

@@ -1,6 +1,6 @@
 import { apiFetch } from "../../../api/api.js";
+import { navigate } from "../../../routes/index.js";
 import { createFarmForm } from "./createOrEditFarm.js";
-import { displayFarms } from "./FarmsHome.js";
 
 export function createFarm(isLoggedIn, container) {
     container.textContent = "";
@@ -15,7 +15,7 @@ export function createFarm(isLoggedIn, container) {
         onSubmit: async (formData) => {
             const res = await apiFetch("/farms", "POST", formData, true);
             if (res.success) {
-                displayFarms(container, isLoggedIn);
+                navigate(`/farms`);
             } else {
                 container.textContent = "❌ Failed to create farm. Please try again.";
             }

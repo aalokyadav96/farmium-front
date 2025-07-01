@@ -1,0 +1,51 @@
+.mega-menu-c {
+  width: 250px;
+  background: #f3f3f3;
+  border-right: 1px solid #ddd;
+  padding: 1rem;
+  font-family: sans-serif;
+}
+
+.menu-section {
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #ccc;
+}
+
+.menu-header {
+  font-weight: bold;
+  padding: 0.5rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #e1e1e1;
+}
+
+.menu-header.open .toggle-icon {
+  transform: rotate(90deg);
+}
+
+.toggle-icon {
+  transition: transform 0.2s ease;
+}
+
+.submenu {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 1rem;
+}
+
+.submenu.hidden {
+  display: none;
+}
+
+.submenu li a {
+  display: block;
+  padding: 0.25rem 0;
+  color: #333;
+  text-decoration: none;
+}
+
+.submenu li a:hover {
+  text-decoration: underline;
+}

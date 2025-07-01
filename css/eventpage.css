@@ -1,0 +1,133 @@
+
+.event-section {
+    padding: 1rem;
+    border-top: 1px solid #ddd;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    margin-bottom: 2rem;
+  }
+  
+  .event-section h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    color: #023d64;
+    font-weight: 600;
+  }
+  
+  .buttonx {
+    margin-right: 4px;
+  }
+
+  .hvflex {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    justify-content: flex-start;
+  }
+  
+  /* .ticket-card {
+    flex: 1 1 250px;
+    max-width: 320px;
+    background: #fafafa;
+    border: 2px solid #023d64;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: #f3f3f3 3px 3px 3px inset, #f3f3f3 3px 3px 3px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  } 
+   
+  .ticket-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(2, 61, 100, 0.15);
+  }
+  
+  .ticket-card h2 {
+    font-size: 2rem;
+    color: #023d64;
+    margin: 0 0 0.5rem;
+  }
+  
+  .ticket-card p {
+    margin: 0.2rem 0;
+    color: #333;
+    font-size: 1rem;
+  }
+  
+  .ticket-card .availability {
+    font-weight: bold;
+    color: #067f5c;
+  }
+  
+  .ticket-card button {
+    margin-top: 1rem;
+    background-color: #023d64;
+    color: #fff;
+    padding: 0.6rem 1rem;
+    border: 2px solid #fff;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+  }
+  
+  .ticket-card button:hover {
+    background-color: #03558d;
+  } */
+/*   
+  .button {
+    margin-bottom: 1rem;
+    background-color: #067f5c;
+    color: #fff;
+    border: none;
+    padding: 0.7rem 1.2rem;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  .button:hover {
+    background-color: #056a4e;
+  }
+   */
+
+
+   /*************/
+   /* --- Event Type Colors --- */
+.color-concert {
+  background: linear-gradient(135deg, #7f00ff, #e100ff); /* purple neon */
+}
+.color-workshop {
+  background: linear-gradient(135deg, #00c853, #b2ff59); /* green fresh */
+}
+.color-sports {
+  background: linear-gradient(135deg, #2196f3, #21cbf3); /* blue sporty */
+}
+.color-meetup {
+  background: linear-gradient(135deg, #ff6f00, #ff8f00); /* warm orange */
+}
+.color-festival {
+  background: linear-gradient(135deg, #ff5f6d, #ffc371); /* rainbow-ish */
+}
+.color-default {
+  background: linear-gradient(135deg, #e0e0e0, #eeeeee); /* neutral */
+}
+
+/* --- Optional: Make buttons rounded and colorful --- */
+.action-btn {
+  border-radius: 30px;
+  padding: 10px 20px;
+  font-weight: bold;
+  transition: background 0.3s, transform 0.2s;
+}
+.action-btn:hover {
+  transform: scale(1.05);
+}
+
+.analytics-btn {
+  background-color: #00b0ff;
+  color: white;
+}
