@@ -11,6 +11,11 @@ async function renderPageContent(isLoggedIn, path, contentContainer) {
             contentContainer.innerHTML = "";
             Entry(isLoggedIn, contentContainer);
         },
+        "/dash": async () => {
+            const { Dash } = await import("../pages/dash/dash.js");
+            contentContainer.innerHTML = "";
+            Dash(isLoggedIn, contentContainer);
+        },
         "/home": async () => {
             const { Home } = await import("../pages/home.js");
             contentContainer.innerHTML = "";

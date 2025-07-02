@@ -54,7 +54,7 @@ export async function displayFarm(isLoggedIn, farmId, container) {
   const cropDistribution = renderCropEmojiMap(farm.crops || []);
   const reviewPlaceholder = createElement("div", { class: "review-block" }, [
     createElement("p", {}, ["⭐️⭐️⭐️⭐️☆ (4.2 avg based on 17 reviews)"]),
-    Button("💬 Write a Review", "review-btn", {
+    Button("💬 Check reviews", "review-btn", {
       click: () => displayReviews(reviewPlaceholder, isCreator, isLoggedIn, "farm", farmId)
     }, "buttonx"),
     Button("📨 Contact Farm", "contact-btn", {
@@ -62,8 +62,17 @@ export async function displayFarm(isLoggedIn, farmId, container) {
         alert(`You can reach ${farm.owner} at ${farm.contact || "N/A"}`)
     }, "buttonx")
   ]);
+  const farmCTA = createElement("div", { class: "cta-block" }, [
+    Button("Schedule a visit", "cta-visit-btn", {
+      click: () => alert("Sheduled"),
+    }, "buttonx"),
+    Button("Pre-order", "cta-pre-btn", {
+      click: () => alert("hey"),
+    }, "buttonx"),
+  ]);
 
   const asideColumn = createElement("aside", { class: "farm-aside" }, [
+    farmCTA,
     summaryStats,
     cropDistribution,
     reviewPlaceholder
