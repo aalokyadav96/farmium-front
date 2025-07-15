@@ -2,61 +2,38 @@ import { createElement } from "../../components/createElement.js";
 import { renderCartCategory } from "./cartUtils.js";
 import { apiFetch } from "../../api/api.js";
 import { displayCheckout } from "./checkout.js";
+import Button from "../../components/base/Button.js";
 
-export async function displayCart(container, isLoggedIn) {
+export async function displayCart(content, isLoggedIn) {
+  let container = createElement('div', { "class": "cartpage" }, []);
+
+  content.innerHTML = "";
+  content.appendChild(container);
   if (!isLoggedIn) {
-    container.innerHTML = "";
-    container.appendChild(createElement("p", {}, ["Please log in to view your cart."]));
-    return;
+    return renderMessage(container, "Please log in to view your cart.");
   }
-
-  const grandTotalText = createElement("h3");
 
   const server = await apiFetch("/cart", "GET");
-  const raw = {};
-  server.forEach(it => {
-    const cat = it.category || "crops";
-    (raw[cat] = raw[cat] || []).push(it);
-  });
+  const grouped = groupCartByCategory(server);
+  const categories = Object.keys(grouped).filter(cat => grouped[cat].length);
 
-  const cart = {};
-  for (const cat in raw) {
-    const m = {};
-    raw[cat].forEach(it => {
-      const key = cat === "crops" ? `${it.item}__${it.farm}` : it.item;
-      if (!m[key]) m[key] = { ...it };
-      else m[key].quantity += it.quantity;
-    });
-    cart[cat] = Object.values(m);
+  if (!categories.length) {
+    return renderMessage(container, "Your cart is empty.");
   }
 
-  const cats = Object.keys(cart).filter(c => cart[c].length);
-  if (!cats.length) {
-    container.innerHTML = "";
-    container.appendChild(createElement("p", {}, ["Your cart is empty."]));
-    return;
-  }
-
-  // Build UI scaffold
   container.innerHTML = "";
   container.append(
-    createElement("button", {
-      class: "back-button",
-      onclick: () => window.history.back()
-    }, ["← Back"]),
+    createElement("button", { className: "back-button", onclick: () => history.back() }, ["← Back"]),
     createElement("h2", {}, ["Your Cart"])
   );
 
-  const tabBar = createElement("div", { className: "cart-tabs" });
-  const tabPanels = createElement("div", { className: "cart-tab-panels" });
   const sectionTotals = {};
+  const grandTotalText = createElement("h3");
 
-  cats.forEach(cat => {
+  categories.forEach(cat => {
     renderCartCategory({
-      cart,
+      cart: grouped,
       category: cat,
-      tabBar,
-      tabPanels,
       sectionTotals,
       updateGrandTotal,
       displayCheckout,
@@ -64,227 +41,47 @@ export async function displayCart(container, isLoggedIn) {
     });
   });
 
-  const grandBox = createElement("div", {}, [
-    grandTotalText,
-    createElement("button", {
-      onclick: () => apiFetch("/cart/checkout", "POST", JSON.stringify(cart))
+  const checkoutAllBtn = Button("Checkout All","ckout-button", {
+    click: () =>
+      apiFetch("/cart/checkout", "POST", JSON.stringify(grouped))
         .then(() => displayCheckout(container))
         .catch(e => console.error(e))
-    }, ["Checkout All"])
-  ]);
+  });
 
-  container.append(tabBar, tabPanels, grandBox);
+  const grandBox = createElement("div", {}, [grandTotalText, checkoutAllBtn]);
+  container.appendChild(grandBox);
 
   function updateGrandTotal() {
-    const total = Object.values(sectionTotals).reduce((a, b) => a + b, 0);
+    const total = Object.values(sectionTotals).reduce((sum, val) => sum + val, 0);
     grandTotalText.textContent = `Grand Total: ₹${total}`;
   }
 
   updateGrandTotal();
 }
 
+function groupCartByCategory(items) {
+  console.log(items);
+  const raw = {};
+  items.forEach(it => {
+    const cat = it.category || "crops";
+    (raw[cat] = raw[cat] || []).push(it);
+  });
 
+  const grouped = {};
+  for (const cat in raw) {
+    const map = {};
+    raw[cat].forEach(it => {
+      const key = cat === "crops" ? `${it.item}__${it.farm}` : it.item;
+      if (!map[key]) map[key] = { ...it };
+      else map[key].quantity += it.quantity;
+    });
+    grouped[cat] = Object.values(map);
+  }
 
-// import { displayCheckout } from "./checkout.js";
-// import { apiFetch } from "../../api/api.js";
-// import { createElement, renderCartCategory } from "./cartUtils.js";
+  return grouped;
+}
 
-// /**
-//  * Renders the entire Cart view into `container`.
-//  * Assumes a top-level <div id="app"></div> or similar.
-//  */
-// export async function displayCart(container, isLoggedIn) {
-//   // 1) Guard: must be logged in
-//   if (!isLoggedIn) {
-//     container.innerHTML = "<p>Please log in to view your cart.</p>";
-//     return;
-//   }
-
-//   // 2) Fetch raw items from server
-//   let serverItems;
-//   try {
-//     serverItems = await apiFetch("/cart", "GET");
-//   } catch (err) {
-//     console.error("Failed to fetch cart:", err);
-//     container.innerHTML = "<p>Unable to load cart right now.</p>";
-//     return;
-//   }
-
-//   // 3) Bucket by category
-//   const rawCart = {};
-//   serverItems.forEach(item => {
-//     const cat = item.category || "crops";
-//     if (!rawCart[cat]) rawCart[cat] = [];
-//     rawCart[cat].push(item);
-//   });
-
-//   // 4) Merge duplicates (same item+farm for crops)
-//   const cart = {};
-//   for (const cat in rawCart) {
-//     const merged = {};
-//     rawCart[cat].forEach(entry => {
-//       const key = cat === "crops"
-//         ? `${entry.item}__${entry.farm}`
-//         : entry.item;
-//       if (!merged[key]) merged[key] = { ...entry };
-//       else merged[key].quantity += entry.quantity;
-//     });
-//     cart[cat] = Object.values(merged);
-//   }
-
-//   // 5) If empty, bail
-//   const categories = Object.keys(cart).filter(c => cart[c].length > 0);
-//   if (!categories.length) {
-//     container.innerHTML = "<p>Your cart is empty.</p>";
-//     return;
-//   }
-
-//   // 6) Clear & build static pieces
-//   container.innerHTML = "";
-//   const backBtn = createElement("button", {
-//     textContent: "← Back",
-//     className: "back-button",
-//     onclick: () => window.history.back()
-//   });
-//   const title = createElement("h2", { textContent: "Your Cart" });
-//   container.append(backBtn, title);
-
-//   const tabBar = createElement("div", { className: "cart-tabs" });
-//   const tabPanels = createElement("div", { className: "cart-tab-panels" });
-
-//   // For totals
-//   const sectionTotals = {};
-//   const grandTotalText = createElement("h3");
-//   const grandTotalBox = createElement("div", {}, [
-//     grandTotalText,
-//     createElement("button", {
-//       textContent: "Checkout All",
-//       onclick: () => {
-//         apiFetch("/api/cart/checkout", "POST", JSON.stringify(cart))
-//           .then(() => displayCheckout(container))
-//           .catch(err => console.error("Checkout All failed:", err));
-//       }
-//     })
-//   ]);
-
-//   // 7) Render each category tab/panel
-//   categories.forEach((cat, idx) => {
-//     renderCartCategory({
-//       cart,
-//       category: cat,
-//       index: idx,
-//       tabBar,
-//       tabPanels,
-//       sectionTotals,
-//       updateGrandTotal,
-//       contentContainer: container,
-//       displayCheckout
-//     });
-//   });
-
-//   // 8) Attach to container
-//   container.append(tabBar, tabPanels, grandTotalBox);
-
-//   // 9) Grand total recompute
-//   function updateGrandTotal() {
-//     const total = Object.values(sectionTotals).reduce((sum, v) => sum + v, 0);
-//     grandTotalText.textContent = `Grand Total: ₹${total}`;
-//   }
-
-//   // Kick off initial total
-//   updateGrandTotal();
-// }
-
-// // import { displayCheckout } from "./checkout.js";
-// // import { apiFetch } from "../../api/api.js";
-// // import { createElement, renderCartCategory } from "./cartUtils.js";
-
-// // export async function displayCart(contentContainer, isLoggedIn) {
-// //   if (!isLoggedIn) {
-// //     contentContainer.innerHTML = "<p>Please log in to view your cart.</p>";
-// //     return;
-// //   }
-
-// //   let rawCart = {};
-
-// //   try {
-// //     const serverData = await apiFetch("/cart", "GET");
-// //     serverData.forEach(item => {
-// //       const category = item.category || "crops";
-// //       if (!rawCart[category]) rawCart[category] = [];
-// //       rawCart[category].push(item);
-// //     });
-// //   } catch (err) {
-// //     console.error("Failed to fetch cart from server:", err);
-// //     contentContainer.innerHTML = "<p>Unable to load cart right now.</p>";
-// //     return;
-// //   }
-
-// //   const cart = {};
-// //   for (const category in rawCart) {
-// //     const merged = {};
-// //     rawCart[category].forEach(entry => {
-// //       const key = category === "crops" ? `${entry.item}__${entry.farm}` : entry.item;
-// //       if (!merged[key]) {
-// //         merged[key] = { ...entry };
-// //       } else {
-// //         merged[key].quantity += entry.quantity;
-// //       }
-// //     });
-// //     cart[category] = Object.values(merged);
-// //   }
-
-// //   const categories = Object.keys(cart).filter(c => cart[c].length > 0);
-// //   if (!categories.length) {
-// //     contentContainer.innerHTML = "<p>Your cart is empty.</p>";
-// //     return;
-// //   }
-
-// //   contentContainer.innerHTML = "";
-// //   contentContainer.appendChild(createElement("button", {
-// //     textContent: "← Back",
-// //     className: "back-button",
-// //     onclick: () => window.history.back()
-// //   }));
-
-// //   contentContainer.appendChild(createElement("h2", { textContent: "Your Cart" }));
-
-// //   const tabBar = createElement("div", { className: "cart-tabs" });
-// //   const tabPanels = createElement("div", { className: "cart-tab-panels" });
-// //   const sectionTotals = {};
-// //   const grandTotalText = createElement("h3");
-// //   const grandTotalBox = createElement("div", {}, [grandTotalText]);
-
-// //   categories.forEach((category, index) => {
-// //     renderCartCategory({
-// //       cart,
-// //       category,
-// //       index,
-// //       tabBar,
-// //       tabPanels,
-// //       sectionTotals,
-// //       updateGrandTotal,
-// //       contentContainer,
-// //       displayCheckout
-// //     });
-// //   });
-
-// //   const allCheckoutBtn = createElement("button", {
-// //     textContent: "Checkout All",
-// //     onclick: () => {
-// //       apiFetch("/cart/checkout", "POST", JSON.stringify(cart))
-// //         .then(() => displayCheckout(contentContainer))
-// //         .catch(err => console.error("Checkout failed:", err));
-// //     }
-// //   });
-
-// //   grandTotalBox.appendChild(allCheckoutBtn);
-// //   contentContainer.appendChild(tabBar);
-// //   contentContainer.appendChild(tabPanels);
-// //   contentContainer.appendChild(grandTotalBox);
-
-// //   function updateGrandTotal() {
-// //     const total = Object.values(sectionTotals).reduce((a, b) => a + b, 0);
-// //     grandTotalText.textContent = `Grand Total: ₹${total}`;
-// //   }
-// // }
+function renderMessage(container, message) {
+  container.innerHTML = "";
+  container.appendChild(createElement("p", {}, [message]));
+}

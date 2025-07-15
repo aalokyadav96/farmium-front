@@ -6,6 +6,9 @@ import { setupProgress } from "./setupProgress.js";
 import { setupClickToPlay } from "./setupClickToPlay.js";
 import { setupFullscreenOrientation } from "./setupOrientation.js";
 
+import {hklegends} from "../video-utils/hkLegends.js";
+
+
 async function generateVideoPlayer(mediaSrc, poster, qualities, subtitles, videoid) {
   const videoPlayer = document.createElement("div");
   videoPlayer.id = "video-player";

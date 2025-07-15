@@ -45,7 +45,7 @@ export function createCommonCropForm({
     isEdit = false,
     onSubmit
 }) {
-    const form = createElement("form", { class: isEdit ? "crop-edit-form" : "crop-create-form" });
+    const form = createElement("form", { class: isEdit ? "crop-edit-form" : "crop-create-form create-section" });
 
     const createField = (labelText, inputElement) => {
         const group = createElement("div", { class: "form-group" });

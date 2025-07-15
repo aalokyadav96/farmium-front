@@ -1,0 +1,79 @@
+.croppage {
+    font-family: sans-serif;
+    padding: 20px;
+    background-color: #f9f9f9;
+  }
+  
+  .croppage h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  
+  .croppage p {
+    font-size: 14px;
+    margin: 5px 0 15px 0;
+    color: #444;
+  }
+  
+  #listings-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
+  
+  #listings-container > div {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 15px;
+    text-align: center;
+  }
+  
+  #listings-container h3 {
+    font-size: 18px;
+    margin-bottom: 5px;
+  }
+  
+  #listings-container h3 a {
+    text-decoration: none;
+    color: #007bff;
+    cursor: pointer;
+  }
+  
+  #listings-container p {
+    font-size: 14px;
+    margin: 5px 0;
+  }
+  
+  .quantity-control {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin: 10px 0;
+  }
+  
+  .quantity-control button {
+    padding: 6px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .quantity-value {
+    min-width: 20px;
+    text-align: center;
+    font-weight: bold;
+  }
+  
+  .a2c-crop {
+    margin-top: 10px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    cursor: pointer;
+  }
+  

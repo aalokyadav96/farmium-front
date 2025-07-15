@@ -17,7 +17,7 @@ export function createLabeledField(labelText, inputElement) {
 }
 
 export function createForm(fields, onSubmit, submitText = "Submit") {
-    const form = createElement("form", { class: "form-container" });
+    const form = createElement("form", { class: "create-section" });
     fields.forEach(field => form.appendChild(field));
     const submitBtn = createElement("button", { type: "submit" }, [submitText]);
     form.appendChild(submitBtn);

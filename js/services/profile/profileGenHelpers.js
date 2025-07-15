@@ -1,4 +1,4 @@
-import { SRC_URL, state } from "../../state/state.js";
+import { SRC_URL, getState } from "../../state/state.js";
 import Sightbox from "../../components/ui/SightBox.mjs";
 import { toggleFollow } from "./toggleFollow.js";
 import Modal from "../../components/ui/Modal.mjs";
@@ -49,7 +49,7 @@ function createBanner(profile) {
 
 
 function createBannerEditButton(profile) {
-    if (profile.userid !== state.user) return document.createDocumentFragment();
+    if (profile.userid !== getState("user")) return document.createDocumentFragment();
 
     const editButton = document.createElement("button");
     editButton.className = "edit-banner-pic";
@@ -100,7 +100,7 @@ function createProfilePicture(profile) {
     profileArea.appendChild(thumb);
 
     // Add Edit Profile Pic button if user owns the profile
-    if (profile.userid === state.user) {
+    if (profile.userid === getState("user")) {
         const editProfileButton = document.createElement("button");
         editProfileButton.className = "edit-profile-pic";
         editProfileButton.textContent = "P";
@@ -162,7 +162,7 @@ function createProfileActions(profile, isLoggedIn) {
     // if (isLoggedIn) {
     // }
 
-    if (profile.userid === state.user) {
+    if (profile.userid === getState("user")) {
         // Logout Button
         const logoutButton = document.createElement("button");
         logoutButton.className = "dropdown-item logout-btn";
@@ -177,7 +177,7 @@ function createProfileActions(profile, isLoggedIn) {
         profileActions.appendChild(editButton);
     }
 
-    if (isLoggedIn && profile.userid !== state.user) {
+    if (isLoggedIn && profile.userid !== getState("user")) {
         const followButton = Button("Follow", "follow-btn", {
             click: () => toggleFollow(profile.userid, followButton, profile)
         }, "btn follow-button", { backgroundColor: "lightgreen" });

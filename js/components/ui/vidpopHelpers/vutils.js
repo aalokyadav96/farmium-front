@@ -39,5 +39,13 @@ function parseVTT(vttText) {
     anchor.click();
   }
   
+
+  export function subtitles(video) {
+    const track = video.textTracks?.[0];
+    if (track) {
+      track.mode = (track.mode === "showing") ? "hidden" : "showing";
+    }
+  }
+
   export { parseVTT, parseTime, toggleFullScreen, togglePictureInPicture, downloadVideo };
   

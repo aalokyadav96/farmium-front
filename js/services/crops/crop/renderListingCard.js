@@ -32,12 +32,12 @@ export function renderListingCard(listing, cropName, isLoggedIn) {
     e.preventDefault();
     navigate(`/farm/${listing.farmId}`);
   };
-
   const handleAddToCart = () => {
     addToCart({
       category: "crops",
       item: cropName,
       farm: listing.farmName,
+      farmid: listing.farmId,
       quantity,
       price: listing.pricePerKg,
       unit: "kg",

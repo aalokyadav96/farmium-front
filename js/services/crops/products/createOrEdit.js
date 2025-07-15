@@ -1,24 +1,17 @@
-// src/ui/pages/farms/items/createOrEdit.js
 import { apiFetch } from "../../../api/api.js";
 import { createElement } from "../../../components/createElement.js";
-import Button from "../../../components/base/Button.js";
 import { createFormGroup } from "../../../components/createFormGroup.js";
+import { createFileInputGroup } from "../../../components/createFileInputGroup.js";
+import Button from "../../../components/base/Button.js";
 
 /**
  * Renders a create/edit form for products or tools.
- *
- * @param {HTMLElement} container   — where to render the form
- * @param {"create"|"edit"} mode    — “create” or “edit”
- * @param {Object|null} itemData    — existing item (for edit) or null
- * @param {"product"|"tool"} type   — which endpoint to hit
- * @param {Function} onDone         — callback to run after success or cancel
  */
 export function renderItemForm(container, mode, itemData, type, onDone) {
   container.replaceChildren();
 
-  const form = createElement("form", { className: "item-form" });
+  const form = createElement("form", { class: "create-section" });
 
-  // Fields using createFormGroup
   const nameGroup = createFormGroup({
     label: "Name",
     inputType: "text",
@@ -28,14 +21,74 @@ export function renderItemForm(container, mode, itemData, type, onDone) {
     isRequired: true
   });
 
-  const categoryGroup = createFormGroup({
-    label: "Category",
-    inputType: "text",
-    inputId: "category",
-    inputValue: itemData?.category || "",
-    placeholder: "e.g., Fruit, Tool",
-    isRequired: true
-  });
+  let categoryGroup;
+
+  if (type === "product") {
+    categoryGroup = createFormGroup({
+      label: "Category",
+      inputType: "select",
+      inputId: "category",
+      inputValue: itemData?.category || "",
+      isRequired: true,
+      options: [
+        { value: "", label: "Select category" },
+        { value: "Spices", label: "Spices" },
+        { value: "Pickles", label: "Pickles" },
+        { value: "Flour", label: "Flour" },
+        { value: "Oils", label: "Oils" },
+        { value: "Honey", label: "Honey" },
+        { value: "Tea & Coffee", label: "Tea & Coffee" },
+        { value: "Dry Fruits", label: "Dry Fruits" },
+        { value: "Natural Sweeteners", label: "Natural Sweeteners" }
+      ]
+    });
+  } else if (type === "tool") {
+    categoryGroup = createFormGroup({
+      label: "Category",
+      inputType: "select",
+      inputId: "category",
+      inputValue: itemData?.category || "",
+      isRequired: true,
+      options: [
+        { value: "", label: "Select category" },
+        { value: "Cutting", label: "Cutting" },
+        { value: "Irrigation", label: "Irrigation" },
+        { value: "Harvesting", label: "Harvesting" },
+        { value: "Hand Tools", label: "Hand Tools" },
+        { value: "Protective Gear", label: "Protective Gear" },
+        { value: "Fertilizer Applicators", label: "Fertilizer Applicators" }
+      ]
+    });
+  } else {
+    categoryGroup = createFormGroup({
+      label: "Category",
+      inputType: "text",
+      inputId: "category",
+      inputValue: itemData?.category || "",
+      placeholder: "e.g., Fruit, Tool",
+      isRequired: true
+    });
+  }
+
+  // const categoryGroup = createFormGroup({
+  //   label: "Category",
+  //   inputType: "select",
+  //   inputId: "category",
+  //   inputValue: itemData?.category || "",
+  //   isRequired: true,
+  //   options: [
+  //     { value: "", label: "Select category" },
+  //     { value: "Spices", label: "Spices" },
+  //     { value: "Pickles", label: "Pickles" },
+  //     { value: "Flour", label: "Flour" },
+  //     { value: "Oils", label: "Oils" },
+  //     { value: "Honey", label: "Honey" },
+  //     { value: "Tea & Coffee", label: "Tea & Coffee" },
+  //     { value: "Dry Fruits", label: "Dry Fruits" },
+  //     { value: "Natural Sweeteners", label: "Natural Sweeteners" }
+  //   ]
+  // });
+
 
   const priceGroup = createFormGroup({
     label: "Price (₹)",
@@ -44,10 +97,7 @@ export function renderItemForm(container, mode, itemData, type, onDone) {
     inputValue: itemData?.price ?? "",
     placeholder: "e.g., 49.99",
     isRequired: true,
-    additionalProps: {
-      step: "0.01",
-      min: "0"
-    }
+    additionalProps: { step: "0.01", min: "0" }
   });
 
   const quantityGroup = createFormGroup({
@@ -57,9 +107,7 @@ export function renderItemForm(container, mode, itemData, type, onDone) {
     inputValue: itemData?.quantity ?? "",
     placeholder: "e.g., 100",
     isRequired: true,
-    additionalProps: {
-      min: "0"
-    }
+    additionalProps: { min: "0" }
   });
 
   const unitGroup = createFormGroup({
@@ -107,13 +155,11 @@ export function renderItemForm(container, mode, itemData, type, onDone) {
     isRequired: true
   });
 
-  const imageUrlGroup = createFormGroup({
-    label: "Image URL",
-    inputType: "text",
-    inputId: "imageUrl",
-    inputValue: itemData?.imageUrl || "",
-    placeholder: "/uploads/item.png",
-    isRequired: true
+  const imageGroup = createFileInputGroup({
+    label: "Upload Images",
+    inputId: "images",
+    isRequired: mode === "create",
+    multiple: true
   });
 
   const featuredGroup = createFormGroup({
@@ -136,11 +182,10 @@ export function renderItemForm(container, mode, itemData, type, onDone) {
     availableFromGroup,
     availableToGroup,
     descriptionGroup,
-    imageUrlGroup,
+    imageGroup,
     featuredGroup
   );
 
-  // Action buttons
   const submitBtn = Button(
     mode === "create" ? `Create ${type}` : `Update ${type}`,
     `submit-${type}-btn`,
@@ -159,10 +204,8 @@ export function renderItemForm(container, mode, itemData, type, onDone) {
     submitBtn,
     cancelBtn
   ]);
-
   form.appendChild(actions);
 
-  // Optional delete button
   if (mode === "edit" && itemData?.id) {
     const deleteBtn = Button(
       `Delete ${type}`,
@@ -184,24 +227,27 @@ export function renderItemForm(container, mode, itemData, type, onDone) {
     form.appendChild(deleteBtn);
   }
 
-  // Form submission logic
+  // Submit logic using FormData
   form.onsubmit = async (e) => {
     e.preventDefault();
     submitBtn.disabled = true;
 
-    const payload = {
-      name: form.name.value.trim(),
-      category: form.category.value.trim(),
-      price: parseFloat(form.price.value),
-      quantity: parseFloat(form.quantity.value),
-      unit: form.unit.value,
-      sku: form.sku.value.trim(),
-      availableFrom: form.availableFrom.value || null,
-      availableTo: form.availableTo.value || null,
-      description: form.description.value.trim(),
-      imageUrl: form.imageUrl.value.trim(),
-      featured: form.featured.checked
-    };
+    const formData = new FormData();
+    formData.append("name", form.name.value.trim());
+    formData.append("category", form.category.value.trim());
+    formData.append("price", form.price.value);
+    formData.append("quantity", form.quantity.value);
+    formData.append("unit", form.unit.value);
+    formData.append("sku", form.sku.value.trim());
+    formData.append("availableFrom", form.availableFrom.value);
+    formData.append("availableTo", form.availableTo.value);
+    formData.append("description", form.description.value.trim());
+    formData.append("featured", form.featured.checked);
+
+    const fileInput = form.querySelector("#images");
+    for (const file of fileInput.files) {
+      formData.append("images", file);
+    }
 
     const url =
       mode === "create"
@@ -210,7 +256,9 @@ export function renderItemForm(container, mode, itemData, type, onDone) {
     const method = mode === "create" ? "POST" : "PUT";
 
     try {
-      await apiFetch(url, method, JSON.stringify(payload));
+      const res = await apiFetch(url, method, formData);
+
+      if (!res.id) throw new Error("Request failed");
       onDone();
     } catch (err) {
       alert(`${mode === "create" ? "Create" : "Update"} failed`);
@@ -222,157 +270,3 @@ export function renderItemForm(container, mode, itemData, type, onDone) {
 
   container.appendChild(form);
 }
-
-// // src/ui/pages/farms/items/createOrEdit.js
-// import { apiFetch } from "../../../api/api.js";
-// import { createElement } from "../../../components/createElement.js";
-// import Button from "../../../components/base/Button.js";
-
-// /**
-//  * Renders a create/edit form for products or tools.
-//  *
-//  * @param {HTMLElement} container   — where to render the form
-//  * @param {"create"|"edit"} mode    — “create” or “edit”
-//  * @param {Object|null} itemData    — existing item (for edit) or null
-//  * @param {"product"|"tool"} type   — which endpoint to hit
-//  * @param {Function} onDone         — callback to run after success or cancel
-//  */
-// export function renderItemForm(container, mode, itemData, type, onDone) {
-//   container.replaceChildren();
-
-//   // Build form
-//   const form = createElement("form", { className: "item-form" });
-
-//   // Name
-//   const nameInput = createElement("input", {
-//     type: "text",
-//     placeholder: "Name",
-//     required: true,
-//     value: itemData?.name || ""
-//   });
-//   form.appendChild(
-//     createElement("label", {}, ["Name: ", nameInput])
-//   );
-
-//   // Category
-//   const categoryInput = createElement("input", {
-//     type: "text",
-//     placeholder: "Category",
-//     required: true,
-//     value: itemData?.category || ""
-//   });
-//   form.appendChild(
-//     createElement("label", {}, ["Category: ", categoryInput])
-//   );
-
-//   // Price
-//   const priceInput = createElement("input", {
-//     type: "number",
-//     step: "0.01",
-//     min: "0",
-//     placeholder: "Price (₹)",
-//     required: true,
-//     value: itemData?.price != null ? String(itemData.price) : ""
-//   });
-//   form.appendChild(
-//     createElement("label", {}, ["Price: ", priceInput])
-//   );
-
-//   // Description
-//   const descInput = createElement("textarea", {
-//     placeholder: "Description",
-//     required: true
-//   }, [itemData?.description || ""]);
-//   form.appendChild(
-//     createElement("label", {}, ["Description: ", descInput])
-//   );
-
-//   // Image URL
-//   const imgInput = createElement("input", {
-//     type: "text",
-//     placeholder: "Image URL",
-//     required: true,
-//     value: itemData?.imageUrl || ""
-//   });
-//   form.appendChild(
-//     createElement("label", {}, ["Image URL: ", imgInput])
-//   );
-
-//   // Action buttons
-//   const submitBtn = Button(
-//     mode === "create" ? `Create ${type}` : `Update ${type}`,
-//     `submit-${type}-btn`,
-//     {},
-//     "primary-button"
-//   );
-//   const cancelBtn = Button(
-//     "Cancel",
-//     `cancel-${type}-btn`,
-//     { click: () => onDone() },
-//     "secondary-button"
-//   );
-
-//   form.appendChild(
-//     createElement("div", { className: "form-actions" }, [
-//       submitBtn,
-//       cancelBtn
-//     ])
-//   );
-
-//   // In edit mode, add a Delete button
-//   if (mode === "edit" && itemData?.id) {
-//     const deleteBtn = Button(
-//       `Delete ${type}`,
-//       `delete-${type}-btn`,
-//       {
-//         click: async () => {
-//           if (!confirm(`Delete this ${type}?`)) return;
-//           try {
-//             await apiFetch(
-//               `/farm/${type}/${itemData.id}`,
-//               "DELETE"
-//             );
-//             onDone();
-//           } catch (err) {
-//             alert("Delete failed");
-//             console.error(err);
-//           }
-//         }
-//       },
-//       "danger-button"
-//     );
-//     form.appendChild(deleteBtn);
-//   }
-
-//   // Handle submit
-//   form.onsubmit = async (e) => {
-//     e.preventDefault();
-//     submitBtn.disabled = true;
-//     const payload = {
-//       name: nameInput.value.trim(),
-//       category: categoryInput.value.trim(),
-//       price: parseFloat(priceInput.value),
-//       description: descInput.value.trim(),
-//       imageUrl: imgInput.value.trim()
-//     };
-
-//     const url =
-//       mode === "create"
-//         ? `/farm/${type}`
-//         : `/farm/${type}/${itemData.id}`;
-//     const method = mode === "create" ? "POST" : "PUT";
-
-//     try {
-//       await apiFetch(url, method, JSON.stringify(payload));
-//       onDone();
-//     } catch (err) {
-//       alert(`${mode === "create" ? "Create" : "Update"} failed`);
-//       console.error(err);
-//     } finally {
-//       submitBtn.disabled = false;
-//     }
-//   };
-
-//   // Render
-//   container.appendChild(form);
-// }

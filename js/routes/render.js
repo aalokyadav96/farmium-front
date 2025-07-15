@@ -1,153 +1,185 @@
+import { createElement } from "../components/createElement.js";
+import { trackEvent } from "../services/activity/metrics.js";
+import {
+    setRouteModule
+} from "../state/state.js";
+
+
+/**
+ * Renders a basic error message.
+ */
+function renderError(container, message = "404 Not Found") {
+    container.innerHTML = "";
+    container.appendChild(createElement("h1", {}, [message]));
+}
+
+/**
+ * Handles route logic, imports module, invokes render function, caches it.
+ */
+async function handleRoute({
+    path,
+    moduleImport,
+    functionName,
+    args = [],
+    contentContainer,
+    cache = true
+}) {
+    if (!contentContainer || typeof contentContainer.innerHTML === "undefined") {
+        throw new Error("Invalid contentContainer: DOM element expected");
+    }
+
+    contentContainer.innerHTML = "";
+
+    const mod = await moduleImport();
+    const renderFn = mod[functionName];
+    if (typeof renderFn !== "function") {
+        throw new Error(`Exported function '${functionName}' not found in module`);
+    }
+
+    const finalArgs = args.includes(contentContainer) ? args : [...args, contentContainer];
+
+    await renderFn(...finalArgs);
+
+    if (cache) {
+        setRouteModule(path, {
+            render: (container) =>
+                renderFn(...finalArgs.map(arg => arg === contentContainer ? container : arg))
+        });
+    }
+}
+
+/**
+ * Loads a route and injects content, handling static and dynamic routes.
+ */
 async function renderPageContent(isLoggedIn, path, contentContainer) {
     if (!path || typeof path !== "string") {
         console.error("Invalid path:", path);
-        contentContainer.innerHTML = `<h1>404 Not Found</h1>`;
-        return;
+        return renderError(contentContainer);
     }
 
-    const routeHandlers = {
-        "/": async () => {
-            const { Entry } = await import("../pages/entry/entry.js");
-            contentContainer.innerHTML = "";
-            Entry(isLoggedIn, contentContainer);
-        },
-        "/dash": async () => {
-            const { Dash } = await import("../pages/dash/dash.js");
-            contentContainer.innerHTML = "";
-            Dash(isLoggedIn, contentContainer);
-        },
-        "/home": async () => {
-            const { Home } = await import("../pages/home.js");
-            contentContainer.innerHTML = "";
-            Home(isLoggedIn, contentContainer);
-        },
-        "/login": async () => {
-            const { Auth } = await import("../pages/auth/auth.js");
-            contentContainer.innerHTML = "";
-            Auth(isLoggedIn, contentContainer);
-        },
-        "/chats": async () => {
-            const { Chats } = await import("../pages/userchat/chats.js");
-            contentContainer.innerHTML = "";
-            Chats(isLoggedIn, contentContainer);
-        },
-        "/livechat": async () => {
-            const { LiveChats } = await import("../pages/livechat/chats.js");
-            contentContainer.innerHTML = "";
-            LiveChats(isLoggedIn, contentContainer);
-        },
-        "/profile": async () => {
-            const { MyProfile } = await import("../pages/profile/userProfile.js");
-            contentContainer.innerHTML = "";
-            MyProfile(isLoggedIn, contentContainer);
-        },
-        "/settings": async () => {
-            const { Settings } = await import("../pages/profile/settings.js");
-            contentContainer.innerHTML = "";
-            Settings(isLoggedIn, contentContainer);
-        },
-        "/cart": async () => {
-            const { Cart } = await import("../pages/cart/cart.js");
-            contentContainer.innerHTML = "";
-            Cart(isLoggedIn, contentContainer);
-        },
-        "/farms": async () => {
-            const { Farms } = await import("../pages/farm/farms.js");
-            contentContainer.innerHTML = "";
-            Farms(isLoggedIn, contentContainer);
-        },
-        "/tools": async () => {
-            const { Tools } = await import("../pages/farm/tools.js");
-            contentContainer.innerHTML = "";
-            Tools(isLoggedIn, contentContainer);
-        },
-        "/products": async () => {
-            const { Products } = await import("../pages/farm/products.js");
-            contentContainer.innerHTML = "";
-            Products(isLoggedIn, contentContainer);
-        },
-        "/crops": async () => {
-            const { Crops } = await import("../pages/crop/crops.js");
-            contentContainer.innerHTML = "";
-            Crops(isLoggedIn, contentContainer);
-        },
-        "/create-farm": async () => {
-            const { Create } = await import("../pages/farm/createNewFarm.js");
-            contentContainer.innerHTML = "";
-            Create(isLoggedIn, contentContainer);
-        },
+    trackEvent("page_view");
+
+    const cleanPath = path.split(/[?#]/)[0];
+    // const state = getRouteState(cleanPath); // optional, in case you use this
+
+
+    const staticRoutes = {
+        "/": { moduleImport: () => import("../pages/entry/entry.js"), functionName: "Entry" },
+        "/home": { moduleImport: () => import("../pages/home.js"), functionName: "Home" },
+        "/profile": { moduleImport: () => import("../pages/profile/userProfile.js"), functionName: "MyProfile" },
+        "/dash": { moduleImport: () => import("../pages/dash/dash.js"), functionName: "Dash" },
+        "/login": { moduleImport: () => import("../pages/auth/auth.js"), functionName: "Auth" },
+        "/merechats": { moduleImport: () => import("../pages/merechats/merechats.js"), functionName: "Mechat" },
+        "/recipes": { moduleImport: () => import("../pages/recipe/recipes.js"), functionName: "Recipes" },
+        "/chats": { moduleImport: () => import("../pages/userchat/chats.js"), functionName: "Chats" },
+        "/admin": { moduleImport: () => import("../pages/admin/admin.js"), functionName: "Admin" },
+        "/cart": { moduleImport: () => import("../pages/cart/cart.js"), functionName: "Cart" },
+        "/my-orders": { moduleImport: () => import("../pages/cart/myorders.js"), functionName: "MyOrders" },
+        "/farms": { moduleImport: () => import("../pages/farm/farms.js"), functionName: "Farms" },
+        "/tools": { moduleImport: () => import("../pages/farm/tools.js"), functionName: "Tools" },
+        "/products": { moduleImport: () => import("../pages/farm/products.js"), functionName: "Products" },
+        "/crops": { moduleImport: () => import("../pages/crop/crops.js"), functionName: "Crops" },
+        "/create-farm": { moduleImport: () => import("../pages/farm/createNewFarm.js"), functionName: "Create" },
     };
 
     const dynamicRoutes = [
         {
             pattern: /^\/user\/([\w-]+)$/,
-            handler: async ([, id]) => {
-                const { UserProfile } = await import("../pages/profile/userProfile.js");
-                UserProfile(isLoggedIn, contentContainer, id);
-            },
+            moduleImport: () => import("../pages/profile/userProfile.js"),
+            functionName: "UserProfile",
+            argBuilder: ([, id]) => [isLoggedIn, id],
         },
         {
             pattern: /^\/chat\/([\w-]+)$/,
-            handler: async ([, id]) => {
-                const { Chat } = await import("../pages/userchat/chat.js");
-                try {
-                    contentContainer.innerHTML = "";
-                    Chat(isLoggedIn, id, contentContainer);
-                } catch {
-                    contentContainer.innerHTML = `<h1>Chat Not Found</h1>`;
-                }
-            },
-        },
-        {
-            pattern: /^\/livechat\/([\w-]+)$/,
-            handler: async ([, id]) => {
-                const { LiveChat } = await import("../pages/livechat/chat.js");
-                try {
-                    contentContainer.innerHTML = "";
-                    LiveChat(isLoggedIn, id, contentContainer);
-                } catch {
-                    contentContainer.innerHTML = `<h1>Chat Not Found</h1>`;
-                }
-            },
+            moduleImport: () => import("../pages/userchat/chat.js"),
+            functionName: "Chat",
+            argBuilder: ([, id]) => [isLoggedIn, id],
         },
         {
             pattern: /^\/crop\/([\w-]+)$/,
-            handler: async ([, id]) => {
-                const { Crop } = await import("../pages/crop/cropPage.js");
-                try {
-                    contentContainer.innerHTML = "";
-                    Crop(isLoggedIn, id, contentContainer);
-                } catch {
-                    contentContainer.innerHTML = `<h1>Crop Not Found</h1>`;
-                }
-            },
+            moduleImport: () => import("../pages/crop/cropPage.js"),
+            functionName: "Crop",
+            argBuilder: ([, id]) => [isLoggedIn, id],
+        },
+        {
+            pattern: /^\/aboutcrop\/([\w-]+)$/,
+            moduleImport: () => import("../pages/crop/aboutCropPage.js"),
+            functionName: "AboutCrop",
+            argBuilder: ([, id]) => [isLoggedIn, id],
         },
         {
             pattern: /^\/farm\/([\w-]+)$/,
-            handler: async ([, id]) => {
-                const { Farm } = await import("../pages/crop/displayFarm.js");
-                try {
-                    contentContainer.innerHTML = "";
-                    Farm(isLoggedIn, id, contentContainer);
-                } catch {
-                    contentContainer.innerHTML = `<h1>Farm Not Found</h1>`;
-                }
-            },
+            moduleImport: () => import("../pages/crop/displayFarm.js"),
+            functionName: "Farm",
+            argBuilder: ([, id]) => [isLoggedIn, id],
+        },
+        {
+            pattern: /^\/recipe\/([\w-]+)$/,
+            moduleImport: () => import("../pages/recipe/recipePage.js"),
+            functionName: "Recipe",
+            argBuilder: ([, id]) => [isLoggedIn, id],
+        },
+        {
+            pattern: /^\/merechats\/([\w-]+)$/,
+            moduleImport: () => import("../pages/merechats/merePage.js"),
+            functionName: "OneChatPage",
+            argBuilder: ([, id]) => [isLoggedIn, id],
         },
     ];
 
-    if (routeHandlers[path]) {
-        await routeHandlers[path]();
-    } else {
-        for (const route of dynamicRoutes) {
-            const matches = path.match(route.pattern);
-            if (matches) {
-                await route.handler(matches);
-                return;
-            }
+    // Static route match
+    if (staticRoutes[cleanPath]) {
+        try {
+            const { moduleImport, functionName } = staticRoutes[cleanPath];
+            await handleRoute({
+                path: cleanPath,
+                moduleImport,
+                functionName,
+                args: [isLoggedIn],
+                contentContainer
+            });
+        } catch (err) {
+            console.error("Error rendering static route:", cleanPath, err);
+            renderError(contentContainer, "500 Internal Error");
         }
-        contentContainer.innerHTML = `<h1>404 Not Found</h1>`;
+        return;
     }
+
+    // Dynamic route match
+    for (const { pattern, moduleImport, functionName, argBuilder } of dynamicRoutes) {
+        const match = cleanPath.match(pattern);
+        if (match) {
+            try {
+                await handleRoute({
+                    path: cleanPath,
+                    moduleImport,
+                    functionName,
+                    args: argBuilder(match),
+                    contentContainer
+                });
+            } catch (err) {
+                console.error("Error rendering dynamic route:", cleanPath, err);
+                renderError(contentContainer, "500 Internal Error");
+            }
+            return;
+        }
+    }
+
+    // Fallback: no match
+    renderError(contentContainer);
 }
 
 export { renderPageContent };
+
+
+/**
+ *
+ *
+ * When to invalidate?
+
+If a user updates their profile, you may want to invalidate the cached /profile view:
+
+import { clearDomCache } from "../routes/render.js";
+
+clearDomCache(); // or domCache.delete("/profile")
+*/

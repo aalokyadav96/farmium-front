@@ -4,7 +4,11 @@ import { apiFetch } from "../../../api/api";
 import { guessCategoryFromName, createPromoLink } from "./displayCrops.helpers";
 import { renderCropInterface } from "./displayCropsUI";
 
-export async function displayCrops(contentContainer, isLoggedIn) {
+export async function displayCrops(content, isLoggedIn) {
+  let contentContainer = createElement('div', { "class": "cropspage" }, []);
+
+  content.innerHTML = "";
+  content.appendChild(contentContainer);
   // const tagFilters = ["Organic", "Imported", "Local", "Bestseller"];
   let categorized = {};
 

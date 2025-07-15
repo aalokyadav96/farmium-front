@@ -1,155 +1,98 @@
-// src/ui/pages/farms/items/displayItems.js
 import { apiFetch } from "../../../api/api.js";
 import { createElement } from "../../../components/createElement.js";
 import Button from "../../../components/base/Button.js";
 import { renderItemForm } from "./createOrEdit.js";
+import { renderItemCard } from "./renderItemCard.js";
+import { renderCategoryChips } from "./renderCategoryChips.js";
+import { capitalize } from "../../profile/profileHelpers.js";
+import {renderSearchAndSortUI} from "./renderSearchAndSortUI.js";
+import {sortItems} from "./sortItems.js";
+import {renderPagination} from "./renderPagination.js";
 
 export async function displayItems(
   type,
-  container,
+  content,
   isLoggedIn,
-  { limit = 10, offset = 0, search = "", category = "" } = {}
+  { limit = 10, offset = 0, search = "", category = "", sort = "" } = {}
 ) {
-  container.replaceChildren();
+  const container = createElement("div", { class: "protoolspage" }, []);
+  content.innerHTML = "";
+  content.appendChild(container);
 
-  // – If not logged in, prompt
-  if (!isLoggedIn) {
-    container.appendChild(
-      createElement("p", {}, ["Please log in to view items."])
-    );
-    return;
-  }
+  const refresh = () =>
+    displayItems(type, content, isLoggedIn, { limit, offset, search, category, sort });
 
-  // --- Top Bar ---
-  const topBar = createElement(
-    "div",
-    { className: "items-topbar" },
-    [
+  container.appendChild(createElement("h2", {}, [`${capitalize(type)}s`]));
+
+  await renderCategoryChips(container, category, (newCategory) =>
+    displayItems(type, content, isLoggedIn, {
+      limit,
+      offset: 0,
+      search,
+      category: newCategory,
+      sort,
+    }), type
+  );
+
+  const { sortSelect, searchInput } = renderSearchAndSortUI(type, sort, search, (newSort, newSearch) =>
+    displayItems(type, content, isLoggedIn, {
+      limit,
+      offset: 0,
+      search: newSearch,
+      category,
+      sort: newSort,
+    })
+  );
+
+  if (isLoggedIn) {
+    const topBar = createElement("div", { class: "items-topbar" }, [
       Button(
         `Create ${type}`,
         `create-${type}-btn`,
-        {
-          click: () => {
-            renderItemForm(container, "create", null, type, () =>
-              displayItems(type, container, isLoggedIn, { limit, offset, search, category })
-            );
-          },
-        },
+        { click: () => renderItemForm(container, "create", null, type, refresh) },
         "primary-button"
       ),
-      createElement("input", {
-        type: "text",
-        placeholder: `Search ${type}s…`,
-        value: search,
-        oninput: (e) =>
-          displayItems(type, container, isLoggedIn, {
-            limit,
-            offset: 0,
-            search: e.target.value,
-            category,
-          }),
-      }),
-      // (Optional) Category filter:
-      // createElement("select", { onchange: ... }, [...])
-    ]
-  );
-  container.appendChild(topBar);
-
-  // --- Fetch Data ---
-  let result;
-  try {
-    const qs = new URLSearchParams({ type, limit, offset, search, category });
-    result = await apiFetch(`/farm/items?${qs.toString()}`);
-  } catch (err) {
-    return container.appendChild(
-      createElement("p", {}, [`Failed to load ${type}s.`])
-    );
+      searchInput,
+      sortSelect,
+    ]);
+    container.appendChild(topBar);
   }
 
-  const { items = [], total = items.length } = result;
+  let items = [];
+  let total = 0;
 
-  // --- Heading + Grid ---
-  container.appendChild(
-    createElement("h2", {}, [
-      `${type.charAt(0).toUpperCase() + type.slice(1)}s (${total})`,
-    ])
-  );
+  try {
+    const qs = new URLSearchParams({ type, limit, offset, search, category });
+    const result = await apiFetch(`/farm/items?${qs.toString()}`);
+    items = result.items || [];
+    total = result.total ?? items.length;
+  } catch (err) {
+    container.appendChild(createElement("p", {}, [`Failed to load ${type}s.`]));
+    return;
+  }
 
-  const grid = createElement("div", { className: `${type}-grid` });
+  if (items.length === 0) {
+    container.appendChild(createElement("p", {}, [`No ${type}s found.`]));
+    return;
+  }
+
+  sortItems(items, sort);
+
+  const grid = createElement("div", { class: `${type}-grid` });
   items.forEach((item) => {
-    const card = createElement(
-      "div",
-      { className: `${type}-card` },
-      [
-        createElement("img", { src: item.imageUrl, alt: item.name }),
-        createElement("h3", {}, [item.name]),
-        createElement("p", {}, [`₹${item.price.toFixed(2)}`]),
-        createElement("p", {}, [item.description]),
-        Button(
-          "Edit",
-          `edit-${type}-btn`,
-          {
-            click: () => {
-              renderItemForm(container, "edit", item, type, () =>
-                displayItems(type, container, isLoggedIn, {
-                  limit,
-                  offset,
-                  search,
-                  category,
-                })
-              );
-            },
-          },
-          "secondary-button"
-        ),
-      ]
-    );
-    grid.appendChild(card);
+    grid.appendChild(renderItemCard(item, type, isLoggedIn, container, refresh));
+    // console.log(renderItemCard(item, type, isLoggedIn, container, refresh));
   });
+
   container.appendChild(grid);
 
-  // --- Pagination Controls ---
-  const pageCount = Math.ceil(total / limit);
-  const currentPage = Math.floor(offset / limit) + 1;
-
-  const pagination = createElement(
-    "div",
-    { className: "pagination" },
-    [
-      Button(
-        "Prev",
-        "page-prev-btn",
-        {
-          disabled: offset === 0,
-          click: () =>
-            displayItems(type, container, isLoggedIn, {
-              limit,
-              offset: Math.max(0, offset - limit),
-              search,
-              category,
-            }),
-        },
-        "secondary-button"
-      ),
-      createElement("span", {}, [
-        `Page ${currentPage} of ${pageCount}`,
-      ]),
-      Button(
-        "Next",
-        "page-next-btn",
-        {
-          disabled: offset + limit >= total,
-          click: () =>
-            displayItems(type, container, isLoggedIn, {
-              limit,
-              offset: offset + limit,
-              search,
-              category,
-            }),
-        },
-        "secondary-button"
-      ),
-    ]
+  renderPagination(container, total, limit, offset, currentPage =>
+    displayItems(type, content, isLoggedIn, {
+      limit,
+      offset: (currentPage - 1) * limit,
+      search,
+      category,
+      sort,
+    })
   );
-  container.appendChild(pagination);
 }

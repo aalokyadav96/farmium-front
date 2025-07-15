@@ -1,160 +1,223 @@
-// import { renderPage } from "../routes/index.js";
-
-/******* */
-
-// const API_URL = "http://localhost:4000/api";
+// const API_URL = "http://localhost:4000/api/v1";
 // const SRC_URL = "http://localhost:4000/static";
-// const SEARCH_URL = "http://localhost:4000/api";
-// const AGI_URL = "http://localhost:4000/agi";
-// const FORUM_URL = "http://localhost:4000/api/forum";
-// const CHAT_URL = "http://localhost:4000/api/chats";
+// const SEARCH_URL = "http://localhost:4000/api/search";
 
-const SRC_URL       = "https://farmium.onrender.com/static";
-const API_URL       = "https://farmium.onrender.com/api";
-const SEARCH_URL    = "https://farmium.onrender.com/api";
-const CHAT_URL       = "https://farmium.onrender.com/api/chats";
-
-
-/*********** */
-
-// State management
-const state = {
-    token: sessionStorage.getItem("token") || localStorage.getItem("token") || null,
-    userProfile: JSON.parse(sessionStorage.getItem("userProfile") || localStorage.getItem("userProfile")) || null,
-    user: JSON.parse(sessionStorage.getItem("user") || localStorage.getItem("user")) || null,
-    lastPath: window.location.pathname // Store last visited path to prevent redundant re-renders
-};
-
-function getState(key) {
-    return state[key];
-}
-
-// Inside state.js
-const listeners = new Set();
-
-/**
- * Subscribe to state changes.
- * @param {Function} callback - A function to call on state updates.
- */
-function subscribe(callback) {
-    listeners.add(callback);
-    return () => listeners.delete(callback); // Return unsubscribe function
-}
-
-/**
- * Notify all subscribers of the latest state.
- */
-function notify() {
-    for (const callback of listeners) {
-        callback({ ...state });
-    }
-}
-
-// Modify setState to trigger notify
-function setState(newState, persist = false) {
-    Object.assign(state, newState);
-
-    if (persist) {
-        if (newState.token) localStorage.setItem("token", newState.token);
-        if (newState.userProfile) localStorage.setItem("userProfile", JSON.stringify(newState.userProfile));
-        if (newState.user) localStorage.setItem("user", JSON.stringify(newState.user));
-    } else {
-        if (newState.token) sessionStorage.setItem("token", newState.token);
-        if (newState.userProfile) sessionStorage.setItem("userProfile", JSON.stringify(newState.userProfile));
-        if (newState.user) sessionStorage.setItem("user", JSON.stringify(newState.user));
-    }
-
-    notify(); // <-- Notify listeners after state update
-}
-
-// export { API_URL, AGI_URL, SRC_URL, CHAT_URL, FORUM_URL, SEARCH_URL, DEFAULT_IMAGE, state, setState, clearState, getState, isAdmin, subscribe };
-
-// /**
-//  * Updates the application state and persists changes to storage.
-//  * @param {Object} newState - The new state properties to merge.
-//  * @param {boolean} persist - Whether to store the state in localStorage (default: false).
-//  */
-// function setState(newState, persist = false) {
-//     Object.assign(state, newState);
-
-//     // Store in sessionStorage or localStorage if needed
-//     if (persist) {
-//         if (newState.token) localStorage.setItem("token", newState.token);
-//         if (newState.userProfile) localStorage.setItem("userProfile", JSON.stringify(newState.userProfile));
-//         if (newState.user) localStorage.setItem("user", JSON.stringify(newState.user));
-//     } else {
-//         if (newState.token) sessionStorage.setItem("token", newState.token);
-//         if (newState.userProfile) sessionStorage.setItem("userProfile", JSON.stringify(newState.userProfile));
-//         if (newState.user) sessionStorage.setItem("user", JSON.stringify(newState.user));
-//     }
-// }
-
-/**
- * Clears the state and removes stored user data.
- */
-function clearState() {
-    sessionStorage.clear();
-    localStorage.removeItem("token");
-    localStorage.removeItem("userProfile");
-    localStorage.removeItem("user");
-
-    state.token = null;
-    state.userProfile = null;
-    state.user = null;
-
-    // renderPage(); // Ensure the UI updates after logout
-}
-
-/**
- * Prevents redundant re-renders on back/forward navigation.
- */
-window.addEventListener("popstate", () => {
-    if (window.location.pathname !== state.lastPath) {
-        console.log("🔄 Back/Forward navigation detected, updating content...");
-        state.lastPath = window.location.pathname;
-        // renderPage(); // Load the new content only if the path changes
-    }
-});
-
-/**
- * Restores session state when returning from bfcache.
- */
-window.addEventListener("pageshow", (event) => {
-    if (event.persisted) {
-        console.log("Restoring session state from bfcache...");
-        state.token = sessionStorage.getItem("token") || localStorage.getItem("token");
-        state.userProfile = JSON.parse(sessionStorage.getItem("userProfile") || localStorage.getItem("userProfile"));
-        state.user = JSON.parse(sessionStorage.getItem("user") || localStorage.getItem("user"));
-
-        if (window.location.pathname !== state.lastPath) {
-            state.lastPath = window.location.pathname;
-            // renderPage(); // Ensure content updates properly
-        }
-    }
-});
+const API_URL = "https://farmium.onrender.com/api";
+const SRC_URL = "https://farmium.onrender.com/static";
+const SEARCH_URL = "https://farmium.onrender.com/api/search";
 
 const DEFAULT_IMAGE = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/wcAAwAB/hsbRWkAAAAASUVORK5CYII=`;
 
-function isAdmin() {
-    return false;
+// --- Allowed and persisted keys ---
+const allowedKeys = new Set([
+  "token",
+  "user",
+  "username",
+  "userProfile",
+  "refreshToken",
+  "socket",
+  "role",
+  "lang",
+  "lastPath",
+  "currentRoute",
+  "routeCache",
+  "routeState",
+  "currentChatId",
+]);
+
+const PERSISTED_KEYS = ["token", "userProfile", "refreshToken", "user"];
+
+// --- Internal listeners for reactivity ---
+const listeners = new Map(); // key => Set of callback functions
+
+// --- Safe JSON parse ---
+function safeParse(key) {
+  try {
+    return JSON.parse(sessionStorage.getItem(key) || localStorage.getItem(key)) || null;
+  } catch {
+    return null;
+  }
 }
 
-// export { API_URL, AGI_URL, SRC_URL, CHAT_URL, FORUM_URL, SEARCH_URL, DEFAULT_IMAGE, state, setState, clearState, getState, isAdmin };
+// --- Core state object ---
+const state = {
+  token: sessionStorage.getItem("token") || localStorage.getItem("token") || null,
+  userProfile: safeParse("userProfile"),
+  user: safeParse("user"),
+  refreshToken: sessionStorage.getItem("refreshToken") || localStorage.getItem("refreshToken") || null,
+  lastPath: window.location.pathname,
+  lang: "en",
+  currentRoute: null,
+  routeCache: new Map(),
+  routeState: new Map(),
 
-export { API_URL, AGI_URL, SRC_URL, CHAT_URL, FORUM_URL, SEARCH_URL, DEFAULT_IMAGE, state, setState, clearState, getState, isAdmin, subscribe };
+  // role is derived from userProfile if possible
+  get role() {
+    const raw = safeParse("userProfile");
+    if (!raw || !raw.role) return [];
+    return Array.isArray(raw.role) ? raw.role : [raw.role];
+  }
+};
 
+// --- Get a state value ---
+function getState(key) {
+  if (!allowedKeys.has(key)) throw new Error(`Invalid state key: ${key}`);
+  return state[key];
+}
 
-/**
- * Usage of pub sub
- */
-/*
+// --- Set a state value (supports object form) ---
+function setState(keyOrObj, persist = false, value = undefined) {
+  if (typeof keyOrObj === "object" && keyOrObj !== null) {
+    for (const [key, val] of Object.entries(keyOrObj)) {
+      if (!allowedKeys.has(key)) throw new Error(`Invalid state key: ${key}`);
+      state[key] = val;
 
-import { subscribe } from '../state/state.js';
+      if (persist && PERSISTED_KEYS.includes(key)) {
+        const str = typeof val === "string" ? val : JSON.stringify(val);
+        sessionStorage.setItem(key, str);
+        localStorage.setItem(key, str);
+      }
 
-const unsubscribe = subscribe((newState) => {
-    console.log("🔔 State changed:", newState);
-    // Update UI or re-render if needed
-});
+      notify(key, val);
+    }
+    return;
+  }
 
+  const key = keyOrObj;
+  if (!allowedKeys.has(key)) throw new Error(`Invalid state key: ${key}`);
+  state[key] = value;
 
-*/
+  if (persist && PERSISTED_KEYS.includes(key)) {
+    const str = typeof value === "string" ? value : JSON.stringify(value);
+    sessionStorage.setItem(key, str);
+    localStorage.setItem(key, str);
+  }
+
+  notify(key, value);
+  return value;
+}
+
+// --- Clear all state and subscriptions ---
+function clearState(preserveKeys = []) {
+  const preserved = {};
+
+  for (const key of preserveKeys) {
+    if (PERSISTED_KEYS.includes(key)) {
+      preserved[key] = sessionStorage.getItem(key);
+    }
+  }
+
+  sessionStorage.clear();
+  localStorage.clear();
+
+  for (const key of allowedKeys) {
+    if (preserveKeys.includes(key) || key === "role") continue;
+    if (key === "routeCache" || key === "routeState") {
+      state[key].clear?.();
+    } else {
+      state[key] = null;
+    }
+  }
+
+  for (const [key, value] of Object.entries(preserved)) {
+    sessionStorage.setItem(key, value);
+    localStorage.setItem(key, value);
+  }
+
+  listeners.clear(); // remove all subscriptions
+}
+
+// --- Route Cache ---
+function getRouteModule(path) {
+  return state.routeCache.get(path);
+}
+
+function setRouteModule(path, module) {
+  state.routeCache.set(path, module);
+}
+
+function hasRouteModule(path) {
+  return state.routeCache.has(path);
+}
+
+function clearRouteCache() {
+  state.routeCache.clear();
+  state.routeState.clear();
+}
+
+// --- Per-Route State ---
+function getRouteState(path) {
+  let route = state.routeState.get(path);
+  if (!route) {
+    route = Object.create(null);
+    state.routeState.set(path, route);
+  }
+  return route;
+}
+
+function setRouteState(path, value) {
+  state.routeState.set(path, value);
+}
+
+// --- Reactivity ---
+function subscribe(key, fn) {
+  if (!allowedKeys.has(key)) throw new Error(`Cannot subscribe to invalid key: ${key}`);
+  if (!listeners.has(key)) listeners.set(key, new Set());
+  listeners.get(key).add(fn); // Set prevents duplicates
+}
+
+function unsubscribe(key, fn) {
+  listeners.get(key)?.delete(fn);
+}
+
+function notify(key, value) {
+  const fns = listeners.get(key);
+  if (!fns) return;
+  for (const fn of fns) fn(value);
+}
+
+// --- Helpers ---
+function getGlobalSnapshot() {
+  return Object.freeze({ ...state });
+}
+
+function hasRole(...roles) {
+  const current = state.role;
+  if (!Array.isArray(current)) return false;
+  return roles.some(r => current.includes(r));
+}
+
+function isAdmin() {
+  return hasRole("admin");
+}
+
+// --- Exports ---
+export {
+  state,
+  API_URL,
+  SRC_URL,
+  SEARCH_URL,
+  DEFAULT_IMAGE,
+  isAdmin,
+  hasRole,
+
+  // global state
+  getState,
+  setState,
+  clearState,
+  getGlobalSnapshot,
+
+  // subscriptions
+  subscribe,
+  unsubscribe,
+
+  // route cache
+  getRouteModule,
+  setRouteModule,
+  hasRouteModule,
+  clearRouteCache,
+
+  // per-route state
+  getRouteState,
+  setRouteState
+};

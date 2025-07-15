@@ -41,7 +41,7 @@ function displayAuthSection(isLoggedIn, contentContainer) {
 }
 
 // Login form
-function createLoginForm() {
+export function createLoginForm() {
     const section = document.createElement('section');
     section.className = 'auth-section';
 

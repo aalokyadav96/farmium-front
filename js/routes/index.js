@@ -1,78 +1,107 @@
 import { attachNavEventListeners, createheader } from "../components/header.js";
-// import MegaMenuC from "../components/ui/MegamenuC.mjs";
 import { createNav } from "../components/navigation.js";
 import { secnav } from "../components/secNav.js";
-// import { Footer } from "../components/footer.js";
-// import { FloatingActionButton } from "../components/ui/FAB.mjs";
 import { renderPageContent } from "./render.js";
-// import { renderPageContent } from "./renderPageContent.js";
-import { state } from "../state/state.js";
-import { coffeeSVG } from "../components/svgs.js";
+import { getState } from "../state/state.js";
 
+import {
+  setState,
+  getRouteState,
+  hasRouteModule,
+  getRouteModule,
+  setRouteModule
+} from "../state/state.js";
+
+import {
+  saveScroll,
+  restoreScroll
+} from "../state/scrollState.js";
+
+let isNavigating = false;
+
+/**
+ * Loads page layout and route content.
+ * Handles login check, layout rendering, scroll state.
+ * @param {string} url
+ */
 async function loadContent(url) {
-    const app = document.getElementById("app");
-    app.innerHTML = ""; // Clear previous content
+  const app = document.getElementById("app");
 
-    state.token = sessionStorage.getItem("token") || localStorage.getItem("token") || null;
-    const isLoggedIn = !!state.token;
-    // console.log("User logged in:", isLoggedIn);
+  const token = localStorage.getItem("token");
+  const user = localStorage.getItem("user");
 
-    const main = document.createElement("main");
-    main.id = "content";
+  if (token && user) {
+    setState({ token, user }, true);
+  }
 
-    app.appendChild(createheader(isLoggedIn));
-    app.appendChild(createNav(isLoggedIn));
+  let main = document.getElementById("content");
 
-    /* */
-    // app.appendChild(MegaMenuC());
-    /* */
-
-    const secNavElement = secnav(isLoggedIn);
-    if (secNavElement) {
-        app.appendChild(secNavElement);
+  if (main && hasRouteModule(url)) {
+    const cached = getRouteModule(url);
+    if (cached?.render) {
+      cached.render(main);
+      restoreScroll(main, getRouteState(url));
+      return;
     }
+  }
 
-    // app.appendChild(secnav(isLoggedIn));
-    app.appendChild(main);
-    // app.appendChild(Footer());
-    // FloatingActionButton(coffeeSVG, "fab-btn");
+  app.innerHTML = "";
 
-    attachNavEventListeners();
-    await renderPageContent(isLoggedIn, url, main);
+  main = document.createElement("main");
+  main.id = "content";
+
+  const header = createheader();
+  header.id = "layout-rendered";
+  app.appendChild(header);
+
+  app.appendChild(createNav());
+  const secNavElement = secnav();
+  if (secNavElement) app.appendChild(secNavElement);
+
+  app.appendChild(main);
+
+  attachNavEventListeners();
+
+  await renderPageContent(Boolean(getState("token")), url, main);
+  restoreScroll(main, getRouteState(url));
 }
 
-
-// SPA Navigation Function
+/**
+ * Navigate to a new path (SPA pushState).
+ * Prevents spam clicks and redundant navigation.
+ * @param {string} path
+ */
 function navigate(path) {
-    sessionStorage.setItem("redirectAfterLogin", window.location.pathname);
-    if (!path) {
-        console.error("🚨 navigate called with null or undefined!", new Error().stack);
-        return;
-    }
-    console.log("Navigating to:", path);
-    if (window.location.pathname !== path) {
-        history.pushState(null, "", path);
-        loadContent(path);
-    }
+  if (!path) {
+    console.error("🚨 navigate called with null or undefined!", new Error().stack);
+    return;
+  }
+
+  // sessionStorage.setItem("redirectAfterLogin", window.location.pathname);
+
+  if (window.location.pathname === path || isNavigating) return;
+
+  console.log("Navigating to:", path);
+  isNavigating = true;
+
+  history.pushState(null, "", path);
+  loadContent(path)
+    .catch(err => console.error("Navigation failed:", err))
+    .finally(() => {
+      isNavigating = false;
+    });
 }
 
-// // SPA Navigation Function
-// function navigate(path) {
-//     sessionStorage.setItem("redirectAfterLogin", window.location.pathname);
-//     if (!path) {
-//         console.error("🚨 navigate called with null or undefined!", new Error().stack);
-//         return;
-//     }
-//     console.log("Navigating to:", path);
-//     if (window.location.pathname !== path) {
-//         history.pushState(null, "", path);
-//         loadContent(path);
-//     }
-// }
-
-// Initial Render
+/**
+ * Initial render on first page load.
+ */
 async function renderPage() {
-    await loadContent(window.location.pathname);
+  await loadContent(window.location.pathname);
 }
+
+// Handle back/forward browser buttons
+window.addEventListener("popstate", () => {
+  loadContent(window.location.pathname);
+});
 
 export { navigate, renderPage, loadContent };

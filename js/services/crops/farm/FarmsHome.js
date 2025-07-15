@@ -127,8 +127,12 @@ function toggleFavorite(farmId) {
   if (currentSidebar) currentSidebar.render(state.farms);
 }
 
-export async function displayFarms(container, loggedIn) {
-  container.innerHTML = "";
+export async function displayFarms(content, loggedIn) {
+  // container.innerHTML = "";
+  let container = createElement('div', { "class": "farmspage" }, []);
+
+  content.innerHTML = "";
+  content.appendChild(container);
   isLoggedIn = loggedIn;
 
   const layout = createElement("div", { class: "farm-page" });

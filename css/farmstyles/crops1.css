@@ -1,0 +1,145 @@
+.cropspage {
+    font-family: sans-serif;
+    padding: 20px;
+    background-color: #f9f9f9;
+  }
+  
+  .catalogue-layout {
+    display: flex;
+    gap: 30px;
+  }
+  
+  .catalogue-main {
+    flex-grow: 1;
+  }
+  
+  .top-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  
+  .search-box,
+  .sort-box {
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
+  
+  .view-toggle {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .view-toggle button {
+    padding: 6px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #e0e0e0;
+  }
+  
+  .view-toggle button.active {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .tabs {
+    margin-bottom: 20px;
+  }
+  
+  .tabs button {
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: none;
+    background-color: #28a745;
+    color: white;
+    margin: 3px;
+    cursor: pointer;
+  }
+  
+  .tab-content.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+  }
+  
+  .crop-card.grid {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 15px;
+  }
+  
+  .crop-card.grid img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+    margin-bottom: 10px;
+  }
+  
+  .crop-card.grid h4 {
+    margin: 0;
+    font-size: 18px;
+  }
+  
+  .crop-info {
+    font-size: 14px;
+    margin: 5px 0;
+    color: #555;
+  }
+  
+  .season-indicator {
+    font-size: 13px;
+    margin: 5px 0;
+  }
+  
+  .off-season {
+    color: red;
+  }
+  
+  .tag-wrap {
+    margin-top: 8px;
+  }
+  
+  .crop-card.grid button {
+    margin-top: 10px;
+    padding: 6px 10px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .catalogue-aside {
+    width: 300px;
+  }
+  
+  .catalogue-aside h3 {
+    margin-top: 20px;
+    font-size: 16px;
+  }
+  
+  .promo-box {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 10px;
+    margin-bottom: 15px;
+    font-size: 14px;
+  }
+  
+  .promo-link {
+    display: block;
+    margin: 5px 0;
+    color: #007bff;
+    text-decoration: none;
+  }
+  
+  .promo-link:hover {
+    text-decoration: underline;
+  }
+  

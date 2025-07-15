@@ -84,8 +84,8 @@ export function createFilterControls(state, onFilterChange) {
         sortSelect,
         locationInput,
         availLabel,
-        ratingMin,
-        ratingMax
+        // ratingMin,
+        // ratingMax
     );
 
     return container;

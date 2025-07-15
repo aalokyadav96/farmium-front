@@ -31,12 +31,23 @@ const createNav = (isLoggedIn) => {
     // const isLoggedIn = Boolean(state.token);
     const navItems = [
         { href: "/home", label: "Home" },
+        // { href: "/events", label: "Events" },
+        // { href: "/places", label: "Places" },
+        // { href: "/artists", label: "Artists" },
+        // { href: "/feed", label: "Feed" },
+        // { href: "/itinerary", label: "Itinerary" },
+        // { href: "/posts", label: "Posts" },
+        // { href: "/baitos", label: "Baito" },
         { href: "/dash", label: "Dash" },
-        { href: "/farms", label: "Farms" },
         { href: "/crops", label: "Crops" },
+        { href: "/farms", label: "Farms" },
         { href: "/products", label: "Products" },
         { href: "/tools", label: "Tools" },
-        { href: "/chats", label: "Chat" },
+        { href: "/recipes", label: "Recipes" },
+        // { href: "/search", label: "Search" },
+        { href: "/merechats", label: "Merechat" },
+        // { href: "/livechat", label: "LiveChat" },
+        // { href: "/chats", label: "Chat" },
 
     ];
 
@@ -80,7 +91,7 @@ const createNav = (isLoggedIn) => {
     nav.appendChild(ulx);
 
     const container = document.createElement("div");
-    container.className = "navigation-container";
+    container.className = "hvflex";
 
     /*********************** */
     container.appendChild(nav);

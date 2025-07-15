@@ -1,133 +1,179 @@
+.eventpage {
+    padding: 1.5rem;
+}
 
-.event-section {
-    padding: 1rem;
-    border-top: 1px solid #ddd;
-    background-color: var(--card-bg);
-    border-radius: 8px;
+/* Event Card */
+.eventpage .event-wrapper {
     margin-bottom: 2rem;
-  }
-  
-  .event-section h2 {
-    font-size: 1.8rem;
-    margin-bottom: 1rem;
-    color: #023d64;
-    font-weight: 600;
-  }
-  
-  .buttonx {
-    margin-right: 4px;
-  }
+}
 
-  .hvflex {
+.eventpage .event-card {
     display: flex;
     flex-wrap: wrap;
-    gap: 1.25rem;
-    justify-content: flex-start;
-  }
-  
-  /* .ticket-card {
-    flex: 1 1 250px;
-    max-width: 320px;
-    background: #fafafa;
-    border: 2px solid #023d64;
-    border-radius: 10px;
-    padding: 1.5rem;
-    box-shadow: #f3f3f3 3px 3px 3px inset, #f3f3f3 3px 3px 3px;
+    border-radius: 6px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.eventpage .banner-section {
+    flex: 1 1 300px;
+}
+
+.eventpage .event-banner-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.eventpage .event-info {
+    flex: 2 1 400px;
+    padding: 1rem;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  } 
-   
-  .ticket-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(2, 61, 100, 0.15);
-  }
-  
-  .ticket-card h2 {
+    gap: 0.6rem;
+}
+
+.eventpage .event-title {
     font-size: 2rem;
-    color: #023d64;
-    margin: 0 0 0.5rem;
-  }
-  
-  .ticket-card p {
-    margin: 0.2rem 0;
-    color: #333;
-    font-size: 1rem;
-  }
-  
-  .ticket-card .availability {
+    margin: 0;
+}
+
+.eventpage .event-status {
     font-weight: bold;
-    color: #067f5c;
-  }
-  
-  .ticket-card button {
+    color: #198754;
+    font-size: 1rem;
+}
+
+.eventpage .event-date {
+    color: #555;
+    font-size: 0.95rem;
+}
+
+.eventpage .event-description {
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.eventpage .event-info a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.eventpage .event-info a:hover {
+    text-decoration: underline;
+}
+
+/* Actions */
+.eventpage .event-actions {
     margin-top: 1rem;
-    background-color: #023d64;
-    color: #fff;
-    padding: 0.6rem 1rem;
-    border: 2px solid #fff;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: background-color 0.2s ease;
-  }
-  
-  .ticket-card button:hover {
-    background-color: #03558d;
-  } */
-/*   
-  .button {
-    margin-bottom: 1rem;
-    background-color: #067f5c;
-    color: #fff;
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+
+.eventpage .action-btn {
+    padding: 0.5rem 1rem;
+    background-color: #0074cc;
+    color: white;
     border: none;
-    padding: 0.7rem 1.2rem;
-    border-radius: 6px;
-    font-weight: 600;
+    border-radius: 4px;
     cursor: pointer;
-    transition: background 0.3s ease;
-  }
-  
-  .button:hover {
-    background-color: #056a4e;
-  }
-   */
-
-
-   /*************/
-   /* --- Event Type Colors --- */
-.color-concert {
-  background: linear-gradient(135deg, #7f00ff, #e100ff); /* purple neon */
-}
-.color-workshop {
-  background: linear-gradient(135deg, #00c853, #b2ff59); /* green fresh */
-}
-.color-sports {
-  background: linear-gradient(135deg, #2196f3, #21cbf3); /* blue sporty */
-}
-.color-meetup {
-  background: linear-gradient(135deg, #ff6f00, #ff8f00); /* warm orange */
-}
-.color-festival {
-  background: linear-gradient(135deg, #ff5f6d, #ffc371); /* rainbow-ish */
-}
-.color-default {
-  background: linear-gradient(135deg, #e0e0e0, #eeeeee); /* neutral */
+    font-size: 0.9rem;
 }
 
-/* --- Optional: Make buttons rounded and colorful --- */
-.action-btn {
-  border-radius: 30px;
-  padding: 10px 20px;
-  font-weight: bold;
-  transition: background 0.3s, transform 0.2s;
-}
-.action-btn:hover {
-  transform: scale(1.05);
+.eventpage .action-btn:hover {
+    background-color: #005fa3;
 }
 
-.analytics-btn {
-  background-color: #00b0ff;
-  color: white;
+.eventpage .delete-btn {
+    background-color: #dc3545;
+}
+
+.eventpage .delete-btn:hover {
+    background-color: #b02a37;
+}
+
+.eventpage .analytics-btn {
+    background-color: #6f42c1;
+}
+
+.eventpage .analytics-btn:hover {
+    background-color: #5936a4;
+}
+
+/* Tabs */
+.eventpage .tabs-container {
+    margin-top: 2rem;
+}
+
+.eventpage .tab-buttons {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 2px solid #ccc;
+    margin-bottom: 1rem;
+}
+
+.eventpage .tab-button {
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    border: none;
+    background: none;
+    font-weight: bold;
+}
+
+.eventpage .tab-button.active {
+    color: #000;
+    border-bottom: 3px solid #0074cc;
+}
+
+.eventpage .tab-content {
+    display: none;
+    padding: 1rem 0;
+}
+
+.eventpage .tab-content.active {
+    display: block;
+}
+
+/* FAQ Accordion */
+.eventpage .accordion {
+    margin-top: 1rem;
+}
+
+.eventpage .accordion-section {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 0.6rem;
+    overflow: hidden;
+    background-color: #fff;
+}
+
+.eventpage .accordion-header {
+    padding: 0.6rem 1rem;
+    cursor: pointer;
+    background-color: #f0f0f0;
+    font-weight: bold;
+    user-select: none;
+}
+
+.eventpage .accordion-body {
+    padding: 0.8rem 1rem;
+    border-top: 1px solid #ddd;
+    background-color: #fafafa;
+}
+
+/* Add Button */
+.eventpage #add-faq-btn {
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background-color: #198754;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.eventpage #add-faq-btn:hover {
+    background-color: #146c43;
 }

@@ -5,11 +5,12 @@ export async function displayEntryPage(contentContainer, isLoggedIn) {
     contentContainer.textContent = '';
 
     if (!isLoggedIn) {
-        const message = document.createElement('p');
-        message.textContent = 'Please log in to view chats.';
-        message.style.margin = '2rem';
-        message.style.fontSize = '1.2rem';
-        contentContainer.appendChild(message);
+        navigate("/login");
+        // const message = document.createElement('p');
+        // message.textContent = 'Please log in to view chats.';
+        // message.style.margin = '2rem';
+        // message.style.fontSize = '1.2rem';
+        // contentContainer.appendChild(message);
         return;
     }
 

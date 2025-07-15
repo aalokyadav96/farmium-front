@@ -1,4 +1,4 @@
-import { state } from '../../state/state.js';
+import { getState } from '../../state/state.js';
 import { apiFetch } from "../../api/api.js";
 import Snackbar from '../../components/ui/Snackbar.mjs';
 import { navigate } from "../../routes/index.js";
@@ -12,7 +12,7 @@ async function displayProfile(isLoggedIn, content) {
     content.textContent = ""; // Clear existing content
     if (isLoggedIn) {
         try {
-            const profile = await fetchProfile();
+            const profile = await fetchProfile(isLoggedIn);
             if (profile) {
                 const profileElement = profilGen(profile, isLoggedIn);
                 content.appendChild(profileElement);
@@ -51,7 +51,7 @@ function attachProfileEventListeners(content) {
 }
 
 async function deleteProfile() {
-    if (!state.token) {
+    if (!getState("token")) {
 
         Snackbar("Please log in to delete your profile.", 3000);
         return;

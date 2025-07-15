@@ -1,334 +1,53 @@
-/* ========= Top Navbar ========= */
-.navbar {
-    background-color: #fff;
-    padding: 6px 16px;
-    /* box-shadow: 0 1px 4px rgba(0,0,0,0.06); */
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  
-  .logo-link {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #222;
-    text-decoration: none;
-  }
-/*   
-  .hflex-sb {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-  } */
-  
-  /* Dropdown */
-  .dropdown {
-    position: relative;
-    list-style: none;
-  }
-/*   
-  .dropdown-toggle {
-    background: none;
-    border: none;
-    font-weight: 500;
-    color: #333;
-    cursor: pointer;
-    padding: 8px 12px;
-    font-size: 15px;
-  } */
-  
-  /* .dropdown-toggle:hover {
-    color: #007bff;
-  } */
-  
-  /* .dropdown-menu {
-    display: none;
-    position: absolute;
-    right: 0;
-    top: 110%;
-    background-color: #fff;
-    border-radius: 6px;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.1);
-    min-width: 160px;
-    z-index: 50;
-    overflow: hidden;
-  }
-   */
-  /* .dropdown:hover .dropdown-menu,
-  .profile-dropdown-toggle:focus + .profile-dropdown-menu {
-    display: block;
-  }
-   */
-  .dropdown-item {
-    display: block;
-    padding: 10px 14px;
-    font-size: 14px;
-    color: #333;
-    text-decoration: none;
-    transition: background 0.2s ease;
-  }
-  
-  .dropdown-item:hover {
-    background-color: #f2f2f2;
-  }
-  
-  /* Icons */
-  .top-svg {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    padding: 4px;
-    transition: background 0.2s ease;
-  }
-  
-  .top-svg:hover {
-    background-color: #f0f0f0;
-  }
-  
-  .flex-center {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-/*   
-  .clrful {
-    stroke: #333;
-    transition: stroke 0.2s ease;
-  }
-  
-  .clrful:hover {
-    stroke: #007bff;
-  }
-   */
-  /* Profile Image Dropdown */
-  /* .profile-dropdown-toggle {
-    cursor: pointer;
-  } */
-  
-  .profile-image.circle {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    object-fit: cover;
-  }
-  
-  .profile-dropdown-menu {
-    display: none;
-    position: absolute;
-    right: 0;
-    top: 110%;
-    background: white;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.1);
-    border-radius: 6px;
-    overflow: hidden;
-    min-width: 80px;
-    padding: 6px;
-  }
-/*   
-  .profile-dropdown-toggle:focus + .profile-dropdown-menu {
-    display: block;
-  } */
-/* ========= Bottom Navigation ========= */
 .navigation {
-    background-color: #fff;
-    box-shadow: 0 -1px 4px rgba(0,0,0,0.05);
-    padding: 0 8px;
+    width: 100%;
     overflow-x: auto;
-    border-top: 1px solid #e0e0e0;
-    border-bottom: 1px solid #e0e0e0;
+    background-color: var(--color-bg);
+    border-bottom: 1px solid var(--color-border);
+    -webkit-overflow-scrolling: touch;
   }
   
   .navigation__inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    display: inline-flex;
+    min-width: max-content;
+    padding: var(--space-sm) var(--space-md);
   }
   
   .navigation__list {
     display: flex;
-    flex-wrap: nowrap;
-    gap: 8px;
-    overflow-x: auto;
+    gap: var(--space-md);
     list-style: none;
+    padding: 0;
     margin: 0;
   }
   
   .navigation__item {
-    flex: 0 0 auto;
+    flex-shrink: 0;
   }
   
   .navigation__link {
     display: inline-block;
-    padding: 8px 12px;
-    font-size: 16px;
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--font-size-base);
+    color: var(--color-fg);
     text-decoration: none;
-    color: #444;
-    font-weight: 600;
-    border-radius: 6px;
-    transition: background 0.2s, color 0.2s;
+    border-radius: var(--radius-sm);
     white-space: nowrap;
+    transition: background-color 0.2s ease-in-out;
   }
   
   .navigation__link:hover {
-    background-color: #f2f2f2;
-    color: #000;
+    background-color: var(--color-border);
   }
   
-  /* Toggle Button (3 Dots) */
-  .navigation__toggle {
-    width: 40px;
-    height: 100%;
-    cursor: pointer;
+  /* Optional: selected state (if needed) */
+  .navigation__link.active {
+    font-weight: bold;
+    background-color: var(--color-accent);
+    color: var(--color-btn-fg);
   }
   
-  .toggle {
+  /* Hide toggle checkbox (used for accessibility) */
+  .navigation .toggle {
     display: none;
   }
   
-  .navigation__toggle svg {
-    stroke: #666;
-    transition: stroke 0.2s;
-  }
-  
-  .navigation__toggle:hover svg {
-    stroke: #007bff;
-  }
-  @media (max-width: 600px) {
-    .navbar .hflex-sb {
-      flex-wrap: wrap;
-      /* gap: 8px; */
-    }
-  
-    .logo-link {
-      font-size: 1.25rem;
-    }
-  
-    .navigation__link {
-      font-size: 13px;
-      padding: 6px 10px;
-    }
-  }
-
-  /**nav from custom css**/
-/*   
-.navigation {
-  width: 100%;
-  letter-spacing: 1.2px;
-  background: #fff;
-  position: relative;
-  border-bottom: 1px solid slateblue
-}
-
-.navigation__inner {
-  display: flex;
-  margin: 0 auto;
-  overflow: hidden;
-  border-left: 0;
-  border-right: 0;
-  height: 36px;
-  background: #fff
-}
-
-.toggle:checked~.navigation__inner {
-  height: auto
-}
-
-.navigation__list {
-  display: flex;
-  flex-wrap: wrap;
-  margin: 0 6px;
-  padding: 0;
-  list-style: none;
-  border-top: 0;
-  border-right: 0;
-  gap: 6px;
-  width: 100%
-}
-
-.navigation__link {
-  display: block;
-  padding: 7px;
-  font-size: 14px;
-  text-shadow: 1px 1px 10px #ccc;
-  text-decoration: none;
-  color: #000;
-  cursor: pointer
-}
-
-.navigation__link:hover {
-  text-decoration: none;
-  background: #fff;
-  color: #000
-}
-
-li.navigation__item:after {
-  content: "|";
-  display: block;
-  position: relative;
-  width: 2px;
-  padding: 2px 2px;
-  color: #c8c8c8
-}
-
-li.navigation__item {
-  display: flex
-}
-
-.navigation__logo {
-  flex-shrink: 0;
-  align-self: flex-start
-}
-
-.navigation__logo .navigation__link {
-  font-weight: 700
-} 
-
-@media screen and (max-width: 400px) {
-  .navigation__item {
-      flex-basis: 30%
-  } 
-
-  li.navigation__item:after {
-      padding: 6px 0 !important
-  }
-}
-
-li.navigation__item:last-of-type:after {
-  content: none
-}
-
-.navigation__toggle {
-  flex-shrink: 0;
-  height: 36px;
-  width: 36px
-}
-
-.navigation__toggle .navigation__link {
-  position: relative;
-  padding-right: 26px;
-  border: 0
-}
-
-.navigation__toggle .navigation__link:after {
-  content: "";
-  position: absolute;
-  top: 18px;
-  right: 12px;
-  width: 0;
-  height: 0;
-  border-style: solid;
-  border-width: 5px 5px 0 5px;
-  border-color: #000 transparent transparent transparent
-}
-
-.toggle:checked~.navigation__inner .navigation__toggle .navigation__link:after {
-  border-width: 0 5px 5px 5px;
-  border-color: transparent transparent #777 transparent
-}
-
-.toggle {
-  position: absolute;
-  z-index: -1;
-  opacity: 0
-} */
