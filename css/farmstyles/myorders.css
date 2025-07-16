@@ -1,12 +1,9 @@
 .user-orders-page {
     padding: 20px;
-    background-color: #f7fafc;
-    color: #2d3748;
   }
   
   .user-orders-page h2 {
     margin-bottom: 20px;
-    color: #2c5282;
   }
   
   /* 🔍 Filters */
@@ -34,7 +31,6 @@
   .user-orders-page .orders-table {
     width: 100%;
     border-collapse: collapse;
-    background-color: white;
     box-shadow: 0 2px 6px rgba(0,0,0,0.05);
   }
   .user-orders-page .orders-table th,

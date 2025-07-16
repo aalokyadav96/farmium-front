@@ -6,7 +6,6 @@ import { openChat } from "../../mechat/chatHandlers.js";
 
 export async function farmChat(farmerId, container) {
     const userId = getState("user");
-    alert(userId);
     if (!userId || !farmerId) return;
 
     const participants = [userId, farmerId];

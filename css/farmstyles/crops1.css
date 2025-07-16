@@ -1,7 +1,5 @@
 .cropspage {
-    font-family: sans-serif;
     padding: 20px;
-    background-color: #f9f9f9;
   }
   
   .catalogue-layout {
@@ -38,7 +36,6 @@
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    background-color: #e0e0e0;
   }
   
   .view-toggle button.active {
@@ -53,10 +50,10 @@
   .tabs button {
     padding: 6px 12px;
     border-radius: 4px;
+    margin: 4px;
     border: none;
     background-color: #28a745;
     color: white;
-    margin: 3px;
     cursor: pointer;
   }
   
@@ -67,10 +64,10 @@
   }
   
   .crop-card.grid {
-    background-color: #fff;
     border: 1px solid #ccc;
     border-radius: 6px;
     padding: 15px;
+    text-align: center;
   }
   
   .crop-card.grid img {
@@ -88,7 +85,6 @@
   .crop-info {
     font-size: 14px;
     margin: 5px 0;
-    color: #555;
   }
   
   .season-indicator {
@@ -124,7 +120,6 @@
   }
   
   .promo-box {
-    background-color: #fff;
     border: 1px solid #ddd;
     border-radius: 6px;
     padding: 10px;
@@ -142,4 +137,87 @@
   .promo-link:hover {
     text-decoration: underline;
   }
-  
+  /**/
+  /* Mobile-friendly enhancements */
+@media (max-width: 768px) {
+  .catalogue-layout {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .catalogue-aside {
+    width: 100%;
+  }
+
+  .top-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .search-box,
+  .sort-box {
+    width: 100%;
+    font-size: 14px;
+  }
+
+  .view-toggle {
+    justify-content: space-between;
+  }
+
+  .view-toggle button {
+    flex: 1;
+    font-size: 14px;
+  }
+
+  .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .tabs button {
+    font-size: 14px;
+    padding: 8px 10px;
+    flex: 1;
+  }
+
+  .tab-content.grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .crop-card.grid {
+    padding: 12px;
+    text-align: left;
+  }
+
+  .crop-card.grid h4 {
+    font-size: 16px;
+    margin-bottom: 5px;
+  }
+
+  .crop-info,
+  .season-indicator {
+    font-size: 13px;
+  }
+
+  .crop-card.grid button {
+    width: 100%;
+    font-size: 14px;
+  }
+
+  .promo-box {
+    font-size: 13px;
+    padding: 10px;
+  }
+
+  .promo-link {
+    font-size: 13px;
+  }
+
+  .catalogue-aside h3 {
+    font-size: 15px;
+  }
+}

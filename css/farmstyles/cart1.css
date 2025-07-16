@@ -1,7 +1,5 @@
 .cartpage {
-  font-family: sans-serif;
   padding: 20px;
-  background-color: #f9f9f9;
 }
 
 .back-button {
@@ -20,7 +18,6 @@
 }
 
 .cart-category {
-  background-color: #fff;
   padding: 15px;
   border-radius: 6px;
   border: 1px solid #ddd;

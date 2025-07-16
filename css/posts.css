@@ -1,0 +1,68 @@
+.postscon {
+    padding: 1.5rem;
+    font-family: sans-serif;
+  }
+  
+  .postscon .post-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .postscon .post-search {
+    padding: 0.4rem 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    width: 250px;
+  }
+  
+  .postscon .post-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+  }
+  
+  .postscon .post-card {
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    padding: 1rem;
+    width: 100%;
+    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .postscon .post-thumbnail {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+    margin-bottom: 0.8rem;
+  }
+  
+  .postscon h3 {
+    font-size: 1.1rem;
+    margin: 0.5rem 0;
+  }
+  
+  .postscon .post-snippet {
+    font-size: 0.95rem;
+    margin: 0.4rem 0;
+  }
+  
+  .postscon .post-meta {
+    font-size: 0.8rem;
+    color: #666;
+    margin-bottom: 0.6rem;
+  }
+  
+  .postscon .btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  

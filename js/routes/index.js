@@ -2,9 +2,9 @@ import { attachNavEventListeners, createheader } from "../components/header.js";
 import { createNav } from "../components/navigation.js";
 import { secnav } from "../components/secNav.js";
 import { renderPageContent } from "./render.js";
-import { getState } from "../state/state.js";
-
+import {sticky} from "../components/sticky.js";
 import {
+  getState,
   setState,
   getRouteState,
   hasRouteModule,
@@ -20,55 +20,60 @@ import {
 let isNavigating = false;
 
 /**
- * Loads page layout and route content.
- * Handles login check, layout rendering, scroll state.
+ * Loads layout and route content into static containers
  * @param {string} url
  */
 async function loadContent(url) {
-  const app = document.getElementById("app");
+  const header = document.getElementById("pageheader");
+  const nav = document.getElementById("primary-nav");
+  const secNavElement = document.getElementById("secondary-nav");
+  const main = document.getElementById("content");
+  const footer = document.getElementById("pagefooter");
 
-  const token = localStorage.getItem("token");
-  const user = localStorage.getItem("user");
-
-  if (token && user) {
-    setState({ token, user }, true);
+  if (!header || !nav || !main || !footer || !secNavElement) {
+    console.error("❌ Missing static layout containers in HTML.");
+    return;
   }
 
-  let main = document.getElementById("content");
+  // hydrate persisted state only once
+  const hydratedToken = localStorage.getItem("token");
+  const hydratedUser = localStorage.getItem("user");
 
-  if (main && hasRouteModule(url)) {
-    const cached = getRouteModule(url);
-    if (cached?.render) {
-      cached.render(main);
-      restoreScroll(main, getRouteState(url));
-      return;
-    }
+  if (hydratedToken && hydratedUser) {
+    // setState({ token: hydratedToken, user: JSON.parse(hydratedUser) }, true);
+    setState({ token: hydratedToken, user: hydratedUser }, true);
   }
 
-  app.innerHTML = "";
+  // Clear dynamic DOM sections
+  header.replaceChildren();
+  nav.replaceChildren();
+  secNavElement.replaceChildren();
+  main.replaceChildren();
 
-  main = document.createElement("main");
-  main.id = "content";
+  // Render layout
+  const headerContent = createheader();
+  if (headerContent) header.appendChild(headerContent);
 
-  const header = createheader();
-  header.id = "layout-rendered";
-  app.appendChild(header);
+  const navContent = createNav();
+  if (navContent) nav.appendChild(navContent);
 
-  app.appendChild(createNav());
-  const secNavElement = secnav();
-  if (secNavElement) app.appendChild(secNavElement);
-
-  app.appendChild(main);
+  const secNav = secnav();
+  if (secNav) secNavElement.appendChild(secNav);
 
   attachNavEventListeners();
 
-  await renderPageContent(Boolean(getState("token")), url, main);
+  footer.appendChild(sticky);
+
+  // Render page module
+  const isLoggedIn = Boolean(getState("token"));
+  await renderPageContent(isLoggedIn, url, main);
+
+  // Restore scroll
   restoreScroll(main, getRouteState(url));
 }
 
 /**
- * Navigate to a new path (SPA pushState).
- * Prevents spam clicks and redundant navigation.
+ * SPA PushState navigation
  * @param {string} path
  */
 function navigate(path) {
@@ -76,8 +81,6 @@ function navigate(path) {
     console.error("🚨 navigate called with null or undefined!", new Error().stack);
     return;
   }
-
-  // sessionStorage.setItem("redirectAfterLogin", window.location.pathname);
 
   if (window.location.pathname === path || isNavigating) return;
 
@@ -93,13 +96,13 @@ function navigate(path) {
 }
 
 /**
- * Initial render on first page load.
+ * Initial page render
  */
 async function renderPage() {
   await loadContent(window.location.pathname);
 }
 
-// Handle back/forward browser buttons
+// Listen to popstate (back/forward)
 window.addEventListener("popstate", () => {
   loadContent(window.location.pathname);
 });

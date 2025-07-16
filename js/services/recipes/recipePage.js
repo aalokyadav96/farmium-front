@@ -95,12 +95,16 @@ export async function displayRecipe(content, isLoggedIn, recipeId, currentUser =
   });
   // swipe
   let touchStartX = 0;
-  imageEl.addEventListener("touchstart", e => { touchStartX = e.changedTouches[0].screenX; });
+  imageEl.addEventListener("touchstart", e => {
+    touchStartX = e.changedTouches[0].screenX;
+  }, { passive: true }); // ✅ Mark as passive
+  
   imageEl.addEventListener("touchend", e => {
     const dx = e.changedTouches[0].screenX - touchStartX;
     if (dx > 50) prevBtn.click();
     else if (dx < -50) nextBtn.click();
-  });
+  }, { passive: true }); // Optional: touchend typically doesn’t block scroll, but safe to include
+  
   const gallery = createElement("div", { class: "image-gallery" }, [
     imageEl, prevBtn, nextBtn
   ]);

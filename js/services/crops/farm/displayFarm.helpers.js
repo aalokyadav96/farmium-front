@@ -107,50 +107,47 @@ export async function renderCrops(
 }
 
 // ─────────── Individual crop card ───────────
-// // function createCropCard(crop, farm, farmId, mainContainer, isLoggedIn, isCreator) {
-// //   const card = createElement("div", { class: "crop-card" });
+// function createCropCard(crop, farm, farmId, mainContainer, isLoggedIn, isCreator) {
+//   const card = createElement("div", { class: "crop-card" });
 
-// //   if (crop.imageUrl) {
-// //     card.appendChild(createElement("img", {
-// //       src: `${SRC_URL}${crop.imageUrl}`,
-// //       alt: crop.name
-// //     }));
-// //   }
+//   if (crop.imageUrl) {
+//     card.appendChild(createElement("img", {
+//       src: `${SRC_URL}${crop.imageUrl}`,
+//       alt: crop.name
+//     }));
+//   }
 
-// //   const ageDesc       = crop.createdAt ? `${getAgeInDays(crop.createdAt)} days old` : "Unknown age";
-// //   const perishable    = crop.expiryDate ? `🧊 Expires: ${crop.expiryDate}` : "Stable";
-// //   const stockStatus   = crop.quantity <= 0 ? "❌ Out of Stock" : "✅ Available";
+//   const ageDesc       = crop.createdAt ? `${getAgeInDays(crop.createdAt)} days old` : "Unknown age";
+//   const perishable    = crop.expiryDate ? `🧊 Expires: ${crop.expiryDate}` : "Stable";
+//   const stockStatus   = crop.quantity <= 0 ? "❌ Out of Stock" : "✅ Available";
 
-// //   card.append(
-// //     createElement("h4", {}, [crop.name]),
-// //     createElement("p", {}, [`💰 ${crop.price} per ${crop.unit}`]),
-// //     createElement("p", {}, [`📦 Stock: ${crop.quantity}`]),
-// //     createElement("p", {}, [`📅 Harvested: ${crop.harvestDate || "Unknown"}`]),
-// //     createElement("p", {}, [`📆 ${perishable}`]),
-// //     createElement("p", {}, [`🕓 ${ageDesc}`]),
-// //     createElement("p", {}, [`📌 ${stockStatus}`])
-// //   );
+//   card.append(
+//     createElement("h4", {}, [crop.name]),
+//     createElement("p", {}, [`💰 ${crop.price} per ${crop.unit}`]),
+//     createElement("p", {}, [`📦 Stock: ${crop.quantity}`]),
+//     createElement("p", {}, [`📅 Harvested: ${crop.harvestDate || "Unknown"}`]),
+//     createElement("p", {}, [`📆 ${perishable}`]),
+//     createElement("p", {}, [`🕓 ${ageDesc}`]),
+//     createElement("p", {}, [`📌 ${stockStatus}`])
+//   );
 
-// //   if (crop.history?.length > 1) {
-// //     card.append(...createPriceHistoryToggle(crop.history));
-// //   }
+//   if (crop.history?.length > 1) {
+//     card.append(...createPriceHistoryToggle(crop.history));
+//   }
 
-// //   if (isCreator) {
-// //     card.append(...createCreatorControls(crop, farmId, mainContainer));
-// //   } else {
-// //     card.append(...createUserControls(crop, farm.name, isLoggedIn));
-// //   }
+//   if (isCreator) {
+//     card.append(...createCreatorControls(crop, farmId, mainContainer));
+//   } else {
+//     card.append(...createUserControls(crop, farm.name, isLoggedIn));
+//   }
 
-// //   return card;
-// // }
-
+//   return card;
+// }
 function createCropCard(crop, farmName, farmId, mainContainer, isLoggedIn, isCreator) {
   const card = createElement("div", { class: "crop-card" });
-  const cardl = createElement("div", { class: "crop-cardl" });
-  const cardr = createElement("div", { class: "crop-cardr" });
 
   if (crop.imageUrl) {
-    cardl.appendChild(createElement("img", {
+    card.appendChild(createElement("img", {
       src: `${SRC_URL}${crop.imageUrl}`,
       alt: crop.name
     }));
@@ -175,7 +172,7 @@ function createCropCard(crop, farmName, farmId, mainContainer, isLoggedIn, isCre
     maximumFractionDigits: 0
   }).format(crop.price);
 
-  cardr.append(
+  card.append(
     createElement("h4", {}, [crop.name]),
     createElement("p", {}, [`💰 ${price} per ${crop.unit}`]),
     createElement("p", {}, [`📦 Stock: ${crop.quantity}`]),
@@ -186,77 +183,17 @@ function createCropCard(crop, farmName, farmId, mainContainer, isLoggedIn, isCre
   );
 
   if (crop.history?.length > 1) {
-    cardr.append(...createPriceHistoryToggle(crop.history));
+    card.append(...createPriceHistoryToggle(crop.history));
   }
 
   if (isCreator) {
-    cardr.append(...createCreatorControls(crop, farmId, mainContainer));
+    card.append(...createCreatorControls(crop, farmId, mainContainer));
   } else {
-    cardr.append(...createUserControls(crop, farmName, farmId, isLoggedIn));
+    card.append(...createUserControls(crop, farmName, farmId, isLoggedIn));
   }
-
-  card.append(cardl,cardr);
 
   return card;
 }
-// function createCropCard(crop, farmName, farmId, mainContainer, isLoggedIn, isCreator, view = "list") {
-//   const card = createElement("div", {
-//     class: `crop-card ${view}-view`
-//   });
-
-//   if (crop.imageUrl) {
-//     const image = createElement("img", {
-//       src: `${SRC_URL}${crop.imageUrl}`,
-//       alt: crop.name
-//     });
-//     card.appendChild(image);
-//   }
-
-//   const formatDate = (isoStr) =>
-//     isoStr ? new Date(isoStr).toLocaleDateString(undefined, {
-//       year: "numeric",
-//       month: "short",
-//       day: "numeric"
-//     }) : "Unknown";
-
-//   const harvestDate = formatDate(crop.harvestDate);
-//   const expiryDate = formatDate(crop.expiryDate);
-//   const ageDesc = crop.createdAt ? `${getAgeInDays(crop.harvestDate)} days old` : "Unknown age";
-//   const perishable = crop.expiryDate ? `🧊 Expires: ${expiryDate}` : "Stable";
-//   const stockStatus = crop.quantity <= 0 ? "❌ Out of Stock" : "✅ Available";
-
-//   const price = new Intl.NumberFormat("en-IN", {
-//     style: "currency",
-//     currency: "INR",
-//     maximumFractionDigits: 0
-//   }).format(crop.price);
-
-//   const infoContainer = createElement("div", {
-//     class: "crop-info"
-//   }, [
-//     createElement("h4", {}, [crop.name]),
-//     createElement("p", {}, [`💰 ${price} per ${crop.unit}`]),
-//     createElement("p", {}, [`📦 Stock: ${crop.quantity}`]),
-//     createElement("p", {}, [`📅 Harvested: ${harvestDate}`]),
-//     createElement("p", {}, [`📆 ${perishable}`]),
-//     createElement("p", {}, [`🕓 ${ageDesc}`]),
-//     createElement("p", {}, [`📌 ${stockStatus}`])
-//   ]);
-
-//   card.appendChild(infoContainer);
-
-//   if (crop.history?.length > 1) {
-//     card.append(...createPriceHistoryToggle(crop.history));
-//   }
-
-//   const controls = isCreator
-//     ? createCreatorControls(crop, farmId, mainContainer)
-//     : createUserControls(crop, farmName, farmId, isLoggedIn);
-
-//   card.append(...controls);
-
-//   return card;
-// }
 
 // ─────────── Price history toggler ───────────
 function createPriceHistoryToggle(history) {

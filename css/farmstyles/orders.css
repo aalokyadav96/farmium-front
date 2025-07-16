@@ -1,12 +1,9 @@
 .orders-page {
-    background: #f4f4f4;
     padding: 20px;
-    color: #333;
   }
   
   .orders-page h2 {
     margin-bottom: 20px;
-    color: #2f4f4f;
   }
   
   /* 🔍 Filters */

@@ -1,26 +1,27 @@
 @import url(theme.css);
 @import url(base.css);
-@import url(header1.css);
+@import url(header5.css);
 @import url(nav.css);
 @import url(authpage.css);
 @import url(profile.css);
 @import url(chat.css);
-@import url(feed1.css);
-@import url(feedimages.css); 
-@import url(foreign.css);
+/* @import url(feed1.css); */
+/* @import url(feedimages.css);  */
+/* @import url(foreign.css); */
 @import url(form.css);
-@import url(placepage.css);
-@import url(artispage.css);
-@import url(artists.css);
-@import url(places1.css);
-@import url(eventpage.css);
-@import url(itinerary.css);
-@import url(events.css);
-@import url(posts1.css);
-@import url(postpage.css);
+/* @import url(placepage.css); */
+/* @import url(artispage.css); */
+/* @import url(artists.css); */
+/* @import url(places1.css); */
+/* @import url(eventpage.css); */
+/* @import url(itinerary.css); */
+/* @import url(events.css); */
+/* @import url(posts1.css); */
+/* @import url(postpage.css); */
 @import url(adminpage.css);
 @import url(home1.css);
-@import url(baitos.css);
+/* @import url(baitos.css); */
 @import url(onechat1.css);
+/* @import url(merechatcon1.css); */
 @import url(merechatcon.css);
 @import url(farmstyles.css);

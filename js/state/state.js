@@ -8,6 +8,12 @@ const SEARCH_URL = "https://farmium.onrender.com/api/search";
 
 const DEFAULT_IMAGE = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/wcAAwAB/hsbRWkAAAAASUVORK5CYII=`;
 
+const USER_PH = `data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMu
+b3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIzMiIgY3k9IjIwIiByPSIxMiIgZmlsbD0iI0NDQyIvPjxwYXRoIGQ9IkMyMC4yOSAzNC44MUMxNi43MSAz
+OC43MiAxNSA0My44NiAxNSA0OS41VjUyQzE1IDU3LjUyIDIwLjQ4IDYyIDI3LjUgNjJIMzYuNUM0My41MiA2MiA0OSA1Ny41MiA0OSA1MlY0OS41QzQ5
+IDQzLjg2IDQ3LjI5IDM4LjcyIDQzLjcxIDM0LjgxQzQwLjEzIDMwLjg5IDM0LjIzIDI4IDMwIDI4QzI1Ljc3IDI4IDE5Ljg3IDMwLjg5IDE2LjI5IDM0
+LjgxWiIgZmlsbD0iI0NDQyIvPjwvc3ZnPg==`;
+
 // --- Allowed and persisted keys ---
 const allowedKeys = new Set([
   "token",
@@ -198,6 +204,7 @@ export {
   SRC_URL,
   SEARCH_URL,
   DEFAULT_IMAGE,
+  USER_PH,
   isAdmin,
   hasRole,
 

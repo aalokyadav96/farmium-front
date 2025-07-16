@@ -1,147 +1,48 @@
 import { createElement } from "../../components/createElement.js";
 import Button from "../../components/base/Button.js";
-import {apiFetch} from "../../api/api.js";
+import { apiFetch } from "../../api/api.js";
 import { createTabs } from "../../components/ui/createTabs.js";
 import { displayOrders } from "../crops/orders/orders.js";
 
-// // // Replace mock version with real fetch (if not already done)
-// // export function apiFetch(endpoint, method = "GET", body = null, options = {}) {
-// //   return fetch(endpoint, {
-// //     method,
-// //     headers: {
-// //       "Content-Type": "application/json",
-// //       ...(options.headers || {}),
-// //     },
-// //     body: body ? JSON.stringify(body) : null,
-// //   })
-// //     .then((res) => {
-// //       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-// //       return res.json();
-// //     });
-// // }
-
-// export function displayDash(content, isLoggedIn) {
-//   let contentContainer = createElement('div', { "class": "farmdashpage" }, []);
-
-//   content.innerHTML = "";
-//   content.appendChild(contentContainer);
-//   contentContainer.replaceChildren();
-
-//   if (!isLoggedIn) {
-//     contentContainer.appendChild(
-//       createElement("p", {}, ["You must be logged in to view the dashboard."])
-//     );
-//     return;
-//   }
-
-//   contentContainer.appendChild(createElement("h2", {}, ["Farm Stats"]));
-
-//   // farmId = "686563edef13fb432aec8ddd";
-
-//   // apiFetch(`/farms/${farmId}`)
-//   apiFetch(`/dash/farms`)
-//     .then((response) => {
-//       if (!response.success || !response.farm) throw new Error("No farm data");
-
-//       const farm = response.farm;
-//       const crops = farm.crops || [];
-
-//       const totalCrops = crops.length;
-//       const totalQuantity = crops.reduce((sum, c) => sum + (c.quantity || 0), 0);
-//       const totalValue = crops.reduce((sum, c) => sum + (c.quantity * c.price), 0);
-
-//       const uniqueCategories = new Set(crops.map(c => c.category)).size;
-//       const featuredCrops = crops.filter(c => c.featured).length;
-
-//       const statsSummary = createElement("div", { class: "stats-summary" }, [
-//         createElement("div", { class: "stat-card" }, [`Farm Name: ${farm.name}`]),
-//         createElement("div", { class: "stat-card" }, [`Total Crops: ${totalCrops}`]),
-//         createElement("div", { class: "stat-card" }, [`Crop Categories: ${uniqueCategories}`]),
-//         createElement("div", { class: "stat-card" }, [`Total Quantity: ${totalQuantity}`]),
-//         createElement("div", { class: "stat-card" }, [`Estimated Value: $${totalValue.toFixed(2)}`]),
-//         createElement("div", { class: "stat-card" }, [`Featured Crops: ${featuredCrops}`]),
-//       ]);
-
-//       contentContainer.appendChild(statsSummary);
-
-//       // Crop breakdown
-//       const cropSection = createElement("div", { class: "crop-distribution" }, [
-//         createElement("h3", {}, ["Crops"]),
-//       ]);
-
-//       if (crops.length === 0) {
-//         cropSection.appendChild(createElement("p", {}, ["No crops listed."]));
-//       } else {
-//         cropSection.appendChild(
-//           createElement(
-//             "ul",
-//             {},
-//             crops.map((crop) =>
-//               createElement("li", {}, [
-//                 `${crop.name} – ${crop.quantity} ${crop.unit} @ $${crop.price}/${crop.unit}`,
-//               ])
-//             )
-//           )
-//         );
-//       }
-
-//       contentContainer.appendChild(cropSection);
-
-//       // Optional: Show contact + availability
-//       const extra = createElement("div", { class: "farm-extra" }, [
-//         createElement("h3", {}, ["Other Info"]),
-//         createElement("p", {}, [`Location: ${farm.location}`]),
-//         createElement("p", {}, [`Availability: ${farm.availabilityTiming}`]),
-//         createElement("p", {}, [`Contact: ${farm.contact || "N/A"}`]),
-//       ]);
-//       contentContainer.appendChild(extra);
-//     })
-//     .catch((err) => {
-//       console.error("Error loading farm stats:", err);
-//       contentContainer.appendChild(
-//         createElement("p", {}, ["Failed to load farm data."])
-//       );
-//     });
-// }
-
-// Main entry point
 export function displayDash(content, isLoggedIn) {
   content.innerHTML = "";
 
   if (!isLoggedIn) {
-    content.appendChild(
-      createElement("p", {}, ["You must be logged in to view the dashboard."])
-    );
+    const notLoggedInUI = createElement("div", { class: "dash-guest" }, [
+      createElement("h2", {}, ["Welcome to your Dashboard"]),
+      createElement("p", {}, ["Log in to access your farm stats, orders, and crop inventory."]),
+      createElement("ul", {}, [
+        createElement("li", {}, ["Track your crop inventory"]),
+        createElement("li", {}, ["Manage and fulfill orders"]),
+        createElement("li", {}, ["Save recipes and favorite crops"]),
+      ]),
+    ]);
+    content.appendChild(notLoggedInUI);
     return;
   }
 
   const tabs = [
-    {
-      id: "overview",
-      title: "Overview",
-      render: renderOverviewTab,
-    },
-    {
-      id: "orders",
-      title: "Orders",
-      render: renderOrdersTab,
-    },
+    { id: "overview", title: "Overview", render: renderOverviewTab },
+    { id: "orders", title: "Orders", render: renderOrdersTab },
   ];
 
   const tabUI = createTabs(tabs, "farmdash-tabs");
   const dashContainer = createElement("div", { class: "farmdashpage" }, [tabUI]);
-
   content.appendChild(dashContainer);
 }
+
 function renderOverviewTab(container) {
   container.replaceChildren();
 
   apiFetch(`/dash/farms`)
     .then((response) => {
-      if (!response.success || !response.farm) throw new Error("No farm data");
+      if (!response.success || !response.farm) {
+        renderOverviewFallback(container, response.message || "No farms found.");
+        return;
+      }
 
       const farm = response.farm;
-      const crops = farm.crops || [];
+      const crops = farm?.crops || [];
 
       container.appendChild(buildStatsSummary(farm, crops));
       container.appendChild(buildCropSection(crops));
@@ -149,9 +50,7 @@ function renderOverviewTab(container) {
     })
     .catch((err) => {
       console.error("Error loading farm stats:", err);
-      container.appendChild(
-        createElement("p", {}, ["Failed to load farm data."])
-      );
+      renderOverviewFallback(container, "Failed to load farm data. Please try again later.");
     });
 }
 
@@ -159,27 +58,10 @@ function renderOrdersTab(container) {
   displayOrders(container);
 }
 
-// function renderOrdersTab(container) {
-//   container.replaceChildren();
-
-//   container.appendChild(
-//     createElement("p", {}, ["Orders module coming soon."])
-//   );
-
-//   container.appendChild(
-//     Button("Create New Order", "cneword435", {
-//       click: () => {
-//         console.log("Redirect to order creation flow");
-//         // navigateTo('/orders/new')
-//       },
-//     }, "btn primary")
-//   );
-// }
-
 function buildStatsSummary(farm, crops) {
   const totalCrops = crops.length;
   const totalQuantity = crops.reduce((sum, c) => sum + (c.quantity || 0), 0);
-  const totalValue = crops.reduce((sum, c) => sum + (c.quantity * c.price), 0);
+  const totalValue = crops.reduce((sum, c) => sum + ((c.quantity || 0) * (c.price || 0)), 0);
   const uniqueCategories = new Set(crops.map(c => c.category)).size;
   const featuredCrops = crops.filter(c => c.featured).length;
 
@@ -188,24 +70,25 @@ function buildStatsSummary(farm, crops) {
     createElement("div", { class: "stat-card" }, [`Total Crops: ${totalCrops}`]),
     createElement("div", { class: "stat-card" }, [`Crop Categories: ${uniqueCategories}`]),
     createElement("div", { class: "stat-card" }, [`Total Quantity: ${totalQuantity}`]),
-    createElement("div", { class: "stat-card" }, [`Estimated Value: $${totalValue.toFixed(2)}`]),
+    createElement("div", { class: "stat-card" }, [`Estimated Value: ₹${totalValue.toFixed(2)}`]),
     createElement("div", { class: "stat-card" }, [`Featured Crops: ${featuredCrops}`]),
   ]);
 }
+
 function buildCropSection(crops) {
   const cropSection = createElement("div", { class: "crop-distribution" }, [
     createElement("h3", {}, ["Crops"]),
   ]);
 
   if (crops.length === 0) {
-    cropSection.appendChild(createElement("p", {}, ["No crops listed."]));
+    cropSection.appendChild(createElement("p", {}, ["No crops listed yet."]));
   } else {
     const cropList = createElement(
       "ul",
       {},
       crops.map((crop) =>
         createElement("li", {}, [
-          `${crop.name} – ${crop.quantity} ${crop.unit} @ $${crop.price}/${crop.unit}`,
+          `${crop.name} – ${crop.quantity} ${crop.unit} @ ₹${crop.price}/${crop.unit}`,
         ])
       )
     );
@@ -214,280 +97,162 @@ function buildCropSection(crops) {
 
   return cropSection;
 }
+
 function buildFarmExtra(farm) {
   return createElement("div", { class: "farm-extra" }, [
     createElement("h3", {}, ["Other Info"]),
-    createElement("p", {}, [`Location: ${farm.location}`]),
-    createElement("p", {}, [`Availability: ${farm.availabilityTiming}`]),
+    createElement("p", {}, [`Location: ${farm.location || "N/A"}`]),
+    createElement("p", {}, [`Availability: ${farm.availabilityTiming || "N/A"}`]),
     createElement("p", {}, [`Contact: ${farm.contact || "N/A"}`]),
   ]);
 }
 
+function renderOverviewFallback(container, message) {
+  container.appendChild(
+    createElement("div", { class: "stats-summary empty-state" }, [
+      createElement("h3", {}, ["No Farm Data Available"]),
+      createElement("p", {}, [message]),
+      createElement("div", { class: "stat-card" }, ["Crops Tracked: 0"]),
+      createElement("div", { class: "stat-card" }, ["Orders Placed: 0"]),
+      createElement("div", { class: "stat-card" }, ["Saved Items: 0"]),
+      createElement("p", {}, [
+        "It looks like you haven't created a farm yet. Let’s get started by creating one now!",
+      ]),
+      createElement("a", { href: "/create-farm", class: "create-farm-btn" }, ["📋 Create Farm"]),
+    ])
+  );
+
+  container.appendChild(
+    createElement("div", { class: "suggested-actions" }, [
+      createElement("h3", {}, ["Next Steps"]),
+      createElement("ul", {}, [
+        createElement("li", {}, ["📌 Create your first farm profile"]),
+        createElement("li", {}, ["🌽 Add crops and pricing info"]),
+        createElement("li", {}, ["🛒 Start receiving orders"]),
+      ]),
+    ])
+  );
+
+  container.appendChild(
+    createElement("div", { class: "community-stats" }, [
+      createElement("h3", {}, ["Community Stats"]),
+      createElement("p", {}, ["👩‍🌾 Active Farmers: 1,242"]),
+      createElement("p", {}, ["🌱 Crops Listed: 12,340"]),
+      createElement("p", {}, ["📦 Orders Fulfilled: 21,880"]),
+    ])
+  );
+}
+
+
 
 // import { createElement } from "../../components/createElement.js";
-// import Button from "../../components/base/Button.js"; // still used for toggle
+// import Button from "../../components/base/Button.js";
+// import {apiFetch} from "../../api/api.js";
+// import { createTabs } from "../../components/ui/createTabs.js";
+// import { displayOrders } from "../crops/orders/orders.js";
 
-// export function apiFetch(endpoint, method = "GET", body = null, options = {}) {
-//   return new Promise((resolve, reject) => {
-//     setTimeout(() => {
-//       if (endpoint === "/farmer/farms" && method === "GET") {
-//         resolve([
-//           {
-//             id: "farm1",
-//             name: "Green Valley Farm",
-//             location: "North Ridge",
-//             size: 15,
-//             crops: [
-//               { name: "Tomatoes", quantity: 200, unit: "kg", price: 2.5 },
-//               { name: "Carrots", quantity: 150, unit: "kg", price: 1.8 },
-//             ],
-//           },
-//           {
-//             id: "farm2",
-//             name: "Sunnyfield",
-//             location: "South Plains",
-//             size: 10,
-//             crops: [],
-//           },
-//         ]);
-//       } else {
-//         reject(new Error("Endpoint not found or method not supported"));
-//       }
-//     }, 300);
-//   });
-// }
 
-// export function displayDash(contentContainer, isLoggedIn) {
-//   contentContainer.replaceChildren();
+// // Main entry point
+// export function displayDash(content, isLoggedIn) {
+//   content.innerHTML = "";
 
 //   if (!isLoggedIn) {
-//     contentContainer.appendChild(
-//       createElement("p", {}, ["You must be logged in to view the dashboard."])
+//     content.appendChild(
+//       createElement("p", {}, ["You don't have any farms to display the stats  for."])
 //     );
 //     return;
 //   }
 
-//   contentContainer.appendChild(createElement("h2", {}, ["Farmer Dashboard"]));
+//   const tabs = [
+//     {
+//       id: "overview",
+//       title: "Overview",
+//       render: renderOverviewTab,
+//     },
+//     {
+//       id: "orders",
+//       title: "Orders",
+//       render: renderOrdersTab,
+//     },
+//   ];
 
-//   apiFetch("/farmer/farms")
-//     .then((farms) => {
-//       const allCrops = farms.flatMap(f => f.crops);
-//       const totalFarms = farms.length;
-//       const totalCropTypes = new Set(allCrops.map(c => c.name)).size;
-//       const totalQuantity = allCrops.reduce((sum, c) => sum + c.quantity, 0);
-//       const totalValue = allCrops.reduce((sum, c) => sum + (c.quantity * c.price), 0);
+//   const tabUI = createTabs(tabs, "farmdash-tabs");
+//   const dashContainer = createElement("div", { class: "farmdashpage" }, [tabUI]);
 
-//       const statsSummary = createElement("div", { class: "stats-summary" }, [
-//         createElement("div", { class: "stat-card" }, [`Total Farms: ${totalFarms}`]),
-//         createElement("div", { class: "stat-card" }, [`Crop Types: ${totalCropTypes}`]),
-//         createElement("div", { class: "stat-card" }, [`Total Quantity: ${totalQuantity} kg`]),
-//         createElement("div", { class: "stat-card" }, [`Estimated Value: $${totalValue.toFixed(2)}`]),
-//       ]);
+//   content.appendChild(dashContainer);
+// }
 
-//       contentContainer.appendChild(statsSummary);
+// function renderOverviewTab(container) {
+//   container.replaceChildren();
 
-//       // Crop distribution
-//       const cropMap = {};
-//       allCrops.forEach(crop => {
-//         if (!cropMap[crop.name]) cropMap[crop.name] = 0;
-//         cropMap[crop.name] += crop.quantity;
-//       });
+//   apiFetch(`/dash/farms`)
+//     .then((response) => {
+//       if (!response.success || !response.farm) throw new Error("No farm data");
 
-//       const cropDist = createElement("div", { class: "crop-distribution" }, [
-//         createElement("h3", {}, ["Crop Distribution"]),
-//         createElement(
-//           "ul",
-//           {},
-//           Object.entries(cropMap).map(([name, qty]) =>
-//             createElement("li", {}, [`${name}: ${qty} kg`])
-//           )
-//         ),
-//       ]);
-//       contentContainer.appendChild(cropDist);
+//       const farm = response.farm;
+//       const crops = farm.crops || [];
 
-//       // Region breakdown
-//       const regionMap = {};
-//       farms.forEach(farm => {
-//         if (!regionMap[farm.location]) regionMap[farm.location] = 0;
-//         regionMap[farm.location]++;
-//       });
-
-//       const regionStats = createElement("div", { class: "region-breakdown" }, [
-//         createElement("h3", {}, ["Farms by Location"]),
-//         createElement(
-//           "ul",
-//           {},
-//           Object.entries(regionMap).map(([location, count]) =>
-//             createElement("li", {}, [`${location}: ${count} farm(s)`])
-//           )
-//         ),
-//       ]);
-//       contentContainer.appendChild(regionStats);
-
-//       // Recent activity (mocked)
-//       const recentActivity = createElement("div", { class: "recent-activity" }, [
-//         createElement("h3", {}, ["Recent Activity"]),
-//         createElement("ul", {}, [
-//           createElement("li", {}, ["Added 150kg Carrots to Green Valley Farm"]),
-//           createElement("li", {}, ["Edited Sunnyfield farm"]),
-//         ]),
-//       ]);
-//       contentContainer.appendChild(recentActivity);
-
-//       // Toggleable farm list
-//       const toggleBtn = Button(
-//         "Show Farm List",
-//         "toggle-farms",
-//         {
-//           click: () => {
-//             const visible = farmList.style.display !== "none";
-//             farmList.style.display = visible ? "none" : "block";
-//             toggleBtn.textContent = visible ? "Show Farm List" : "Hide Farm List";
-//           },
-//         },
-//         "toggle-button"
-//       );
-
-//       const farmList = createElement("div", { class: "farm-list" });
-//       farmList.style.display = "none";
-
-//       farms.forEach((farm) => {
-//         const cropsList = farm.crops.length
-//           ? createElement(
-//             "ul",
-//             {},
-//             farm.crops.map((crop) =>
-//               createElement("li", {}, [
-//                 `${crop.name} - ${crop.quantity} ${crop.unit} @ $${crop.price}/${crop.unit}`,
-//               ])
-//             )
-//           )
-//           : createElement("p", {}, ["No crops listed."]);
-
-//         const farmCard = createElement("div", { class: "farm-card" }, [
-//           createElement("h4", {}, [farm.name]),
-//           createElement("p", {}, [`Location: ${farm.location}`]),
-//           createElement("p", {}, [`Size: ${farm.size} acres`]),
-//           createElement("h5", {}, ["Crops:"]),
-//           cropsList,
-//         ]);
-
-//         farmList.appendChild(farmCard);
-//       });
-
-//       contentContainer.appendChild(toggleBtn);
-//       contentContainer.appendChild(farmList);
+//       container.appendChild(buildStatsSummary(farm, crops));
+//       container.appendChild(buildCropSection(crops));
+//       container.appendChild(buildFarmExtra(farm));
 //     })
 //     .catch((err) => {
-//       console.error("Failed to load farms:", err);
-//       contentContainer.appendChild(
-//         createElement("p", {}, ["Error loading dashboard."])
+//       console.error("Error loading farm stats:", err);
+//       container.appendChild(
+//         createElement("p", {}, ["Failed to load farm data."])
 //       );
 //     });
 // }
 
+// function renderOrdersTab(container) {
+//   displayOrders(container);
+// }
 
 
+// function buildStatsSummary(farm, crops) {
+//   const totalCrops = crops.length;
+//   const totalQuantity = crops.reduce((sum, c) => sum + (c.quantity || 0), 0);
+//   const totalValue = crops.reduce((sum, c) => sum + (c.quantity * c.price), 0);
+//   const uniqueCategories = new Set(crops.map(c => c.category)).size;
+//   const featuredCrops = crops.filter(c => c.featured).length;
 
-// // import { createElement } from "../../components/createElement.js";
-// // import Button from "../../components/base/Button.js"; // assuming default export
+//   return createElement("div", { class: "stats-summary" }, [
+//     createElement("div", { class: "stat-card" }, [`Farm Name: ${farm.name}`]),
+//     createElement("div", { class: "stat-card" }, [`Total Crops: ${totalCrops}`]),
+//     createElement("div", { class: "stat-card" }, [`Crop Categories: ${uniqueCategories}`]),
+//     createElement("div", { class: "stat-card" }, [`Total Quantity: ${totalQuantity}`]),
+//     createElement("div", { class: "stat-card" }, [`Estimated Value: $${totalValue.toFixed(2)}`]),
+//     createElement("div", { class: "stat-card" }, [`Featured Crops: ${featuredCrops}`]),
+//   ]);
+// }
+// function buildCropSection(crops) {
+//   const cropSection = createElement("div", { class: "crop-distribution" }, [
+//     createElement("h3", {}, ["Crops"]),
+//   ]);
 
-// // export function apiFetch(endpoint, method = "GET", body = null, options = {}) {
-// //   return new Promise((resolve, reject) => {
-// //     setTimeout(() => {
-// //       if (endpoint === "/farmer/farms" && method === "GET") {
-// //         resolve([
-// //           {
-// //             id: "farm1",
-// //             name: "Green Valley Farm",
-// //             location: "North Ridge",
-// //             size: 15,
-// //             crops: [
-// //               { name: "Tomatoes", quantity: 200, unit: "kg", price: 2.5 },
-// //               { name: "Carrots", quantity: 150, unit: "kg", price: 1.8 },
-// //             ],
-// //           },
-// //           {
-// //             id: "farm2",
-// //             name: "Sunnyfield",
-// //             location: "South Plains",
-// //             size: 10,
-// //             crops: [],
-// //           },
-// //         ]);
-// //       } else {
-// //         reject(new Error("Endpoint not found or method not supported"));
-// //       }
-// //     }, 300);
-// //   });
-// // }
+//   if (crops.length === 0) {
+//     cropSection.appendChild(createElement("p", {}, ["No crops listed."]));
+//   } else {
+//     const cropList = createElement(
+//       "ul",
+//       {},
+//       crops.map((crop) =>
+//         createElement("li", {}, [
+//           `${crop.name} – ${crop.quantity} ${crop.unit} @ $${crop.price}/${crop.unit}`,
+//         ])
+//       )
+//     );
+//     cropSection.appendChild(cropList);
+//   }
 
-// // export function displayDash(contentContainer, isLoggedIn) {
-// //   contentContainer.replaceChildren();
+//   return cropSection;
+// }
+// function buildFarmExtra(farm) {
+//   return createElement("div", { class: "farm-extra" }, [
+//     createElement("h3", {}, ["Other Info"]),
+//     createElement("p", {}, [`Location: ${farm.location}`]),
+//     createElement("p", {}, [`Availability: ${farm.availabilityTiming}`]),
+//     createElement("p", {}, [`Contact: ${farm.contact || "N/A"}`]),
+//   ]);
+// }
 
-// //   if (!isLoggedIn) {
-// //     contentContainer.appendChild(
-// //       createElement("p", {}, ["You must be logged in to view the dashboard."])
-// //     );
-// //     return;
-// //   }
-
-// //   contentContainer.appendChild(createElement("h2", {}, ["Farmer Dashboard"]));
-
-// //   apiFetch("/farmer/farms")
-// //     .then((farms) => {
-// //       if (!farms.length) {
-// //         contentContainer.appendChild(
-// //           createElement("p", {}, ["No farms listed yet."])
-// //         );
-// //         return;
-// //       }
-
-// //       const farmList = createElement("div", { class: "farm-list" });
-
-// //       farms.forEach((farm) => {
-// //         const cropsList = farm.crops.length
-// //           ? createElement(
-// //               "ul",
-// //               {},
-// //               farm.crops.map((crop) =>
-// //                 createElement("li", {}, [
-// //                   `${crop.name} - ${crop.quantity} ${crop.unit} @ $${crop.price}/${crop.unit}`,
-// //                 ])
-// //               )
-// //             )
-// //           : createElement("p", {}, ["No crops listed."]);
-
-// //         const editBtn = Button(
-// //           "Edit Farm",
-// //           `edit-${farm.id}`,
-// //           {
-// //             click: () => {
-// //               alert(`Edit farm: ${farm.name}`);
-// //               // replace with actual routing/logic
-// //             },
-// //           },
-// //           "edit-button"
-// //         );
-
-// //         const farmCard = createElement("div", { class: "farm-card" }, [
-// //           createElement("h3", {}, [farm.name]),
-// //           createElement("p", {}, [`Location: ${farm.location}`]),
-// //           createElement("p", {}, [`Size: ${farm.size} acres`]),
-// //           createElement("h4", {}, ["Crops for Sale:"]),
-// //           cropsList,
-// //           editBtn,
-// //         ]);
-
-// //         farmList.appendChild(farmCard);
-// //       });
-
-// //       contentContainer.appendChild(farmList);
-// //     })
-// //     .catch((err) => {
-// //       console.error("Failed to load farms:", err);
-// //       contentContainer.appendChild(
-// //         createElement("p", {}, ["Error loading dashboard."])
-// //       );
-// //     });
-// // }

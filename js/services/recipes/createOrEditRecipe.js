@@ -19,14 +19,14 @@ function renderRecipeForm(container, mode = "create", recipe = null) {
     enctype: "multipart/form-data",
   });
 
-  const userIdGroup = createFormGroup({
-    label: "User ID",
-    inputType: "text",
-    inputId: "userId",
-    inputValue: recipe?.userId || "",
-    placeholder: "e.g. u123",
-    isRequired: true,
-  });
+  // const userIdGroup = createFormGroup({
+  //   label: "User ID",
+  //   inputType: "text",
+  //   inputId: "userId",
+  //   inputValue: recipe?.userId || "",
+  //   placeholder: "e.g. u123",
+  //   isRequired: true,
+  // });
 
   const titleGroup = createFormGroup({
     label: "Recipe Title",
@@ -47,17 +47,57 @@ function renderRecipeForm(container, mode = "create", recipe = null) {
     additionalProps: { rows: 3 },
   });
 
-  const ingredientsGroup = createFormGroup({
-    label: "Ingredients",
-    inputType: "textarea",
-    inputId: "ingredients",
-    inputValue: recipe?.ingredients
-      ?.map((i) => `${i.quantity} ${i.unit} ${i.name}`)
-      .join("\n") || "",
-    placeholder: "List ingredients, one per line",
-    isRequired: true,
-    additionalProps: { rows: 5 },
+  const ingredientsGroup = createElement("div", { class: "form-group" }, []);
+  const label = createElement("label", { for: "ingredients" }, ["Ingredients"]);
+  ingredientsGroup.appendChild(label);
+  
+  const ingredientsList = createElement("div", { id: "ingredients-list" }, []);
+  ingredientsGroup.appendChild(ingredientsList);
+  
+  function addIngredientRow(name = "", quantity = "", unit = "") {
+      const row = createElement("div", { class: "ingredient-row hflex" }, [
+          createElement("input", {
+              type: "text",
+              name: "ingredientName[]",
+              placeholder: "Name",
+              value: name,
+              required: true
+          }),
+          createElement("input", {
+              type: "number",
+              name: "ingredientQuantity[]",
+              placeholder: "Qty",
+              step: "any",
+              value: quantity,
+              required: true
+          }),
+          createElement("input", {
+              type: "text",
+              name: "ingredientUnit[]",
+              placeholder: "Unit",
+              value: unit,
+              required: true
+          }),
+          Button("−", "", { click: () => row.remove() }, "remove-btn")
+      ]);
+  
+      ingredientsList.appendChild(row);
+  }
+  
+  // For edit mode
+  if (recipe?.ingredients?.length) {
+      recipe.ingredients.forEach(ing => {
+          addIngredientRow(ing.name, ing.quantity, ing.unit);
+      });
+  } else {
+      addIngredientRow();
+  }
+  
+  const addIngredientBtn = Button("Add Ingredient", "", {
+      click: () => addIngredientRow()
   });
+  ingredientsGroup.appendChild(addIngredientBtn);
+  
 
   const stepsGroup = createFormGroup({
     label: "Steps",
@@ -175,7 +215,7 @@ function renderRecipeForm(container, mode = "create", recipe = null) {
   });
 
   form.append(
-    userIdGroup,
+    // userIdGroup,
     titleGroup,
     descriptionGroup,
     prepTimeGroup,

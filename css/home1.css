@@ -1,9 +1,7 @@
 .portal-layout {
     display: flex;
     gap: 30px;
-    font-family: sans-serif;
     padding: 20px;
-    background-color: #f2f2f2;
   }
   
   .portal-left,
@@ -15,7 +13,6 @@
   }
   
   .widget {
-    background-color: #fff;
     border: 1px solid #ddd;
     border-radius: 6px;
     padding: 15px;
@@ -72,4 +69,50 @@
     border-radius: 4px;
     margin-bottom: 10px;
   }
-  
+  /* Mobile-friendly tweaks */
+@media (max-width: 768px) {
+  .portal-layout {
+    flex-direction: column;
+    gap: 20px;
+    padding: 15px;
+  }
+
+  .portal-left,
+  .portal-right {
+    width: 100%;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .widget {
+    padding: 12px;
+  }
+
+  .widget h2 {
+    font-size: 16px;
+  }
+
+  .widget-body li,
+  .widget-body p {
+    font-size: 13px;
+  }
+
+  .widget-body a {
+    font-size: 14px;
+  }
+
+  #go-dashboard,
+  .widget input[type="text"],
+  .widget button {
+    font-size: 14px;
+    width: 100%;
+  }
+
+  .widget input[type="text"] {
+    margin-bottom: 8px;
+  }
+
+  .widget img {
+    border-radius: 6px;
+  }
+}

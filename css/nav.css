@@ -9,7 +9,7 @@
   .navigation__inner {
     display: inline-flex;
     min-width: max-content;
-    padding: var(--space-sm) var(--space-md);
+    padding: var(--space-xs) var(--space-xs);
   }
   
   .navigation__list {
