@@ -3,7 +3,17 @@
     max-width: 960px;
     margin: auto;
   }
-  
+
+  .places-layout{
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .places-main{
+    flex:3;
+  }
+  .palces-aside{
+    flex:1;
+  }
   .place-details h3 {
     font-size: 1.5rem;
     margin-bottom: 1rem;
@@ -65,7 +75,7 @@
     position: relative;
     border: 1px solid #ddd;
     border-radius: 6px;
-    width: 280px;
+    max-width: 280px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -133,5 +143,28 @@
   
   .pagination-bar span {
     font-size: 0.95rem;
+  }
+  .place-controls {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .place-search, .place-sort {
+    padding: 0.5rem;
+    font-size: 1rem;
+  }
+/*   
+  .place-card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    overflow: hidden;
+    width: 300px;
+    margin: 0.5rem;
+  } */
+  
+  .place-info {
+    padding: 0.5rem;
   }
   

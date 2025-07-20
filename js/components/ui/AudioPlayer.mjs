@@ -1,6 +1,7 @@
 import "../../../css/ui/AudioPlayer.css";
 
 function AudioPlayer(audioSrc) {
+  console.log(audioSrc);
   const player = document.createElement("div");
   player.id = "audio-player-container";
 

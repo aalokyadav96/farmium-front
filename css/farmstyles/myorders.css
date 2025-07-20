@@ -1,7 +1,7 @@
-.user-orders-page {
+/* .user-orders-page {
     padding: 20px;
   }
-  
+   */
   .user-orders-page h2 {
     margin-bottom: 20px;
   }
@@ -40,7 +40,7 @@
     text-align: center;
   }
   .user-orders-page .orders-table th {
-    background-color: #ebf8ff;
+    /* background-color: #ebf8ff; */
     font-weight: bold;
   }
   .user-orders-page .orders-table td button {

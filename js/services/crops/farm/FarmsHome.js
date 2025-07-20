@@ -4,6 +4,7 @@ import { apiFetch } from "../../../api/api.js";
 import {
   renderFarmCards,
   renderFeaturedFarm,
+  renderCTAFarm,
   renderWeatherWidget,
   renderFarmStats,
 } from "./farmListHelpers.js";
@@ -58,6 +59,7 @@ function Sidebar() {
     container,
     render(allFarms) {
       container.innerHTML = "";
+      renderCTAFarm(container);
       renderWeatherWidget(container);
       renderFeaturedFarm(container, allFarms[0]);
       renderFarmStats(container, allFarms);

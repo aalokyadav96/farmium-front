@@ -117,7 +117,7 @@ export async function displayFarm(isLoggedIn, farmId, content) {
   const mainColumnChildren = [farmDetails, cropHeader, layoutToggle, cropsContainer];
   if (addCropButton) mainColumnChildren.push(addCropButton);
 
-  const mainColumn = createElement("main", { class: "farm-main" }, mainColumnChildren);
+  const mainColumn = createElement("div", { class: "farm-main" }, mainColumnChildren);
   const layoutWrapper = createElement("div", { class: "farm-layout" }, [mainColumn, asideColumn]);
 
   // ——— Optional Image Gallery ———

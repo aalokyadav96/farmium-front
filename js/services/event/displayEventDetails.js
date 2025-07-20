@@ -206,7 +206,7 @@ const fieldConfig = [
 
 // --- Utility Functions ---
 const createDetailItems = (config, data) => {
-    const details = createContainer(['event-details']);
+    const details = createContainer(['eventpage-details']);
     config.forEach(({ key, label, tag, classes, formatter }) => {
         let value = data[key];
         if (!value) return;

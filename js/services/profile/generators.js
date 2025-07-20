@@ -6,6 +6,8 @@ import Snackbar from '../../components/ui/Snackbar.mjs';
 import { createForm } from "../../components/createForm.js"; 
 import { showLoadingMessage, removeLoadingMessage, capitalize } from "./profileHelpers.js";
 
+import { createElement } from "../../components/createElement.js";
+
 async function updatePicture(type) {
     if (!getState("token")) {
         Snackbar(`Please log in to update your ${type} picture.`, 3000);
@@ -112,22 +114,49 @@ async function updateProfilePics(type) {
     await updatePicture(type);
 }
 
-function generateFormField(label, id, type, value) {
-    if (value == undefined) {value = ""};
-    if (type === "textarea") {
-        return `
-            <label for="${id}">${label}</label>
-            <textarea id="${id}" name="${id}">${value}</textarea>
-        `;
-    }
-    return `
-    <div class="form-group">
-        <label for="${id}">${label}</label>
-        <input id="${id}" name="${id}" type="${type}" value="${value}" />
-    </div>
-    `;
-}
+// function generateFormField(label, id, type, value) {
+//     if (value == undefined) {value = ""};
+//     if (type === "textarea") {
+//         return `
+//             <label for="${id}">${label}</label>
+//             <textarea id="${id}" name="${id}">${value}</textarea>
+//         `;
+//     }
+//     return `
+//     <div class="form-group">
+//         <label for="${id}">${label}</label>
+//         <input id="${id}" name="${id}" type="${type}" value="${value}" />
+//     </div>
+//     `;
+// }
 
+function generateFormField(label, id, type, value = "") {
+    const wrapper = createElement("div", { class: "form-group" });
+
+    const labelEl = createElement("label", { for: id }, [label]);
+
+    let inputEl;
+    if (type === "textarea") {
+        inputEl = createElement("textarea", {
+            id,
+            name: id,
+            rows: 4
+        });
+        inputEl.value = value;
+    } else {
+        inputEl = createElement("input", {
+            id,
+            name: id,
+            type,
+            value
+        });
+    }
+
+    wrapper.appendChild(labelEl);
+    wrapper.appendChild(inputEl);
+
+    return wrapper;
+}
 
 
 export { generateBannerForm, generateAvatarForm, generateFormField };

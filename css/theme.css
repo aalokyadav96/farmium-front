@@ -9,6 +9,8 @@
     --color-btn-bg: var(--color-accent);
     --color-btn-fg: #ffffff;
     --color-btn-hover-bg: #2563eb;
+
+    --stroke-svg: #000;
   
     --font-base: 'Breezesans', Roboto, sans-serif;
     --font-size-sm: 0.875rem;
@@ -34,6 +36,8 @@
     --color-accent: #3b82f6;
     --color-border: #374151;
   
+    --stroke-svg: #ffffff;
+    
     --color-btn-bg: var(--color-accent);
     --color-btn-fg: #ffffff;
     --color-btn-hover-bg: #2563eb;
@@ -47,6 +51,8 @@
     --color-muted: #93a1a1;
     --color-accent: #268bd2;
     --color-border: #eee8d5;
+    --stroke-svg: #000000;
+    
   }
   
   /* Dimmed Theme */
@@ -56,5 +62,6 @@
     --color-muted: #a6adc8;
     --color-accent: #89b4fa;
     --color-border: #313244;
+    --stroke-svg: #ffffff;
   }
   

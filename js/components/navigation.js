@@ -1,102 +1,98 @@
-// Navigation Component
 import { navigate } from "../routes/index.js";
 import { moreSVG, chatSVG, notifSVG } from "./svgs.js";
 
-/** Utility Functions */
+/** Utility: Highlight current active link based on path */
+export const highlightActiveNav = (path) => {
+    const links = document.querySelectorAll(".navigation__link");
+    links.forEach(link => {
+        const href = link.getAttribute("href");
+        if (href === path) {
+            link.classList.add("active");
+        } else {
+            link.classList.remove("active");
+        }
+    });
+};
+
+/** Utility: Handle navigation + active class */
 const handleNavigation = (event, href) => {
     event.preventDefault();
     if (!href) return console.error("🚨 handleNavigation received null href!");
-    // console.log("handleNavigation called with href:", href);
+    
+    // highlightActiveNav(href);
     navigate(href);
 };
 
-/*********************** */
-
-/** Navigation Item */
+/** Create one navigation item */
 const createNavItem = (href, label) => {
     const li = document.createElement("li");
     li.className = "navigation__item";
+
     const anchor = document.createElement("a");
     anchor.href = href;
-    anchor.className = "nav-link navigation__link";
+    anchor.className = "navigation__link";
     anchor.textContent = label;
+
     anchor.addEventListener("click", (e) => handleNavigation(e, href));
+
     li.appendChild(anchor);
     return li;
 };
 
 /** Navigation Bar */
-const createNav = (isLoggedIn) => {
-
-    // const isLoggedIn = Boolean(state.token);
+const createNav = () => {
     const navItems = [
-        { href: "/home", label: "Home" },
-        // { href: "/events", label: "Events" },
-        // { href: "/places", label: "Places" },
-        // { href: "/artists", label: "Artists" },
-        // { href: "/feed", label: "Feed" },
-        // { href: "/itinerary", label: "Itinerary" },
-        // { href: "/posts", label: "Posts" },
-        // { href: "/baitos", label: "Baito" },
-        { href: "/dash", label: "Dashboard" },
-        { href: "/crops", label: "Crops" },
+        // { href: "/dash", label: "Dash" },
+        // { href: "/crops", label: "Crops" },
         { href: "/farms", label: "Farms" },
-        { href: "/products", label: "Products" },
-        { href: "/tools", label: "Tools" },
-        { href: "/recipes", label: "Recipes" },
-        // { href: "/search", label: "Search" },
-        { href: "/merechats", label: "Chat" },
-        // { href: "/livechat", label: "LiveChat" },
-        // { href: "/chats", label: "Chat" },
-
+        // { href: "/baitos", label: "Baito" },
+        // { href: "/places", label: "Places" },
+        // { href: "/events", label: "Events" },
+        // { href: "/feed", label: "Feed" },
+        // { href: "/posts", label: "Posts" },
     ];
 
-    /*************************** */
+    const nav = document.createElement("div");
+    // nav.className = "navigation";
 
-    // Create Navigation Menu
-    const nav = document.createElement("nav");
-    // nav.className = "nav-menu hflex";
-    nav.className = "navigation hflex";
+    const toggle = document.createElement("input");
+    toggle.className = "toggle";
+    toggle.type = "checkbox";
+    toggle.id = "more";
+    toggle.setAttribute("aria-hidden", "true");
+    toggle.setAttribute("tabindex", "-1");
+
+    const inner = document.createElement("div");
+    inner.className = "navigation__inner";
 
     const ul = document.createElement("ul");
-    // ul.className = "nav-list hflex";
     ul.className = "navigation__list";
 
-    // Append Navigation Items
     const fragment = document.createDocumentFragment();
-    navItems.forEach((item) => fragment.appendChild(createNavItem(item.href, item.label)));
-
-
-    const ulx = document.createElement("div");
-    ulx.className = "navigation__inner";
-
-    const ipt = document.createElement("input");
-    ipt.className = "toggle";
-    ipt.type = "checkbox";
-    ipt.id = "more";
-    ipt.setAttribute("aria-hidden", "true");
-    ipt.setAttribute("tabindex", "-1");
-
-    // const nin = document.createElement("div");
-    // nin.className = "navigation__toggle flex-center";
-    // nin.style.borderLeft = "1px solid #ccc";
-    // // nin.innerHTML = `<label class="navigation__link" for="more" aria-hidden="true">${downloadSVG}</label>`;
-    // nin.innerHTML = `<label class="flex-center" for="more" aria-hidden="true">${moreSVG}</label>`;
-
-
+    navItems.forEach(({ href, label }) => {
+        fragment.appendChild(createNavItem(href, label));
+    });
     ul.appendChild(fragment);
-    nav.appendChild(ipt);
-    ulx.appendChild(ul);
-    // ulx.appendChild(nin);
-    nav.appendChild(ulx);
 
-    const container = document.createElement("div");
-    container.className = "hvflex";
+    const toggleLabelWrapper = document.createElement("div");
+    toggleLabelWrapper.className = "navigation__toggle";
 
-    /*********************** */
-    container.appendChild(nav);
+    const toggleLabel = document.createElement("label");
+    toggleLabel.className = "navigation__link";
+    toggleLabel.setAttribute("for", "more");
+    toggleLabel.setAttribute("aria-hidden", "true");
+    toggleLabel.innerText = "More";
 
-    return container;
+    toggleLabelWrapper.appendChild(toggleLabel);
+    inner.appendChild(ul);
+    inner.appendChild(toggleLabelWrapper);
+    nav.appendChild(toggle);
+    nav.appendChild(inner);
+
+    // Highlight the current route on initial render
+    highlightActiveNav(window.location.pathname);
+
+    return nav;
 };
 
 export { createNav, createNavItem };

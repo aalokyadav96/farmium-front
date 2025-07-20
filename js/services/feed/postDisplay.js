@@ -2,7 +2,7 @@
 import { createElement } from "../../components/createElement.js";
 import Snackbar from "../../components/ui/Snackbar.mjs";
 // import Button from "../../components/base/Button.js";
-import { renderPost } from "./renderNewPost.js";
+import { renderPost } from "./renders/renderPost.js";
 import { apiFetch } from "../../api/api.js";
 
 async function displayPost(isLoggedIn, postId, contentContainer) {

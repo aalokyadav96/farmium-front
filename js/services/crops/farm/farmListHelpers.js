@@ -112,6 +112,19 @@ function renderFeaturedFarm(container, farm) {
     replaceOrAppend(container, ".farm__featured", section);
 }
 
+function renderCTAFarm(container) {
+    const section = createElement("section", { class: "farm__Cta" }, [
+        Button("Buy Tools","buytools-crp-btn",{
+            click: () => {navigate('/tools')}
+        }, "buttonx"),
+        Button("Chats","chatss-frm-btn",{
+            click: () => {navigate('/merechats')}
+        }),
+    ]);
+
+    replaceOrAppend(container, ".farm__Cta", section);
+}
+
 function renderWeatherWidget(container) {
     const section = createElement("section", { class: "farm__weather" }, [
         createElement("h3", {}, ["🌤 Weather"]),
@@ -149,6 +162,7 @@ export {
     createCropList,
     createFarmBadges,
     renderFeaturedFarm,
+    renderCTAFarm,
     renderWeatherWidget,
     renderFarmStats,
     replaceOrAppend

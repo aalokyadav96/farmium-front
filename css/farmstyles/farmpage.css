@@ -1,0 +1,217 @@
+.farmpage {
+    padding: 1.5rem;
+}
+
+.farmpage .farm-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.farmpage .breadcrumbs {
+    font-size: 0.9rem;
+}
+
+.farmpage .farm-banner {
+    width: 100%;
+    max-height: 300px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.farmpage .farm-banner img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.farmpage .farm-layout {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.farmpage .farm-main {
+    flex: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.farmpage .farm-detail {
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.farmpage .farm-detail h2 {
+    margin-top: 0;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.farmpage .farm-detail p {
+    margin: 0.3rem 0;
+}
+
+.farmpage .farm-actions {
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.farmpage .farm-actions .button {
+    padding: 0.5rem 0.75rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.farmpage .farm-actions .button:hover {
+    background: #ddd;
+}
+
+.farmpage .layout-toggle {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.farmpage .crop-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.farmpage .crop-list.grid-view {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.farmpage .crop-list.list-view {
+    grid-template-columns: 1fr;
+}
+
+.farmpage .crop-card {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 1rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.farmpage .crop-card img {
+    width: 100%;
+    height: 140px;
+    object-fit: contain;
+    border-radius: 4px;
+}
+
+.farmpage .crop-card h4 {
+    margin: 0.5rem 0 0;
+}
+
+.farmpage .crop-card p {
+    font-size: 0.9rem;
+    margin: 0.2rem 0;
+}
+
+.farmpage .crop-card .edit-btn,
+.farmpage .crop-card .btn-danger {
+    margin-top: 0.5rem;
+    padding: 0.4rem 0.6rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.farmpage .crop-card .edit-btn {
+    background: #f0f0f0;
+    color: #000;
+}
+
+.farmpage .crop-card .btn-danger {
+    background: #e74c3c;
+    color: white;
+}
+
+.farmpage .add-crop-btn {
+    margin-top: 1rem;
+    padding: 0.6rem 1rem;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    align-self: flex-start;
+}
+
+.farmpage .add-crop-btn:hover {
+    background: #218838;
+}
+
+.farmpage .farm-aside {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.farmpage .cta-block button {
+    width: 100%;
+    margin-bottom: 0.5rem;
+    padding: 0.6rem;
+    border: none;
+    background: #007bff;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+.farmpage .cta-block button:hover {
+    background: #0056b3;
+}
+
+.farmpage .crop-summary,
+.farmpage .crop-distribution,
+.farmpage .review-block {
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.farmpage .review-block button {
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.farmpage .gallery-block {
+    margin-top: 2rem;
+}
+
+.farmpage .gallery {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+}
+
+.farmpage .gallery-image {
+    height: 150px;
+    border-radius: 6px;
+    object-fit: cover;
+}

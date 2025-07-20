@@ -14,11 +14,10 @@
   
   .logo-link {
     text-decoration: none;
-    font-size: 2rem;
+    font-size: 20px;
     font-weight: bold;
-    color: #000;
-    font-family: math;
-}
+    color: #007bff;
+  }
   
   .hflex-sb {
     display: flex;
@@ -90,12 +89,11 @@
   }
   
   .logout-btn {
-    /* width: 100%; */
+    width: 100%;
     text-align: left;
     background-color: transparent;
     border: none;
     color: #dc3545;
-    border: 1px solid #dc3545;
     cursor: pointer;
   }
   

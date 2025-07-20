@@ -103,6 +103,7 @@ svg {
   stroke-width: 1.4;
   max-width: 3rem;
   max-height: 3rem;
+  stroke: var(--stroke-svg);
 }
 
 .buttonx {
@@ -120,6 +121,27 @@ textarea {
 
 main {
   padding: 0.6rem;
+}
+
+.hvflex {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.hflexcen {
+  display: flex;
+  justify-content: center;
+}
+
+.vflex {
+  display: flex;
+  flex-direction: column;
+}
+
+.vflexcen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* For text containers like <div>, <p>, <span>, etc. */

@@ -1,7 +1,7 @@
-.farmspage {
+/* .farmspage {
     padding: 20px;
   }
-  
+   */
   .farm__layout {
     display: flex;
     gap: 20px;
@@ -29,7 +29,7 @@
     display: flex;
     align-items: center;
     gap: 5px;
-    font-size: 14px;
+    font-size: 15px;
   }
   
   .farm__grid {
@@ -51,13 +51,13 @@
   }
   
   .farm__header p {
-    font-size: 14px;
+    font-size: 15px;
     margin: 5px 0;
   }
   
   .farm__meta p {
     margin: 5px 0;
-    font-size: 14px;
+    font-size: 15px;
   }
   
   .farm__crops-preview h4 {
@@ -172,7 +172,7 @@
   }
   
   .farm__featured-rating {
-    font-size: 14px;
+    font-size: 15px;
   }
   
   .farm__map-placeholder {
@@ -203,7 +203,7 @@
   .farm__filters input,
   .farm__filters select {
     width: 100%;
-    font-size: 14px;
+    font-size: 15px;
   }
 
   .farm__grid {
@@ -244,11 +244,11 @@
 
   .farm__button.button {
     width: 100%;
-    font-size: 14px;
+    font-size: 15px;
   }
 
   .farm__sidebar section {
-    font-size: 14px;
+    font-size: 15px;
   }
 
   .farm__featured-photo {
@@ -258,6 +258,6 @@
 
   .farm__map-placeholder {
     height: 200px;
-    font-size: 14px;
+    font-size: 15px;
   }
 }

@@ -1,0 +1,27 @@
+.post-controls {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .post-search, .post-sort {
+    padding: 0.5rem;
+    font-size: 1rem;
+  }
+  
+  .post-card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    overflow: hidden;
+    max-width: 300px;
+    margin: 0.5rem;
+  }
+  
+  .post-info {
+    padding: 0.5rem;
+  }
+  .post-info p {
+    margin: 0.25rem 0;
+    font-size: 0.9rem;
+}

@@ -28,7 +28,7 @@
   
   .widget-body li,
   .widget-body p {
-    font-size: 14px;
+    font-size: 15px;
     margin-bottom: 8px;
   }
   
@@ -47,7 +47,7 @@
     padding: 6px 10px;
     border-radius: 4px;
     border: 1px solid #ccc;
-    font-size: 14px;
+    font-size: 15px;
   }
   
   #go-dashboard,
@@ -98,13 +98,13 @@
   }
 
   .widget-body a {
-    font-size: 14px;
+    font-size: 15px;
   }
 
   #go-dashboard,
   .widget input[type="text"],
   .widget button {
-    font-size: 14px;
+    font-size: 15px;
     width: 100%;
   }
 

@@ -1,10 +1,11 @@
-// const API_URL = "http://localhost:4000/api/v1";
-// const SRC_URL = "http://localhost:4000/static";
-// const SEARCH_URL = "http://localhost:4000/api/search";
 
-const API_URL = "https://farmium.onrender.com/api";
-const SRC_URL = "https://farmium.onrender.com/static";
-const SEARCH_URL = "https://farmium.onrender.com/api/search";
+const API_URL = "http://localhost:4000/api/v1";
+const SRC_URL = "http://localhost:4000/static";
+const SEARCH_URL = "http://localhost:4000/api/search";
+
+// const API_URL = "https://gallium.onrender.com/api/v1";
+// const SRC_URL = "https://gallium.onrender.com/static";
+// const SEARCH_URL = "https://gallium.onrender.com/api/search";
 
 const DEFAULT_IMAGE = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/wcAAwAB/hsbRWkAAAAASUVORK5CYII=`;
 
@@ -130,7 +131,17 @@ function clearState(preserveKeys = []) {
     localStorage.setItem(key, value);
   }
 
-  listeners.clear(); // remove all subscriptions
+  // listeners.clear(); // remove all subscriptions
+  for (const key of allowedKeys) {
+    if (preserveKeys.includes(key) || key === "role") continue;
+    if (key === "routeCache" || key === "routeState") {
+      state[key].clear?.();
+    } else {
+      state[key] = null;
+      notify(key, null); // 🔑 notify subscribers of the null state
+    }
+  }
+  
 }
 
 // --- Route Cache ---

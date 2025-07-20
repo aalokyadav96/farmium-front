@@ -2,7 +2,7 @@
     width: 100%;
     background-color: var(--color-bg);
     color: var(--color-fg);
-    padding: var(--space-md);
+    /* padding: var(--space-md); */
     box-sizing: border-box;
   }
   

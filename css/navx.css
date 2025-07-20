@@ -1,0 +1,178 @@
+.navigation {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border-bottom: 1px solid #ccc;
+    position: relative;
+    font-family: sans-serif;
+  }
+  
+  .navigation__inner {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  
+  .navigation__list {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-wrap: nowrap;
+  }
+  
+  .navigation__item {
+    margin: 0;
+  }
+  
+  .navigation__link {
+    display: block;
+    padding: 1rem;
+    text-decoration: none;
+    color: #333;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  
+  .navigation__link:hover {
+    background: #f0f0f0;
+  }
+  
+  .navigation__toggle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    border-left: 1px solid #ccc;
+  }
+  
+  .navigation__toggle label {
+    cursor: pointer;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+  }
+  
+  /* Checkbox toggle behavior */
+  .toggle {
+    display: none;
+  }
+  
+  /* Example: limit visible items on small screen and use "More" toggle */
+  @media (max-width: 768px) {
+    .navigation__item:nth-child(n + 6) {
+      display: none;
+    }
+  
+    .toggle:checked ~ .navigation__inner .navigation__item {
+      display: flex;
+    }
+  
+    .navigation__toggle {
+      display: flex;
+    }
+  }
+  
+/* 
+.navigation {
+    width: 100%;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    font-family: "Segoe UI", sans-serif;
+    z-index: 10000;
+    background: #fff;
+  }
+
+  .navigation__inner {
+    display: flex;
+    margin: 0 auto;
+    overflow: hidden;
+    border-left: 0;
+    border-right: 0;
+    height: 34px;
+    background: #fff;
+  }
+
+  .toggle:checked ~ .navigation__inner {
+    height: auto;
+  }
+
+  .navigation__link {
+    display: block;
+    padding: 8px 20px 8px 20px;
+    font-size: 14px;
+    text-shadow: 1px 1px 10px #ccc;
+    font-weight: bold;
+    text-decoration: none;
+    color: #000000;
+    cursor: pointer;
+  }
+
+  .navigation__link:hover {
+    text-decoration: none;
+    background: #fff;
+    color: #000;
+  }
+
+  .navigation__logo {
+    flex-shrink: 0;
+    align-self: flex-start;
+  }
+
+  .navigation__logo .navigation__link {
+    font-weight: bold;
+  }
+
+  .navigation__list {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 0;
+    border-right: 0;
+    width: 100%;
+  }
+
+  @media screen and (max-width: 400px) {
+    .navigation__item {
+      flex-basis: 100%;
+    }
+  }
+
+  .navigation__toggle {
+    flex-shrink: 0;
+  }
+
+  .navigation__toggle .navigation__link {
+    position: relative;
+    padding-right: 20px;
+  }
+
+  .navigation__toggle .navigation__link:after {
+    content: "";
+    position: absolute;
+    top: 14px;
+    right: 24px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 5px 5px 0 5px;
+    border-color: #000 transparent transparent transparent;
+  }
+
+  .toggle:checked
+  ~ .navigation__inner
+  .navigation__toggle
+  .navigation__link:after {
+    border-width: 0 5px 5px 5px;
+    border-color: transparent transparent #777 transparent;
+  }
+
+  .toggle {
+    position: absolute;
+    z-index: -1;
+    opacity: 0;
+  } */

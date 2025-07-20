@@ -1,8 +1,17 @@
-import {renderPost} from "./renders/renderPost";
+import { renderPost } from "./renders/renderPost.js";
 
-function renderNewPost(post, i) {
-    const postsContainer = document.getElementById("postsContainer");
-    renderPost(post, postsContainer, i);
+/**
+ * Convenience wrapper to render post into default container
+ */
+export function renderNewPost(post, i, container) {
+  renderPost(post, container, i);
 }
 
-export { renderNewPost, renderPost };
+// import {renderPost} from "./renders/renderPost";
+
+// function renderNewPost(post, i) {
+//     const postsContainer = document.getElementById("postsContainer");
+//     renderPost(post, postsContainer, i);
+// }
+
+// export { renderNewPost, renderPost };

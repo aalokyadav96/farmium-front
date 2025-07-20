@@ -28,6 +28,7 @@
   .itinerary-layout .itinerary-left button {
     padding: 0.5rem 1rem;
     background-color: #0074cc;
+    color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
@@ -51,6 +52,7 @@
   
   .itinerary-layout #itineraryList button {
     background-color: #6c757d;
+    color: white;
     font-size: 0.8rem;
     border: none;
     padding: 0.3rem 0.6rem;

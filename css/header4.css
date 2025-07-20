@@ -1,0 +1,94 @@
+/* @import url(./header.css); */
+/* @import url(./header1.css); */
+@import url(./header2.css);
+/* @import url(./header3.css); */
+/* Scoped styles for #pageheader header */
+#pageheader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ffffff;
+    padding: 10px 20px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    font-family: 'Segoe UI', sans-serif;
+  }
+  
+  .logo-link {
+    font-size: 1.8rem;
+    color: #2c3e50;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  
+  .hflex-sb {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .top-svg {
+    margin-left: 16px;
+  }
+  
+  .flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .clrful {
+    stroke: #3498db;
+  }
+  
+  .dropdown {
+    position: relative;
+  }
+  
+  .dropdown-toggle {
+    cursor: pointer;
+    background-color: #eaeaea;
+    padding: 8px 12px;
+    border-radius: 4px;
+  }
+  
+  .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: #f7f7f7;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border-radius: 6px;
+    display: none;
+    z-index: 10;
+  }
+  
+  .dropdown:hover .dropdown-menu {
+    display: block;
+  }
+  
+  .dropdown-item {
+    padding: 10px 16px;
+    text-decoration: none;
+    color: #333;
+    display: block;
+  }
+  
+  .profile-image {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  
+  .logout-btn {
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    color: #e74c3c;
+  }
+  

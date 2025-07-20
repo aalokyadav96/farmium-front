@@ -5,43 +5,43 @@
     /* background-color: #fff; */
 }
 
-  /* === PROFILE IMAGE + BANNER SECTION === */
-  .photocon {
+/* === PROFILE IMAGE + BANNER SECTION === */
+.photocon {
     gap: 2rem;
     margin-bottom: 1.5rem;
     flex-wrap: wrap;
-  }
-  
-  .artist-photo {
-    width: 150px;
-    height: 150px;
+}
+
+.artist-photo {
+    width: 185px;
+    height: 185px;
     border-radius: 50%;
     object-fit: cover;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  }
-  
-  .artist-banner {
-    width: 320px;
-    height: 150px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.artist-banner {
+    aspect-ratio: 4 / 1;
+    height: 185px;
     object-fit: cover;
     border-radius: 10px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  }
-  
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
 .artispage .photocon {
     gap: 1.5rem;
     margin-bottom: 2rem;
     flex-wrap: wrap;
 }
 
-.artispage .artist-photo,
+/* .artispage .artist-photo,
 .artispage .artist-banner {
     max-width: 100%;
     height: auto;
     border-radius: 6px;
     object-fit: cover;
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
+} */
 
 .artispage .hflex {
     display: flex;
@@ -169,6 +169,13 @@
 
 /* Optional animation */
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

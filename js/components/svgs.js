@@ -57,4 +57,7 @@ let cartSVG = '<svg class="clrful" viewBox="0 0 24 24" width="24" height="24" st
 let arrowLeftSVG = '<svg class="clrful" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1"><circle cx="12" cy="12" r="10"></circle><polyline points="12 8 8 12 12 16"></polyline><line x1="16" y1="12" x2="8" y2="12"></line></svg>';
 
 
-export { profileSVG, searchSVG, liveStreamSVG, chatSVG, heartSVG, moonSVG, settingsSVG, downloadSVG, playSVG, PauseSVG, playCropSVG, headphonesSVG, imageSVG, filterSVG, placesSVG, coffeeSVG, calendarSVG, locaSVG, evaSVG, plusCircleSVG, plusSquareSVG, moreSVG, notifSVG, shopBagSVG, xSVG, logoutSVG, cartSVG, arrowLeftSVG };
+let homeSVG = '<svg class="clrful" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>';
+
+
+export { profileSVG, searchSVG, liveStreamSVG, chatSVG, heartSVG, moonSVG, settingsSVG, downloadSVG, playSVG, PauseSVG, playCropSVG, headphonesSVG, imageSVG, filterSVG, placesSVG, coffeeSVG, calendarSVG, locaSVG, evaSVG, plusCircleSVG, plusSquareSVG, moreSVG, notifSVG, shopBagSVG, xSVG, logoutSVG, cartSVG, arrowLeftSVG, homeSVG };

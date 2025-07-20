@@ -1,5 +1,7 @@
 import { createPromoLink } from "./displayCrops.helpers";
 import { createElement } from "../../../components/createElement";
+import Button from "../../../components/base/Button";
+import { navigate } from "../../../routes";
 
 // export function cropAside(cropData) {
 //     return createElement("div","",[
@@ -20,8 +22,18 @@ import { createElement } from "../../../components/createElement";
 
 export function cropAside(cropData) {
     return createElement("div", "", [
+        createElement("h3", {}, ["CTA Buttons"]),
+        createElement("div", { class: "cta-list" }, [
+            Button("Buy Products","buyprds-crp-btn",{
+                click: () => {navigate('/products')}
+            }, "action-btn", {"margin-right":"4px"}),
+            Button("See Recipes","recipes-crp-btn",{
+                click: () => {navigate('/recipes')}
+            }),
+        ]),
+
         createElement("h3", {}, ["🌟 Featured Crops"]),
-        createElement("div", { class: "featured-list" }),
+        createElement("div", { class: "featured-list" }, []),
 
         createElement("h3", {}, ["💸 Deals"]),
         createElement("div", { class: "promo-box" }, [

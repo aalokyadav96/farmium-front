@@ -1,4 +1,126 @@
 .modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  pointer-events: auto;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.modal--fade-out {
+  animation: fadeOut 0.2s ease-in forwards;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: -1;
+}
+
+/* Dialog Container */
+.modal-dialog {
+  background: #fff;
+  border-radius: 8px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  outline: none;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.modal--small .modal-dialog {
+  max-width: 360px;
+}
+
+.modal--medium .modal-dialog {
+  max-width: 600px;
+}
+
+.modal--large .modal-dialog {
+  max-width: 860px;
+}
+
+/* Header */
+.modal-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fafafa;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+/* Close Button */
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #666;
+  padding: 0 0.25rem;
+  transition: color 0.2s ease;
+}
+.modal-close:hover {
+  color: #111;
+}
+
+/* Body */
+.modal-body {
+  padding: 1rem 1.25rem;
+  overflow-y: auto;
+  flex-grow: 1;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #333;
+}
+
+/* Footer */
+.modal-footer {
+  padding: 0.75rem 1.25rem;
+  border-top: 1px solid #eee;
+  background: #fafafa;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+/* Fade Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
+/* .modal {
     position: fixed;
     inset: 0;
     display: flex;
@@ -37,7 +159,6 @@
     width: 800px;
   }
   
-  /* Fade in/out animations */
   @keyframes fadeIn {
     from {opacity: 0;}
     to {opacity: 1;}
@@ -74,6 +195,6 @@
   .modal-body {
     padding: 1rem;
     overflow-y: auto;
-    max-height: calc(96vh - 50px); /* Adjust depending on header/footer size */
-  }
-  
+    max-height: calc(96vh - 50px); 
+  } */
+  /* Adjust depending on header/footer size */

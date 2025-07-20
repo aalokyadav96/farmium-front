@@ -30,7 +30,7 @@ function createIconButton(svg, href, onClick) {
   const icon = createElement("span", { class: "icon" });
   icon.innerHTML = svg;
 
-  const anchor = createElement("a", { class: "iconic-button" }, [icon]);
+  const anchor = createElement("button", { class: "iconic-button" }, [icon]);
   if (href) anchor.href = href;
   if (onClick) anchor.addEventListener("click", onClick);
 
@@ -176,8 +176,6 @@ function createHeader() {
   ]);
 
   const nav = createElement("div", { class: "header-content" }, []);
-
-  nav.appendChild(createIconButton(searchSVG, "/search"));
 
   const createLinks = [
     { href: "/create-event", text: "Event" },

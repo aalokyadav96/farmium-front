@@ -103,8 +103,14 @@ async function login(event) {
     
       const redirectUrl = sessionStorage.getItem("redirectAfterLogin") || "/";
       sessionStorage.removeItem("redirectAfterLogin");
-    
-      window.location.href = redirectUrl === "/login" ? "/" : redirectUrl;
+      
+      // Make sure it's a same-origin path, not full URL
+      if (!redirectUrl.startsWith("/") || redirectUrl === "/login") {
+        window.location.href = "/";
+      } else {
+        window.location.href = redirectUrl;
+      }
+      
     }
      else {
       Snackbar(res.message || "Invalid credentials.", 3000);
@@ -114,17 +120,23 @@ async function login(event) {
   }
 }
 
-async function logout(skip = false) {
+function logout(skip = false) {
   if (!skip) {
     const confirmLogout = confirm("Page will reload. Are you sure you want to log out?");
     if (!confirmLogout) return;
   }
 
-  sessionStorage.setItem("redirectAfterLogin", window.location.pathname);
+  const currentPath = window.location.pathname;
+
+  // Avoid storing redirect to login or logout page
+  if (currentPath !== "/login" && currentPath !== "/logout") {
+    sessionStorage.setItem("redirectAfterLogin", currentPath);
+  }
 
   clearState();
   navigate("/");
 }
+
 
 export { login, signup, logout };
 

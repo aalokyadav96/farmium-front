@@ -1,0 +1,181 @@
+.cropspage {
+    padding: 1.5rem;
+}
+
+.cropspage .catalogue-layout {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+.cropspage .catalogue-main {
+    flex: 3;
+    display: flex;
+    flex-direction: column;
+}
+
+.cropspage .top-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    align-items: center;
+}
+
+.cropspage .search-box {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    flex: 1;
+    min-width: 200px;
+}
+
+.cropspage .sort-box {
+    padding: 0.5rem;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.cropspage .view-toggle button {
+    background: none;
+    border: 1px solid #ccc;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.cropspage .view-toggle .active {
+    background-color: #e0e0e0;
+    color: #000;
+    font-weight: bold;
+}
+
+.cropspage .tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.cropspage .tabs button {
+    padding: 0.4rem 0.8rem;
+    background: #f4f4f4;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.cropspage .tabs .active {
+    border-color: #dbeaff;
+    background: #6aaaff;
+    font-weight: bold;
+}
+
+.cropspage #catalogue-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.cropspage .tab-content.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.cropspage .crop-card {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 1rem;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.cropspage .crop-card img {
+    width: 100%;
+    max-height: 150px;
+    object-fit: contain;
+    margin-bottom: 0.5rem;
+}
+
+.cropspage .crop-card h4 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.cropspage .crop-card .crop-info {
+    font-size: 0.9rem;
+}
+
+.cropspage .season-indicator {
+    font-size: 0.85rem;
+}
+
+.cropspage .season-indicator.off-season {
+    color: red;
+}
+
+.cropspage .tag-wrap {
+    margin-top: 0.5rem;
+}
+
+.cropspage .crop-card button {
+    margin-top: auto;
+    padding: 0.5rem;
+    border: none;
+    background: #007bff;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.cropspage .crop-card button:hover {
+    background: #0056b3;
+}
+
+.cropspage .catalogue-aside {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.cropspage .catalogue-aside h3 {
+    font-size: 1.2rem;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 0.3rem;
+    margin-bottom: 0.5rem;
+}
+
+.cropspage .promo-box {
+    border: 1px dashed #ccc;
+    padding: 0.75rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.cropspage .promo-link {
+    display: block;
+    color: #007bff;
+    text-decoration: none;
+    margin-bottom: 0.5rem;
+}
+
+.cropspage .promo-link:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 800px) {
+    .cropspage .catalogue-layout {
+        flex-direction: column;
+    }
+
+    .cropspage .tab-content.grid {
+        grid-template-columns: 1fr;
+    }
+}

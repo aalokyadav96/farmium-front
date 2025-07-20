@@ -1,8 +1,8 @@
 import { attachNavEventListeners, createheader } from "../components/header.js";
-import { createNav } from "../components/navigation.js";
+import { createNav, highlightActiveNav } from "../components/navigation.js";
 import { secnav } from "../components/secNav.js";
-import { renderPageContent } from "./render.js";
-import {sticky} from "../components/sticky.js";
+import { render } from "./router.js";
+import { sticky } from "../components/sticky.js";
 import {
   getState,
   setState,
@@ -54,19 +54,25 @@ async function loadContent(url) {
   const headerContent = createheader();
   if (headerContent) header.appendChild(headerContent);
 
+  // const navContent = createNav();
+  // if (navContent) nav.appendChild(navContent);
   const navContent = createNav();
-  if (navContent) nav.appendChild(navContent);
+  if (navContent) {
+    nav.appendChild(navContent);
+    highlightActiveNav(url); // 🔥 This makes sure the active link reflects current URL
+  }
+
 
   const secNav = secnav();
   if (secNav) secNavElement.appendChild(secNav);
 
   attachNavEventListeners();
 
-  footer.appendChild(sticky);
+  footer.appendChild(sticky());
 
   // Render page module
-  const isLoggedIn = Boolean(getState("token"));
-  await renderPageContent(isLoggedIn, url, main);
+  const isLoggedIn = Boolean(getState("user"));
+  await render(url, main);
 
   // Restore scroll
   restoreScroll(main, getRouteState(url));

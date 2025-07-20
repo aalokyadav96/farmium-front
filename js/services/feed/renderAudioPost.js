@@ -1,4 +1,4 @@
-import { DEFAULT_IMAGE } from "../../state/state.js";
+import { DEFAULT_IMAGE, SRC_URL } from "../../state/state.js";
 import AudioPlayer from '../../components/ui/AudioPlayer.mjs';
 
 const lyrics = [
@@ -12,19 +12,17 @@ const lyrics = [
     { time: 33, text: "Fourth line of lyrics..." }
   ];
 
-async function RenderAudioPost(mediaContainer, media, media_url="", resolution) {
-    console.log(media_url);
-    media.forEach(audioSrc => {
+async function RenderAudioPost(mediaContainer, media_url="", resolution) {
         const audiox = AudioPlayer({
-            src: `${audioSrc}`,
+            src: `${SRC_URL}/postpic/${media_url}/${media_url}.mp3`,
             className: 'post-audio',
             muted: false,
             poster: DEFAULT_IMAGE,
             lyricsData: lyrics,
             controls: true,
-        }, media_url[0], resolution);
+            resolutions: resolution,
+        });
         mediaContainer.appendChild(audiox);
-    });
 }
 
 export { RenderAudioPost };

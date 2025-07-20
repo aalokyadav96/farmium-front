@@ -8,7 +8,7 @@
 }
 
 .author-info {
-  font-size: 14px;
+  font-size: 15px;
   margin-bottom: 20px;
 }
 
@@ -37,7 +37,7 @@
   /* background-color: #e0e0e0; */
   border: none;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .recipe-info-box {
@@ -49,7 +49,7 @@
 
 .recipe-info-box p {
   margin: 5px 0;
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .tags {
@@ -92,7 +92,7 @@
   left: 50%;
   top: 3px;
   transform: translateX(-50%);
-  font-size: 14px;
+  font-size: 15px;
   color: #fff;
 }
 
@@ -107,7 +107,7 @@ ol {
 
 ol li {
   margin-bottom: 15px;
-  font-size: 14px;
+  font-size: 15px;
   display: flex;
   align-items: center;
   gap: 10px;

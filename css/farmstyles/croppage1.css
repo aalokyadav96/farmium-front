@@ -1,6 +1,6 @@
-.croppage {
+/* .croppage {
     padding: 20px;
-  }
+  } */
   
   .croppage h2 {
     font-size: 24px;
@@ -9,16 +9,22 @@
   }
   
   .croppage p {
-    font-size: 14px;
+    font-size: 15px;
     margin: 5px 0 15px 0;
   }
-  
+/*   
   #listings-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 20px;
-  }
+  } */
   
+  #listings-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
   #listings-container > div {
     border: 1px solid #ccc;
     border-radius: 6px;
@@ -38,7 +44,7 @@
   }
   
   #listings-container p {
-    font-size: 14px;
+    font-size: 15px;
     margin: 5px 0;
   }
   
