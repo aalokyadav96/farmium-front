@@ -1,0 +1,130 @@
+/* @import url(feed2.css); */
+@import url(feed1.css);
+/* @import url(feed_.css); */
+@import url(feed.css);
+.feed-layout {
+    display: flex;
+    flex-direction: row;       /* Use column on small screens if needed */
+    flex-wrap: wrap;           /* Allows wrap if content overflows */
+    gap: 1rem;
+    align-items: flex-start;
+    width: 100%;
+    padding: 1rem;
+    box-sizing: border-box;
+  }
+/*   
+  .vflex {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+     */
+
+     .misccon {
+        flex: 0 0 200px;
+        order: 1;
+      }
+      
+      .formcon {
+        flex: 1;
+        min-width: 300px;
+        order: 2;
+      }
+      
+      .postsContainer {
+        flex: 2;
+        min-width: 400px;
+        order: 3;
+      }
+      .tab-header {
+        display: flex;
+        gap: 0.5rem;
+        border-bottom: 1px solid #ccc;
+      }
+      
+      .tab-btn {
+        padding: 0.5rem 1rem;
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        font-weight: 500;
+      }
+      
+      .tab-btn.active-tab {
+        border-bottom: 2px solid #000;
+      }
+      
+      .tab-panel {
+        display: none;
+        padding: 0.5rem 0;
+      }
+      
+      .tab-panel[style*="display: block"] {
+        display: block;
+      }
+      .text-area {
+        width: 100%;
+        resize: vertical;
+        padding: 0.5rem;
+        font-size: 1rem;
+        line-height: 1.4;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+      
+      .file-input {
+        margin-bottom: 0.5rem;
+      }
+      .preview-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      
+      .preview-image,
+      .preview-video,
+      .preview-audio {
+        max-width: 100%;
+        max-height: 200px;
+        object-fit: contain;
+      }
+      
+      .preview-video,
+      .preview-audio {
+        width: 100%;
+      }
+      .publish-btn {
+        padding: 0.5rem 1rem;
+        background-color: #000;
+        color: #fff;
+        border: none;
+        font-weight: bold;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+      }
+      
+      .publish-btn:disabled {
+        background-color: #aaa;
+        cursor: not-allowed;
+      }
+      .postsContainer {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+      @media (max-width: 768px) {
+        .feed-layout {
+          flex-direction: column;
+        }
+      
+        .misccon,
+        .formcon,
+        .postsContainer {
+          order: unset;
+          width: 100%;
+        }
+      }
+                                          

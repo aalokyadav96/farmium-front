@@ -1,16 +1,10 @@
-
-@import url(../cssxx/feed.css);  
-/* @import url(../cssxx/feedmore.css);   */
-/* @import url(../cssx/feed.css);   */
-
-
-/* .container.feed {
+.container.feed {
     font-family: Arial, sans-serif;
     color: #333;
   }
-   */
+  
   /* Tab Header */
-  /* .container.feed #tab-header button {
+  .container.feed #tab-header button {
     padding: 6px 12px;
     cursor: pointer;
     border: 1px solid #666;
@@ -21,9 +15,9 @@
   .container.feed #tab-header button[data-tab].active {
     background: #ddd;
   }
-   */
+  
   /* Panels */
-  /* .container.feed #panel-wrapper > div {
+  .container.feed #panel-wrapper > div {
     margin-bottom: 8px;
   }
   
@@ -32,10 +26,10 @@
     padding: 8px;
     font-size: 14px;
     resize: vertical;
-  } */
+  }
   
   /* Image & Video Inputs */
-  /* .container.feed input[type="file"] {
+  .container.feed input[type="file"] {
     margin-top: 8px;
   }
   
@@ -52,9 +46,9 @@
     max-width: 120px;
     border-radius: 4px;
   }
-   */
+  
   /* Publish Button */
-  /* .container.feed #publish-btn {
+  .container.feed #publish-btn {
     padding: 8px 16px;
     cursor: pointer;
     border: 1px solid #333;
@@ -66,18 +60,18 @@
     background-color: #ccc;
     cursor: not-allowed;
   }
-   */
+  
   /* Feed Items */
-  /* .container.feed .feed-item {
+  .container.feed .feed-item {
     border: 1px solid #ddd;
     border-radius: 6px;
     padding: 12px;
     margin-bottom: 16px;
     background-color: #fff;
   }
-   */
+  
   /* Post Header */
-  /* .container.feed .post-header {
+  .container.feed .post-header {
     display: flex;
     align-items: center;
     margin-bottom: 8px;
@@ -100,10 +94,10 @@
   .container.feed .timestamp {
     font-size: 12px;
     color: #777;
-  } */
+  }
   
   /* Post Media */
-  /* .container.feed .post-media img.post-image {
+  .container.feed .post-media img.post-image {
     max-width: 100%;
     border-radius: 4px;
   }
@@ -117,9 +111,9 @@
     width: 100%;
     border-radius: 4px;
   }
-   */
+  
   /* Post Actions */
-  /* .container.feed .post-actions {
+  .container.feed .post-actions {
     display: flex;
     justify-content: space-between;
     margin-top: 8px;
@@ -151,9 +145,9 @@
   .container.feed .dropdown.hidden {
     display: none;
   }
-   */
+  
   /* Comments */
-  /* .container.feed .comments-section {
+  .container.feed .comments-section {
     margin-top: 12px;
     border-top: 1px solid #eee;
     padding-top: 8px;
@@ -191,4 +185,42 @@
   .container.feed .comment-form button {
     padding: 6px 12px;
     cursor: pointer;
-  } */
+  } .container.feed .comments-section {
+    margin-top: 12px;
+    border-top: 1px solid #eee;
+    padding-top: 8px;
+  }
+  
+  .container.feed .comment {
+    margin-bottom: 8px;
+    padding: 6px;
+    background: #f9f9f9;
+    border-radius: 4px;
+  }
+  
+  .container.feed .comment-top {
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+  
+  .container.feed .comment-reactions {
+    font-size: 12px;
+    color: #e0245e;
+  }
+  
+  .container.feed .comment-form {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  
+  .container.feed .comment-form input[type="text"] {
+    flex: 1;
+    padding: 6px;
+    font-size: 14px;
+  }
+  
+  .container.feed .comment-form button {
+    padding: 6px 12px;
+    cursor: pointer;
+  }

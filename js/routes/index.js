@@ -1,4 +1,4 @@
-import { attachNavEventListeners, createheader } from "../components/header.js";
+import { createheader } from "../components/header.js";
 import { createNav, highlightActiveNav } from "../components/navigation.js";
 import { secnav } from "../components/secNav.js";
 import { render } from "./router.js";
@@ -65,8 +65,6 @@ async function loadContent(url) {
 
   const secNav = secnav();
   if (secNav) secNavElement.appendChild(secNav);
-
-  attachNavEventListeners();
 
   footer.appendChild(sticky());
 

@@ -195,7 +195,5 @@ function createHeader() {
   loadTheme();
 }
 
-// Placeholder for future event listeners
-function attachNavEventListeners() {}
 
-export { createHeader as createheader, attachNavEventListeners };
+export { createHeader as createheader };
