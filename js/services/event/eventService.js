@@ -12,6 +12,7 @@ import { updateEvent, editEventForm } from "./editEvent.js";
 import { displayTickets } from "../tickets/ticketService.js";
 import { displayMerchandise } from "../merch/merchService.js";
 import { displayMedia } from "../media/mediaService.js";
+import { persistTabs } from "../../utils/persistTabs.js";
 
 
 // --- Helpers ---
@@ -94,23 +95,34 @@ const setupTabs = (eventData, eventId, isCreator, isLoggedIn) => {
 };
 
 // Display Full Event
+
 async function displayEvent(isLoggedIn, eventId, content) {
     content.innerHTML = "";
-    let container = createElement('div',{"class":"eventpage"},[]);
-
-    content.innerHTML = "";
+    const container = createElement('div', { class: "eventpage" }, []);
     content.appendChild(container);
+
     try {
         container.innerHTML = "";
+
         const eventData = await fetchEventData(eventId);
         const isCreator = isLoggedIn && state.user === eventData.creatorid;
 
         await displayEventDetails(container, eventData, isCreator, isLoggedIn);
-
-        container.appendChild(createElement('div', {id:"edittabs"}));
+        container.appendChild(createElement('div', { id: "edittabs" }));
 
         const tabs = setupTabs(eventData, eventId, isCreator, isLoggedIn);
-        container.appendChild(createTabs(tabs));
+        persistTabs(container, tabs, `event-tabs:${eventId}`);
+
+        // const tabs = setupTabs(eventData, eventId, isCreator, isLoggedIn);
+
+        // const tabStorageKey = `event-tabs:${eventId}`;
+        // const activeTabId = localStorage.getItem(tabStorageKey) || tabs[0]?.id;
+
+        // const tabsUI = createTabs(tabs, tabStorageKey, activeTabId, (newTabId) => {
+        //     localStorage.setItem(tabStorageKey, newTabId);
+        // });
+
+        // container.appendChild(tabsUI);
 
         if (eventData.seatingplan) {
             await createVenue(container, eventData.eventid, isLoggedIn);
@@ -124,6 +136,38 @@ async function displayEvent(isLoggedIn, eventId, content) {
         SnackBar("Failed to load event details. Please try again later.", 3000);
     }
 }
+
+
+// async function displayEvent(isLoggedIn, eventId, content) {
+//     content.innerHTML = "";
+//     let container = createElement('div',{"class":"eventpage"},[]);
+
+//     content.innerHTML = "";
+//     content.appendChild(container);
+//     try {
+//         container.innerHTML = "";
+//         const eventData = await fetchEventData(eventId);
+//         const isCreator = isLoggedIn && state.user === eventData.creatorid;
+
+//         await displayEventDetails(container, eventData, isCreator, isLoggedIn);
+
+//         container.appendChild(createElement('div', {id:"edittabs"}));
+
+//         const tabs = setupTabs(eventData, eventId, isCreator, isLoggedIn);
+//         container.appendChild(createTabs(tabs));
+
+//         if (eventData.seatingplan) {
+//             await createVenue(container, eventData.eventid, isLoggedIn);
+//         }
+
+//     } catch (error) {
+//         container.innerHTML = "";
+//         container.appendChild(
+//             createElement("h1", { textContent: `Error loading event details: ${error.message}` })
+//         );
+//         SnackBar("Failed to load event details. Please try again later.", 3000);
+//     }
+// }
 
 // Display Sections (direct sections instead of tabs)
 async function displayEventSections(wrapper, eventData, isCreator, isLoggedIn) {

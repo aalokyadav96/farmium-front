@@ -71,7 +71,7 @@ export async function displayFarm(isLoggedIn, farmId, content) {
         click: () => alert("Pre-ordered"),
       }, "buttonx"),
       Button("Chat", "cta-chat-btn", {
-        click: () => farmChat(farm.createdBy, chatcon)
+        click: () => farmChat(farm.createdBy, chatcon, farm.farmId)
       }, "buttonx")
     ] : [
       createElement("p", {}, ["🔒 Log in to schedule a visit, pre-order, or chat with this farm."])

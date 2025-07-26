@@ -73,7 +73,7 @@ export function renderCropInterface(container, cropData) {
   container.replaceChildren();
 
   const layout = createElement("div", { class: "catalogue-layout" });
-  const main = createElement("main", { class: "catalogue-main" });
+  const main = createElement("div", { class: "catalogue-main" });
   const aside = createElement("aside", { class: "catalogue-aside" });
 
   layout.append(main, aside);

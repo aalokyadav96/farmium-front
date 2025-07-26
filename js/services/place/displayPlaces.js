@@ -2,6 +2,7 @@ import { apiFetch } from "../../api/api.js";
 import { createElement } from "../../components/createElement.js";
 import { SRC_URL } from "../../state/state.js";
 import { Button } from "../../components/base/Button.js"; // as per your setup
+import { navigate } from "../../routes/index.js";
 
 export function displayPlaces(isLoggedIn, contentA) {
   renderPlacesPage(contentA);
@@ -20,7 +21,7 @@ async function renderPlacesPage(container) {
   });
 
   const aside = createElement("aside", {
-    "class": "palces-aside",
+    "class": "places-aside",
   });
 
   container.appendChild(layout);
@@ -56,22 +57,27 @@ async function renderPlacesPage(container) {
   main.appendChild(content);
 
   // ASIDE CTA BUTTONS
+  aside.appendChild(Button("Create Place", "btn-create-palce", {
+    click: () => {
+      navigate("/create-place");
+    }
+  }, "buttonx primary"));
+
   aside.appendChild(Button("Create Itinerary", "btn-create-itinerary", {
     click: () => {
-      // window.location.href = "/itinerary/create";
-      window.location.href = "/itinerary";
+      navigate("/itinerary");
     }
   }, "buttonx primary"));
 
   aside.appendChild(Button("Manage Places", "btn-manage-places", {
     click: () => {
-      window.location.href = "/places/manage";
+      navigate("/places/manage");
     }
   }, "buttonx secondary"));
 
   aside.appendChild(Button("Help / FAQ", "btn-help", {
     click: () => {
-      window.location.href = "/help";
+      navigate("/help");
     }
   }, "buttonx secondary"));
 

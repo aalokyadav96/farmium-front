@@ -13,12 +13,12 @@ export function renderPost(post, postsContainer, i) {
     const isCreator = isLoggedIn && state.user === post.userid;
 
     const postElement = createElement("article", {
-        class: ["feed-item"],
-        href: `./post/${post.postid}`,
+        "class": "feed-item",
+        "href": `./post/${post.postid}`,
         "date-is": new Date(post.timestamp).toLocaleString()
     }, [createPostHeader(post)]);
 
-    const mediaContainer = createElement("div", { class: ["post-media"] });
+    const mediaContainer = createElement("div", { "class": ["post-media"] });
 
     switch (post.type) {
         case "image":

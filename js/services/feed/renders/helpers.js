@@ -18,24 +18,24 @@ export function createPostHeader(post) {
         loading: "lazy",
         src: userPicUrl,
         alt: "Profile Picture",
-        class: ["profile-thumb"],
+        class: "profile-thumb",
         onerror: `this.onerror=null;this.src='${fallbackPic}'`
     });
 
     const userIconLink = createElement("a", {
         href: `/user/${post.username}`,
-        class: ["user-icon"]
+        class: "user-icon"
     }, [img]);
 
-    const usernameDiv = createElement("div", { class: ["username"] }, [post.username]);
-    const timestampDiv = createElement("div", { class: ["timestamp"] }, [post.timestamp]);
+    const usernameDiv = createElement("div", { class: "username" }, [post.username]);
+    const timestampDiv = createElement("div", { class: "timestamp" }, [post.timestamp]);
 
-    const userTimeDiv = createElement("div", { class: ["user-time"] }, [
+    const userTimeDiv = createElement("div", { class: "user-time" }, [
         usernameDiv,
         timestampDiv
     ]);
 
-    return createElement("div", { class: ["post-header", "hflex"] }, [
+    return createElement("div", { class: "post-header hflex" }, [
         userIconLink,
         userTimeDiv
     ]);
@@ -49,11 +49,11 @@ export function createActions(post, isLoggedIn, isCreator) {
     const entityType = "feed";
     const entityId = post.postid;
 
-    const actionsContainer = createElement("div", { class: ["post-actions"] });
+    const actionsContainer = createElement("div", { class: "post-actions" });
 
     if (isLoggedIn) {
         // Like Button
-        const likeButton = createElement("span", { class: ["like"] }, [`Like (${post.likes})`]);
+        const likeButton = createElement("span", { class: "like" }, [`Like (${post.likes})`]);
 
         const handleLikeClick = debounce(async () => {
             try {
@@ -69,7 +69,7 @@ export function createActions(post, isLoggedIn, isCreator) {
         likeButton.addEventListener("click", handleLikeClick);
 
         // Comment Button
-        const commentButton = createElement("span", { class: ["comment"] }, ["Comment"]);
+        const commentButton = createElement("span", { class: "comment" }, ["Comment"]);
         commentButton.addEventListener("click", () => {
             if (!post._commentSectionVisible) {
                 const commentsEl = createCommentsSection(
@@ -88,11 +88,11 @@ export function createActions(post, isLoggedIn, isCreator) {
         actionsContainer.appendChild(commentButton);
 
         // More Menu (Report/Delete)
-        const moreButton = createElement("button", { class: ["more-btn"] }, ["⋮"]);
+        const moreButton = createElement("button", { class: "more-btn" }, ["⋮"]);
         const dropdown = createElement("div", { class: "dropdown hidden" });
 
         // Report
-        const reportButton = createElement("button", { class: ["report-btn"] }, ["Report"]);
+        const reportButton = createElement("button", { class: "report-btn" }, ["Report"]);
         reportButton.addEventListener("click", () => {
             dropdown.classList.add("hidden");
             reportPost(post.postid, "post");
@@ -101,7 +101,7 @@ export function createActions(post, isLoggedIn, isCreator) {
 
         // Delete (only if creator)
         if (isCreator) {
-            const deleteButton = createElement("button", { class: ["delete-btn"] }, ["Delete"]);
+            const deleteButton = createElement("button", { class: "delete-btn" }, ["Delete"]);
             deleteButton.addEventListener("click", () => {
                 dropdown.classList.add("hidden");
                 deletePost(post.postid);
@@ -109,7 +109,7 @@ export function createActions(post, isLoggedIn, isCreator) {
             dropdown.appendChild(deleteButton);
         }
 
-        const moreWrapper = createElement("div", { class: ["more-wrapper"] }, [
+        const moreWrapper = createElement("div", { class: "more-wrapper" }, [
             moreButton,
             dropdown
         ]);

@@ -1,5 +1,7 @@
 import { apiFetch } from "../../api/api.js";
+import Button from "../../components/base/Button.js";
 import { createElement } from "../../components/createElement.js";
+import { navigate } from "../../routes/index.js";
 import { SRC_URL } from "../../state/state.js";
 
 export async function displayPosts(content, isLoggedIn) {
@@ -8,6 +10,13 @@ export async function displayPosts(content, isLoggedIn) {
 
 async function renderPostsPage(container) {
   container.innerHTML = "";
+
+  const createBtn = Button("Create Post", "crtbtn-allposts",{
+    click : () => {
+      navigate("/create-post");
+    }
+  });
+  container.appendChild(createBtn);
 
   const heading = createElement("h2", {}, ["All Posts"]);
   container.appendChild(heading);

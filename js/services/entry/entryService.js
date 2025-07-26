@@ -28,7 +28,8 @@ export async function displayEntryPage(contentContainer, isLoggedIn) {
     contentContainer.appendChild(wrapper);
 
     // Brief pause before redirect
-    setTimeout(() => navigate("/home"), 1000);
+    navigate("/home")
+    // setTimeout(() => navigate("/home"), 1000);
 }
 
 // import { navigate } from "../../routes/index.js";

@@ -20,6 +20,12 @@ export async function displayArtists(content, isLoggedIn) {
   content.appendChild(container);
   currentPage = 0;
 
+  container.appendChild(Button("Create Artist","crt-artst",{
+    click : () => {
+      navigate("/create-artist");
+    }
+  }, "buttonx"));
+
   try {
     // Fetch artists from API
     const artists = await apiFetch(`/artists`);

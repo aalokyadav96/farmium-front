@@ -1,83 +1,68 @@
-import { apiFetch } from "../api/api.js";
 import { setState, getState } from "../state/state.js";
 
 let translations = {};
 let currentLang = "en";
 
-/**
- * Detect preferred language
- */
-function detectLanguage() {
-  const stored = localStorage.getItem("lang") || "en";
-  if (stored) return stored;
+export async function setLanguage(lang) {
+  try {
+    // const module = await import(`./lang/${lang}.json`, { assert: { type: "json" } });
+    const module = await fetch(`/static/i18n/${lang}.json`);
+    translations = module.default || module;
+    currentLang = lang;
+    localStorage.setItem("lang", lang);
+  } catch (err) {
+    console.error(`Failed to load language "${lang}"`, err);
+    translations = {};
+  }
+}
 
-  const browserLang = navigator.language?.split("-")[0];
-  return browserLang === "es" ? "es" : "en";
+export function detectLanguage() {
+  const saved = localStorage.getItem("lang");
+  if (saved) return saved;
+  return navigator.language.startsWith("ja") ? "jp" : "en";
 }
 
 /**
- * Load translation file
+ * Translate key with optional variables and fallback
+ * Supports:
+ * - fallback key if missing
+ * - pluralization (key.one / key.other)
+ * - {var} interpolation
  */
-async function loadTranslations(lang = "en") {
-  const res = await fetch(`/static/i18n/${lang}.json`);
-  translations = await res.json();
-  currentLang = lang;
-  localStorage.setItem("lang", lang);
-  setState("lang", lang);
+export function t(key, vars = {}, fallback = "") {
+  const count = vars.count;
+  let template = translations[key];
+
+  // Pluralization: prefer "key.one" or "key.other"
+  if (typeof count === "number") {
+    const pluralKey = `${key}.${count === 1 ? "one" : "other"}`;
+    template = translations[pluralKey] || template;
+  }
+
+  if (!template) template = fallback || key;
+
+  // Interpolation
+  return template.replace(/\{(\w+)\}/g, (_, k) =>
+    Object.prototype.hasOwnProperty.call(vars, k) ? vars[k] : `{${k}}`
+  );
+}
+
+export function getCurrentLanguage() {
+  return currentLang;
 }
 
 /**
- * Translate a key
+ * Load and store translations into memory.
  */
-function t(key) {
-  return translations[key] || key;
+export async function loadTranslations(lang = "en") {
+  try {
+    const res = await fetch(`/static/i18n/${lang}.json`);
+    translations = await res.json();
+    currentLang = lang;
+    localStorage.setItem("lang", lang);
+    setState("lang", lang);
+  } catch (err) {
+    console.error("Failed to load translations for", lang, err);
+    translations = {}; // fallback to empty
+  }
 }
-
-/**
- * Manually switch language
- */
-async function setLanguage(lang) {
-  await loadTranslations(lang);
-  // Optionally trigger full re-render
-  location.reload();
-}
-
-export {
-  detectLanguage,
-  loadTranslations,
-  setLanguage,
-  t
-};
-
-
-/*
-import { t } from "../../i18n/i18n.js";
-
-const title = createElement("h1", {}, [t("artist.overview")]);
-
-
-*/
-
-/*
-
-5. Optional: Add a Language Switcher
-
-Example in your header:
-
-function createLanguageSelector() {
-  return createElement("select", {
-    onchange: async (e) => {
-      await setLanguage(e.target.value);
-    }
-  }, [
-    createElement("option", { value: "en" }, ["English"]),
-    createElement("option", { value: "es" }, ["Español"]),
-  ]);
-}
-
-Then add it inside your createHeader(isLoggedIn):
-
-header.appendChild(createLanguageSelector());
-
-
-*/

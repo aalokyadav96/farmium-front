@@ -14,14 +14,13 @@ import { reportPost } from "../reporting/reporting.js";
 import Button from "../../components/base/Button.js";
 import { toggleAction } from "../beats/toggleFollows.js";
 import { getState } from "../../state/state.js";
+import { persistTabs } from "../../utils/persistTabs.js";
 
 // import { SubscribeToArtist } from "../../services/subscription.js";
 
 export async function displayArtist(content, artistID, isLoggedIn) {
     content.innerHTML = "";
-    let contentContainer = createElement('div',{"class":"artispage"},[]);
-
-    content.innerHTML = "";
+    const contentContainer = createElement('div', { class: "artispage" }, []);
     content.appendChild(contentContainer);
 
     try {
@@ -45,8 +44,7 @@ export async function displayArtist(content, artistID, isLoggedIn) {
                 alt: artist.name ? `${artist.name}'s photo` : "Artist photo",
                 class: "artist-photo"
             });
-            const artistPhoto = createElement("div", { class: "hflex" }, [photo]);
-            artistPics.appendChild(artistPhoto);
+            artistPics.appendChild(createElement("div", { class: "hflex" }, [photo]));
         }
 
         if (artist.banner) {
@@ -55,8 +53,7 @@ export async function displayArtist(content, artistID, isLoggedIn) {
                 alt: artist.name ? `${artist.name}'s banner` : "Artist banner",
                 class: "artist-banner"
             });
-            const artistBanner = createElement("div", { class: "hflex" }, [banner]);
-            artistPics.appendChild(artistBanner);
+            artistPics.appendChild(createElement("div", { class: "hflex" }, [banner]));
         }
 
         contentContainer.appendChild(artistPics);
@@ -81,7 +78,6 @@ export async function displayArtist(content, artistID, isLoggedIn) {
             reportButton,
             createElement("div", { class: "editdiv", id: "editevent" })
         ]);
-
         contentContainer.appendChild(buttonContainer);
 
         const tabs = [
@@ -106,26 +102,28 @@ export async function displayArtist(content, artistID, isLoggedIn) {
                 id: "merch",
                 render: (container) =>
                     renderMerchTab(container, artistID, isCreator, isLoggedIn),
-            },
-            // {
-            //     title: "Songs",
-            //     id: "songs",
-            //     render: (container) =>
-            //         renderSongsTab(container, artistID, isCreator),
-            // },
+            }
         ];
 
-        // Only add Songs tab if artist.category is allowed
         const categoriesWithSongs = ["singer", "band", "musician", "rapper", "composer"];
         if (categoriesWithSongs.includes(artist.category?.toLowerCase())) {
             tabs.push({
                 title: "Songs",
                 id: "songs",
-                render: (container) =>
-                    renderSongsTab(container, artistID, isCreator),
+                render: (container) => renderSongsTab(container, artistID, isCreator),
             });
         }
-        contentContainer.appendChild(createTabs(tabs));
+
+        persistTabs(contentContainer, tabs, `artist-tabs:${artistID}`);
+
+        // const tabStorageKey = `artist-tabs:${artistID}`;
+        // const activeTabId = localStorage.getItem(tabStorageKey) || "overview";
+
+        // const tabsUI = createTabs(tabs, tabStorageKey, activeTabId, (newTabId) => {
+        //     localStorage.setItem(tabStorageKey, newTabId);
+        // });
+
+        // contentContainer.appendChild(tabsUI);
 
     } catch (error) {
         contentContainer.innerHTML = "";

@@ -1,6 +1,19 @@
 /* .cropspage {
     padding: 20px;
   } */
+  .cropspage {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  .cropsaside {
+    width: 220px;
+    flex-shrink: 0;
+  }
+  
+  .cropsmain {
+    flex: 1;
+  }
   
   .catalogue-layout {
     display: flex;

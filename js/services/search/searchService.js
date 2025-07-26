@@ -2,37 +2,45 @@ import { SEARCH_URL, SRC_URL } from "../../state/state.js";
 import Toast from "../../components/ui/Toast.mjs";
 
 // Function to display search form and tabs
-async function displaySearchForm(container) {
-  const d3container = document.createElement("div");
-  d3container.classList.add("vflex");
+import { createTabs } from "../../components/ui/createTabs.js"; // adjust path
+import { createElement } from "../../components/createElement.js";
 
-  const searchContainer = document.createElement("div");
-  searchContainer.classList.add("search-container");
+export async function displaySearchForm(container) {
+  container.innerHTML = "";
 
-  // Search Input Section
-  const searchBar = document.createElement("div");
-  // searchBar.classList.add("search-bar", "d3");
-  searchBar.classList.add("d3");
+  const d3container = createElement("div", { class: "vflex" });
 
-  const searchInput = document.createElement("input");
-  searchInput.id = "search-query";
-  searchInput.className = "search-field";
-  searchInput.placeholder = "Search anything...";
-  searchInput.required = true;
+  const searchContainer = createElement("div", { class: "search-container" });
 
-  const searchButton = document.createElement("button");
-  searchButton.id = "search-button";
-  searchButton.className = "search-btn";
-  searchButton.innerHTML = `
-    <svg class="srchicon" viewBox="0 0 24 24" width="100%" height="100%" role="img" stroke="#000000">
-      <circle cx="11" cy="11" r="8"></circle>
-      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-    </svg>`;
+  // Search Bar
+  const searchBar = createElement("div", { class: "d3" });
 
-  // Autocomplete dropdown
-  const autocompleteList = document.createElement("ul");
-  autocompleteList.id = "autocomplete-list";
-  autocompleteList.classList.add("autocomplete-list");
+  const searchInput = createElement("input", {
+    id: "search-query",
+    placeholder: "Search anything...",
+    required: true,
+    class: "search-field",
+  });
+
+  const searchButton = createElement("button", {
+    id: "search-button",
+    class: "search-btn"
+  }, [createElement("svg", {
+    class: "srchicon",
+    viewBox: "0 0 24 24",
+    width: "100%",
+    height: "100%",
+    role: "img",
+    stroke: "#000000"
+  }, [
+    createElement("circle", { cx: "11", cy: "11", r: "8" }),
+    createElement("line", { x1: "21", y1: "21", x2: "16.65", y2: "16.65" })
+  ])]);
+
+  const autocompleteList = createElement("ul", {
+    id: "autocomplete-list",
+    class: "autocomplete-list"
+  });
 
   searchBar.appendChild(searchInput);
   searchBar.appendChild(searchButton);
@@ -40,47 +48,33 @@ async function displaySearchForm(container) {
   d3container.appendChild(autocompleteList);
   searchContainer.appendChild(d3container);
 
-  // Tabs Section
-  const tabContainer = document.createElement("div");
-  tabContainer.classList.add("tabs-container", "R6-Wf");
-
-  const tabButtonCon = document.createElement("div");
-  tabButtonCon.classList.add("tab-buttons");
-
-  const tabs = [
-    { title: "All", id: "all" },
-    { title: "Events", id: "events" },
-    { title: "Places", id: "places" },
-    { title: "Social", id: "social" },
-    { title: "Merch", id: "merch" },
-  ];
-
-  tabs.forEach((tab, index) => {
-    const tabButton = document.createElement("div");
-    tabButton.classList.add("tab-button");
-    tabButton.textContent = tab.title;
-    tabButton.dataset.type = tab.id;
-
-    if (index === 0) {
-      tabButton.classList.add("active");
-    }
-
-    tabButton.addEventListener("click", () => switchTab(tab.id));
-    tabButtonCon.appendChild(tabButton);
+  // Results container reused across tabs
+  const resultsContainer = createElement("div", {
+    id: "search-results",
+    class: "hvflex"
   });
 
-  tabContainer.appendChild(tabButtonCon);
-  searchContainer.appendChild(tabContainer);
+  // Tabs
+  const tabs = [
+    { title: "All", id: "all", render: () => switchTab("all") },
+    { title: "Events", id: "events", render: () => switchTab("events") },
+    { title: "Places", id: "places", render: () => switchTab("places") },
+    { title: "Social", id: "social", render: () => switchTab("social") },
+    { title: "Merch", id: "merch", render: () => switchTab("merch") },
+  ];
 
-  // Results Section
-  const searchResultsContainer = document.createElement("div");
-  searchResultsContainer.id = "search-results";
-  searchResultsContainer.className = "hvflex";
-  searchContainer.appendChild(searchResultsContainer);
+  const tabsUI = createTabs(tabs, "search-tabs", "all");
+
+  const tabContainer = createElement("div", {
+    class: "tabs-container R6-Wf"
+  }, [tabsUI]);
+
+  searchContainer.appendChild(tabContainer);
+  searchContainer.appendChild(resultsContainer);
 
   container.appendChild(searchContainer);
 
-  // Event Listeners
+  // Wire listeners
   searchButton.addEventListener("click", fetchSearchResults);
   searchInput.addEventListener("input", handleAutocomplete);
   searchInput.addEventListener("keydown", handleKeyboardNavigation);
@@ -89,7 +83,104 @@ async function displaySearchForm(container) {
       autocompleteList.innerHTML = "";
     }
   });
+
+  // --- Internal switch logic (tab content filtering or re-rendering)
+  function switchTab(tabId) {
+    // Replace this with real filtering logic later
+    resultsContainer.innerHTML = "";
+    resultsContainer.appendChild(createElement("p", {}, [`Showing results for: ${tabId}`]));
+  }
 }
+
+
+// async function displaySearchForm(container) {
+//   const d3container = document.createElement("div");
+//   d3container.classList.add("vflex");
+
+//   const searchContainer = document.createElement("div");
+//   searchContainer.classList.add("search-container");
+
+//   // Search Input Section
+//   const searchBar = document.createElement("div");
+//   // searchBar.classList.add("search-bar", "d3");
+//   searchBar.classList.add("d3");
+
+//   const searchInput = document.createElement("input");
+//   searchInput.id = "search-query";
+//   searchInput.className = "search-field";
+//   searchInput.placeholder = "Search anything...";
+//   searchInput.required = true;
+
+//   const searchButton = document.createElement("button");
+//   searchButton.id = "search-button";
+//   searchButton.className = "search-btn";
+//   searchButton.innerHTML = `
+//     <svg class="srchicon" viewBox="0 0 24 24" width="100%" height="100%" role="img" stroke="#000000">
+//       <circle cx="11" cy="11" r="8"></circle>
+//       <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+//     </svg>`;
+
+//   // Autocomplete dropdown
+//   const autocompleteList = document.createElement("ul");
+//   autocompleteList.id = "autocomplete-list";
+//   autocompleteList.classList.add("autocomplete-list");
+
+//   searchBar.appendChild(searchInput);
+//   searchBar.appendChild(searchButton);
+//   d3container.appendChild(searchBar);
+//   d3container.appendChild(autocompleteList);
+//   searchContainer.appendChild(d3container);
+
+//   // Tabs Section
+//   const tabContainer = document.createElement("div");
+//   tabContainer.classList.add("tabs-container", "R6-Wf");
+
+//   const tabButtonCon = document.createElement("div");
+//   tabButtonCon.classList.add("tab-buttons");
+
+//   const tabs = [
+//     { title: "All", id: "all" },
+//     { title: "Events", id: "events" },
+//     { title: "Places", id: "places" },
+//     { title: "Social", id: "social" },
+//     { title: "Merch", id: "merch" },
+//   ];
+
+//   tabs.forEach((tab, index) => {
+//     const tabButton = document.createElement("div");
+//     tabButton.classList.add("tab-button");
+//     tabButton.textContent = tab.title;
+//     tabButton.dataset.type = tab.id;
+
+//     if (index === 0) {
+//       tabButton.classList.add("active");
+//     }
+
+//     tabButton.addEventListener("click", () => switchTab(tab.id));
+//     tabButtonCon.appendChild(tabButton);
+//   });
+
+//   tabContainer.appendChild(tabButtonCon);
+//   searchContainer.appendChild(tabContainer);
+
+//   // Results Section
+//   const searchResultsContainer = document.createElement("div");
+//   searchResultsContainer.id = "search-results";
+//   searchResultsContainer.className = "hvflex";
+//   searchContainer.appendChild(searchResultsContainer);
+
+//   container.appendChild(searchContainer);
+
+//   // Event Listeners
+//   searchButton.addEventListener("click", fetchSearchResults);
+//   searchInput.addEventListener("input", handleAutocomplete);
+//   searchInput.addEventListener("keydown", handleKeyboardNavigation);
+//   document.addEventListener("click", (e) => {
+//     if (!searchContainer.contains(e.target)) {
+//       autocompleteList.innerHTML = "";
+//     }
+//   });
+// }
 
 
 // Function to fetch autocomplete suggestions

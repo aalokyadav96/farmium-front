@@ -34,7 +34,8 @@
     align-items: center;
     gap: 15px;
     margin-bottom: 20px;
-  }
+    flex-direction: column;
+}
   
   .items-topbar input[type="text"] {
     flex-grow: 1;

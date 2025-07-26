@@ -50,6 +50,15 @@ const createNav = () => {
         { href: "/events", label: "Events" },
         { href: "/feed", label: "Feed" },
         { href: "/posts", label: "Posts" },
+        { href: "/artists", label: "Artists" },
+        { href: "/itinerary", label: "Itinerary" },
+        { href: "/products", label: "Products" },
+        { href: "/tools", label: "Tools" },
+        { href: "/recipes", label: "Recipes" },
+        { href: "/search", label: "Search" },
+        { href: "/merechats", label: "FarmChat" },
+        { href: "/livechat", label: "LiveChat" },
+        { href: "/chats", label: "UserChat" },
     ];
 
     const nav = document.createElement("div");

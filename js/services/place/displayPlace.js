@@ -5,7 +5,8 @@ import { renderPlaceDetails } from "./renderPlaceDetails.js";
 import { displayMedia } from "../media/mediaService.js";
 import Snackbar from "../../components/ui/Snackbar.mjs";
 import { displayReviews } from "../reviews/displayReviews.js";
-import { createTabs } from "../../components/ui/createTabs.js";
+// import { createTabs } from "../../components/ui/createTabs.js";
+import {persistTabs} from "../../utils/persistTabs.js";
 import { displayPlaceInfo } from "./placeTabs.js";
 import {
   displayPlaceNearby,
@@ -56,7 +57,7 @@ export default async function displayPlace(isLoggedIn, placeId, contentContainer
     // );
 
     // ─── Creator Editable Details ───────────────────────────────────────────────
-      const editSection = createElement("div", { class: "detail-section hvflex" });
+      const editSection = createElement("div", { class: "detail-section vflex" });
       try {
         renderPlaceDetails(isLoggedIn, editSection, placeData, isCreator);
         contentContainer.appendChild(editSection);
@@ -194,12 +195,15 @@ export default async function displayPlace(isLoggedIn, placeId, contentContainer
     );
 
     // ─── Final Tab Rendering ────────────────────────────────────────────────────
-    try {
-      const tabsElement = createTabs(tabs);
-      contentContainer.appendChild(tabsElement);
-    } catch (err) {
-      console.warn("Tabs component failed to initialize:", err);
-    }
+    // placeTabs(contentContainer, tabs, `place-tabs:${placeId}`);
+    persistTabs(contentContainer, tabs, `place-tabs:${placeId}`);
+
+    // try {
+    //   const tabsElement = createTabs(tabs);
+    //   contentContainer.appendChild(tabsElement);
+    // } catch (err) {
+    //   console.warn("Tabs component failed to initialize:", err);
+    // }
 
   } catch (err) {
     console.error("displayPlace error:", err);
@@ -210,3 +214,19 @@ export default async function displayPlace(isLoggedIn, placeId, contentContainer
     Snackbar("Failed to load place details. Please try again later.", 3000);
   }
 }
+
+// export function placeTabs(container, tabs, storageKey = null) {
+//   try {
+//       const activeTabId = storageKey ? localStorage.getItem(storageKey) : null;
+
+//       const tabsElement = createTabs(tabs, storageKey, activeTabId, (newTabId) => {
+//           if (storageKey) {
+//               localStorage.setItem(storageKey, newTabId);
+//           }
+//       });
+
+//       container.appendChild(tabsElement);
+//   } catch (err) {
+//       console.warn("Tabs component failed to initialize:", err);
+//   }
+// }

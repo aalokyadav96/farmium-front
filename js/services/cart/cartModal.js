@@ -26,6 +26,7 @@ export function openCartModal() {
 
     goToCartButton.addEventListener("click", () => {
         modal.remove();
+        document.body.style.overflow = "";
         navigate("/cart");
     });
 

@@ -18,6 +18,18 @@ async function renderEventsPage(layout) {
   layout.appendChild(main);
   layout.appendChild(aside);
 
+  aside.appendChild(
+    createElement("div", { class: "sidebar-cta" }, [
+      createElement("h3", {}, ["Actions"]),
+      Button("Create Event", "crt-evnt", { click: () => {navigate("/create-event")}}),
+      createElement("a", { href: "/my-events", class: "cta-btn" }, ["My Events"]),
+      createElement("a", { href: "/event-calendar", class: "cta-btn" }, ["Event Calendar"]),
+      Button("Browse Artists","artsts-brws", {
+        click: () => {navigate("/artists");}
+      })
+    ])
+  );
+
   const heading = createElement("h2", {}, ["All Events"]);
   main.appendChild(heading);
 
@@ -96,18 +108,6 @@ async function renderEventsPage(layout) {
       content.innerHTML = "";
       filtered.forEach(ev => content.appendChild(createEventCard(ev)));
     }
-
-    aside.appendChild(
-      createElement("div", { class: "sidebar-cta" }, [
-        createElement("h3", {}, ["Actions"]),
-        Button("Create Event", "crt-evnt", { click: () => {navigate("/create-event")}}),
-        createElement("a", { href: "/my-events", class: "cta-btn" }, ["My Events"]),
-        createElement("a", { href: "/event-calendar", class: "cta-btn" }, ["Event Calendar"]),
-        Button("Browse Artists","artsts-brws", {
-          click: () => {navigate("/artists");}
-        })
-      ])
-    );
 
     renderFilteredEvents();
 

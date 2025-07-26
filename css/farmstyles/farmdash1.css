@@ -5,7 +5,7 @@
   .tabs-container {
     /* border: 1px solid #ddd; */
     border-radius: 6px;
-    padding: 5px;
+    /* padding: 5px; */
   }
   
   .tab-buttons {
@@ -34,7 +34,9 @@
   }
   
   .tab-content.active {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
   }
   
   .stats-summary {

@@ -15,11 +15,11 @@ export function displayWeed(isLoggedIn, root) {
   const layout = createEl("div", { class: "feed-layout" });
   root.appendChild(layout);
 
-  const miscCon = createEl("div", { class: ["vflex", "misccon"], style: "order: 3;" });
+  const miscCon = createEl("div", { class: "vflex misccon", style: "order: 3;" });
   miscCon.appendChild(miscnav());
   layout.appendChild(miscCon);
 
-  const formCon = createEl("div", { class: ["vflex", "formcon"], style: "order: 1;" });
+  const formCon = createEl("div", { class: "vflex formcon", style: "order: 1;" });
   layout.appendChild(formCon);
 
   const feedContainer = createEl("div", {

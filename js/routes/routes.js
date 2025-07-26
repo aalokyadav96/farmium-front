@@ -29,6 +29,7 @@ export const protectedRoutes = new Set([
     "/posts": { moduleImport: () => import("../pages/posts/posts.js"), functionName: "Posts" },
     "/baitos": { moduleImport: () => import("../pages/baitos/baitos.js"), functionName: "Baitos" },
     "/baitos/dash": { moduleImport: () => import("../pages/baitos/baitoDash.js"), functionName: "BaitoDash" },
+    "/baitos/hire": { moduleImport: () => import("../pages/baitos/hireWorkers.js"), functionName: "HireWorkers" },
     "/baitos/create-profile": { moduleImport: () => import("../pages/baitos/createProfile.js"), functionName: "CreateProfile" },
     "/create-event": { moduleImport: () => import("../pages/events/createEvent.js"), functionName: "Create" },
     "/create-place": { moduleImport: () => import("../pages/places/createPlace.js"), functionName: "CreatePlace" },

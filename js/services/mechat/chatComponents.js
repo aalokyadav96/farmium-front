@@ -149,7 +149,7 @@ function createUploadHandler(chatId, msgList) {
       const rendered = renderMessage(uploadedMsg);
       if (!rendered) throw new Error("renderMessage failed");
 
-      msgList.appendChild(rendered);
+      // msgList.appendChild(rendered);
       msgList.scrollTop = msgList.scrollHeight;
     } catch (err) {
       console.error(err);

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Avatar Builder</title>
+</head>
+<body>
+  <h2>Create Your Avatar</h2>
+
+  <label for="hair">Hair:</label>
+  <select id="hair">
+    <option value="short">Short</option>
+    <option value="long">Long</option>
+    <option value="curly">Curly</option>
+  </select><br><br>
+
+  <label for="eyes">Eyes:</label>
+  <select id="eyes">
+    <option value="blue">Blue</option>
+    <option value="green">Green</option>
+    <option value="brown">Brown</option>
+  </select><br><br>
+
+  <label for="color">Skin Color:</label>
+  <input type="color" id="color" value="#ffcc99"><br><br>
+
+  <button onclick="saveAvatar()">Save Avatar</button>
+  <button onclick="loadAvatar()">Load Avatar</button>
+
+  <div id="avatarDisplay" style="margin-top:20px;"></div>
+
+  <script>
+    function saveAvatar() {
+      const avatar = {
+        hair: document.getElementById('hair').value,
+        eyes: document.getElementById('eyes').value,
+        color: document.getElementById('color').value
+      };
+      document.cookie = "avatar=" + JSON.stringify(avatar) + ";path=/";
+      alert("Avatar saved in cookies!");
+    }
+
+    function loadAvatar() {
+      const cookieArr = document.cookie.split(";");
+      let avatarData;
+      cookieArr.forEach(cookie => {
+        const [name, value] = cookie.trim().split("=");
+        if (name === "avatar") {
+          avatarData = JSON.parse(value);
+        }
+      });
+
+      if (avatarData) {
+        const display = document.getElementById("avatarDisplay");
+        display.innerHTML = `
+          <p><strong>Hair:</strong> ${avatarData.hair}</p>
+          <p><strong>Eyes:</strong> ${avatarData.eyes}</p>
+          <div style="width:100px;height:100px;background:${avatarData.color};border-radius:50%;"></div>
+        `;
+      } else {
+        alert("No avatar found in cookies.");
+      }
+    }
+  </script>
+</body>
+</html>

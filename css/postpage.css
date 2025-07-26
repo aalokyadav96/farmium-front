@@ -1,11 +1,12 @@
-.postpage {
+/* .postpage {
     padding: 1.5rem;
-  }
+  } */
   
   .postpage .post-detail {
-    padding: 1.5rem;
+    max-width: 600px;
+    margin: 0 auto;
     border-radius: 6px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    /* box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08); */
   }
   
   .postpage .post-data h2 {

@@ -41,19 +41,19 @@ function renderPlaceDetails(isLoggedIn, content, place, isCreator) {
         actionsWrapper.appendChild(
             Button("Edit Place", "edit-place-btn", {
                 click: () => editPlaceForm(isLoggedIn, place.placeid, editContainer),
-            })
+            },"buttonx")
         );
 
         actionsWrapper.appendChild(
             Button("Delete Place", "delete-place-btn", {
                 click: () => deletePlace(isLoggedIn, place.placeid),
-            }, "delete-btn")
+            }, "delete-btn buttonx")
         );
 
         actionsWrapper.appendChild(
             Button("View Analytics", "analytics-place-btn", {
                 click: () => analyticsPlace(isLoggedIn, place.placeid),
-            })
+            },"buttonx")
         );
 
         detailsSection.appendChild(actionsWrapper);

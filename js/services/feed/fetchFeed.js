@@ -2,6 +2,7 @@ import { apiFetch } from "../../api/api.js";
 import { renderNewPost } from "./renderNewPost.js";
 import { createTabs } from "../../components/ui/createTabs.js";
 import { createElement } from "../../components/createElement.js";
+import { persistTabs } from "../../utils/persistTabs.js";
 
 /**
  * Preferred tab order
@@ -55,8 +56,9 @@ export async function setupFeedTabs(container) {
         };
     });
 
-    const tabsElement = createTabs(tabs, "feedTabs");
-    container.appendChild(tabsElement);
+    persistTabs(container, tabs, `feed-tabs`);
+    // const tabsElement = createTabs(tabs, "feedTabs");
+    // container.appendChild(tabsElement);
 }
 
 /**

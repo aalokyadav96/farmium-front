@@ -119,7 +119,10 @@ function renderCTAFarm(container) {
         }, "buttonx"),
         Button("Chats","chatss-frm-btn",{
             click: () => {navigate('/merechats')}
-        }),
+        }, "buttonx"),
+        Button("Create Farm","crt-frm-btn",{
+            click: () => {navigate('/create-farm')}
+        }, "buttonx"),
     ]);
 
     replaceOrAppend(container, ".farm__Cta", section);

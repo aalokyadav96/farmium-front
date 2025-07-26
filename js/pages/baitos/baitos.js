@@ -1,4 +1,4 @@
-import { displayBaitos } from "../../services/baitos/BaitosService.js";
+import { displayBaitos } from "../../services/baitos/DisplayBaitos.js";
 
 async function Baitos(isLoggedIn, contentContainer) {
     contentContainer.innerHTML = '';

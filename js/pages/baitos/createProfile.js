@@ -1,4 +1,4 @@
-import { displayCreateBaitoProfile } from "../../services/baitos/createBaitoProfile.js";
+import { displayCreateBaitoProfile } from "../../services/baitos/create/createBaitoProfile.js";
 
 async function CreateProfile(isLoggedIn, contentContainer) {
     contentContainer.innerHTML = '';
