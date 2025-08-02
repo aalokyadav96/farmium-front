@@ -19,10 +19,9 @@ export const protectedRoutes = new Set([
   export const staticRoutes = {
     "/": { moduleImport: () => import("../pages/entry/entry.js"), functionName: "Entry" },
     "/home": { moduleImport: () => import("../pages/home.js"), functionName: "Home" },
-    "/dash": { moduleImport: () => import("../pages/dash/dash.js"), functionName: "Dash" },
     "/login": { moduleImport: () => import("../pages/auth/auth.js"), functionName: "Auth" },
+    "/booking": { moduleImport: () => import("../pages/booking/booking.js"), functionName: "Booking" },
     "/merechats": { moduleImport: () => import("../pages/merechats/merechats.js"), functionName: "Mechat" },
-    "/recipes": { moduleImport: () => import("../pages/recipe/recipes.js"), functionName: "Recipes" },
     "/chats": { moduleImport: () => import("../pages/userchat/chats.js"), functionName: "Chats" },
     "/admin": { moduleImport: () => import("../pages/admin/admin.js"), functionName: "Admin" },
     "/livechat": { moduleImport: () => import("../pages/livechat/chats.js"), functionName: "LiveChats" },
@@ -40,6 +39,7 @@ export const protectedRoutes = new Set([
     "/search": { moduleImport: () => import("../pages/search/search.js"), functionName: "Search" },
     "/settings": { moduleImport: () => import("../pages/profile/settings.js"), functionName: "Settings" },
     "/feed": { moduleImport: () => import("../pages/weed/weed.js"), functionName: "Weed" },
+    "/social": { moduleImport: () => import("../pages/tumblr/tumblr.js"), functionName: "Tumblr" },
     "/create-post": { moduleImport: () => import("../pages/posts/createNewPost.js"), functionName: "Create" },
     "/create-baito": { moduleImport: () => import("../pages/baitos/createNewBaito.js"), functionName: "Create" },
     "/create-artist": { moduleImport: () => import("../pages/artist/createArtist.js"), functionName: "Create" },
@@ -48,10 +48,13 @@ export const protectedRoutes = new Set([
     "/itinerary": { moduleImport: () => import("../pages/itinerary/itinerary.js"), functionName: "Itinerary" },
     "/cart": { moduleImport: () => import("../pages/cart/cart.js"), functionName: "Cart" },
     "/my-orders": { moduleImport: () => import("../pages/cart/myorders.js"), functionName: "MyOrders" },
+    "/dash": { moduleImport: () => import("../pages/dash/dash.js"), functionName: "Dash" },
+    "/recipes": { moduleImport: () => import("../pages/recipe/recipes.js"), functionName: "Recipes" },
     "/farms": { moduleImport: () => import("../pages/farm/farms.js"), functionName: "Farms" },
     "/tools": { moduleImport: () => import("../pages/farm/tools.js"), functionName: "Tools" },
     "/products": { moduleImport: () => import("../pages/farm/products.js"), functionName: "Products" },
     "/crops": { moduleImport: () => import("../pages/crop/crops.js"), functionName: "Crops" },
+    "/grocery": { moduleImport: () => import("../pages/crop/crops.js"), functionName: "Crops" },
     "/create-farm": { moduleImport: () => import("../pages/farm/createNewFarm.js"), functionName: "Create" }
   };
   
@@ -95,13 +98,6 @@ export const protectedRoutes = new Set([
       protected: false,
       argBuilder: safeArgBuilder
     },
-    {
-      pattern: /^\/product\/([\w-]+)\/([a-f\d]{24})$/,
-      moduleImport: () => import("../pages/product/product.js"),
-      functionName: "Product",
-      protected: false,
-      argBuilder: safeArgBuilder
-    },    
     {
       pattern: /^\/chat\/([\w-]+)$/,
       moduleImport: () => import("../pages/userchat/chat.js"),
@@ -152,6 +148,27 @@ export const protectedRoutes = new Set([
       argBuilder: safeArgBuilder
     },
     {
+      pattern: /^\/product\/([\w-]+)\/([a-f\d]{24})$/,
+      moduleImport: () => import("../pages/product/product.js"),
+      functionName: "Product",
+      protected: false,
+      argBuilder: safeArgBuilder
+    },    
+    {
+      pattern: /^\/hashtag\/([\w-]+)$/,
+      moduleImport: () => import("../pages/hashtag/hashtagPage.js"),
+      functionName: "Hashtag",
+      protected: false,
+      argBuilder: safeArgBuilder
+    },
+    {
+      pattern: /^\/merechats\/([\w-]+)$/,
+      moduleImport: () => import("../pages/merechats/merePage.js"),
+      functionName: "OneChatPage",
+      protected: true,
+      argBuilder: safeArgBuilder
+    },
+    {
       pattern: /^\/crop\/([\w-]+)$/,
       moduleImport: () => import("../pages/crop/cropPage.js"),
       functionName: "Crop",
@@ -179,19 +196,5 @@ export const protectedRoutes = new Set([
       protected: false,
       argBuilder: safeArgBuilder
     },
-    {
-      pattern: /^\/hashtag\/([\w-]+)$/,
-      moduleImport: () => import("../pages/hashtag/hashtagPage.js"),
-      functionName: "Hashtag",
-      protected: false,
-      argBuilder: safeArgBuilder
-    },
-    {
-      pattern: /^\/merechats\/([\w-]+)$/,
-      moduleImport: () => import("../pages/merechats/merePage.js"),
-      functionName: "OneChatPage",
-      protected: true,
-      argBuilder: safeArgBuilder
-    }
   ];
   

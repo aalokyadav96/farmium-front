@@ -20,7 +20,7 @@ export async function displayChat(contentContainer, isLoggedIn) {
   });
 
   const sidebar = createElement("aside", { class: "chat-sidebar", role: "complementary" });
-  const main = createElement("main", { class: "chat-main", role: "main" });
+  const main = createElement("div", { class: "chat-main", role: "main" });
 
   const chatList = createElement("nav", { class: "chat-list", role: "navigation" });
   const chatView = createElement("section", { class: "chat-view", role: "region" });

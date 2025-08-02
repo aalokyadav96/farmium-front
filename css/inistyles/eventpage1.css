@@ -1,0 +1,159 @@
+.eventpage {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Event Wrapper & Card */
+.event-wrapper {
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.event-card.hvflex {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.banner-section {
+  flex: 1 1 300px;
+}
+
+.event-banner-image {
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+  object-fit: cover;
+  aspect-ratio: 11 / 4;
+}
+
+/* Event Info */
+.event-info {
+  flex: 2 1 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.eventpage-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.event-title {
+  font-size: 1.6rem;
+  margin: 0;
+}
+
+.event-status {
+  font-size: 0.95rem;
+  color: #007bff;
+}
+
+.event-date,
+.event-description {
+  font-size: 0.95rem;
+}
+
+.event-actions {
+  margin-top: 0.5rem;
+}
+
+.action-btn {
+  padding: 0.5rem 1rem;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.action-btn:hover {
+  background: #c82333;
+}
+
+/* Tabs */
+.eventpage .tabs-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.eventpage .tab-buttons {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.eventpage .tab-button {
+  padding: 0.5rem 1rem;
+  border-radius: 4px 4px 0 0;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.eventpage .tab-button.active {
+  border: 1px solid #ddd;
+  border-bottom: none;
+  font-weight: bold;
+}
+
+.eventpage .tab-contents {
+  border: 1px solid #ddd;
+  border-radius: 0 0 6px 6px;
+  padding: 0.4rem;
+}
+
+.eventpage .tab-content {
+  display: none;
+}
+
+.eventpage .tab-content.active {
+  display: block;
+}
+
+/* Tab Panels */
+.eventpage .tab-content h2 {
+  margin-top: 0;
+}
+
+.eventpage .tab-content p {
+  font-size: 0.95rem;
+}
+
+.eventpage .button {
+  padding: 0.5rem 1rem;
+  background: #007bff;
+  border: none;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.eventpage .button:hover {
+  background: #0056b3;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .event-card.hvflex {
+    flex-direction: column;
+  }
+
+  .banner-section,
+  .event-info {
+    flex: 1 1 100%;
+  }
+
+  .tab-buttons {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+
+  .tab-button {
+    flex: 0 0 auto;
+  }
+}

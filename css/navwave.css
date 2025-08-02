@@ -1,0 +1,129 @@
+.navigation__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    align-items: center;
+  }
+  
+  .navigation__item {
+    flex: 0 0 auto;
+  }
+  
+  .navigation__link {
+    display: inline-block;
+    text-decoration: none;
+    padding: 0.3rem 0.6rem;
+    border-radius: 0.25rem;
+    /* background: var(--nav-link-bg, #e0e0e0); */
+    color: var(--nav-link-color, #111);
+    transition: background 0.2s ease;
+    font-size: 0.9rem;
+  }
+  
+  .navigation__link:hover {
+    background: var(--nav-link-hover-bg, #ccc);
+  }
+  
+  .navigation__link.active {
+    font-weight: bold;
+    background: var(--nav-link-active-bg, #444);
+    color: var(--nav-link-active-color, #fff);
+  }
+  
+  .navigation__item:nth-child(odd) .navigation__link {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+  
+  .navigation__item:nth-child(even) .navigation__link {
+    font-size: 0.85rem;
+    font-weight: 400;
+  }
+  .primary-nav {
+    position: sticky;
+    top: 0;
+    z-index: 1; /* Above header content */
+    background: var(--color-bg); /* Needed to cover other content */
+  }
+  
+  .navigation {
+    width: 100%;
+    letter-spacing: 1.2px;
+    z-index: 1;
+    position: relative;
+  }
+  
+  .navigation__inner {
+    display: flex;
+    margin: 0 auto;
+    overflow: hidden;
+    border-left: 0;
+    border-right: 0;
+    height: 52px;
+    padding: 4px 12px;
+    border-bottom: 1px solid var(--color-border);
+    /* border-top: 1px solid var(--color-border); */
+  }
+  
+  .toggle:checked ~ .navigation__inner {
+    height: auto;
+  }
+  
+  
+  .navigation__logo {
+    flex-shrink: 0;
+    align-self: flex-start;
+  }
+  
+  .navigation__logo .navigation__link {
+    font-weight: bold;
+  }
+  
+  @media screen and (max-width: 400px) {
+    /* .navigation__item {
+      flex-basis: 33%;
+    } */
+  }
+  
+  .navigation__toggle {
+    flex-shrink: 0;
+    height: 32px;
+    border-left: 1px solid #ddd;
+    box-shadow: inset 0px 0px 3px #dfdfdf;
+    filter: drop-shadow(2px 2px 6px rgb(200, 200, 200));
+  }
+  
+  .navigation__toggle .navigation__link {
+    position: relative;
+    padding-right: 24px;
+  }
+  
+  .navigation__toggle .navigation__link:after {
+    content: "";
+    position: absolute;
+    top: 15px;
+    right: 12px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 5px 5px 0 5px;
+    border-color: #000 transparent transparent transparent;
+  }
+  
+  .toggle:checked
+  ~ .navigation__inner
+  .navigation__toggle
+  .navigation__link:after {
+    border-width: 0 5px 5px 5px;
+    border-color: transparent transparent #777 transparent;
+  }
+  
+  .primary-nav .toggle {
+    position: absolute;
+    z-index: -1;
+    opacity: 0;
+  }
+  

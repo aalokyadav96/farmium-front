@@ -1,0 +1,86 @@
+/* Wrapper blocks */
+.section-block {
+    background-color: #f9f9f9;
+    padding: 12px;
+    margin: 12px;
+    border-radius: 6px;
+    box-shadow: 0 0 2px rgba(0,0,0,0.05);
+}
+
+/* Stats layout */
+.stat-box {
+    background: #eaffea;
+    padding: 12px;
+    flex: 1 1 100px;
+    text-align: center;
+    border-radius: 6px;
+    min-width: 100px;
+    box-shadow: 0 0 1px rgba(0,0,0,0.1);
+}
+
+.stat-box strong {
+    font-size: 1.4rem;
+    display: block;
+    color: #065f46;
+}
+
+.stat-box p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+/* Notification list */
+.section-block ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.section-block ul li {
+    padding: 6px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 0.95rem;
+    color: #444;
+}
+
+/* Banner blocks */
+/* .temp-banner, .ad-banner {
+    background: #fffbe6;
+    padding: 10px;
+    margin: 12px;
+    border: 1px solid #ffd666;
+    border-radius: 6px;
+    font-size: 0.95rem;
+} */
+
+/* Icons grid */
+.icons-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: space-around;
+    margin: 12px;
+}
+
+.icons-grid .icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.9rem;
+    cursor: pointer;
+    width: 64px;
+    padding: 8px;
+    border-radius: 6px;
+    background-color: #f0f0f0;
+    transition: background 0.2s;
+}
+
+.icons-grid .icon:hover {
+    background-color: #e6e6e6;
+}
+
+.icons-grid .icon span:first-child {
+    font-size: 1.5rem;
+}
+/**/

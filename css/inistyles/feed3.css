@@ -1,5 +1,12 @@
 /* ========== LAYOUT ========== */
 
+:root {
+  --post-header-height: 3.6rem;
+  --post-actions-height: 2.4rem;
+  --post-media-height: 90vh;
+}
+
+
 .feed-layout {
   display: flex;
   flex-wrap: wrap;
@@ -69,6 +76,9 @@ button:disabled,
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  border-bottom: 1px solid #ddd;
+  height: var(--post-header-height);
+  padding: 0.6rem;
 }
 
 .user-icon img.profile-thumb {
@@ -98,7 +108,8 @@ button:disabled,
 
 .post-media {
   overflow: hidden;
-  max-height: 90vh;
+  /* max-height: 90vh; */
+  max-height: var(--post-media-height);
   padding: 0.6rem;
 }
 
@@ -195,13 +206,13 @@ button:disabled,
   margin-right: 1rem;
   border-radius: 3px;
 }
-
+/* 
 #theater {
   background: #007bff;
   color: #fff;
   border: none;
   padding: 0.4rem 0.8rem;
-}
+} */
 
 #theater:hover {
   background: #0056b3;
@@ -214,7 +225,9 @@ button:disabled,
   justify-content: space-between;
   align-items: center;
   font-size: 0.9rem;
+  padding: 0.4rem;
   gap: 1rem;
+  height: var(--post-actions-height);
 }
 
 .post-actions span {
@@ -224,6 +237,9 @@ button:disabled,
 
 .feed-item {
   font-weight: 400;
+  max-width: 480px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
 }
 
 .more-wrapper {

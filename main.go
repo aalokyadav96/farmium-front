@@ -1,14 +1,12 @@
 package main
 
 import (
+	"compress/gzip"
 	"context"
-	"fmt"
+	"html/template"
 	"io"
 	"log"
-	"html/template"
 	"net/http"
-	"net/http/httputil"
-	"net/url"
 	"os"
 	"os/signal"
 	"strings"
@@ -16,159 +14,167 @@ import (
 	"time"
 )
 
-// Global server instance for graceful shutdown
+// Global server instance
 var server *http.Server
-
-var tmpl = template.Must(template.ParseGlob("index.html"))
+var tmpl = template.Must(template.ParseGlob("dist/index.html"))
 
 func main() {
-	// Start the server
-	log.Println("Starting server on http://localhost:3000")
+	log.Println("🚀 Starting server on http://localhost:3000")
 
-	// Set up the router and routes
 	mux := http.NewServeMux()
 
-	// Middleware for CORS
-	mux.HandleFunc("/", applyCORS(serveIndex))
-	mux.HandleFunc("/static/", applyCORS(proxyStatic))
-	mux.HandleFunc("/assets/", applyCORS(serveAssets))
-	mux.HandleFunc("/api/", applyCORS(proxyToBackend))
-	mux.HandleFunc("/agi/", applyCORS(proxyToBackend))
-	mux.HandleFunc("/search/", applyCORS(proxyToBackend))
+	// Apply middleware chain
+	handler := applyLogging(applyCompression(applyCORS(frontendRouter)))
 
-	// Create and start the server
+	mux.HandleFunc("/", handler)
+
 	server = &http.Server{
 		Addr:    ":3000",
 		Handler: mux,
 	}
 
+	// Run server in a goroutine
 	go func() {
-		if err := server.ListenAndServe(); err != nil {
-			log.Fatalf("Failed to start server: %v", err)
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("❌ Server failed: %v", err)
 		}
 	}()
 
-	// Graceful shutdown handling
 	shutdownGracefully()
 }
 
-// Graceful shutdown logic
 func shutdownGracefully() {
-	// Create a channel to listen for OS signals (e.g., SIGINT, SIGTERM)
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-
-	// Wait for a termination signal
 	<-sigChan
 
-	log.Println("Shutting down server gracefully...")
-
-	// Set a timeout for shutdown
+	log.Println("🧘 Shutting down gracefully...")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	if err := server.Shutdown(ctx); err != nil {
-		log.Fatalf("Server Shutdown Failed: %v", err)
+		log.Fatalf("⚠️ Shutdown error: %v", err)
 	}
-
-	log.Println("Server exited gracefully.")
+	log.Println("✅ Server exited cleanly")
 }
 
-// Apply CORS middleware to every request
-func applyCORS(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		// Enable CORS
-		enableCORS(w, r)
+// Main routing logic
+func frontendRouter(w http.ResponseWriter, r *http.Request) {
+	path := r.URL.Path
 
-		// Call the next handler in the chain
-		next(w, r)
+	switch {
+	case strings.HasPrefix(path, "/static"), strings.HasPrefix(path, "/api"):
+		proxyToBackend(w, r)
+	case strings.HasPrefix(path, "/assets/"):
+		serveAssets(w, r)
+	default:
+		serveIndex(w, r)
 	}
 }
 
-// Serve index.html on the / endpoint
+// Serve index.html
 func serveIndex(w http.ResponseWriter, r *http.Request) {
-	// log.Println("Serving index.html on /")
-	// http.ServeFile(w, r, "./index.html")
-	tmpl.ExecuteTemplate(w,"index.html",nil)
+	w.Header().Set("Cache-Control", "public, max-age=3600")
+	tmpl.ExecuteTemplate(w, "index.html", nil)
 }
 
-// Proxy static files to localhost:4000
-func proxyStatic(w http.ResponseWriter, r *http.Request) {
-	staticURL, err := url.Parse("http://localhost:4000")
-	if err != nil {
-		log.Fatalf("Failed to parse static file server URL: %v", err)
+// Serve /assets files
+func serveAssets(w http.ResponseWriter, r *http.Request) {
+	path := strings.TrimPrefix(r.URL.Path, "/assets/")
+	file := "./dist/assets/" + path
+
+	// Set correct MIME type for .css files
+	if strings.HasSuffix(path, ".css") {
+		w.Header().Set("Content-Type", "text/css")
+	} else if strings.HasSuffix(path, ".js") {
+		w.Header().Set("Content-Type", "application/javascript")
 	}
 
-	proxy := httputil.NewSingleHostReverseProxy(staticURL)
-	log.Printf("Proxying static request to localhost:4000: %s", r.URL.Path)
-	proxy.ServeHTTP(w, r)
+	// Cache and serve file
+	w.Header().Set("Cache-Control", "public, max-age=86400")
+	http.ServeFile(w, r, file)
 }
 
-// Serve assets files from the /assets directory
-func serveAssets(w http.ResponseWriter, r *http.Request) {
-	// Strip "/assets/" from the path and serve the file from the "./assets" directory
-	path := strings.TrimPrefix(r.URL.Path, "/assets/")
-	log.Printf("Serving assets file: %s", path)
-	http.ServeFile(w, r, "./assets/"+path)
-}
-
-// General proxy handler for /api, /agi, and /search paths
+// Proxy to backend
 func proxyToBackend(w http.ResponseWriter, r *http.Request) {
-	// Modify the request path to point to localhost:4000 or another backend service
 	backendURL := "http://localhost:4000" + r.URL.Path
-
-	// Create a new request for the backend server
 	req, err := http.NewRequest(r.Method, backendURL, r.Body)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to create request: %v", err), http.StatusInternalServerError)
+		http.Error(w, "⚠️ Request creation failed", http.StatusInternalServerError)
 		return
 	}
-
-	// Copy headers from the incoming request to the new request
-	for key, values := range r.Header {
-		if key != "Host" && key != "Content-Length" {
-			for _, value := range values {
-				req.Header.Add(key, value)
-			}
+	for k, v := range r.Header {
+		for _, val := range v {
+			req.Header.Add(k, val)
 		}
 	}
 
-	// Create a new HTTP client to send the request
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to send request to backend: %v", err), http.StatusInternalServerError)
+		http.Error(w, "⚠️ Backend request failed", http.StatusBadGateway)
 		return
 	}
 	defer resp.Body.Close()
 
-	// Copy the response status code and body to the original response
-	w.WriteHeader(resp.StatusCode)
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to read backend response: %v", err), http.StatusInternalServerError)
-		return
+	for k, v := range resp.Header {
+		for _, val := range v {
+			w.Header().Add(k, val)
+		}
 	}
-	w.Write(body)
+	w.WriteHeader(resp.StatusCode)
+	io.Copy(w, resp.Body)
 }
 
-// Function to enable CORS by setting necessary headers
-func enableCORS(w http.ResponseWriter, r *http.Request) {
-	// Allow any origin (or specify your allowed origins)
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-
-	// Allow specific HTTP methods (GET, POST, OPTIONS, etc.)
-	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-
-	// Allow specific headers in requests (you can adjust this based on your needs)
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-Requested-With, Authorization")
-
-	// Expose the necessary headers to the client (you can add others as needed)
-	w.Header().Set("Access-Control-Expose-Headers", "Content-Type, X-Requested-With, Authorization")
-
-	// If it's a preflight OPTIONS request, respond with a 200 status code
-	if r.Method == http.MethodOptions {
-		w.WriteHeader(http.StatusOK)
-		return
+// CORS middleware
+func applyCORS(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		enableCORS(w, r)
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		next(w, r)
 	}
+}
+
+func enableCORS(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+	w.Header().Set("Access-Control-Expose-Headers", "Content-Type, Authorization")
+}
+
+// Logging middleware
+func applyLogging(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		log.Printf("📥 %s %s from %s", r.Method, r.URL.Path, r.RemoteAddr)
+		next(w, r)
+		log.Printf("⏱️ Completed in %v", time.Since(start))
+	}
+}
+
+// Compression middleware
+func applyCompression(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+			next(w, r)
+			return
+		}
+		w.Header().Set("Content-Encoding", "gzip")
+		gzw := gzip.NewWriter(w)
+		defer gzw.Close()
+		gzwResponse := gzipResponseWriter{Writer: gzw, ResponseWriter: w}
+		next(gzwResponse, r)
+	}
+}
+
+type gzipResponseWriter struct {
+	io.Writer
+	http.ResponseWriter
+}
+
+func (w gzipResponseWriter) Write(b []byte) (int, error) {
+	return w.Writer.Write(b)
 }

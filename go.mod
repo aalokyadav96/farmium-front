@@ -1,3 +1,3 @@
-module naevis
+module nae
 
 go 1.24.0

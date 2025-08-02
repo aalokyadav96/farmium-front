@@ -1,0 +1,139 @@
+.places-layout {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+  }
+  
+  /* Main content */
+  .places-main {
+    flex: 2 1 600px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .places-main h2 {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+  
+  .place-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+  }
+  
+  .place-search {
+    flex: 1 1 200px;
+    padding: 0.5rem;
+    font-size: 0.95rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .place-sort {
+    padding: 0.5rem;
+    font-size: 0.95rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .category-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .category-chip {
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+  }
+  
+  #places.hvflex {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  /* Place card */
+  .place-card {
+    border-radius: 6px;
+    overflow: hidden;
+    width: 100%;
+    max-width: 320px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: box-shadow 0.2s;
+  }
+  
+  .place-card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+  
+  .place-info {
+    padding: 0.75rem;
+  }
+  
+  .place-info h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.2rem;
+  }
+  
+  .place-info p {
+    margin: 0.2rem 0;
+    font-size: 0.95rem;
+  }
+  
+  /* Aside */
+  .places-aside {
+    flex: 1 1 250px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .buttonx {
+    padding: 0.5rem 1rem;
+    font-size: 0.95rem;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+  }
+  
+  .buttonx.primary {
+    background: #007bff;
+    color: white;
+  }
+  
+  .buttonx.primary:hover {
+    background: #0056b3;
+  }
+  
+  .buttonx.secondary {
+    background: #e0e0e0;
+    color: #333;
+  }
+  
+  .buttonx.secondary:hover {
+    background: #cfcfcf;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .places-layout {
+      flex-direction: column;
+    }
+  
+    .places-aside {
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+  
+    .places-aside button {
+      flex: 1 1 45%;
+    }
+  }
+  

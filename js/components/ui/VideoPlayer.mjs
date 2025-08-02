@@ -54,7 +54,7 @@ const VideoPlayer = (
             : `${baseSrc}-${q}p.mp4`,
         })),
       }),
-  });
+  }, "buttonx");
 
   video.setAttribute("aria-label", "Video Player");
   theaterButton.setAttribute("title", "Activate Theater Mode");

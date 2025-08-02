@@ -1,0 +1,402 @@
+.tumblr-layout {
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.tumblr-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.tab-header {
+    display: flex;
+    gap: 8px;
+    overflow-x: scroll;
+}
+
+.tab-button {
+    padding: 6px 12px;
+    background: #eee;
+    border: none;
+    cursor: pointer;
+}
+
+.tab-button.active {
+    background: #444;
+    color: #fff;
+}
+
+.tab-panel {
+    display: none;
+}
+
+.tab-panel.active {
+    display: block;
+}
+
+.tumblr-textarea {
+    width: 100%;
+    padding: 8px;
+    font-size: 1rem;
+}
+
+.publish-btn {
+    margin-top: 8px;
+    padding: 8px 16px;
+    background: #007acc;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+.publish-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.file-input-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.file-preview img.preview-image,
+.file-preview video.preview-video {
+    width: 100%;
+    max-height: 300px;
+    object-fit: contain;
+}
+
+.file-preview audio.preview-audio {
+    width: 100%;
+}
+
+.tumblr-feed {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/**/
+/* Container */
+#postsContainer.tumblr-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* Tabs Layout */
+.tumblr-feed .tabs-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.tumblr-feed .tab-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.tumblr-feed .tab-button {
+    padding: 8px 16px;
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    background: var(--tab-bg);
+    color: var(--tab-color);
+    font-weight: 500;
+    transition: background 0.3s;
+}
+
+.tumblr-feed .tab-button.active {
+    background: var(--tab-active-bg);
+    color: var(--tab-active-color);
+}
+
+.tumblr-feed .tab-contents {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.tumblr-feed .tab-content {
+    display: none;
+}
+
+.tumblr-feed .tab-content.active {
+    display: flex;
+    gap: 3rem;
+}
+
+/* Feed Item */
+.feed-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 0.4rem;
+    border-radius: 8px;
+    background: var(--feed-bg);
+    box-shadow: var(--feed-shadow);
+    color: var(--text);
+    border-bottom: 1px solid #ddd;
+}
+
+/* Post Header */
+.post-header.hflex {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-icon img.profile-thumb {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-time .username {
+    font-weight: 600;
+}
+
+.user-time .timestamp {
+    font-size: 0.85rem;
+    color: var(--text-light);
+}
+
+/* Media */
+.post-media {
+    width: 100%;
+}
+
+.preview_image_wrap__Q29V8 {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.post-image {
+    max-width: 100%;
+    border-radius: 6px;
+    object-fit: contain;
+}
+
+.video-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.videocon .video-player {
+    width: 100%;
+    max-height: 400px;
+    border-radius: 6px;
+}
+
+/* Theater and Quality */
+.buttcon {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.buttonx {
+    padding: 6px 10px;
+    background: var(--button-bg);
+    color: var(--button-color);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.buttonx:hover {
+    background: var(--button-hover-bg);
+}
+
+/* Post Actions */
+.post-actions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.like,
+.comment {
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+/* More Dropdown */
+.more-wrapper {
+    position: relative;
+}
+
+.more-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.tumblr-feed .dropdown {
+    position: absolute;
+    top: 24px;
+    right: 0;
+    background: var(--dropdown-bg);
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: var(--dropdown-shadow);
+    z-index: 100;
+}
+
+.tumblr-feed .dropdown.hidden {
+    display: none;
+}
+
+.report-btn {
+    padding: 8px 12px;
+    width: 100%;
+    background: none;
+    border: none;
+    text-align: left;
+    color: var(--danger);
+    cursor: pointer;
+}
+
+/* Comments */
+.comments-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+}
+
+.comment-controls {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.comment-sort {
+    padding: 4px 8px;
+}
+
+.comments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.comment {
+    background: var(--comment-bg);
+    padding: 8px 12px;
+    border-radius: 4px;
+    color: var(--text);
+}
+
+.comment-top {
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+.comment-reactions {
+    font-size: 0.85rem;
+    color: var(--text-light);
+}
+
+.report-comment,
+.edit-comment,
+.delete-comment {
+    margin-right: 6px;
+    background: none;
+    border: none;
+    font-size: 0.85rem;
+    cursor: pointer;
+    color: var(--action-color);
+}
+
+.comment-form {
+    display: flex;
+    gap: 8px;
+}
+
+.comment-form input {
+    /* flex: 1; */
+    /* padding: 6px 10px; */
+    /* border: 1px solid var(--border); */
+    border-radius: 4px;
+}
+
+.comment-form button {
+    padding: 6px 12px;
+    background: var(--button-bg);
+    color: var(--button-color);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* Default light theme */
+.theme-light {
+    --tab-bg: #f1f1f1;
+    --tab-color: #333;
+    --tab-active-bg: #333;
+    --tab-active-color: #fff;
+
+    --feed-bg: #fff;
+    --feed-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+
+    --text: #222;
+    --text-light: #777;
+
+    --border: #ddd;
+
+    --button-bg: #007bff;
+    --button-color: #fff;
+    --button-hover-bg: #0056b3;
+
+    --dropdown-bg: #fff;
+    --dropdown-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    --comment-bg: #f9f9f9;
+    --action-color: #007bff;
+    --danger: #d33;
+}
+
+/* Dark mode override */
+.theme-dark {
+    --tab-bg: #333;
+    --tab-color: #ccc;
+    --tab-active-bg: #eee;
+    --tab-active-color: #111;
+
+    --feed-bg: #222;
+    --feed-shadow: 0 2px 6px rgba(255, 255, 255, 0.05);
+
+    --text: #f0f0f0;
+    --text-light: #999;
+
+    --border: #444;
+
+    --button-bg: #0d6efd;
+    --button-color: #fff;
+    --button-hover-bg: #0b5ed7;
+
+    --dropdown-bg: #2a2a2a;
+    --dropdown-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+
+    --comment-bg: #2f2f2f;
+    --action-color: #4da3ff;
+    --danger: #ff5555;
+}

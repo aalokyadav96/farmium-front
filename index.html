@@ -1,19 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#4285f4" />
-    <meta name="description" content="a written description of the page">
-    <title>Your App</title>
-    <link rel="stylesheet" href="/css/style.css" />
+  <!-- Charset and viewport -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Title and Description -->
+  <title>Vanilla SPA</title>
+  <meta name="description" content="A minimal, performant single-page application built with vanilla JavaScript.">
+
+  <!-- SEO Keywords -->
+  <meta name="keywords" content="JavaScript SPA, Vanilla JS, frontend, single-page application, client-side routing">
+
+  <!-- Author -->
+  <meta name="author" content="Your Name or Org" />
+
+  <!-- Theme Color (for PWA / browser bar) -->
+  <meta name="theme-color" content="#ffffff" />
+
+  <!-- Open Graph (OG) Meta Tags for Social Sharing -->
+  <meta property="og:title" content="Vanilla SPA" />
+  <meta property="og:description" content="A minimal, performant single-page app in pure JavaScript." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://yourdomain.com/" />
+  <meta property="og:image" content="https://yourdomain.com/assets/preview.png" />
+
+  <!-- Twitter Card Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Vanilla SPA" />
+  <meta name="twitter:description" content="Built using vanilla JavaScript and no framework." />
+  <meta name="twitter:image" content="https://yourdomain.com/assets/preview.png" />
+
+  <!-- Manifest -->
+  <link rel="manifest" href="/manifest.json" />
+
+  <!-- Sitemap -->
+  <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
+
+  <!-- Favicon -->
+  <link rel="icon" href="/assets/favicon.ico" type="image/x-icon" />
+
+  <!-- Stylesheet -->  
+  <!-- <link rel="stylesheet" href="/js/assets/styles.css" /> -->
+  <link rel="stylesheet" href="/css/style.css" preload />
 </head>
 <body>
-    <noscript>
-        <p>JavaScript is disabled in your browser. Please enable it to view this page properly.</p>
-        <p>If you do not want to enable JavaScript, we have non JavaScript version too.<a href="#">Click here for Plaintext HTML version</a></p>
-    </noscript>
-    <div id="app" class="app">Hi Welcome to Farmium</div>
-    <script src="/js/app.js" type="module"></script>
+  <noscript>
+    <p>JavaScript is disabled in your browser. Please enable it to view this page properly.</p>
+    <p>If you do not want to enable JavaScript, we have non JavaScript version too.
+      <a href="#">Click here for Plaintext HTML version</a>
+    </p>
+  </noscript>
+
+  <!-- <div id="app"></div> -->
+  <div id="app" class="app">
+    <header id="pageheader" class="pageheader"></header>
+    <nav id="primary-nav" class="primary-nav"></nav>
+    <div id="secondary-nav" class="secondary-nav"></div>
+    <div class="vflex">
+      <!-- <div id="stickycon"><button id="install-pwa" style="display:none;">Install App</button></div> -->
+      <main id="content" class="main-content"></main>
+    </div>
+    <footer id="pagefooter" class="pagefooter"></footer>
+  </div>
+  <script type="module" src="/js/app.js"></script>
 </body>
 </html>

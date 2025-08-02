@@ -42,23 +42,21 @@ const createNavItem = (href, label) => {
 /** Navigation Bar */
 const createNav = () => {
     const navItems = [
+        { href: "/grocery", label: "Grocery" },
         { href: "/dash", label: "Dash" },
-        { href: "/crops", label: "Crops" },
-        { href: "/farms", label: "Farms" },
-        { href: "/baitos", label: "Baito" },
         { href: "/places", label: "Places" },
         { href: "/events", label: "Events" },
-        { href: "/feed", label: "Feed" },
-        { href: "/posts", label: "Posts" },
-        { href: "/artists", label: "Artists" },
-        { href: "/itinerary", label: "Itinerary" },
+        { href: "/baitos", label: "Baito" },
+        { href: "/search", label: "Search" },
+        { href: "/social", label: "Social" },
+        { href: "/farms", label: "Farms" },
+        { href: "/crops", label: "Crops" },
+        { href: "/recipes", label: "Recipes" },
         { href: "/products", label: "Products" },
         { href: "/tools", label: "Tools" },
-        { href: "/recipes", label: "Recipes" },
-        { href: "/search", label: "Search" },
-        { href: "/merechats", label: "FarmChat" },
-        { href: "/livechat", label: "LiveChat" },
-        { href: "/chats", label: "UserChat" },
+        { href: "/itinerary", label: "Itinerary" },
+        { href: "/artists", label: "Artists" },
+        { href: "/posts", label: "Posts" },
     ];
 
     const nav = document.createElement("div");

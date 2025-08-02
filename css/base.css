@@ -10,10 +10,12 @@ body {
   color: var(--color-fg);
   line-height: 1.5;
   font-size: var(--font-size-base);
+  margin: 0 auto;
+  width: 100%;
 }
 
 a {
-  color: var(--color-accent);
+  color: var(--color-link);
   text-decoration: none;
 }
 
@@ -29,12 +31,12 @@ hr {
 
 .button {
   display: inline-block;
-  padding: var(--space-sm) var(--space-md);
+  /* padding: var(--space-sm) var(--space-md); */
   background-color: var(--color-btn-bg);
   color: var(--color-btn-fg);
   border: none;
   border-radius: var(--radius-md);
-  font-size: var(--font-size-base);
+  /* font-size: var(--font-size-base); */
   cursor: pointer;
   transition: background-color 0.2s ease-in-out;
 }
@@ -121,6 +123,7 @@ textarea {
 
 main {
   padding: 0.6rem;
+  min-height: 100vh;
 }
 
 .hvflex {

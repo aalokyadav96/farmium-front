@@ -3,7 +3,8 @@
     --color-bg: #ffffff;
     --color-fg: #1a1a1a;
     --color-muted: #666666;
-    --color-accent: #3b82f6;
+    --color-accent: #003fa3;
+    --color-link: #003994;
     --color-border: #e5e7eb;
   
     --color-btn-bg: var(--color-accent);

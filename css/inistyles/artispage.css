@@ -1,5 +1,4 @@
 .artispage {
-    padding: 1.5rem;
     max-width: 1000px;
     margin: 0 auto;
     /* background-color: #fff; */
@@ -83,6 +82,10 @@
 .artispage .report-btn:hover {
     background-color: #b52a38;
 }
+
+/**/
+
+/**/
 
 .artispage .editdiv {
     margin-left: 1rem;

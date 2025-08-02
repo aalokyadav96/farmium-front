@@ -1,6 +1,6 @@
-.protoolspage {
+/* .protoolspage {
     padding: 20px;
-  }
+  } */
   
   .protoolspage h2 {
     font-size: 24px;
@@ -88,13 +88,13 @@
     min-width: 20px;
     text-align: center;
   }
-  
+/*   
   .button {
     padding: 6px 10px;
     cursor: pointer;
     border: none;
     border-radius: 4px;
-  }
+  } */
   
   .primary-button {
     background-color: #28a745;

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Status Page</title>
+  <style>
+    body {
+      font-family: monospace;
+      background: #0e0e0e;
+      color: #e0e0e0;
+      padding: 2rem;
+    }
+    h1 { color: #00ff90; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    th, td {
+      border-bottom: 1px solid #333;
+      padding: 0.5rem;
+      text-align: left;
+    }
+    .status-up { color: #00ff90; }
+    .status-down { color: #ff4b4b; }
+    .updated { font-size: 0.9em; color: #888; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>Status Page</h1>
+  <table id="status-table">
+    <thead>
+      <tr>
+        <th>Service</th>
+        <th>Status</th>
+        <th>Latency</th>
+      </tr>
+    </thead>
+    <tbody id="status-body">
+      <!-- Rows will be injected here -->
+    </tbody>
+  </table>
+  <div class="updated" id="last-updated">Last checked: never</div>
+
+  <script>
+    const services = [
+      { name: "Google", url: "https://www.google.com" },
+      { name: "Cloudflare", url: "https://www.cloudflare.com" },
+      { name: "GitHub", url: "https://www.github.com" },
+      { name: "My API", url: "https://example.com/api/health" } // replace with your API
+    ];
+
+    async function checkService(service) {
+      const start = performance.now();
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 5000);
+
+        const response = await fetch(service.url, {
+          method: "GET",
+          mode: "no-cors", // Avoid CORS issues with simple GET
+          signal: controller.signal
+        });
+        clearTimeout(timeout);
+
+        const latency = Math.round(performance.now() - start);
+        return { name: service.name, status: "up", latency };
+      } catch (e) {
+        return { name: service.name, status: "down", latency: "-" };
+      }
+    }
+
+    async function updateStatus() {
+      const tbody = document.getElementById("status-body");
+      tbody.innerHTML = "";
+
+      const results = await Promise.all(services.map(checkService));
+
+      results.forEach(result => {
+        const row = document.createElement("tr");
+
+        const nameCell = document.createElement("td");
+        nameCell.textContent = result.name;
+
+        const statusCell = document.createElement("td");
+        statusCell.textContent = result.status.toUpperCase();
+        statusCell.className = result.status === "up" ? "status-up" : "status-down";
+
+        const latencyCell = document.createElement("td");
+        latencyCell.textContent = result.latency === "-" ? "-" : `${result.latency}ms`;
+
+        row.appendChild(nameCell);
+        row.appendChild(statusCell);
+        row.appendChild(latencyCell);
+        tbody.appendChild(row);
+      });
+
+      document.getElementById("last-updated").textContent =
+        "Last checked: " + new Date().toLocaleTimeString();
+    }
+
+    updateStatus();
+    setInterval(updateStatus, 30000); // update every 30 seconds
+  </script>
+</body>
+</html>

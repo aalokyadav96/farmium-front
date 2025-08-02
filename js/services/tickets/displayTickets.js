@@ -3,7 +3,6 @@ import { Button } from "../../components/base/Button.js";
 import { createElement } from "../../components/createElement.js";
 import { deleteTicket, editTicket } from "./editTicket.js";
 import { showBuyTicketModal } from "./showBuy.js";
-// import { showBuyTicketModal } from "./showBuyModal.js";
 import { verifyTicketAndShowModal } from "./verifyTicket.js";
 import { createButton } from "../../components/eventHelper.js";
 import { addTicketForm } from './ticketService.js';

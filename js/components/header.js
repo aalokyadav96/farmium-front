@@ -4,6 +4,7 @@ import { navigate } from "../routes/index.js";
 import { logout } from "../services/auth/authService.js";
 import { settingsSVG, searchSVG, moonSVG, profileSVG, shopBagSVG, logoutSVG } from "./svgs.js";
 import { createElement } from "../components/createElement.js";
+import {sticky} from "./sticky.js";
 
 // Theme logic
 const themes = ["light", "dark", "solarized", "dimmed"];
@@ -30,7 +31,7 @@ function createIconButton(svg, href, onClick) {
   const icon = createElement("span", { class: "icon" });
   icon.innerHTML = svg;
 
-  const anchor = createElement("button", { class: "iconic-button" }, [icon]);
+  const anchor = createElement("div", { class: "iconic-button" }, [icon]);
   if (href) anchor.href = href;
   if (onClick) anchor.addEventListener("click", onClick);
 
@@ -64,11 +65,11 @@ function createProfileSection(userId) {
   // const profileImgSrc = userId
   //   ? `${SRC_URL}/userpic/thumb/${userId}.jpg`
   //   : `${SRC_URL}/userpic/thumb/thumb.jpg`;
-  const profileImgSrc =`${SRC_URL}/userpic/thumb/${userId}.jpg`;
+  const profileImgSrc = `${SRC_URL}/userpic/thumb/${userId}.jpg`;
   const img = createElement("img", {
     src: profileImgSrc,
     alt: "Profile",
-    loading: "lazy",
+    // loading: "lazy",
     class: "profile-pic"
   });
 
@@ -138,7 +139,7 @@ function renderUserSection() {
 
   function render() {
     container.innerHTML = "";
-    const userId = getState("user");
+    const userId = getState("user") || localStorage.getItem("user");
 
     if (!!getState("token")) {
       container.appendChild(createProfileSection(userId));
@@ -172,8 +173,13 @@ function createHeader() {
   header.className = "main-header";
 
   const logo = createElement("div", { class: "logo" }, [
-    createElement("a", { href: "/", class: "logo-link" }, ["Farmium"])
+    createElement("a", { href: "/home", class: "logo-link" }, ["Farmium"])
   ]);
+
+  let sky = createElement("div",{class:"hflexcen"},[]);
+  if (location.pathname != "/home") {
+    sky.appendChild(sticky());
+  }
 
   const nav = createElement("div", { class: "header-content" }, []);
 
@@ -191,7 +197,7 @@ function createHeader() {
   nav.appendChild(createIconButton(moonSVG, null, toggleTheme));
   nav.appendChild(renderUserSection());
 
-  header.replaceChildren(logo, nav);
+  header.replaceChildren(logo, sky, nav);
   loadTheme();
 }
 

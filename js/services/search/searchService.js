@@ -4,6 +4,8 @@ import Toast from "../../components/ui/Toast.mjs";
 // Function to display search form and tabs
 import { createTabs } from "../../components/ui/createTabs.js"; // adjust path
 import { createElement } from "../../components/createElement.js";
+import Button from "../../components/base/Button.js";
+import { searchSVG } from "../../components/svgs.js";
 
 export async function displaySearchForm(container) {
   container.innerHTML = "";
@@ -22,20 +24,32 @@ export async function displaySearchForm(container) {
     class: "search-field",
   });
 
-  const searchButton = createElement("button", {
-    id: "search-button",
-    class: "search-btn"
-  }, [createElement("svg", {
-    class: "srchicon",
-    viewBox: "0 0 24 24",
-    width: "100%",
-    height: "100%",
-    role: "img",
-    stroke: "#000000"
-  }, [
-    createElement("circle", { cx: "11", cy: "11", r: "8" }),
-    createElement("line", { x1: "21", y1: "21", x2: "16.65", y2: "16.65" })
-  ])]);
+  // const searchButton = Button("Search",{},[]);
+  // searchButton.innerHTML = searchSVG ;
+  
+  const searchButton = document.createElement("button");
+  searchButton.id = "search-button";
+  searchButton.className = "search-btn";
+  searchButton.innerHTML = `
+    <svg class="srchicon" viewBox="0 0 24 24" width="100%" height="100%" role="img" stroke="#000000">
+      <circle cx="11" cy="11" r="8"></circle>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>`;
+    
+  // const searchButton = createElement("button", {
+  //   id: "search-button",
+  //   class: "search-btn"
+  // }, [createElement("svg", {
+  //   class: "srchicon",
+  //   viewBox: "0 0 24 24",
+  //   width: "100%",
+  //   height: "100%",
+  //   role: "img",
+  //   stroke: "#000000"
+  // }, [
+  //   createElement("circle", { cx: "11", cy: "11", r: "8" }),
+  //   createElement("line", { x1: "21", y1: "21", x2: "16.65", y2: "16.65" })
+  // ])]);
 
   const autocompleteList = createElement("ul", {
     id: "autocomplete-list",

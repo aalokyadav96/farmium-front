@@ -1,6 +1,6 @@
-.recipepage {
+/* .recipepage {
   padding: 20px;
-}
+} */
 
 .recipepage h2 {
   font-size: 24px;
@@ -73,7 +73,7 @@
   list-style: disc;
 }
 
-.progress-bar {
+.recipepage .progress-bar {
   border-radius: 6px;
   position: relative;
   height: 24px;
@@ -81,13 +81,13 @@
   overflow: hidden;
 }
 
-.progress-fill {
+.recipepage .progress-fill {
   background-color: #28a745;
   height: 100%;
   transition: width 0.3s ease-in-out;
 }
 
-.progress-text {
+.recipepage .progress-text {
   position: absolute;
   left: 50%;
   top: 3px;

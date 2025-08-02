@@ -16,9 +16,11 @@
   .farm-banner img {
     width: 100%;
     height: auto;
+    aspect-ratio: 11 / 3;
     border-radius: 6px;
     margin-bottom: 20px;
-  }
+    object-fit: cover;
+}
   
   .farm-layout {
     display: flex;
@@ -71,11 +73,11 @@
     border-radius: 4px;
     margin-bottom: 10px;
   }
-  
+/*   
   .crop-card h4 {
     margin: 0;
     font-size: 18px;
-  }
+  } */
   
   .crop-card p {
     font-size: 15px;

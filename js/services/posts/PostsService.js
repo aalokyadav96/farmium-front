@@ -129,7 +129,7 @@ function createPostCard(post) {
         createElement("strong", {}, ["Posted on: "]),
         new Date(post.createdAt).toLocaleString()
       ]),
-      createElement("p", {}, [post.content || "No content available."])
+      // createElement("p", {}, [post.content || "No content available."])
     ])
   ])]);
 }

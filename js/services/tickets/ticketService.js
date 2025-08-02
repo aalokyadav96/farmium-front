@@ -190,13 +190,13 @@ function addTicketForm(eventId, ticketList) {
     seatStartInput.type = 'number';
     seatStartInput.id = 'seat-start';
     seatStartInput.placeholder = 'Start Seat Number (e.g. 1)';
-    seatStartInput.required = true;
+    seatStartInput.required = false;
 
     const seatEndInput = document.createElement('input');
     seatEndInput.type = 'number';
     seatEndInput.id = 'seat-end';
     seatEndInput.placeholder = 'End Seat Number (e.g. 100)';
-    seatEndInput.required = true;
+    seatEndInput.required = false;
 
     const submitButton = document.createElement('button');
     submitButton.type = 'submit';

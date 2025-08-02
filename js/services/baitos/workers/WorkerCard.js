@@ -4,7 +4,7 @@ import { SRC_URL } from "../../../api/api.js";
 import { openHireWorkerModal } from "./WorkerModal.js";
 
 export function HireWorkerCard(worker, isLoggedIn) {
-  const photo = createElement("div", { class: "worker-photo" });
+  const photo = createElement("div", { class: "worker-photo", alt:"worker-photo" });
 
   if (worker.profile_picture) {
     photo.appendChild(createElement("img", {

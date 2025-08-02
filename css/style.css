@@ -1,34 +1,34 @@
 @import url(theme.css);
 @import url(base.css);
 @import url(header5.css);
-@import url(navx11.css);
-/* @import url(navgrid.css); */
+/* @import url(navx11.css); */
+@import url(navwave.css);
 @import url(authpage.css);
 @import url(profile.css);
 @import url(chat.css);
-@import url(feed3.css);
-@import url(feedimages.css); 
-@import url(foreign.css);
 @import url(form.css);
-@import url(placepage.css);
-@import url(artispage.css);
-@import url(artists.css);
-@import url(places1.css);
-@import url(eventpage.css);
-@import url(itinerary.css);
-@import url(events1.css);
-@import url(posts2.css);
-@import url(postpage.css);
 @import url(adminpage.css);
-@import url(home1.css);
-/* @import url(baitos1.css); */
-/* @import url(baitopage.css); */
-/* @import url(baitotabbed1.css); */
-/* @import url(baitoworkers3.css); */
-@import url(baitofull1.css);
+@import url(home6.css);
+/* @import url(home8.css); */
 @import url(onechat1.css);
 @import url(merechatcon.css);
 @import url(farmstyles.css);
 @import url(search.css);
 @import url(livechat.css);
-@import url(sticky.css);
+@import url(sticky2.css);
+
+/**/
+
+/* @import url(inistyles/feed4.css); */
+@import url(inistyles/tumblr.css);
+@import url(inistyles/feedimages.css); 
+@import url(inistyles/placepage.css);
+@import url(inistyles/artistpage.css);
+@import url(inistyles/artists.css);
+@import url(inistyles/places2.css);
+@import url(inistyles/eventpage1.css);
+@import url(inistyles/itinerary.css);
+@import url(inistyles/events2.css);
+@import url(inistyles/posts2.css);
+@import url(inistyles/postpage.css);
+@import url(inistyles/baitos1.css);

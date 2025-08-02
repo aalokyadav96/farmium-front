@@ -2,20 +2,17 @@ import { createheader } from "../components/header.js";
 import { createNav, highlightActiveNav } from "../components/navigation.js";
 import { secnav } from "../components/secNav.js";
 import { render } from "./router.js";
-import { sticky } from "../components/sticky.js";
+// import { sticky } from "../components/sticky.js";
 import {
   getState,
   setState,
   getRouteState,
   hasRouteModule,
   getRouteModule,
-  setRouteModule
-} from "../state/state.js";
-
-import {
+  setRouteModule,
   saveScroll,
-  restoreScroll
-} from "../state/scrollState.js";
+  restoreScroll,
+} from "../state/state.js";
 
 let isNavigating = false;
 
@@ -27,6 +24,7 @@ async function loadContent(url) {
   const header = document.getElementById("pageheader");
   const nav = document.getElementById("primary-nav");
   const secNavElement = document.getElementById("secondary-nav");
+  const stickycon = document.getElementById("stickycon");
   const main = document.getElementById("content");
   const footer = document.getElementById("pagefooter");
 
@@ -57,7 +55,7 @@ async function loadContent(url) {
   // const navContent = createNav();
   // if (navContent) nav.appendChild(navContent);
   const navContent = createNav();
-  if (navContent) {
+  if (navContent && url != "/home") {
     nav.appendChild(navContent);
     highlightActiveNav(url); // 🔥 This makes sure the active link reflects current URL
   }
@@ -66,10 +64,13 @@ async function loadContent(url) {
   const secNav = secnav();
   if (secNav) secNavElement.appendChild(secNav);
 
-  footer.appendChild(sticky());
+  // if (navContent && url != "/home") {
+  // // footer.appendChild(sticky());
+  // stickycon.appendChild(sticky());
+  // }
 
   // Render page module
-  const isLoggedIn = Boolean(getState("user"));
+  // const isLoggedIn = Boolean(getState("user"));
   await render(url, main);
 
   // Restore scroll

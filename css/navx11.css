@@ -1,3 +1,9 @@
+.primary-nav {
+  position: sticky;
+  top: 0;
+  z-index: 1; /* Above header content */
+  background: var(--color-bg); /* Needed to cover other content */
+}
 
 .navigation {
   width: 100%;

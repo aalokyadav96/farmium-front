@@ -1,237 +1,166 @@
-/* .cropspage {
-    padding: 20px;
-  } */
-  .cropspage {
-    display: flex;
-    gap: 1rem;
-  }
-  
-  .cropsaside {
-    width: 220px;
-    flex-shrink: 0;
-  }
-  
-  .cropsmain {
-    flex: 1;
-  }
-  
-  .catalogue-layout {
-    display: flex;
-    gap: 30px;
-  }
-  
-  .catalogue-main {
-    flex-grow: 1;
-  }
-  
-  .top-controls {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-  }
-  
-  .search-box,
-  .sort-box {
-    padding: 6px 10px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-  }
-  
-  .view-toggle {
-    display: flex;
-    gap: 10px;
-  }
-  
-  .view-toggle button {
-    padding: 6px 10px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .view-toggle button.active {
-    background-color: #007bff;
-    color: white;
-  }
-  
-  .tabs {
-    margin-bottom: 20px;
-  }
-  
-  .tabs button {
-    padding: 6px 12px;
-    border-radius: 4px;
-    margin: 4px;
-    border: none;
-    background-color: #28a745;
-    color: white;
-    cursor: pointer;
-  }
-  
-  .tab-content.grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 20px;
-  }
-  
-  .crop-card.grid {
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    padding: 15px;
-    text-align: center;
-  }
-  
-  .crop-card.grid img {
-    max-width: 100%;
-    height: auto;
-    aspect-ratio: 25/14;
-    border-radius: 6px;
-    margin-bottom: 10px;
-  }
-  
-  .crop-card.grid h4 {
-    margin: 0;
-    font-size: 18px;
-  }
-  
-  .crop-info {
-    font-size: 15px;
-    margin: 5px 0;
-  }
-  
-  .season-indicator {
-    font-size: 13px;
-    margin: 5px 0;
-  }
-  
-  .off-season {
-    color: red;
-  }
-  
-  .tag-wrap {
-    margin-top: 8px;
-  }
-  
-  .crop-card.grid button {
-    margin-top: 10px;
-    padding: 6px 10px;
-    background-color: #007bff;
-    color: white;
-    border-radius: 4px;
-    border: none;
-    cursor: pointer;
-  }
-  
-  .catalogue-aside {
-    width: 300px;
-  }
-  
-  .catalogue-aside h3 {
-    margin-top: 20px;
-    font-size: 16px;
-  }
-  
-  .promo-box {
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    padding: 10px;
-    margin-bottom: 15px;
-    font-size: 15px;
-  }
-  
-  .promo-link {
-    display: block;
-    margin: 5px 0;
-    color: #007bff;
-    text-decoration: none;
-  }
-  
-  .promo-link:hover {
-    text-decoration: underline;
-  }
-  /**/
-  /* Mobile-friendly enhancements */
-@media (max-width: 768px) {
-  .catalogue-layout {
-    flex-direction: column;
-    gap: 20px;
-  }
+.cropspage {
+  padding: 1rem;
+  background: #f9f9f9;
+  box-sizing: border-box;
+}
 
-  .catalogue-aside {
-    width: 100%;
-  }
+.catalogue-layout {
+  display: grid;
+  grid-template-columns: 1fr 300px; /* Main content and sidebar */
+  gap: 2rem;
+  align-items: start;
+}
 
-  .top-controls {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-  }
+/* Main Column */
+.catalogue-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
 
-  .search-box,
-  .sort-box {
-    width: 100%;
-    font-size: 15px;
-  }
+/* Top Controls */
+.top-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
 
-  .view-toggle {
-    justify-content: space-between;
-  }
+.search-box,
+.sort-box {
+  padding: 0.5rem;
+  font-size: 1rem;
+}
 
-  .view-toggle button {
-    flex: 1;
-    font-size: 15px;
-  }
+.view-toggle button {
+  padding: 0.5rem 1rem;
+  margin-left: 0.5rem;
+  border: 1px solid #ccc;
+  background: white;
+  cursor: pointer;
+}
 
-  .tabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: center;
-  }
+.view-toggle .active {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
 
-  .tabs button {
-    font-size: 15px;
-    padding: 8px 10px;
-    flex: 1;
-  }
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+}
 
-  .tab-content.grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
+.tabs button {
+  padding: 0.5rem 1rem;
+  background: #eee;
+  border: none;
+  cursor: pointer;
+}
 
-  .crop-card.grid {
-    padding: 12px;
-    text-align: left;
-  }
+.tabs .active {
+  background: #007bff;
+  color: white;
+}
 
-  .crop-card.grid h4 {
-    font-size: 16px;
-    margin-bottom: 5px;
-  }
+/* Catalogue Grid */
+#catalogue-container {
+  display: grid;
+}
 
-  .crop-info,
-  .season-indicator {
-    font-size: 13px;
-  }
+.tab-content.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+}
 
-  .crop-card.grid button {
-    width: 100%;
-    font-size: 15px;
-  }
+.crop-card {
+  background: white;
+  padding: 1rem;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: center;
+}
 
-  .promo-box {
-    font-size: 13px;
-    padding: 10px;
-  }
+.crop-card img {
+  width: 100%;
+  max-width: 100px;
+  height: auto;
+}
 
-  .promo-link {
-    font-size: 13px;
-  }
+.crop-info {
+  font-size: 0.9rem;
+  color: #555;
+}
 
-  .catalogue-aside h3 {
-    font-size: 15px;
-  }
+.season-indicator {
+  font-weight: bold;
+}
+
+.off-season {
+  color: #c00;
+}
+
+/* Sidebar (Aside) */
+.catalogue-aside {
+  background: #fff;
+  padding: 1rem;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.catalogue-aside h3 {
+  margin-top: 1.5rem;
+  font-size: 1.1rem;
+}
+
+.cta-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.action-btn {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+.button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+.promo-box {
+  margin: 0.5rem 0;
+  background: #f1f1f1;
+  padding: 0.5rem;
+  border-radius: 4px;
+}
+
+.promo-box p,
+.promo-link {
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.promo-link {
+  display: block;
+  margin-bottom: 0.25rem;
+  text-decoration: none;
+}
+
+.promo-link:hover {
+  text-decoration: underline;
 }

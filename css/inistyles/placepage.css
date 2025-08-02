@@ -19,6 +19,7 @@
     height: auto;
     border-radius: 8px;
     object-fit: cover;
+    aspect-ratio: 11 / 4;
 }
 
 .placepage #placedetails h1 {
@@ -63,7 +64,6 @@
     display: flex;
     gap: 1rem;
     margin-bottom: 1rem;
-    flex-wrap: wrap;
 }
 
 .placepage .tab-button {

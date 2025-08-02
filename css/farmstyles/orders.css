@@ -33,7 +33,7 @@
   }
   .orders-page .bulk-actions button {
     margin-right: 10px;
-    background-color: #48bb78;
+    background-color: #008236;
     border: none;
     padding: 8px 15px;
     color: white;
@@ -41,7 +41,7 @@
     cursor: pointer;
   }
   .orders-page .bulk-actions button:hover {
-    background-color: #38a169;
+    background-color: #027e3c;
   }
   
   /* 📋 Orders Table */
@@ -63,14 +63,14 @@
   .orders-page .orders-table td button {
     padding: 6px 10px;
     margin: 2px;
-    background-color: #4a90e2;
+    background-color: #0056b9;
     border: none;
     color: white;
     border-radius: 4px;
     cursor: pointer;
   }
   .orders-page .orders-table td button:hover {
-    background-color: #357ab8;
+    background-color: #015096;
   }
   
   /* 📦 Checkbox Styling */

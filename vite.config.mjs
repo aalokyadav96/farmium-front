@@ -1,25 +1,38 @@
-// vite.config.js
 import { defineConfig } from 'vite';
 
-// let API_URL = 'https://zincate.onrender.com';
-let API_URL = 'http://localhost:7000';
-let AGI_URL = 'http://localhost:7000';
-let SRC_URL = 'http://localhost:7000';
-let SEARCH_URL = 'http://localhost:7000';
-
 export default defineConfig({
-  root: '.',  // the root directory of your project
+  root: '.',
   build: {
     minify: 'terser',
     chunkSizeWarningLimit: 1000,
-    outDir: 'dist',  // output directory for built files
+    outDir: 'dist',
   },
-  server: {
-    proxy: {
-      '/api': API_URL, // Proxy API requests to Go server
-      '/agi': AGI_URL, // Proxy API requests to Go server
-      '/static': SRC_URL, // Proxy API requests to Go server
-      '/api/search': SEARCH_URL, // Proxy API requests to Go server
-    },
+  // server: {
+  //   proxy: {
+  //     // Proxy /api/v1/* → http://localhost:4000/api/v1/*
+  //     '/api/v1': {
+  //       target: 'http://localhost:4000',
+  //       changeOrigin: true
+  //     },
+
+  //     // Proxy /api/search → http://localhost:4000/api/search
+  //     '/api/search': {
+  //       target: 'http://localhost:4000',
+  //       changeOrigin: true
+  //     },
+
+  //     // Proxy /static/* → http://localhost:4000/static/*
+  //     '/static': {
+  //       target: 'http://localhost:4000',
+  //       changeOrigin: true
+  //     }
+  //   }
+  // },
+  rollupOptions: {
+    treeshake: {
+      moduleSideEffects: false,
+      propertyReadSideEffects: false,
+      tryCatchDeoptimization: false
+    }
   },
 });

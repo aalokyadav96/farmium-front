@@ -1,6 +1,6 @@
 export const createQualitySelector = (video, baseSrc, availableResolutions) => {
     const selector = document.createElement("select");
-    selector.className = "quality-selector";
+    selector.className = "quality-selector buttonx";
   
     const allQualities = ["original", 1440, 1080, 720, 480, 360, 240, 144];
     const available = ["original", ...allQualities.filter((q) => availableResolutions.includes(q))];
