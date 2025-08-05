@@ -5,6 +5,8 @@ import { logout } from "../services/auth/authService.js";
 import { settingsSVG, searchSVG, moonSVG, profileSVG, shopBagSVG, logoutSVG } from "./svgs.js";
 import { createElement } from "../components/createElement.js";
 import {sticky} from "./sticky.js";
+import { resolveImagePath, EntityType, PictureType } from "../utils/imagePaths.js";
+
 
 // Theme logic
 const themes = ["light", "dark", "solarized", "dimmed"];
@@ -60,25 +62,17 @@ function createDropdownMenu(id, labelText, items) {
   return createElement("div", { class: "dropdown" }, [toggle, menu]);
 }
 
-// Profile dropdown
+
 function createProfileSection(userId) {
-  // const profileImgSrc = userId
-  //   ? `${SRC_URL}/userpic/thumb/${userId}.jpg`
-  //   : `${SRC_URL}/userpic/thumb/thumb.jpg`;
-  const profileImgSrc = `${SRC_URL}/userpic/thumb/${userId}.jpg`;
   const img = createElement("img", {
-    src: profileImgSrc,
+    src: resolveImagePath(EntityType.USER, PictureType.THUMB, `${userId}.jpg`),
     alt: "Profile",
-    // loading: "lazy",
     class: "profile-pic"
   });
 
-  // img.onerror = () => {
-  //   img.src = `${SRC_URL}/userpic/thumb/thumb.jpg`;
-  // };
-
+  // fallback if image fails to load
   img.onerror = () => {
-    img.src = USER_PH;
+    img.src = resolveImagePath(EntityType.USER, PictureType.THUMB, "thumb.jpg");
   };
 
   const toggle = createElement("div", {
@@ -133,6 +127,79 @@ function createProfileSection(userId) {
   return createElement("div", { class: "dropdown" }, [toggle, menu]);
 }
 
+// // Profile dropdown
+// function createProfileSection(userId) {
+//   // const profileImgSrc = userId
+//   //   ? `${SRC_URL}/userpic/thumb/${userId}.jpg`
+//   //   : `${SRC_URL}/userpic/thumb/thumb.jpg`;
+//   const profileImgSrc = `${SRC_URL}/userpic/thumb/${userId}.jpg`;
+//   const img = createElement("img", {
+//     src: profileImgSrc,
+//     alt: "Profile",
+//     // loading: "lazy",
+//     class: "profile-pic"
+//   });
+
+//   // img.onerror = () => {
+//   //   img.src = `${SRC_URL}/userpic/thumb/thumb.jpg`;
+//   // };
+
+//   // img.onerror = () => {
+//   //   img.src = USER_PH;
+//   // };
+
+//   const toggle = createElement("div", {
+//     class: "profile-toggle",
+//     tabIndex: 0
+//   }, [img]);
+
+//   const links = [
+//     { href: "/profile", text: "Profile", icon: profileSVG },
+//     { href: "/my-orders", text: "My Orders", icon: shopBagSVG },
+//     ...(isAdmin() ? [{ href: "/admin", text: "Admin" }] : []),
+//     { href: "/settings", text: "Settings", icon: settingsSVG }
+//   ];
+
+//   const menu = createElement("div", { class: "profile-menu" });
+
+//   links.forEach(({ href, text, icon }) => {
+//     const label = createElement("span", {}, [text]);
+//     const iconSpan = createElement("span", {});
+//     if (icon) iconSpan.innerHTML = icon;
+
+//     const link = createElement("a", { class: "menu-item", href }, [iconSpan, label]);
+//     link.addEventListener("click", (e) => {
+//       e.preventDefault();
+//       navigate(href);
+//     });
+
+//     menu.appendChild(link);
+//   });
+
+//   const logoutBtn = createElement("button", { class: "menu-item logout" }, []);
+//   logoutBtn.innerHTML = logoutSVG;
+//   logoutBtn.appendChild(createElement("span", {}, ["Logout"]));
+//   logoutBtn.addEventListener("click", async () => await logout());
+
+//   menu.appendChild(logoutBtn);
+
+//   toggle.addEventListener("click", (e) => {
+//     e.stopPropagation();
+//     menu.classList.toggle("open");
+//   });
+
+//   toggle.addEventListener("keydown", (e) => {
+//     if (["Enter", " "].includes(e.key)) {
+//       e.preventDefault();
+//       menu.classList.toggle("open");
+//     }
+//   });
+
+//   document.addEventListener("click", () => menu.classList.remove("open"));
+
+//   return createElement("div", { class: "dropdown" }, [toggle, menu]);
+// }
+
 // User Section
 function renderUserSection() {
   const container = createElement("div", { class: "user-area" });
@@ -177,9 +244,9 @@ function createHeader() {
   ]);
 
   let sky = createElement("div",{class:"hflexcen"},[]);
-  if (location.pathname != "/home") {
+  // if (location.pathname != "/home") {
     sky.appendChild(sticky());
-  }
+  // }
 
   const nav = createElement("div", { class: "header-content" }, []);
 

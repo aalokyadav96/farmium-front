@@ -1,0 +1,100 @@
+#shopping-page {
+    font-family: 'Papyrus', fantasy;
+    background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Colorful_nebula.jpg/1200px-Colorful_nebula.jpg') center/cover no-repeat;
+    padding: 50px;
+    color: #fafafa;
+    filter: hue-rotate(180deg) grayscale(25%);
+    transform: skewY(-1deg);
+  }
+  
+  #shopping-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+    perspective: 1000px;
+  }
+  
+  .shopping-tab.button {
+    background: repeating-conic-gradient(#0ff, #f0f, #ff0, #0ff);
+    color: transparent;
+    text-shadow: 0 0 4px white;
+    font-size: 18px;
+    padding: 16px 20px;
+    border: 5px ridge magenta;
+    border-radius: 50% 20% / 10% 40%;
+    animation: floatUp 3s infinite ease-in-out;
+  }
+  
+  @keyframes floatUp {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+  }
+  
+  #filters label {
+    display: inline-block;
+    margin: 10px;
+    padding: 12px;
+    background-color: rgba(255, 255, 255, 0.1);
+    font-size: 20px;
+    transform: rotate(2deg);
+  }
+  
+  #filters input {
+    border: 4px double #ff69b4;
+    background-color: #fffff0;
+    font-size: 16px;
+  }
+  
+  #sort-options select {
+    font-family: 'Lucida Console', monospace;
+    background: linear-gradient(90deg, #ff8, #8ff);
+    border: 3px dashed teal;
+    font-size: 18px;
+    border-radius: 12px;
+  }
+  
+  #items {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 30px;
+  }
+  
+  .item-card {
+    border: 6px groove #cc00ff;
+    background: linear-gradient(135deg, rgba(0,0,0,0.8), transparent);
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    border-radius: 30px;
+    transform: rotateZ(1deg);
+  }
+  
+  .item-card h3 {
+    font-size: 24px;
+    color: #00ffe0;
+    text-shadow: 2px 2px 4px black;
+    transform: rotate(-2deg);
+  }
+  
+  .item-card span {
+    display: block;
+    font-size: 20px;
+    color: #ff00ff;
+    background-color: #000;
+    padding: 6px;
+    border-radius: 8px;
+    margin-top: 8px;
+  }
+  
+  .item-card button.button {
+    margin-top: 14px;
+    background: url('https://media.giphy.com/media/26AHONQ79FdWZhAI0/giphy.gif') center/cover no-repeat;
+    color: yellow;
+    font-weight: bold;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    text-shadow: 1px 1px 2px black;
+  }
+  

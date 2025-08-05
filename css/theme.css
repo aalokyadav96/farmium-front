@@ -6,12 +6,13 @@
     --color-accent: #003fa3;
     --color-link: #003994;
     --color-border: #e5e7eb;
+    --color-space: #e6e9f7;
   
     --color-btn-bg: var(--color-accent);
     --color-btn-fg: #ffffff;
     --color-btn-hover-bg: #2563eb;
 
-    --stroke-svg: #000;
+    --stroke-svg: #424242;
   
     --font-base: 'Breezesans', Roboto, sans-serif;
     --font-size-sm: 0.875rem;

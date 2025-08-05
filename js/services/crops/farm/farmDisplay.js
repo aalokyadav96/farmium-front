@@ -4,6 +4,7 @@ import Button from "../../../components/base/Button.js";
 import Gallery from "../../../components/ui/Gallery.mjs";
 import { navigate } from "../../../routes/index.js";
 import { getState } from "../../../state/state.js";
+import { resolveImagePath, EntityType, PictureType } from "../../../utils/imagePaths.js";
 
 import {
   renderFarmDetails,
@@ -39,10 +40,13 @@ export async function displayFarm(isLoggedIn, farmId, content) {
   // ——— Banner ———
   const banner = createElement("div", { class: "farm-banner" }, [
     createElement("img", {
-      src: farm.photo ? SRC_URL + farm.photo : "/default-farm.jpg",
+      src: farm.photo
+        ? resolveImagePath(EntityType.FARM, PictureType.PHOTO, farm.photo)
+        : "/default-farm.jpg",
       alt: farm.name
     })
   ]);
+  
 
   // ——— Farm Info ———
   const farmDetails = renderFarmDetails(farm, isCreator);

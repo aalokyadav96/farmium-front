@@ -102,10 +102,11 @@ hr {
 
 svg {
   fill: none;
-  stroke-width: 1.4;
+  stroke-width: 1.8;
   max-width: 3rem;
   max-height: 3rem;
   stroke: var(--stroke-svg);
+  filter: drop-shadow(1px 1px #ddd);
 }
 
 .buttonx {
@@ -124,6 +125,7 @@ textarea {
 main {
   padding: 0.6rem;
   min-height: 100vh;
+  margin-bottom: 4rem;
 }
 
 .hvflex {

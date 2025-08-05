@@ -1,15 +1,18 @@
 import { createElement } from "../../../components/createElement.js";
+import { resolveImagePath, EntityType, PictureType } from "../../../utils/imagePaths.js";
 
 export function displayCropCard(crop) {
     const card = createElement("div", { class: "crop-card" });
 
     if (crop.imageUrl) {
-        card.appendChild(createElement("img", {
-            src: crop.imageUrl,
-            alt: crop.name,
-            class: "crop-card-image"
-        }));
-    }
+        const cropImg = createElement("img", {
+          src: resolveImagePath(EntityType.CROP, PictureType.BANNER, crop.imageUrl),
+          alt: crop.name,
+          class: "crop-card-image"
+        });
+        card.appendChild(cropImg);
+      }
+      
 
     card.append(
         createElement("h4", {}, [crop.name]),

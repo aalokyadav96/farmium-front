@@ -61,7 +61,10 @@ import { handlePurchase } from "../payment/pay.js";
 //     }
 // }
 
-async function addMenu(placeId, menuList, isCreator, isLoggedIn) {
+async function addMenu(placeId, menuList) {
+    let isCreator = true;
+    let isLoggedIn = true;
+
     const menuName = document.getElementById('menu-name').value.trim();
     const menuPrice = parseFloat(document.getElementById('menu-price').value);
     const menuStock = parseInt(document.getElementById('menu-stock').value);
@@ -91,7 +94,7 @@ async function addMenu(placeId, menuList, isCreator, isLoggedIn) {
             
             // Optionally clear list and refetch everything:
             // await displayMenu(menuList.parentElement, placeId, isCreator, isLoggedIn);
-
+            
             // Or just append new menu card directly:
             const menu = response.data;
             const card = MenuCard({
@@ -322,7 +325,7 @@ function addMenuForm(placeId, menuList) {
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
         // await addMenu(placeId, menuList); // You may need to modify this if it needs values from the form
-        await addMenu(placeId, menuList, isCreator, isLoggedIn);
+        await addMenu(placeId, menuList);
         modal.remove();
         document.body.style.overflow = "";
     });

@@ -1,0 +1,119 @@
+.placepage {
+    max-width: 900px;
+    margin: auto;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05);
+  }
+  
+  .place-header {
+    margin-bottom: 16px;
+  }
+  
+  .place-header h1 {
+    margin: 0;
+    font-size: 1.75rem;
+  }
+  
+  .place-header button {
+    font-size: 20px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    transition: color 0.3s ease;
+  }
+  
+  .place-header button:hover {
+    color: #0077cc;
+  }
+  
+  .detail-section.vflex {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  
+  .placedetails {
+    flex: 1;
+    min-width: 280px;
+  }
+  
+  #place-banner img {
+    width: 100%;
+    border-radius: 8px;
+    object-fit: cover;
+    box-shadow: 0 0 5px rgba(0,0,0,0.05);
+  }
+  
+  #placedetails h1 {
+    margin-top: 0;
+    font-size: 1.5rem;
+  }
+  
+  #placedetails p {
+    margin: 6px 0;
+    font-size: 0.95rem;
+  }
+  
+  .report-comment {
+    margin-top: 12px;
+    padding: 8px 12px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .report-comment:hover {
+    background: #c82333;
+  }
+  
+  .tabs-container {
+    margin-top: 24px;
+  }
+  
+  .tab-buttons {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  
+  .tab-button {
+    flex: 1;
+    padding: 10px;
+    border-radius: 4px;
+    text-align: center;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+  .tab-button.active {
+    background: #0077cc;
+    color: white;
+  }
+  
+  .tab-content {
+    display: none;
+    padding: 12px;
+    border-radius: 6px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.05);
+  }
+  
+  .tab-content.active {
+    display: block;
+  }
+  
+  .place-info p {
+    margin: 8px 0;
+    font-size: 0.95rem;
+  }
+/*   
+  .place-info strong {
+    color: #333;
+  }
+  
+  .place-info span {
+    color: #555;
+  }
+   */

@@ -3,6 +3,7 @@ import { editPlaceForm, deletePlace, analyticsPlace } from "./placeService.js";
 import Button from "../../components/base/Button.js";
 import { SRC_URL } from "../../api/api.js";
 import { reportPost } from "../reporting/reporting.js";
+import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
 
 function renderPlaceDetails(isLoggedIn, content, place, isCreator) {
     content.innerHTML = "";
@@ -13,13 +14,34 @@ function renderPlaceDetails(isLoggedIn, content, place, isCreator) {
     const longitude = place.coordinates?.lng || "N/A";
 
     // Banner section
-    const bannerSection = createElement("section", { id: "place-banner", class: "placedetails" }, [
-        createElement("img", {
-            src: place.banner ? `${SRC_URL}/placepic/${place.banner}` : "https://via.placeholder.com/1200x400?text=No+Banner",
-            alt: place.name,
-            loading: "lazy",
-        }),
-    ]);
+    const bannerFilename = place.banner || "placeholder.png";
+    const bannerSrc = resolveImagePath(EntityType.PLACE, PictureType.BANNER, bannerFilename);
+
+    const bannerImg = createElement("img", {
+        src: bannerSrc,
+        alt: place.name || "Place Banner",
+        loading: "lazy",
+        style: "width:100%;max-height:400px;object-fit:cover;"
+    });
+
+    // Fallback logic if image fails to load
+    bannerImg.onerror = () => {
+        bannerImg.src = resolveImagePath(EntityType.DEFAULT, PictureType.STATIC, "placeholder.png");
+    };
+
+    const bannerSection = createElement("section", {
+        id: "place-banner",
+        class: "placedetails"
+    }, [bannerImg]);
+
+    // // Banner section
+    // const bannerSection = createElement("section", { id: "place-banner", class: "placedetails" }, [
+    //     createElement("img", {
+    //         src: place.banner ? `${SRC_URL}/placepic/${place.banner}` : "https://via.placeholder.com/1200x400?text=No+Banner",
+    //         alt: place.name,
+    //         loading: "lazy",
+    //     }),
+    // ]);
 
     // Core details section
     const detailsSection = createElement("section", { id: "placedetails", class: "placedetails" }, [
@@ -41,7 +63,7 @@ function renderPlaceDetails(isLoggedIn, content, place, isCreator) {
         actionsWrapper.appendChild(
             Button("Edit Place", "edit-place-btn", {
                 click: () => editPlaceForm(isLoggedIn, place.placeid, editContainer),
-            },"buttonx")
+            }, "buttonx")
         );
 
         actionsWrapper.appendChild(
@@ -53,7 +75,7 @@ function renderPlaceDetails(isLoggedIn, content, place, isCreator) {
         actionsWrapper.appendChild(
             Button("View Analytics", "analytics-place-btn", {
                 click: () => analyticsPlace(isLoggedIn, place.placeid),
-            },"buttonx")
+            }, "buttonx")
         );
 
         detailsSection.appendChild(actionsWrapper);

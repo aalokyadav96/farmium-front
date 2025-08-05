@@ -42,21 +42,21 @@ const createNavItem = (href, label) => {
 /** Navigation Bar */
 const createNav = () => {
     const navItems = [
-        { href: "/grocery", label: "Grocery" },
-        { href: "/dash", label: "Dash" },
         { href: "/places", label: "Places" },
+        { href: "/grocery", label: "Grocery" },
         { href: "/events", label: "Events" },
         { href: "/baitos", label: "Baito" },
-        { href: "/search", label: "Search" },
+        // { href: "/crops", label: "Crops" },
+        // { href: "/farms", label: "Farms" },
         { href: "/social", label: "Social" },
-        { href: "/farms", label: "Farms" },
-        { href: "/crops", label: "Crops" },
+        { href: "/posts", label: "Posts" },
+        { href: "/shop", label: "Shop" },
         { href: "/recipes", label: "Recipes" },
-        { href: "/products", label: "Products" },
-        { href: "/tools", label: "Tools" },
+        // { href: "/tools", label: "Tools" },
+        { href: "/search", label: "Search" },
         { href: "/itinerary", label: "Itinerary" },
         { href: "/artists", label: "Artists" },
-        { href: "/posts", label: "Posts" },
+        // { href: "/dash", label: "Dash" },
     ];
 
     const nav = document.createElement("div");

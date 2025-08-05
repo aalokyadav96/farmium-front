@@ -1,15 +1,9 @@
 import { createheader } from "../components/header.js";
 import { createNav, highlightActiveNav } from "../components/navigation.js";
-import { secnav } from "../components/secNav.js";
 import { render } from "./router.js";
-// import { sticky } from "../components/sticky.js";
 import {
-  getState,
   setState,
   getRouteState,
-  hasRouteModule,
-  getRouteModule,
-  setRouteModule,
   saveScroll,
   restoreScroll,
 } from "../state/state.js";
@@ -23,12 +17,10 @@ let isNavigating = false;
 async function loadContent(url) {
   const header = document.getElementById("pageheader");
   const nav = document.getElementById("primary-nav");
-  const secNavElement = document.getElementById("secondary-nav");
-  const stickycon = document.getElementById("stickycon");
   const main = document.getElementById("content");
   const footer = document.getElementById("pagefooter");
 
-  if (!header || !nav || !main || !footer || !secNavElement) {
+  if (!header || !nav || !main || !footer) {
     console.error("❌ Missing static layout containers in HTML.");
     return;
   }
@@ -45,32 +37,19 @@ async function loadContent(url) {
   // Clear dynamic DOM sections
   header.replaceChildren();
   nav.replaceChildren();
-  secNavElement.replaceChildren();
   main.replaceChildren();
 
   // Render layout
   const headerContent = createheader();
   if (headerContent) header.appendChild(headerContent);
 
-  // const navContent = createNav();
-  // if (navContent) nav.appendChild(navContent);
   const navContent = createNav();
   if (navContent && url != "/home") {
     nav.appendChild(navContent);
     highlightActiveNav(url); // 🔥 This makes sure the active link reflects current URL
   }
 
-
-  const secNav = secnav();
-  if (secNav) secNavElement.appendChild(secNav);
-
-  // if (navContent && url != "/home") {
-  // // footer.appendChild(sticky());
-  // stickycon.appendChild(sticky());
-  // }
-
   // Render page module
-  // const isLoggedIn = Boolean(getState("user"));
   await render(url, main);
 
   // Restore scroll
@@ -92,7 +71,9 @@ function navigate(path) {
   console.log("Navigating to:", path);
   isNavigating = true;
 
+  saveScroll(document.getElementById("content"), getRouteState(window.location.pathname));
   history.pushState(null, "", path);
+  
   loadContent(path)
     .catch(err => console.error("Navigation failed:", err))
     .finally(() => {
@@ -106,10 +87,5 @@ function navigate(path) {
 async function renderPage() {
   await loadContent(window.location.pathname);
 }
-
-// Listen to popstate (back/forward)
-window.addEventListener("popstate", () => {
-  loadContent(window.location.pathname);
-});
 
 export { navigate, renderPage, loadContent };

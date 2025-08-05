@@ -173,7 +173,6 @@ async function updateEvent(isLoggedIn, eventId) {
 
 async function editEventForm(isLoggedIn, eventId) {
   const createSection = document.getElementById("editevent");
-
   if (!isLoggedIn) {
     navigate("/login");
     return;

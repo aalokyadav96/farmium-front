@@ -13,7 +13,8 @@ import {
   import { toggleAction } from "../beats/toggleFollows.js";
   import { getState } from "../../state/state.js";
   import { persistTabs } from "../../utils/persistTabs.js";
-  
+  import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
+
   // async wrapper
   export async function displayArtist(content, artistID, isLoggedIn) {
     content.innerHTML = "";
@@ -35,27 +36,31 @@ import {
       const isSubscribed = artist.subscribed === true;
   
       // -- PHOTO & BANNER SECTION --
-      const photoBannerRow = createElement("div", { class: "hflex-sb photocon" });
-  
-      if (artist.photo) {
-        const photoImg = createElement("img", {
-          src: `${SRC_URL}/artistpic/photo/${artist.photo}`,
-          alt: `${artist.name || "Artist"}'s photo`,
-          class: "artist-photo"
-        });
-        photoBannerRow.appendChild(createElement("div", { class: "hflex" }, [photoImg]));
-      }
-  
-      if (artist.banner) {
-        const bannerImg = createElement("img", {
-          src: `${SRC_URL}/artistpic/banner/${artist.banner}`,
-          alt: `${artist.name || "Artist"}'s banner`,
-          class: "artist-banner"
-        });
-        photoBannerRow.appendChild(createElement("div", { class: "hflex" }, [bannerImg]));
-      }
-  
-      contentContainer.appendChild(photoBannerRow);
+// -- PHOTO & BANNER SECTION --
+const photoBannerRow = createElement("div", { class: "hflex-sb photocon" });
+
+if (artist.photo) {
+  const photoSrc = resolveImagePath(EntityType.ARTIST, PictureType.PHOTO, artist.photo);
+  const photoImg = createElement("img", {
+    src: photoSrc,
+    alt: `${artist.name || "Artist"}'s photo`,
+    class: "artist-photo"
+  });
+  photoBannerRow.appendChild(createElement("div", { class: "hflex" }, [photoImg]));
+}
+
+if (artist.banner) {
+  const bannerSrc = resolveImagePath(EntityType.ARTIST, PictureType.BANNER, artist.banner);
+  const bannerImg = createElement("img", {
+    src: bannerSrc,
+    alt: `${artist.name || "Artist"}'s banner`,
+    class: "artist-banner"
+  });
+  photoBannerRow.appendChild(createElement("div", { class: "hflex" }, [bannerImg]));
+}
+
+contentContainer.appendChild(photoBannerRow);
+
   
       // -- BUTTON SECTION --
       const subscribeButton = Button(

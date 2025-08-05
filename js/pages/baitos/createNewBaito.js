@@ -1,8 +1,8 @@
 import { createBaito } from "../../services/baitos/create/createBaito.js";
 
-async function Create(isLoggedIn, contentContainer) {
+async function CreateBaito(isLoggedIn, contentContainer) {
     contentContainer.innerHTML = '';
     createBaito(isLoggedIn, contentContainer);
 }
 
-export { Create };
+export { CreateBaito };

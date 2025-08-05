@@ -75,60 +75,9 @@ function generateAvatarForm(content, pic) {
     });
 }
 
-// async function updatePicture(type) {
-//     if (!getState("token")) {
-//         Snackbar(`Please log in to update your ${type} picture.`, 3000);
-//         return;
-//     }
-
-//     const fileInput = document.getElementById(`edit-${type}-picture`);
-//     if (!fileInput || !fileInput.files[0]) {
-//         Snackbar(`No ${type} picture selected.`, 3000);
-//         return;
-//     }
-
-//     showLoadingMessage(`Updating ${type} picture...`);
-
-//     try {
-//         const formData = new FormData();
-//         formData.append(`${type}_picture`, fileInput.files[0]);
-
-//         const updatedProfile = await apiFetch(`/profile/${type}`, 'PUT', formData);
-//         if (!updatedProfile) throw new Error(`No response received for ${type} picture update.`);
-
-//         state.userProfile = { ...getState("userProfile"), ...updatedProfile };
-//         localStorage.setItem("userProfile", JSON.stringify(getState("userProfile")));
-
-//         Snackbar(`${capitalize(type)} picture updated successfully.`, 3000);
-//         window.location.pathname = window.location.pathname;
-//     } catch (error) {
-//         console.error(`Error updating ${type} picture:`, error);
-//         handleError(`Error updating ${type} picture. Please try again.`);
-//     } finally {
-//         removeLoadingMessage();
-//     }
-// }
-
-
 async function updateProfilePics(type) {
     await updatePicture(type);
 }
-
-// function generateFormField(label, id, type, value) {
-//     if (value == undefined) {value = ""};
-//     if (type === "textarea") {
-//         return `
-//             <label for="${id}">${label}</label>
-//             <textarea id="${id}" name="${id}">${value}</textarea>
-//         `;
-//     }
-//     return `
-//     <div class="form-group">
-//         <label for="${id}">${label}</label>
-//         <input id="${id}" name="${id}" type="${type}" value="${value}" />
-//     </div>
-//     `;
-// }
 
 function generateFormField(label, id, type, value = "") {
     const wrapper = createElement("div", { class: "form-group" });

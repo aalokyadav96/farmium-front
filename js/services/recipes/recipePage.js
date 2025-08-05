@@ -4,6 +4,8 @@ import { addToCart } from "../cart/addToCart.js";
 import { SRC_URL, apiFetch } from "../../api/api.js";
 import { getState } from "../../state/state.js";
 import { editRecipe } from "./createOrEditRecipe.js";
+import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
+
 
 function getStepKey(recipeId) {
   return `completedSteps:${recipeId}`;
@@ -75,39 +77,48 @@ export async function displayRecipe(content, isLoggedIn, recipeId, currentUser =
 
   // --- Image Carousel with swipe support ---
   let imgIndex = 0;
+  const getImageAtIndex = (i) =>
+    resolveImagePath(EntityType.RECIPE, PictureType.PHOTO, recipe.imageUrls?.[i]);
+  
   const imageEl = createElement("img", {
-    src: `${SRC_URL}/uploads/${recipe.imageUrls[0] || ""}`,
+    src: getImageAtIndex(imgIndex),
     alt: recipe.title,
     class: "thumbnail",
   });
+  
   const updateImg = () => {
-    imageEl.src = `${SRC_URL}/uploads/${recipe.imageUrls[imgIndex]}`;
+    imageEl.src = getImageAtIndex(imgIndex);
   };
+  
   const prevBtn = Button("Prev", "prev-img", {}, "small-button");
   const nextBtn = Button("Next", "next-img", {}, "small-button");
+  
   prevBtn.addEventListener("click", () => {
     imgIndex = (imgIndex - 1 + recipe.imageUrls.length) % recipe.imageUrls.length;
     updateImg();
   });
+  
   nextBtn.addEventListener("click", () => {
     imgIndex = (imgIndex + 1) % recipe.imageUrls.length;
     updateImg();
   });
-  // swipe
+  
+  // Swipe support
   let touchStartX = 0;
   imageEl.addEventListener("touchstart", e => {
     touchStartX = e.changedTouches[0].screenX;
-  }, { passive: true }); // ✅ Mark as passive
+  }, { passive: true });
   
   imageEl.addEventListener("touchend", e => {
     const dx = e.changedTouches[0].screenX - touchStartX;
     if (dx > 50) prevBtn.click();
     else if (dx < -50) nextBtn.click();
-  }, { passive: true }); // Optional: touchend typically doesn’t block scroll, but safe to include
+  }, { passive: true });
   
   const gallery = createElement("div", { class: "image-gallery" }, [
     imageEl, prevBtn, nextBtn
   ]);
+  
 
   // --- Info Box & Nutrition ---
   const infoBox = createElement("div", { class: "recipe-info-box" }, [

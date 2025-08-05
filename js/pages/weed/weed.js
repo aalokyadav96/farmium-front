@@ -1,8 +1,8 @@
-import { displayTumblr } from "../../services/tumblr/tumblr.js";
+import { displayWeed } from "../../services/weed/weed.js";
 
-async function Tumblr(isLoggedIn, contentContainer) {
+async function Weed(isLoggedIn, contentContainer) {
     contentContainer.innerHTML = '';
-    displayTumblr(isLoggedIn, contentContainer);
+    displayWeed(isLoggedIn, contentContainer);
 }
 
-export { Tumblr };
+export { Weed };

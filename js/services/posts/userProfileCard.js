@@ -1,5 +1,6 @@
 import { createElement } from "../../components/createElement.js";
 import { SRC_URL } from "../../state/state.js";
+import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
 
 export function userProfileCard(profile = {
     username: "Anonymous",
@@ -11,10 +12,12 @@ export function userProfileCard(profile = {
     const card = createElement("div", { class: "user-profile-card" });
 
     const avatar = createElement("img", {
-        src: `${SRC_URL}/${profile.avatarUrl}`,
+        src: resolveImagePath(EntityType.USER, PictureType.THUMB, profile.avatarUrl),
         alt: `${profile.username}'s avatar`,
-        class: "avatar"
-    });
+        class: "avatar",
+        loading: "lazy"
+      });
+      
 
     const name = createElement("h3", {}, [profile.username]);
     const bio = createElement("p", { class: "bio" }, [profile.bio]);

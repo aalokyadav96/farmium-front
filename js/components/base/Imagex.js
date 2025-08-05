@@ -1,47 +1,41 @@
-import "../../../css/ui/Image.css";
-import { SRC_URL } from "../../state/state";
+// src/components/base/Imagex.js
 
-// Image component with enhanced functionality
+import "../../../css/ui/Image.css";
+
+// Image component with fallback and dynamic attributes
 const Imagex = (
   src,
-  alt = "Image", // Fallback alt text for accessibility
-  loading = "lazy", // Default loading behavior
+  alt = "Image",
+  loading = "lazy",
   id = "",
   classes = "",
   styles = {},
-  events = {}
+  events = {},
+  fallback = "/assets/icon-192.png"
 ) => {
-  // Input validation
   if (!src || typeof src !== "string") {
-    throw new Error("A valid 'src' attribute is required for the Image component.");
+    throw new Error("A valid 'src' is required for Imagex.");
   }
 
-  // Create the image element
   const image = document.createElement("img");
   image.src = src;
-  image.alt = alt || "Image"; // Ensure accessibility
+  image.alt = alt;
   image.id = id;
-
-  // Add loading attribute for lazy loading
   image.loading = loading;
 
-  // Apply inline styles dynamically
-  for (const [key, value] of Object.entries(styles)) {
-    image.style[key] = value;
+  for (const [k, v] of Object.entries(styles)) {
+    image.style[k] = v;
   }
 
-  // Add classes dynamically
   if (classes) {
     image.classList.add(...classes.split(" "));
   }
 
-  // Add fallback for broken image links
   image.onerror = () => {
-    image.src = `/images/fallback.png`; // Replace with your fallback image path
-    image.alt = "Fallback image"; // Ensure fallback accessibility
+    image.src = fallback;
+    image.alt = "Fallback image";
   };
 
-  // Add custom event listeners
   for (const [event, handler] of Object.entries(events)) {
     if (typeof handler === "function") {
       image.addEventListener(event, handler);
@@ -53,3 +47,60 @@ const Imagex = (
 
 export default Imagex;
 export { Imagex };
+
+// import "../../../css/ui/Image.css";
+// import { SRC_URL } from "../../state/state";
+
+// // Enhanced universal image component
+// const Imagex = (
+//   src,
+//   alt = "Image",
+//   loading = "lazy",
+//   id = "",
+//   classes = "",
+//   styles = {},
+//   events = {},
+//   fallback = "/images/fallback.png", // Custom fallback path
+// ) => {
+//   if (!src || typeof src !== "string") {
+//     throw new Error("A valid 'src' attribute is required for the Image component.");
+//   }
+
+//   const image = document.createElement("img");
+//   image.src = src;
+//   image.alt = alt || "Image";
+//   image.id = id;
+//   image.loading = loading;
+
+//   // Apply styles (both object or string)
+//   if (typeof styles === "string") {
+//     image.setAttribute("style", styles);
+//   } else {
+//     for (const [key, value] of Object.entries(styles)) {
+//       image.style[key] = value;
+//     }
+//   }
+
+//   // Add class list
+//   if (classes) {
+//     image.classList.add(...classes.trim().split(/\s+/));
+//   }
+
+//   // Fallback image on error
+//   image.onerror = () => {
+//     image.src = fallback;
+//     image.alt = "Fallback image";
+//   };
+
+//   // Add all event listeners
+//   for (const [event, handler] of Object.entries(events)) {
+//     if (typeof handler === "function") {
+//       image.addEventListener(event, handler);
+//     }
+//   }
+
+//   return image;
+// };
+
+// export default Imagex;
+// export { Imagex };

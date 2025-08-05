@@ -63,6 +63,12 @@
     border-radius: 6px;
     padding: 15px;
     text-align: center;
+    cursor: pointer;
+  }
+  
+  .product-card:hover,
+  .tool-card:hover {
+    box-shadow: 2px 2px 12px #000;
   }
   
   .no-image {

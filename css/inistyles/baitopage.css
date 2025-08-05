@@ -1,0 +1,155 @@
+.baito-detail {
+    max-width: 800px;
+    margin: auto;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05);
+  }
+  
+  /* Title */
+  .baito-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 16px;
+  }
+  
+  /* Meta Info */
+  .baito-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 16px;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+  }
+  
+  .baito-meta p {
+    margin: 0;
+  }
+  
+  /* Requirements */
+  .baito-reqs {
+    margin-bottom: 20px;
+  }
+  
+  .baito-reqs h4 {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    color: #0077cc;
+  }
+  
+  .baito-reqs ul {
+    padding-left: 20px;
+    margin: 0;
+  }
+  
+  .baito-reqs li {
+    margin-bottom: 6px;
+  }
+  
+  /* Description */
+  .baito-description {
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+  }
+  
+  /* Banner Image */
+  .baito-banner {
+    width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  
+  /* User Controls */
+  .baito-user-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .buttonx {
+    padding: 10px 14px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  .btn-primary {
+    background: #0077cc;
+    color: white;
+  }
+  
+  .btn-primary:hover {
+    background: #005fa3;
+  }
+  
+  .btn-bookmark {
+    background: #ffe58f;
+    color: #333;
+  }
+  
+  .btn-bookmark:hover {
+    background: #ffd666;
+  }
+  
+  .btn-danger {
+    background: #ff4d4f;
+    color: white;
+  }
+  
+  .btn-danger:hover {
+    background: #d9363e;
+  }
+  
+  .btn-secondary {
+    background: #f0f0f0;
+    color: #333;
+  }
+  
+  .btn-secondary:hover {
+    background: #d9d9d9;
+  }
+  
+  /* Related Jobs */
+  .baito-related-details {
+    margin-top: 20px;
+    font-size: 0.95rem;
+  }
+  
+  .baito-related-details summary {
+    cursor: pointer;
+    font-weight: bold;
+    color: #0077cc;
+    margin-bottom: 10px;
+  }
+  
+  .baito-related-card {
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    box-shadow: 0 0 4px rgba(0,0,0,0.05);
+  }
+  
+  .baito-related-card p {
+    margin: 0 0 8px 0;
+    font-size: 0.9rem;
+  }
+  
+  .btn-sm {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    background: #0077cc;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .btn-sm:hover {
+    background: #005fa3;
+  }
+  

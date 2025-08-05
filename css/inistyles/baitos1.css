@@ -2,26 +2,26 @@
   box-sizing: border-box;
 }
 
-.tabs-container {
+.baitos-tabbed-page .tabs-container {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
 /* Tabs */
-.tab-buttons {
+.baitos-tabbed-page .tab-buttons {
   display: flex;
   gap: 1rem;
   border-bottom: 1px solid #ddd;
 }
 
-.tab-button {
+.baitos-tabbed-page .tab-button {
   padding: 0.5rem 1rem;
   cursor: pointer;
   border: none;
 }
 
-.tab-button.active {
+.baitos-tabbed-page .tab-button.active {
   background: #007bff;
   color: white;
 }
@@ -37,7 +37,7 @@
 }
 
 .baitosaside {
-  flex: 1 1 220px;
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;

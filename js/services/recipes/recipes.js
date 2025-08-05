@@ -4,6 +4,7 @@ import Button from "../../components/base/Button.js";
 import { createRecipe } from "./createOrEditRecipe.js";
 import { navigate } from "../../routes/index.js";
 import { SRC_URL, apiFetch } from "../../api/api.js";
+import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
 
 const PAGE_LIMIT = 2;
 
@@ -14,25 +15,39 @@ let currentTags = new Set();
 let currentSort = "newest";
 
 export async function displayRecipes(content, isLoggedIn) {
-  let contentContainer = createElement('div', { "class": "recipespage" }, []);
-
+  let contentContainer = createElement('div', { class: "recipespage" }, []);
   content.innerHTML = "";
   content.appendChild(contentContainer);
+
   offset = 0;
   currentTags.clear();
   contentContainer.replaceChildren();
 
+  // const header = createElement("div", { class: "recipes-header" }, [
+  //   createElement("h2", {}, ["Recipes"]),
+  //   isLoggedIn
+  //     ? Button(
+  //         "Create New Recipe",
+  //         "create-recipe-btn",
+  //         { click: () => createRecipe(contentContainer) },
+  //         "primary-button"
+  //       )
+  //     : null,
+  // ]);
+
+  const wrapper = createElement("div", { class: "recipes-wrapper" });
+  const aside = createElement("aside", { class: "recipes-aside" });
+  const main = createElement("div", { class: "recipes-main" });
+
   const header = createElement("div", { class: "recipes-header" }, [
-    createElement("h2", {}, ["Recipes"]),
-    isLoggedIn
-      ? Button(
-        "Create New Recipe",
-        "create-recipe-btn",
-        { click: () => createRecipe(contentContainer) },
-        "primary-button"
-      )
-      : null,
-  ]);
+      createElement("h2", {}, ["Recipes"])]);
+  main.appendChild(header);
+
+  aside.appendChild(createElement("h3", {}, ["Actions"]));
+  if (isLoggedIn) {
+    const createBtn = Button("Create New Recipe","create-recipe-btn",{ click: () => createRecipe(contentContainer) },"primary-button");
+    aside.appendChild(createBtn);
+  }
 
   const searchInput = createElement("input", {
     type: "text",
@@ -109,9 +124,14 @@ export async function displayRecipes(content, isLoggedIn) {
 
   const container = createElement("div", { class: "recipe-grid-container" });
 
-  contentContainer.appendChild(header);
-  contentContainer.appendChild(controls);
-  contentContainer.appendChild(container);
+  // contentContainer.appendChild(header);
+  contentContainer.appendChild(wrapper);
+
+  wrapper.appendChild(main);
+  wrapper.appendChild(aside);
+
+  main.appendChild(controls);
+  main.appendChild(container);
 
   await renderRecipeGrid(container, isLoggedIn, true);
 
@@ -126,6 +146,120 @@ export async function displayRecipes(content, isLoggedIn) {
 
   observer.observe(observerTarget);
 }
+
+// export async function displayRecipes(content, isLoggedIn) {
+//   let contentContainer = createElement('div', { "class": "recipespage" }, []);
+
+//   content.innerHTML = "";
+//   content.appendChild(contentContainer);
+//   offset = 0;
+//   currentTags.clear();
+//   contentContainer.replaceChildren();
+
+//   const header = createElement("div", { class: "recipes-header" }, [
+//     createElement("h2", {}, ["Recipes"]),
+//     isLoggedIn
+//       ? Button(
+//         "Create New Recipe",
+//         "create-recipe-btn",
+//         { click: () => createRecipe(contentContainer) },
+//         "primary-button"
+//       )
+//       : null,
+//   ]);
+
+//   const searchInput = createElement("input", {
+//     type: "text",
+//     placeholder: "Search recipes by title...",
+//     value: currentSearch,
+//   });
+
+//   const ingredientInput = createElement("input", {
+//     type: "text",
+//     placeholder: "Search by ingredient...",
+//     value: currentIngredient,
+//   });
+
+//   const sortSelect = createElement("select");
+//   const sortOptions = [
+//     ["newest", "Newest"],
+//     ["views", "Most Viewed"],
+//     ["prepTime", "Shortest Prep Time"],
+//   ];
+//   sortOptions.forEach(([value, text]) => {
+//     const option = createElement("option", { value }, [text]);
+//     if (value === currentSort) option.selected = true;
+//     sortSelect.appendChild(option);
+//   });
+
+//   const tagCheckboxesContainer = createElement("div", { class: "tag-checkboxes" });
+//   const tags = await fetchAllTags();
+
+//   tags.forEach((tag) => {
+//     const checkbox = createElement("input", {
+//       type: "checkbox",
+//       value: tag,
+//       checked: currentTags.has(tag),
+//     });
+
+//     checkbox.addEventListener("change", () => {
+//       if (checkbox.checked) currentTags.add(tag);
+//       else currentTags.delete(tag);
+//       offset = 0;
+//       renderRecipeGrid(container, isLoggedIn, true);
+//     });
+
+//     const label = createElement("label", {}, [
+//       checkbox,
+//       createElement("span", {}, [tag]),
+//     ]);
+//     tagCheckboxesContainer.appendChild(label);
+//   });
+
+//   searchInput.addEventListener("input", (e) => {
+//     currentSearch = e.target.value.trim();
+//     offset = 0;
+//     renderRecipeGrid(container, isLoggedIn, true);
+//   });
+
+//   ingredientInput.addEventListener("input", (e) => {
+//     currentIngredient = e.target.value.trim();
+//     offset = 0;
+//     renderRecipeGrid(container, isLoggedIn, true);
+//   });
+
+//   sortSelect.addEventListener("change", (e) => {
+//     currentSort = e.target.value;
+//     offset = 0;
+//     renderRecipeGrid(container, isLoggedIn, true);
+//   });
+
+//   const controls = createElement("div", { class: "recipe-controls" }, [
+//     searchInput,
+//     ingredientInput,
+//     sortSelect,
+//     tagCheckboxesContainer,
+//   ]);
+
+//   const container = createElement("div", { class: "recipe-grid-container" });
+
+//   contentContainer.appendChild(header);
+//   contentContainer.appendChild(controls);
+//   contentContainer.appendChild(container);
+
+//   await renderRecipeGrid(container, isLoggedIn, true);
+
+//   const observerTarget = createElement("div", { id: "infinite-scroll-trigger" });
+//   container.appendChild(observerTarget);
+
+//   const observer = new IntersectionObserver(async ([entry]) => {
+//     if (entry.isIntersecting) {
+//       await renderRecipeGrid(container, isLoggedIn);
+//     }
+//   }, { threshold: 1.0 });
+
+//   observer.observe(observerTarget);
+// }
 
 async function fetchAllTags() {
   try {
@@ -172,11 +306,15 @@ async function renderRecipeGrid(container, isLoggedIn, reset = false) {
     await delay(100); // Optional loading delay
 
     for (const recipe of recipes) {
+      const imageUrl = resolveImagePath(
+        EntityType.RECIPE,
+        PictureType.THUMB,
+        recipe.imageUrls?.[0]
+      );
+    
       const card = createElement("div", { class: "recipe-card" }, [
         createElement("img", {
-          src: recipe.imageUrls?.[0]
-            ? `${SRC_URL}/uploads/${recipe.imageUrls[0]}`
-            : `/static/images/placeholder.jpg`,
+          src: imageUrl,
           alt: recipe.title,
           class: "thumbnail",
         }),
@@ -195,9 +333,10 @@ async function renderRecipeGrid(container, isLoggedIn, reset = false) {
           click: () => navigate(`/recipe/${recipe.id}`),
         }),
       ]);
-
+    
       grid.appendChild(card);
     }
+    
 
     offset += PAGE_LIMIT;
 

@@ -1,4 +1,3 @@
-// router.js
 import { createElement } from "../components/createElement.js";
 import { trackEvent } from "../services/activity/metrics.js";
 import {
@@ -10,15 +9,13 @@ import {
 } from "../state/state.js";
 import {
   staticRoutes,
-  dynamicRoutes,
-  protectedRoutes
+  dynamicRoutes
 } from "./routes.js";
 import { navigate } from "./index.js";
 
 /** Render a simple error message */
 function renderError(container, message = "404 Not Found") {
-  container.innerHTML = "";
-  container.appendChild(createElement("h1", {}, [message]));
+  container.replaceChildren(createElement("h1", {}, [message]));
 }
 
 /**
@@ -29,12 +26,12 @@ async function handleRoute({ path, moduleImport, functionName, args = [], conten
     return getRouteModule(path).render(contentContainer);
   }
 
-  contentContainer.innerHTML = "";
+  contentContainer.replaceChildren();
 
   const mod = await moduleImport();
   const renderFn = mod[functionName];
   if (typeof renderFn !== "function") {
-    throw new Error(`Export '${functionName}' not found in module`);
+    throw new Error(`Export '${functionName}' not found in module. Available exports: ${Object.keys(mod).join(", ")}`);
   }
 
   const fullArgs = [...args, contentContainer];
@@ -56,25 +53,25 @@ export async function render(rawPath, contentContainer) {
   const isLoggedIn = !!getState("user");
   trackEvent("page_view");
 
-  // Clean path (remove query/hash, normalize)
+  // Normalize path
   let cleanPath = decodeURIComponent(String(rawPath).split(/[?#]/)[0]);
   if (cleanPath.length > 1 && cleanPath.endsWith("/")) {
     cleanPath = cleanPath.slice(0, -1);
   }
 
-  // 1) Guard protected static routes
-  if (protectedRoutes.has(cleanPath) && !isLoggedIn) {
-    sessionStorage.setItem("redirectAfterLogin", cleanPath);
-    return navigate("/login");
-  }
+  // 1) Static route check
+  const staticRoute = staticRoutes[cleanPath];
+  if (staticRoute) {
+    if (staticRoute.protected && !isLoggedIn) {
+      sessionStorage.setItem("redirectAfterLogin", cleanPath);
+      return navigate("/login");
+    }
 
-  // 2) Static routes
-  if (staticRoutes[cleanPath]) {
     try {
       await handleRoute({
         path: cleanPath,
-        moduleImport: staticRoutes[cleanPath].moduleImport,
-        functionName: staticRoutes[cleanPath].functionName,
+        moduleImport: staticRoute.moduleImport,
+        functionName: staticRoute.functionName,
         args: [isLoggedIn],
         contentContainer,
         cache: true
@@ -86,24 +83,26 @@ export async function render(rawPath, contentContainer) {
     return;
   }
 
-  // 3) Dynamic routes
+  // 2) Dynamic route match
   for (const route of dynamicRoutes) {
     const match = cleanPath.match(route.pattern);
     if (!match) continue;
-    
-    const args = match.slice(1); // Only capture groups, skip match[0]
-    
+
     if (route.protected && !isLoggedIn) {
       sessionStorage.setItem("redirectAfterLogin", cleanPath);
       return navigate("/login");
     }
-    
+
+    const args = typeof route.argBuilder === "function"
+      ? route.argBuilder(match)
+      : [isLoggedIn, ...match.slice(1)];
+
     try {
       await handleRoute({
         path: cleanPath,
         moduleImport: route.moduleImport,
         functionName: route.functionName,
-        args: [isLoggedIn, ...args],
+        args,
         contentContainer,
         cache: true
       });
@@ -111,49 +110,30 @@ export async function render(rawPath, contentContainer) {
       console.error("Error rendering dynamic route:", cleanPath, err);
       renderError(contentContainer, "500 Internal Error");
     }
-    
     return;
   }
 
-  // 4) No match
+  // 3) No match found
   renderError(contentContainer);
 }
 
-// Handle back/forward browser navigation
-// window.addEventListener("popstate", () => {
-//   const container = document.getElementById("content");
-//   if (container) render(window.location.pathname, container);
-// });
-
-// // Redirect after login
+// Redirect after login
 subscribe("user", (user) => {
   const redirect = sessionStorage.getItem("redirectAfterLogin");
 
   if (user && redirect) {
     sessionStorage.removeItem("redirectAfterLogin");
-
     const target = (redirect.startsWith("/") && redirect !== "/login") ? redirect : "/";
     navigate(target);
   }
 });
 
-// subscribe("user", (user) => {
-//   if (user) {
-//     const redirect = sessionStorage.getItem("redirectAfterLogin") || "/";
-//     sessionStorage.removeItem("redirectAfterLogin");
 
-//     const target = (redirect.startsWith("/") && redirect !== "/login") ? redirect : "/";
-//     navigate(target);
-//   }
-// });
-
-// // router.js
 // import { createElement } from "../components/createElement.js";
 // import { trackEvent } from "../services/activity/metrics.js";
 // import {
 //   getState,
 //   subscribe,
-//   clearState,
 //   setRouteModule,
 //   getRouteModule,
 //   hasRouteModule
@@ -165,27 +145,25 @@ subscribe("user", (user) => {
 // } from "./routes.js";
 // import { navigate } from "./index.js";
 
-// // let isNavigating = false;
-
-// /** Renders a basic error message. */
+// /** Render a simple error message */
 // function renderError(container, message = "404 Not Found") {
-//   container.innerHTML = "";
-//   container.appendChild(createElement("h1", {}, [message]));
+//   container.replaceChildren(createElement("h1", {}, [message]));
 // }
 
-// /** Actually invokes the page’s render function and caches it. */
+// /**
+//  * Invokes and caches a page's render function.
+//  */
 // async function handleRoute({ path, moduleImport, functionName, args = [], contentContainer, cache }) {
-//   // Cache hit
 //   if (cache && hasRouteModule(path)) {
 //     return getRouteModule(path).render(contentContainer);
 //   }
 
-//   contentContainer.innerHTML = "";
+//   contentContainer.replaceChildren(createElement("span", {}, []));
 
 //   const mod = await moduleImport();
 //   const renderFn = mod[functionName];
 //   if (typeof renderFn !== "function") {
-//     throw new Error(`Export '${functionName}' not found in module`);
+//     throw new Error(`Export '${functionName}' not found in module. Available exports: ${Object.keys(mod).join(", ")}`);
 //   }
 
 //   const fullArgs = [...args, contentContainer];
@@ -199,7 +177,7 @@ subscribe("user", (user) => {
 // }
 
 // /**
-//  * Main entrypoint: determines route, guards, and renders.
+//  * Resolves and renders the appropriate route.
 //  * @param {string} rawPath
 //  * @param {HTMLElement} contentContainer
 //  */
@@ -207,8 +185,11 @@ subscribe("user", (user) => {
 //   const isLoggedIn = !!getState("user");
 //   trackEvent("page_view");
 
-//   // sanitize and strip query/hash
-//   const cleanPath = decodeURIComponent(String(rawPath).split(/[?#]/)[0]);
+//   // Clean path (remove query/hash, normalize)
+//   let cleanPath = decodeURIComponent(String(rawPath).split(/[?#]/)[0]);
+//   if (cleanPath.length > 1 && cleanPath.endsWith("/")) {
+//     cleanPath = cleanPath.slice(0, -1);
+//   }
 
 //   // 1) Guard protected static routes
 //   if (protectedRoutes.has(cleanPath) && !isLoggedIn) {
@@ -217,12 +198,13 @@ subscribe("user", (user) => {
 //   }
 
 //   // 2) Static routes
-//   if (staticRoutes[cleanPath]) {
+//   const staticRoute = staticRoutes[cleanPath];
+//   if (staticRoute) {
 //     try {
 //       await handleRoute({
 //         path: cleanPath,
-//         moduleImport: staticRoutes[cleanPath].moduleImport,
-//         functionName: staticRoutes[cleanPath].functionName,
+//         moduleImport: staticRoute.moduleImport,
+//         functionName: staticRoute.functionName,
 //         args: [isLoggedIn],
 //         contentContainer,
 //         cache: true
@@ -234,13 +216,13 @@ subscribe("user", (user) => {
 //     return;
 //   }
 
-//   // 3) Dynamic routes
-//   for (const route of dynamicRoutes) {
-//     const match = cleanPath.match(route.pattern);
-//     if (!match) continue;
+//   // 3) Prioritized dynamic routes (most specific first)
+//   const matchedRoute = dynamicRoutes.find(route => cleanPath.match(route.pattern));
+//   if (matchedRoute) {
+//     const match = cleanPath.match(matchedRoute.pattern);
+//     const args = match.slice(1); // skip full match [0]
 
-//     // Guard if flagged
-//     if (route.protected && !isLoggedIn) {
+//     if (matchedRoute.protected && !isLoggedIn) {
 //       sessionStorage.setItem("redirectAfterLogin", cleanPath);
 //       return navigate("/login");
 //     }
@@ -248,9 +230,9 @@ subscribe("user", (user) => {
 //     try {
 //       await handleRoute({
 //         path: cleanPath,
-//         moduleImport: route.moduleImport,
-//         functionName: route.functionName,
-//         args: [isLoggedIn, match],
+//         moduleImport: matchedRoute.moduleImport,
+//         functionName: matchedRoute.functionName,
+//         args: [isLoggedIn, ...args],
 //         contentContainer,
 //         cache: true
 //       });
@@ -261,46 +243,28 @@ subscribe("user", (user) => {
 //     return;
 //   }
 
-//   // 4) If nothing matched
+//   // 4) No match
 //   renderError(contentContainer);
 // }
 
-// /** SPA navigation helper */
-// // export function navigate(path) {
-// //   if (!path || isNavigating || window.location.pathname === path) return;
-
-// //   isNavigating = true;
-// //   history.pushState(null, "", path);
-// //   render(path, document.getElementById("content"))
-// //     .catch(err => console.error("Navigation failed:", err))
-// //     .finally(() => { isNavigating = false; });
-// // }
-
-// // Handle browser back/forward
-// window.addEventListener("popstate", () => {
-//   render(window.location.pathname, document.getElementById("content"));
-// });
-
 // // Redirect after login
 // subscribe("user", (user) => {
-//   if (user) {
-//     const redirect = sessionStorage.getItem("redirectAfterLogin") || "/";
-//     sessionStorage.removeItem("redirectAfterLogin");
+//   const redirect = sessionStorage.getItem("redirectAfterLogin");
 
+//   if (user && redirect) {
+//     sessionStorage.removeItem("redirectAfterLogin");
 //     const target = (redirect.startsWith("/") && redirect !== "/login") ? redirect : "/";
-//     // window.location.href = target; // Use navigate(target) if SPA behavior desired
-//     navigate(target); // Use navigate(target) if SPA behavior desired
+//     navigate(target);
 //   }
 // });
 
+
 // // // router.js
 // // import { createElement } from "../components/createElement.js";
-// // import { navigate as navigateTo } from "./index.js";     // if you factored navigate out
 // // import { trackEvent } from "../services/activity/metrics.js";
 // // import {
 // //   getState,
 // //   subscribe,
-// //   clearState,
 // //   setRouteModule,
 // //   getRouteModule,
 // //   hasRouteModule
@@ -310,41 +274,43 @@ subscribe("user", (user) => {
 // //   dynamicRoutes,
 // //   protectedRoutes
 // // } from "./routes.js";
+// // import { navigate } from "./index.js";
 
-// // let isNavigating = false;
-
-// // /** Renders a basic error message. */
+// // /** Render a simple error message */
 // // function renderError(container, message = "404 Not Found") {
-// //   container.innerHTML = "";
-// //   container.appendChild(createElement("h1", {}, [message]));
+// //   container.replaceChildren(createElement("h1", {}, [message]));
 // // }
 
-// // /** Actually invokes the page’s render function and caches. */
+// // /**
+// //  * Invokes and caches a page's render function.
+// //  */
 // // async function handleRoute({ path, moduleImport, functionName, args = [], contentContainer, cache }) {
-// //   // Cache hit?
 // //   if (cache && hasRouteModule(path)) {
-// //     getRouteModule(path).render(contentContainer);
-// //     return;
+// //     return getRouteModule(path).render(contentContainer);
 // //   }
 
-// //   contentContainer.innerHTML = "";
+// //   container.replaceChildren(createElement("span", {}, []));
+
 // //   const mod = await moduleImport();
 // //   const renderFn = mod[functionName];
 // //   if (typeof renderFn !== "function") {
-// //     throw new Error(`Export '${functionName}' not found in module`);
+// //     // throw new Error(`Export '${functionName}' not found in module`);
+// //     throw new Error(`Export '${functionName}' not found in module. Available exports: ${Object.keys(mod).join(", ")}`);
+
 // //   }
 
-// //   await renderFn(...args);
+// //   const fullArgs = [...args, contentContainer];
+// //   await renderFn(...fullArgs);
 
 // //   if (cache) {
 // //     setRouteModule(path, {
-// //       render: () => renderFn(...args, contentContainer)
+// //       render: (container) => renderFn(...args, container)
 // //     });
 // //   }
 // // }
 
 // // /**
-// //  * Main entrypoint: determines route, guards, and renders.
+// //  * Resolves and renders the appropriate route.
 // //  * @param {string} rawPath
 // //  * @param {HTMLElement} contentContainer
 // //  */
@@ -352,10 +318,13 @@ subscribe("user", (user) => {
 // //   const isLoggedIn = !!getState("user");
 // //   trackEvent("page_view");
 
-// //   // sanitize and strip query/hash
-// //   const cleanPath = decodeURIComponent(rawPath.split(/[?#]/)[0]);
+// //   // Clean path (remove query/hash, normalize)
+// //   let cleanPath = decodeURIComponent(String(rawPath).split(/[?#]/)[0]);
+// //   if (cleanPath.length > 1 && cleanPath.endsWith("/")) {
+// //     cleanPath = cleanPath.slice(0, -1);
+// //   }
 
-// //   // 1) Guard static protected routes
+// //   // 1) Guard protected static routes
 // //   if (protectedRoutes.has(cleanPath) && !isLoggedIn) {
 // //     sessionStorage.setItem("redirectAfterLogin", cleanPath);
 // //     return navigate("/login");
@@ -368,7 +337,7 @@ subscribe("user", (user) => {
 // //         path: cleanPath,
 // //         moduleImport: staticRoutes[cleanPath].moduleImport,
 // //         functionName: staticRoutes[cleanPath].functionName,
-// //         args: [isLoggedIn, contentContainer],
+// //         args: [isLoggedIn],
 // //         contentContainer,
 // //         cache: true
 // //       });
@@ -383,21 +352,20 @@ subscribe("user", (user) => {
 // //   for (const route of dynamicRoutes) {
 // //     const match = cleanPath.match(route.pattern);
 // //     if (!match) continue;
-
-// //     // protect if flagged
+    
+// //     const args = match.slice(1); // Only capture groups, skip match[0]
+    
 // //     if (route.protected && !isLoggedIn) {
 // //       sessionStorage.setItem("redirectAfterLogin", cleanPath);
 // //       return navigate("/login");
 // //     }
-
+    
 // //     try {
-// //       // const args = route.argBuilder(match);
-// //       const args = [isLoggedIn, match[1], contentContainer];
 // //       await handleRoute({
 // //         path: cleanPath,
 // //         moduleImport: route.moduleImport,
 // //         functionName: route.functionName,
-// //         args,
+// //         args: [isLoggedIn, ...args],
 // //         contentContainer,
 // //         cache: true
 // //       });
@@ -405,35 +373,22 @@ subscribe("user", (user) => {
 // //       console.error("Error rendering dynamic route:", cleanPath, err);
 // //       renderError(contentContainer, "500 Internal Error");
 // //     }
+    
 // //     return;
 // //   }
 
-// //   // 4) If nothing matched
+// //   // 4) No match
 // //   renderError(contentContainer);
 // // }
 
-// // /** SPA navigation helper */
-// // export function navigate(path) {
-// //   if (!path || isNavigating || window.location.pathname === path) return;
-// //   isNavigating = true;
-// //   history.pushState(null, "", path);
-// //   render(path, document.getElementById("app-content"))
-// //     .catch(err => console.error("Navigation failed:", err))
-// //     .finally(() => { isNavigating = false; });
-// // }
-
-// // // handle browser back/forward
-// // window.addEventListener("popstate", () => {
-// //   render(window.location.pathname, document.getElementById("app-content"));
-// // });
-
-// // // redirect after login
+// // // Redirect after login
 // // subscribe("user", (user) => {
-// //   if (user) {
-// //     const redirect = sessionStorage.getItem("redirectAfterLogin") || "/";
+// //   const redirect = sessionStorage.getItem("redirectAfterLogin");
+
+// //   if (user && redirect) {
 // //     sessionStorage.removeItem("redirectAfterLogin");
-// //     // sanitize
+
 // //     const target = (redirect.startsWith("/") && redirect !== "/login") ? redirect : "/";
-// //     window.location.href = target;
+// //     navigate(target);
 // //   }
 // // });

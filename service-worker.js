@@ -50,7 +50,7 @@ self.addEventListener("fetch", (event) => {
           return res;
         })
         .catch(() => {
-          sendTelemetry("html-fetch-failed", url.pathname);
+          // sendTelemetry("html-fetch-failed", url.pathname);
           return caches.match(req).then((cached) => cached || caches.match(OFFLINE_URL));
         })
     );
@@ -62,7 +62,7 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       caches.match(req).then((cached) => {
         if (cached) {
-          sendTelemetry("cache-hit", url.pathname);
+          // sendTelemetry("cache-hit", url.pathname);
           return cached;
         }
         return fetch(req).then((res) => {
@@ -108,7 +108,7 @@ async function staleWhileRevalidate(req) {
       return res;
     })
     .catch(() => {
-      sendTelemetry("image-fetch-failed", req.url);
+      // sendTelemetry("image-fetch-failed", req.url);
       return cached;
     });
   return cached || fetchPromise;
@@ -138,7 +138,7 @@ self.addEventListener("notificationclick", (event) => {
 
 // Basic telemetry reporting
 function sendTelemetry(type, url) {
-  fetch("/telemetry/sw-event", {
+  fetch("http://localhost:4000/api/v1/telemetry/sw-event", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ type, url, ts: Date.now() })

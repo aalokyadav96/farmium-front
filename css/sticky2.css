@@ -72,10 +72,12 @@
         height: 100vh;
         top: 0;
         left: 0;
-        border-right: 1px solid #ddd;
     }
     .app {
         margin-left: 54px;
+        border-left: 1px solid #ddd;
+        border-right: 1px solid #ddd;
+        margin-right: 12px;
     }
 }
 
@@ -86,11 +88,14 @@
         width: 60px;
         height: 100vh;
         top: 0;
-        right: 0;
-        left: auto;
+        left: 0;
+        right: auto;
         border-right: 1px solid #ddd;
     }
     .app {
         margin-left: 60px;
+        border-left: 1px solid #ddd;
+        border-right: 1px solid #ddd;
+        margin-right: 12px;
     }
 }

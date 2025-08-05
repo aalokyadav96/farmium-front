@@ -596,9 +596,9 @@ function createAvatar(userId) {
     img.src = `${SRC_URL}/userpic/thumb/${userId}.jpg`;
     img.alt = "User avatar";
     img.loading = "lazy";
-    img.onerror = () => {
-        img.src = `${SRC_URL}/userpic/thumb/default.png`;
-    };
+    // img.onerror = () => {
+    //     img.src = `${SRC_URL}/userpic/thumb/default.png`;
+    // };
     return img;
 }
 

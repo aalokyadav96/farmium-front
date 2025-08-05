@@ -1,0 +1,83 @@
+#shopping-page {
+    font-family: 'Segoe UI', sans-serif;
+    padding: 20px;
+    background: #f8f9fa;
+  }
+  
+  #shopping-nav {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .shopping-tab.button {
+    background-color: #0078d4;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  
+  .shopping-tab.button:hover {
+    background-color: #005ea6;
+  }
+  
+  #filters label {
+    margin-right: 15px;
+    font-weight: bold;
+  }
+  
+  #filters input[type="number"],
+  #filters input[type="checkbox"] {
+    margin-left: 6px;
+  }
+  
+  #sort-options {
+    margin: 20px 0;
+  }
+  
+  #sort-options select {
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
+  
+  #items {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+  }
+  
+  .item-card {
+    background: white;
+    border: 1px solid #ddd;
+    padding: 16px;
+    border-radius: 6px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  }
+  
+  .item-card h3 {
+    margin: 0 0 6px;
+    font-size: 18px;
+  }
+  
+  .item-card span {
+    color: #0078d4;
+    font-weight: bold;
+  }
+  
+  .item-card button.button {
+    margin-top: 10px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .item-card button.button:hover {
+    background-color: #218838;
+  }
+  

@@ -14,6 +14,7 @@
     font-size: 1.4rem;
     font-weight: 700;
     /* color: #2c3e50; */
+    color: var(--color-fg);
     text-decoration: none;
   }
   
@@ -84,10 +85,16 @@
     text-decoration: none;
     font-size: 0.95rem;
     transition: background 0.2s ease;
+    color: var(--color-fg);
   }
   
   .menu-item:hover {
-    background-color: #f0f0f0;
+    background-color: var(--color-fg);
+    color: var(--color-bg);
+  }
+  
+  .menu-item:hover svg {
+    stroke: var(--color-bg);
   }
   
   /* Profile dropdown */

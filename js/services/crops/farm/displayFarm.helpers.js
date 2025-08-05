@@ -4,6 +4,7 @@ import { editCrop } from "../crop/editCrop.js";
 import Button from "../../../components/base/Button.js";
 import { navigate } from "../../../routes/index.js";
 import { addToCart } from "../../cart/addToCart.js";
+import { resolveImagePath, EntityType, PictureType } from "../../../utils/imagePaths.js";
 
 // ─────────── Render the farm’s top‐level detail block ───────────
 export function renderFarmDetails(farm, isCreator) {
@@ -146,12 +147,14 @@ export async function renderCrops(
 function createCropCard(crop, farmName, farmId, mainContainer, isLoggedIn, isCreator) {
   const card = createElement("div", { class: "crop-card" });
 
-  if (crop.imageUrl) {
-    card.appendChild(createElement("img", {
-      src: `${SRC_URL}${crop.imageUrl}`,
-      alt: crop.name
-    }));
-  }
+  const img = crop.imageUrl
+  ? createElement("img", {
+      src: resolveImagePath(EntityType.FARM, PictureType.BANNER, crop.imageUrl),
+      alt: crop.name,
+      class: "crop__image"
+    })
+  : createElement("div", { class: "crop__image placeholder" }, ["No Image"]);
+
 
   const formatDate = (isoStr) =>
     isoStr ? new Date(isoStr).toLocaleDateString(undefined, {
