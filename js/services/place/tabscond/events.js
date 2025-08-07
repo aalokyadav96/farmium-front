@@ -1,5 +1,6 @@
 import { SRC_URL, apiFetch } from "../../../api/api.js";
 import { createElement } from "../../../components/createElement.js";
+import { resolveImagePath, EntityType, PictureType } from "../../../utils/imagePaths.js";
 
 // ─── Events (Arena) ────────────────────────────────────────────────────────────
 
@@ -334,7 +335,8 @@ function renderEvents(container, events) {
 
         if (event.banner_image) {
             const banner = document.createElement('img');
-            banner.src = `${SRC_URL}/eventpic/banner/thumb/${event.banner_image}`;
+            // banner.src = `${SRC_URL}/eventpic/banner/thumb/${event.banner_image}`;
+            banner.src = resolveImagePath(EntityType.USER, PictureType.THUMB, `${event.banner_image}`);
             banner.alt = event.title;
             banner.style.width = '100%';
             banner.style.maxHeight = '200px';

@@ -7,16 +7,18 @@ import { displayEventFAQs } from "./eventFAQHelper.js";
 // import { displaySeatingMap } from "./seatingMap.js";
 // import { loadMap } from "../map/mapUI.js";
 import EventTimeline from "../../components/ui/EventTimeline.mjs";
+import { EntityType, PictureType, resolveImagePath } from "../../utils/imagePaths.js";
 
 
 async function displayEventReviews(reviewsContainer, eventId, isCreator, isLoggedIn) {
     displayReviews(reviewsContainer, isCreator, isLoggedIn, "event", eventId);
 }
 
-async function displayEventVenue(venueList, isLoggedIn, eventID) {
+async function displayEventVenue(venueList, isLoggedIn, eventID, seatingplan) {
     // displaySeatingMap(venueList, place, eventid, isLoggedIn);
     // loadMap(venueList, isLoggedIn, { type: "event", id: eventID });
-    venueList.appendChild(createElement('img',{src:`${SRC_URL}/eventpic/seating/${eventID}seating.jpg`},[]));
+    let imgx = resolveImagePath(EntityType.EVENT,PictureType.THUMB, seatingplan);
+    venueList.appendChild(Imagex(imgx));
     // venueList.appendChild(Imagex(`${SRC_URL}/eventpic/seating/${eventID}seating.jpg`));
 }
 

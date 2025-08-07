@@ -2,6 +2,7 @@ import { SRC_URL, apiFetch } from "../../api/api.js";
 import Snackbar from "../../components/ui/Snackbar.mjs";
 import { navigate } from "../../routes/index.js";
 // import { toggleFollow } from "./toggleFollow.js";
+import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
 
 async function displayFollowSuggestions(userid, suggestionsSection) {
     suggestionsSection.innerHTML = ""; // Clear previous content
@@ -25,7 +26,8 @@ async function displayFollowSuggestions(userid, suggestionsSection) {
                 const profilePic = document.createElement("img");
                 // profilePic.className = "profile-picture";
                 profilePic.className = "circle padd-4";
-                profilePic.src = user.userid ? `${SRC_URL}/userpic/thumb/${user.userid}.jpg` : "${SRC_URL}/userpic/thumb/default-avatar.jpg";
+                // profilePic.src = user.userid ? `${SRC_URL}/userpic/thumb/${user.userid}.jpg` : "${SRC_URL}/userpic/thumb/default-avatar.jpg";
+                profilePic.src = resolveImagePath(EntityType.USER, PictureType.THUMB, `${user.userid}.jpg`);
                 profilePic.alt = `${user.username}'s profile`;
                 profilePic.setAttribute("loading", "lazy");
                 

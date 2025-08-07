@@ -6,6 +6,7 @@ import { SRC_URL } from "../../state/state.js";
 import SnackBar from "../../components/ui/Snackbar.mjs";
 import Modal from "../../components/ui/Modal.mjs";
 import { handlePurchase } from "../payment/pay.js";
+import { EntityType, PictureType, resolveImagePath } from "../../utils/imagePaths.js";
 
 // // Add Menu to the event
 // async function addMenu(placeId, menuList) {
@@ -100,7 +101,8 @@ async function addMenu(placeId, menuList) {
             const card = MenuCard({
                 name: menu.name,
                 price: menu.price,
-                image: `${SRC_URL}/menupic/${menu.menu_pic}`,
+                // image: `${SRC_URL}/menupic/${menu.menu_pic}`,
+                image: resolveImagePath(EntityType.MENU,PictureType.THUMB,menu.menu_pic),
                 stock: menu.stock,
                 isCreator,
                 isLoggedIn,
@@ -144,7 +146,8 @@ function displayNewMenu(menuData, menuList) {
 
     if (menuData.menu_pic) {
         const menuImage = document.createElement("img");
-        menuImage.src = `${SRC_URL}/menupic/${menuData.menu_pic}`;
+        // menuImage.src = `${SRC_URL}/menupic/${menuData.menu_pic}`;
+        menuImage.src = resolveImagePath(EntityType.MENU,PictureType.THUMB,menu.menu_pic);
         menuImage.alt = menuData.name;
         menuImage.loading = "lazy";
         menuImage.style.maxWidth = "160px";
@@ -365,7 +368,8 @@ async function displayMenu(menuListcon, placeId, isCreator, isLoggedIn) {
         const card = MenuCard({
             name: menu.name,
             price: menu.price,
-            image: `${SRC_URL}/menupic/${menu.menu_pic}`,
+            // image: `${SRC_URL}/menupic/${menu.menu_pic}`,
+            image: resolveImagePath(EntityType.MENU,PictureType.THUMB,menu.menu_pic),
             stock: menu.stock,
             isCreator,
             isLoggedIn,

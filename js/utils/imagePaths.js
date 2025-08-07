@@ -7,7 +7,6 @@ export const EntityType = {
   ARTIST: "artist",
   USER: "user",
   BAITO: "baito",
-  WORKER: "worker",
   SONG: "song",
   POST: "post",
   CHAT: "chat",
@@ -16,12 +15,17 @@ export const EntityType = {
   CROP: "crop",
   PLACE: "place",
   RECIPE: "recipe",
+  MEDIA: "media",
+  MERCH: "merch",
+  MENU: "menu",
+  FEED: "feed",
 };
 
 // Picture types
 export const PictureType = {
   BANNER: "banner",
   PHOTO: "photo",
+  POSTER: "poster",
   SEATING: "seating",
   MEMBER: "member",
   THUMB: "thumb",
@@ -37,6 +41,7 @@ export const PictureType = {
 const PictureSubfolders = {
   [PictureType.BANNER]: "banner",
   [PictureType.PHOTO]: "photo",
+  [PictureType.POSTER]: "poster",
   [PictureType.SEATING]: "seating",
   [PictureType.MEMBER]: "member",
   [PictureType.THUMB]: "thumb",
@@ -60,6 +65,16 @@ export function resolveImagePath(entityType, pictureType, filename, fallback = "
 
 /******HOW TO USE******/
 /*
+
+// Banner
+const banner = Imagex(
+  resolveImagePath(EntityType.EVENT, PictureType.BANNER, `${event.id}.jpg`),
+  `Event banner`,
+  "lazy",
+  "",
+  "event-banner-image"
+);
+
 import { Imagex } from "../../components/base/Imagex.js";
 import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
 
@@ -70,14 +85,5 @@ const avatar = Imagex(
   "lazy",
   "",
   "chatavatar circle"
-);
-
-// Banner
-const banner = Imagex(
-  resolveImagePath(EntityType.EVENT, PictureType.BANNER, `${event.id}.jpg`),
-  `Event banner`,
-  "lazy",
-  "",
-  "event-banner-image"
 );
  */

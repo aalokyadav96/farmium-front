@@ -165,3 +165,6 @@
     background: #218838;
   }
   
+  .venue-container img {
+    width: auto;
+  }

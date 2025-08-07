@@ -70,10 +70,10 @@ function createProfileSection(userId) {
     class: "profile-pic"
   });
 
-  // fallback if image fails to load
-  img.onerror = () => {
-    img.src = resolveImagePath(EntityType.USER, PictureType.THUMB, "thumb.jpg");
-  };
+  // // fallback if image fails to load
+  // img.onerror = () => {
+  //   img.src = resolveImagePath(EntityType.USER, PictureType.THUMB, "thumb.jpg");
+  // };
 
   const toggle = createElement("div", {
     class: "profile-toggle",

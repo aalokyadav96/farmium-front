@@ -1,7 +1,7 @@
 import { createElement } from "../../components/createElement";
 import Button from "../../components/base/Button.js";
 import { SRC_URL } from "../../api/api";
-
+import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
 export function renderProduct(product, isLoggedIn, productType, productId, container) {
   const physical = ["clothing", "grocery", "produce", "tool", "electronics", "appliance", "furniture"];
   const media = ["book", "software", "course"];
@@ -49,7 +49,8 @@ export function renderProduct(product, isLoggedIn, productType, productId, conta
   const imageGallery = product.imageUrls?.length
     ? createElement("div", { class: "product-image-gallery" }, product.imageUrls.map((url) =>
         createElement("img", {
-          src: `${SRC_URL}/uploads/${url}`,
+          // src: `${SRC_URL}/uploads/${url}`,
+          src: resolveImagePath(EntityType.PRODUCT, PictureType.THUMB, `${url}`),
           alt: product.name || "Image",
           class: "product-image",
         })

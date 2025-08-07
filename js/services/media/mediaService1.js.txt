@@ -166,7 +166,7 @@ function renderMediaItem(media, index, isLoggedIn, entityType, entityId) {
             class: "media-video",
             controls: false,
             // poster: `${SRC_URL}/uploads/${media.id}.jpg`, // optionally use resolveImagePath if you want
-            poster: resolveImagePath(EntityType.MEDIA, PictureType.THUMB, media.id + ".jpg"),
+            poster: resolveImagePath(EntityType.MEDIA, PictureType.POSTER, media.id + ".jpg"),
         });
 
         const caption = createElement("figcaption", {}, [media.caption || "No caption provided"]);
@@ -207,6 +207,129 @@ function renderMediaItem(media, index, isLoggedIn, entityType, entityId) {
     return mediaItem;
 }
 
+
+// // Display newly uploaded media in the list
+// function displayNewMedia(isLoggedIn, mediaData, mediaList) {
+//     // const mediaList = document.getElementById("media-list");
+//     const isCreator = isLoggedIn && state.user === mediaData.creatorid;
+
+//     const mediaItem = document.createElement("div");
+//     mediaItem.className = "imgcon";
+
+//     let mediaContent = "";
+
+//     // Render image or video depending on media type
+//     if (mediaData.type === "image") {
+//         mediaContent = `
+//             <img loading="lazy" src="${SRC_URL}/uploads/${mediaData.url}" alt="${mediaData.caption || "Media"}" 
+//                 class="media-img" data-index="${mediaItems.length}" 
+//                 style="max-width: 160px; max-height: 240px; height: auto; width: auto;" />
+//         `;
+//     } else if (mediaData.type === "video") {
+//         mediaContent = `
+//             <video controls style="max-width: 160px; max-height: 240px;">
+//                 <source src="${SRC_URL}/uploads/${mediaData.url}" type="video/mp4" />
+//                 Your browser does not support the video tag.
+//             </video>
+//         `;
+//     }
+
+//     mediaItem.innerHTML = `
+//         <h3>${mediaData.caption || "No caption provided"}</h3>
+//         ${mediaContent}
+//         ${isCreator ? `
+//             <button class="delete-media-btn" data-media-id="${mediaData.id}" data-entity-id="${mediaData.entityid}">Delete</button>
+//         ` : ""}
+//     `;
+
+//     mediaList.appendChild(mediaItem); // Append the new media item to the list
+//     mediaItems.push(mediaData); // Add the new media to the global mediaItems array
+// }
+
+// function renderMediaItem(media, index, isLoggedIn, entityType, entityId) {
+//     const mediaItem = document.createElement("div");
+//     mediaItem.className = "media-item";
+
+//     // Validate media source URL
+//     const mediaUrl = `${SRC_URL}/uploads/media/thumb/${media.url}`;
+//     if (!media.url) {
+//         console.error("Invalid media URL");
+//         return mediaItem;
+//     }
+
+//     if (media.type === "image") {
+//         // Handle image media
+//         const figure = document.createElement("figure");
+
+//         const img = document.createElement("img");
+//         img.src = mediaUrl;
+//         img.loading = "lazy";
+//         img.alt = media.caption || "Media Image";
+//         img.className = "media-img";
+//         img.dataset.index = index;
+//         figure.appendChild(img);
+
+//         const caption = document.createElement("figcaption");
+//         caption.textContent = media.caption || "No caption provided";
+//         figure.appendChild(caption);
+
+//         mediaItem.appendChild(figure);
+//     } else if (media.type === "video") {
+//         console.log(typeof VidPlay); // Should log "function"
+
+//         // Handle video media
+//         const video = document.createElement("video");
+//         video.className = "media-video";
+//         video.controls = false;
+//         video.poster = `${SRC_URL}/uploads/${media.id}.jpg`;
+
+//         // const source = document.createElement("source");
+//         // source.src = mediaUrl;
+//         // source.type = "video/mp4";
+//         // video.appendChild(source);
+
+//         const caption = document.createElement("figcaption");
+//         caption.textContent = media.caption || "No caption provided";
+
+//         const figure = document.createElement("figure");
+//         figure.appendChild(video);
+//         figure.appendChild(caption);
+
+//         mediaItem.appendChild(figure);
+//     } else {
+//         console.warn("Unsupported media type");
+//     }
+
+//     // Add delete button for creators
+//     if (isLoggedIn && state.user === media.creatorid) {
+//         const deleteButton = document.createElement("button");
+//         deleteButton.className = "delete-media-btn";
+//         deleteButton.textContent = "Delete";
+//         deleteButton.dataset.mediaId = media.id;
+
+//         deleteButton.addEventListener("click", async () => {
+//             try {
+//                 await deleteMedia(media.id, entityType, entityId);
+//                 mediaItem.remove(); // Remove the item on successful delete
+//             } catch (error) {
+//                 console.error("Failed to delete media:", error);
+//             }
+//         });
+
+//         mediaItem.appendChild(deleteButton);
+//     }
+
+//         // Report button
+//         const reportButton = document.createElement("button");
+//         reportButton.className = "report-btn";
+//         reportButton.textContent = "Report";
+//         reportButton.addEventListener("click", () => {
+//             reportPost(media.id, "media");
+//         });
+//         mediaItem.appendChild(reportButton);
+
+//     return mediaItem;
+// }
 
 
 async function displayMedia(content, entityType, entityId, isLoggedIn) {

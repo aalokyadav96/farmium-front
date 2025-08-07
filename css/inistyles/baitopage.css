@@ -69,14 +69,6 @@
     margin-bottom: 20px;
   }
   
-  .buttonx {
-    padding: 10px 14px;
-    border: none;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: background 0.3s ease;
-  }
   
   .btn-primary {
     background: #0077cc;

@@ -38,7 +38,6 @@ export const staticRoutes = {
 
   "/booking": { moduleImport: () => import("../pages/booking/booking.js"), functionName: "Booking" },
   "/search": { moduleImport: () => import("../pages/search/search.js"), functionName: "Search" },
-  "/feed": { moduleImport: () => import("../pages/weed/weed.js"), functionName: "Weed" },
   "/social": { moduleImport: () => import("../pages/tumblr/tumblr.js"), functionName: "Tumblr" },
   "/merechats": { moduleImport: () => import("../pages/merechats/merechats.js"), functionName: "Mechat", protected: true },
   "/livechat": { moduleImport: () => import("../pages/livechat/chats.js"), functionName: "LiveChats", protected: true },

@@ -36,9 +36,9 @@ const createSection = (parent) => {
     return section;
 };
 
-const createVenue = async (container, eventId, isLoggedIn) => {
+const createVenue = async (container, eventId, seatingplan, isLoggedIn) => {
     const venueContainer = createElement('div', { id: 'event-venue', class: 'venue-container' });
-    await displayEventVenue(venueContainer, isLoggedIn, eventId);
+    await displayEventVenue(venueContainer, isLoggedIn, eventId, seatingplan);
     container.appendChild(venueContainer);
 };
 
@@ -125,7 +125,7 @@ async function displayEvent(isLoggedIn, eventId, content) {
         // container.appendChild(tabsUI);
 
         if (eventData.seatingplan) {
-            await createVenue(container, eventData.eventid, isLoggedIn);
+            await createVenue(container, eventData.eventid, eventData.seatingplan, isLoggedIn);
         }
 
     } catch (error) {

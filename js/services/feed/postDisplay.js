@@ -2,7 +2,7 @@
 import { createElement } from "../../components/createElement.js";
 import Snackbar from "../../components/ui/Snackbar.mjs";
 // import Button from "../../components/base/Button.js";
-import { renderPost } from "./renders/renderPost.js";
+import { renderPost } from "./renderNewPost.js";
 import { apiFetch } from "../../api/api.js";
 
 async function displayPost(isLoggedIn, postId, contentContainer) {
@@ -13,7 +13,7 @@ async function displayPost(isLoggedIn, postId, contentContainer) {
             contentContainer = document.getElementById("content");
         }
         contentContainer.innerHTML = "";
-        renderPost(postData, contentContainer, 0);
+        renderNewPost(postData, contentContainer, 0);
     } catch (error) {
         contentContainer.innerHTML = "";
         if (error.message === '404') {

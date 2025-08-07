@@ -2,6 +2,7 @@ import { createElement } from "../../components/createElement.js";
 import { SRC_URL, apiFetch } from "../../api/api.js";
 import Button from "../../components/base/Button.js";
 import { handlePurchase } from '../payment/paymentService.js';
+import { EntityType, PictureType, resolveImagePath } from "../../utils/imagePaths.js";
 
 export async function displayMerch(contentContainer, merchID, isLoggedIn) {
   // Clear existing content
@@ -78,7 +79,8 @@ export async function displayMerch(contentContainer, merchID, isLoggedIn) {
     );
     if (data.merch_pic) {
       const img = createElement("img", {
-        src: `${SRC_URL}/merchpic/${data.merch_pic}`,
+        // src: `${SRC_URL}/merchpic/${data.merch_pic}`,
+        src: resolveImagePath(EntityType.MERCH, PictureType.THUMB, data.merch_pic),
         alt: data.name || "Merch Image",
         style: "max-width: 100%; border-radius: 4px;",
       });

@@ -9,7 +9,7 @@ export function HireWorkerCard(worker, isLoggedIn) {
   const photo = createElement("div", { class: "worker-photo", alt: "worker-photo" });
 
   const profileImg = createElement("img", {
-    src: resolveImagePath(EntityType.WORKER, PictureType.PHOTO, worker.profile_picture),
+    src: resolveImagePath(EntityType.BAITO, PictureType.THUMB, worker.profile_picture),
     class: "profile-thumbnail",
     loading: "lazy",
     alt: `${worker.name}'s profile photo`

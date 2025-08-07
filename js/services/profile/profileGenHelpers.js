@@ -38,13 +38,14 @@ function createBanner(profile) {
 
     // Resolve banner image path
     const bannerFilename = profile.banner_picture || "default.webp";
-    const bannerPath = resolveImagePath(EntityType.USER, PictureType.BANNER, bannerFilename);
+    const bannerPath = resolveImagePath(EntityType.USER, PictureType.THUMB, bannerFilename);
+    const sightPath = resolveImagePath(EntityType.USER, PictureType.BANNER, bannerFilename);
 
     // Set banner as background image
     bgImg.style.backgroundImage = `url(${bannerPath})`;
 
     // Sightbox preview
-    bgImg.addEventListener("click", () => Sightbox(bannerPath, "image"));
+    bgImg.addEventListener("click", () => Sightbox(sightPath, "image"));
 
     // Add edit button and image container
     banncon.appendChild(createBannerEditButton(profile));
@@ -103,13 +104,14 @@ function createProfilePicture(profile) {
 
     const thumb = document.createElement("span");
     thumb.classList.add("thumb");
-    
+
     // Resolve image paths
     const thumbSrc = resolveImagePath(EntityType.USER, PictureType.THUMB, `${profile.userid}.jpg`);
-    
-    const fullSrc = profile.profile_picture
-        ? `${SRC_URL}/userpic/${profile.profile_picture}` // kept as-is, fallback not handled yet
-        : `${SRC_URL}/userpic/default-profile.png`;
+    const fullSrc = resolveImagePath(EntityType.USER, PictureType.PHOTO, profile.profile_picture);
+
+    // const fullSrc = profile.profile_picture
+    //     ? `${SRC_URL}/userpic/${profile.profile_picture}` // kept as-is, fallback not handled yet
+    //     : `${SRC_URL}/userpic/default-profile.png`;
 
     // Use Imagex component
     const img = Imagex(

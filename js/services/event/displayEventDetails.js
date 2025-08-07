@@ -239,9 +239,9 @@ function createActionSection(eventData, isCreator, isLoggedIn) {
 
     if (isLoggedIn && isCreator) {
         actions.push(
-            { text: '✏ Edit Event', onClick: () => editEventForm(isLoggedIn, eventData.eventid) },
-            { text: '🗑 Delete Event', onClick: () => deleteEvent(isLoggedIn, eventData.eventid), classes: ['delete-btn'] },
-            { text: '📊 View Analytics', onClick: () => viewEventAnalytics(isLoggedIn, eventData.eventid), classes: ['analytics-btn'] }
+            { text: '✏ Edit Event', onClick: () => editEventForm(isLoggedIn, eventData.eventid), classes: ['edit-btn',"buttonx"] },
+            { text: '🗑 Delete Event', onClick: () => deleteEvent(isLoggedIn, eventData.eventid), classes: ['delete-btn', 'buttonx'] },
+            { text: '📊 View Analytics', onClick: () => viewEventAnalytics(isLoggedIn, eventData.eventid), classes: ['analytics-btn',"buttonx"] }
         );
     } else if (isLoggedIn) {
         actions.push({ text: 'Report Event', onClick: () => reportPost(eventData.eventid, 'event') });

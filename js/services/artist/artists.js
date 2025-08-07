@@ -121,7 +121,7 @@ function renderNextPage(grid, artists, isLoggedIn) {
 
   pageItems.forEach(artist => {
     const imgSrc = artist.photo
-      ? resolveImagePath(EntityType.ARTIST, PictureType.PHOTO, artist.photo)
+      ? resolveImagePath(EntityType.ARTIST, PictureType.THUMB, artist.photo)
       : "https://via.placeholder.com/300x300?text=No+Image";
   
     const card = createElement("article", { class: "artist-card" }, [

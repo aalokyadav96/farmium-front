@@ -9,6 +9,7 @@ import { handlePurchase } from '../payment/paymentService.js';
 import SnackBar from "../../components/ui/Snackbar.mjs";
 import Modal from "../../components/ui/Modal.mjs";
 
+import { EntityType, PictureType, resolveImagePath } from "../../utils/imagePaths.js";
 import { reportPost } from "../reporting/reporting.js";
 
 // Add merchandise to the event
@@ -262,7 +263,8 @@ function displayNewMerchandise(merchData, merchList) {
 
     if (merchData.merch_pic) {
         const merchImage = document.createElement("img");
-        merchImage.src = `${SRC_URL}/merchpic/${merchData.merch_pic}`;
+        // merchImage.src = `${SRC_URL}/merchpic/${merchData.merch_pic}`;
+        merchImage.src = resolveImagePath(EntityType.MERCH, PictureType.THUMB, data.merch_pic);
         merchImage.alt = merchData.name;
         merchImage.loading = "lazy";
         merchImage.style.maxWidth = "160px";
@@ -304,7 +306,8 @@ async function displayMerchandise(merchcon, merchData, entityType, eventId, isCr
         const card = MerchCard({
             name: merch.name,
             price: merch.price,
-            image: `${SRC_URL}/merchpic/${merch.merch_pic}`,
+            // image: `${SRC_URL}/merchpic/${merch.merch_pic}`,
+            image: resolveImagePath(EntityType.MERCH, PictureType.THUMB, merch.merch_pic),
             stock: merch.stock,
             isCreator,
             isLoggedIn,

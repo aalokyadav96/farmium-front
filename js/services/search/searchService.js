@@ -6,6 +6,7 @@ import { createTabs } from "../../components/ui/createTabs.js"; // adjust path
 import { createElement } from "../../components/createElement.js";
 import Button from "../../components/base/Button.js";
 import { searchSVG } from "../../components/svgs.js";
+import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
 
 export async function displaySearchForm(container) {
   container.innerHTML = "";
@@ -323,10 +324,12 @@ function createCard(entityType, item) {
   let imageSrc = "";
   let altText = "";
   if (entityType === "events") {
-    imageSrc = `${SRC_URL}/eventpic/thumb/${item.eventid}.jpg`;
+    // imageSrc = `${SRC_URL}/eventpic/thumb/${item.eventid}.jpg`;
+    imageSrc = resolveImagePath(EntityType.EVENT, PictureType.THUMB, `${item.eventid}.jpg`);
     altText = item.title || "Event";
   } else if (entityType === "places") {
-    imageSrc = `${SRC_URL}/placepic/thumb/${item.placeid}.jpg`;
+    // imageSrc = `${SRC_URL}/placepic/thumb/${item.placeid}.jpg`;
+    imageSrc = resolveImagePath(EntityType.PLACE, PictureType.THUMB, `${item.placeid}.jpg`);
     altText = item.name || "Place";
   }
   if (imageSrc) {

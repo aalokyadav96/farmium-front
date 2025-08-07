@@ -1,13 +1,15 @@
 // chomponents/renderMedia.js
 import { createElement } from "../../../components/createElement";
 import { SRC_URL } from "../../../state/state";
+import { resolveImagePath, EntityType, PictureType } from "../../../utils/imagePaths.js";
 
 export function renderMedia(msg) {
   if (!msg.media?.url || !msg.media?.type) {
     return [ msg.content ];
   }
 
-  const url  = `${SRC_URL}/uploads/farmchat/${msg.media.url}`;
+  // const url  = `${SRC_URL}/uploads/farmchat/${msg.media.url}`;
+  const url  = resolveImagePath(EntityType.MECHAT, PictureType.THUMB, `${msg.media.url}`);
   const type = msg.media.type;
 
   if (type.startsWith("image/")) {

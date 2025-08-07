@@ -78,7 +78,7 @@ export async function displayRecipe(content, isLoggedIn, recipeId, currentUser =
   // --- Image Carousel with swipe support ---
   let imgIndex = 0;
   const getImageAtIndex = (i) =>
-    resolveImagePath(EntityType.RECIPE, PictureType.PHOTO, recipe.imageUrls?.[i]);
+    resolveImagePath(EntityType.RECIPE, PictureType.THUMB, recipe.imageUrls?.[i]);
   
   const imageEl = createElement("img", {
     src: getImageAtIndex(imgIndex),

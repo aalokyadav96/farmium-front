@@ -191,14 +191,15 @@ async function handlePostSubmit(form, isEdit = false, existingId = null) {
     }
 
     if (files && files.length) {
-        for (let file of files) {
+        Array.from(files).forEach((file, index) => {
             const error = validateImage(file);
             if (error) {
                 Snackbar(error, 3000);
                 return;
             }
-            cleaned.append("images", file);
-        }
+            cleaned.append(`images_${index + 1}`, file); // unique field names
+        });
+        
     }
 
     try {

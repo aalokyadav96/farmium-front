@@ -167,7 +167,7 @@
   /* Media Previews */
   .post-media img.post-image {
     width: 100%;
-    max-height: 500px;
+    max-height: 360px;
     object-fit: contain;
     border-radius: 6px;
   }

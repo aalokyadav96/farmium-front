@@ -126,7 +126,7 @@
     gap: 10px;
     margin-bottom: 20px;
   }
-  
+/*   
   .cta-block .buttonx {
     background-color: #17a2b8;
     color: white;
@@ -135,7 +135,7 @@
     padding: 8px 12px;
     cursor: pointer;
   }
-  
+   */
   .crop-summary,
   .crop-distribution,
   .review-block {
@@ -236,7 +236,7 @@
     font-size: 16px;
   }
 
-  .cta-block .buttonx,
+  /* .cta-block .buttonx, */
   .a2c-crop,
   .add-crop-btn,
   .review-block button {
