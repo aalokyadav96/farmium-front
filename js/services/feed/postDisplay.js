@@ -4,6 +4,7 @@ import Snackbar from "../../components/ui/Snackbar.mjs";
 // import Button from "../../components/base/Button.js";
 import { renderPost } from "./renderNewPost.js";
 import { apiFetch } from "../../api/api.js";
+import Notify from "../../components/ui/Notify.mjs";
 
 async function displayPost(isLoggedIn, postId, contentContainer) {
     try {
@@ -13,7 +14,7 @@ async function displayPost(isLoggedIn, postId, contentContainer) {
             contentContainer = document.getElementById("content");
         }
         contentContainer.innerHTML = "";
-        renderNewPost(postData, contentContainer, 0);
+        renderPost(postData, contentContainer, 0);
     } catch (error) {
         contentContainer.innerHTML = "";
         if (error.message === '404') {

@@ -2,9 +2,8 @@
 import { state } from "../../state/state.js";
 import { apiFetch } from "../../api/api.js";
 import { navigate } from "../../routes/index.js";
-import SnackBar from "../../components/ui/Snackbar.mjs";
 import { createElement } from "../../components/createElement.js";
-import { createTabs } from "../../components/ui/createTabs.js";
+import Notify from "../../components/ui/Notify.mjs";
 
 import { displayEventDetails } from "./displayEventDetails.js";
 import { displayEventVenue, displayEventFAQ, displayEventReviews, displayLostAndFound, displayContactDetails } from "./eventTabs.js";
@@ -21,9 +20,9 @@ const confirmAndExecute = async (message, action, successMessage, errorMessage) 
     if (confirm(message)) {
         try {
             await action();
-            SnackBar(successMessage, 3000);
+            Notify(successMessage, {type: "warning", duration: 3000, dismissible: true});
         } catch (error) {
-            SnackBar(`${errorMessage}: ${error.message}`, 3000);
+            Notify(`${errorMessage}: ${error.message}`, {type: "warning", duration: 3000, dismissible: true});
         }
     }
 };
@@ -46,7 +45,8 @@ const createVenue = async (container, eventId, seatingplan, isLoggedIn) => {
 
 // Delete Event
 async function deleteEvent(isLoggedIn, eventId) {
-    if (!isLoggedIn) return SnackBar("Please log in to delete your event.", 3000);
+    if (!isLoggedIn) return 
+    Notify("Please log in to delete your event.", {type: "warning", duration: 3000, dismissible: true});
 
     await confirmAndExecute(
         "Are you sure you want to delete this event?",
@@ -58,7 +58,8 @@ async function deleteEvent(isLoggedIn, eventId) {
 
 // View Analytics (placeholder)
 async function viewEventAnalytics(isLoggedIn) {
-    if (!isLoggedIn) return SnackBar("Please log in to view your event analytics.", 3000);
+    if (!isLoggedIn) return 
+    Notify("Please log in to view your event analytics.", {type: "warning", duration: 3000, dismissible: true});
     confirm("Do you want to view event analytics?");
 }
 
@@ -133,7 +134,7 @@ async function displayEvent(isLoggedIn, eventId, content) {
         container.appendChild(
             createElement("h1", { textContent: `Error loading event details: ${error.message}` })
         );
-        SnackBar("Failed to load event details. Please try again later.", 3000);
+        Notify("Failed to load event details. Please try again later.", {type: "warning", duration: 3000, dismissible: true});
     }
 }
 

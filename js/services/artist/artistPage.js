@@ -46,17 +46,17 @@ export async function displayArtist(content, artistID, isLoggedIn) {
         alt: `${artist.name || "Artist"}'s photo`,
         class: "artist-photo"
       });
-      photoBannerRow.appendChild(createElement("div", { class: "hflex" }, [photoImg]));
+      photoBannerRow.appendChild(createElement("div", { class: "hflex artist-photo" }, [photoImg]));
     }
 
     if (artist.banner) {
-      const bannerSrc = resolveImagePath(EntityType.ARTIST, PictureType.THUMB, artist.banner);
+      const bannerSrc = resolveImagePath(EntityType.ARTIST, PictureType.BANNER, artist.banner);
       const bannerImg = createElement("img", {
         src: bannerSrc,
         alt: `${artist.name || "Artist"}'s banner`,
         class: "artist-banner"
       });
-      photoBannerRow.appendChild(createElement("div", { class: "hflex" }, [bannerImg]));
+      photoBannerRow.appendChild(createElement("div", { class: "hflex artist-banner" }, [bannerImg]));
     }
 
     contentContainer.appendChild(photoBannerRow);

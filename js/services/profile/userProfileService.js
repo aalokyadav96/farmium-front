@@ -6,6 +6,7 @@ import { logout } from "../../services/auth/authService.js";
 import { fetchProfile } from "./fetchProfile.js";
 import profilGen from "./renderUserProfile.js";
 import { editProfile } from "./editProfile.js";
+import Notify from "../../components/ui/Notify.mjs";
 
 // Display the profile content in the profile section
 async function displayProfile(isLoggedIn, content) {

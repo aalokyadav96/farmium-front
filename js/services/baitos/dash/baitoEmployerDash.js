@@ -16,7 +16,7 @@ function buildHeader() {
 export async function showApplicantsModal(job) {
   let applicants;
   try {
-    applicants = await apiFetch(`/baitos/baito/${job._id}/applicants`);
+    applicants = await apiFetch(`/baitos/baito/${job.baitoid}/applicants`);
   } catch {
     const errModal = Modal({
       title: "Error",

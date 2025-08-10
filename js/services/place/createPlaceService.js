@@ -1,15 +1,15 @@
 
 import { createElement } from "../../components/createElement.js";
-import Snackbar from '../../components/ui/Snackbar.mjs';
 import { navigate } from "../../routes/index.js";
 import { createPlace } from "./placeService.js";
 import { createFormGroup } from "./editPlace.js";
+import Notify from "../../components/ui/Notify.mjs";
 
 async function createPlaceForm(isLoggedIn, createSection) {
     createSection.innerHTML = "";
 
     if (!isLoggedIn) {
-        Snackbar("You must be logged in to create a place.", 3000);
+        Notify("You must be logged in to create a place.", {type: "warning", duration: 3000, dismissible: true});
         navigate('/login');
         return;
     }
@@ -75,10 +75,10 @@ async function createPlaceForm(isLoggedIn, createSection) {
         try {
             await createPlace(formData);
             // const resp = await createPlace(formData);
-            Snackbar("Place created successfully!", 3000);
+            Notify("Place created successfully!", {duration:3000});
             // navigate(`/place/${resp.placeid}`);
         } catch (err) {
-            Snackbar("Failed to create place. Try again.", 3000);
+            Notify("Failed to create place. Try again.", {duration:3000});
             console.error("Error creating place:", err);
         }
     });

@@ -146,4 +146,30 @@
   }
   
 
+  .sightbox.fade-out {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .buffering-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: bold;
+    color: white;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 8px 12px;
+    border-radius: 4px;
+    z-index: 999;
+    pointer-events: none;
+  }
+  
+  .time-display {
+    font-family: monospace;
+    font-size: 13px;
+    color: white;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+  }
   

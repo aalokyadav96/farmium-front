@@ -38,6 +38,7 @@ export const staticRoutes = {
 
   "/booking": { moduleImport: () => import("../pages/booking/booking.js"), functionName: "Booking" },
   "/search": { moduleImport: () => import("../pages/search/search.js"), functionName: "Search" },
+  "/feed": { moduleImport: () => import("../pages/feed/feed.js"), functionName: "Feed" },
   "/social": { moduleImport: () => import("../pages/tumblr/tumblr.js"), functionName: "Tumblr" },
   "/merechats": { moduleImport: () => import("../pages/merechats/merechats.js"), functionName: "Mechat", protected: true },
   "/livechat": { moduleImport: () => import("../pages/livechat/chats.js"), functionName: "LiveChats", protected: true },
@@ -63,7 +64,8 @@ export const dynamicRoutes = [
     argBuilder: safeArgBuilder
   },
   {
-    pattern: /^\/products\/([\w-]+)\/([a-f\d]{24})$/,
+    // pattern: /^\/products\/([\w-]+)\/([a-f\d]{24})$/,
+    pattern: /^\/products\/(product|tool)\/([\w-]+)$/,
     moduleImport: () => import("../pages/product/product.js"),
     functionName: "Product",
     protected: false,

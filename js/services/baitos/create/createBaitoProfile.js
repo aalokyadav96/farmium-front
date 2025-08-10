@@ -4,6 +4,7 @@ import { navigate } from "../../../routes/index.js";
 import { apiFetch } from "../../../api/api.js";
 import { createFormGroup } from "../../../components/createFormGroup.js";
 import Button from "../../../components/base/Button.js";
+import Notify from "../../../components/ui/Notify.mjs";
 
 export function displayCreateBaitoProfile(isLoggedIn, contentContainer) {
     contentContainer.innerHTML = "";

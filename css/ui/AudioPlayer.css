@@ -112,3 +112,13 @@
   padding: 4px;
   max-width: 400px;
 }
+.time-display {
+  margin: 0 8px;
+  font-family: monospace;
+}
+
+.buffering-indicator {
+  color: orange;
+  font-size: 0.9em;
+  margin-left: 8px;
+}

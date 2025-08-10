@@ -4,6 +4,7 @@ import { createFormField } from "../event/createEventHelpers.js";
 import Button from "../../components/base/Button.js";
 import { apiFetch } from "../../api/api.js";
 import { createElement } from "../../components/createElement.js";
+import Notify from "../../components/ui/Notify.mjs";
 
 export async function createArtistForm(isLoggedIn, content) {
     const createSection = createElement("div", { class: "create-section" });

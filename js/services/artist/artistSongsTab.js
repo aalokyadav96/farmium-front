@@ -3,6 +3,7 @@ import MiniAudio from "../../components/ui/MiniAudio.mjs";
 import { createElement } from "../../components/createElement.js";
 import Modal from "../../components/ui/Modal.mjs";
 import Button from "../../components/base/Button.js";
+import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
 
 async function renderSongsTab(container, artistID, isCreator) {
     try {
@@ -38,17 +39,13 @@ async function renderSongsTab(container, artistID, isCreator) {
             }
 
             if (song.poster) {
-                song.poster = `${SRC_URL}/artistpic/posters/${song.poster}`;
-                // Uncomment if you want the poster displayed
-                // li.appendChild(createElement("img", {
-                //     src: song.poster,
-                //     alt: "Poster",
-                //     style: "max-height:100px; display:block; margin:10px 0;"
-                // }));
+                // song.poster = `${SRC_URL}/artistpic/posters/${song.poster}`;
+                song.poster = resolveImagePath(EntityType.SONG, PictureType.THUMB, song.poster);
             }
 
             if (song.audioUrl) {
-                song.audioUrl = `${SRC_URL}/artistpic/songs/${song.audioUrl}`;
+                // song.audioUrl = `${SRC_URL}/uploads/song/audio/${song.audioUrl}`;
+                song.audioUrl = resolveImagePath(EntityType.SONG, PictureType.AUDIO, song.audioUrl);
                 li.appendChild(MiniAudio(song));
             }
 

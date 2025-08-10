@@ -1,21 +1,17 @@
-import { SEARCH_URL, SRC_URL } from "../../state/state.js";
+import { SEARCH_URL, API_URL } from "../../state/state.js";
 import Toast from "../../components/ui/Toast.mjs";
-
-// Function to display search form and tabs
-import { createTabs } from "../../components/ui/createTabs.js"; // adjust path
+import { createTabs } from "../../components/ui/createTabs.js";
 import { createElement } from "../../components/createElement.js";
-import Button from "../../components/base/Button.js";
-import { searchSVG } from "../../components/svgs.js";
 import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
+
+let currentTab = "all"; // Tracks active tab
 
 export async function displaySearchForm(container) {
   container.innerHTML = "";
 
-  const d3container = createElement("div", { class: "vflex" });
-
   const searchContainer = createElement("div", { class: "search-container" });
 
-  // Search Bar
+  // --- Search Bar
   const searchBar = createElement("div", { class: "d3" });
 
   const searchInput = createElement("input", {
@@ -25,32 +21,14 @@ export async function displaySearchForm(container) {
     class: "search-field",
   });
 
-  // const searchButton = Button("Search",{},[]);
-  // searchButton.innerHTML = searchSVG ;
-  
   const searchButton = document.createElement("button");
   searchButton.id = "search-button";
-  searchButton.className = "search-btn";
+  searchButton.classList.add("search-btn");
   searchButton.innerHTML = `
     <svg class="srchicon" viewBox="0 0 24 24" width="100%" height="100%" role="img" stroke="#000000">
       <circle cx="11" cy="11" r="8"></circle>
       <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
     </svg>`;
-    
-  // const searchButton = createElement("button", {
-  //   id: "search-button",
-  //   class: "search-btn"
-  // }, [createElement("svg", {
-  //   class: "srchicon",
-  //   viewBox: "0 0 24 24",
-  //   width: "100%",
-  //   height: "100%",
-  //   role: "img",
-  //   stroke: "#000000"
-  // }, [
-  //   createElement("circle", { cx: "11", cy: "11", r: "8" }),
-  //   createElement("line", { x1: "21", y1: "21", x2: "16.65", y2: "16.65" })
-  // ])]);
 
   const autocompleteList = createElement("ul", {
     id: "autocomplete-list",
@@ -59,37 +37,61 @@ export async function displaySearchForm(container) {
 
   searchBar.appendChild(searchInput);
   searchBar.appendChild(searchButton);
-  d3container.appendChild(searchBar);
-  d3container.appendChild(autocompleteList);
-  searchContainer.appendChild(d3container);
 
-  // Results container reused across tabs
+  // --- Tabs
+  const tabs = [
+    { id: "all", title: "All", render: () => { } },
+    { id: "events", title: "Events", render: () => { } },
+    { id: "places", title: "Places", render: () => { } },
+    { id: "feedposts", title: "Social", render: () => { } },
+    { id: "merch", title: "Merch", render: () => { } },
+    { id: "blogposts", title: "Posts", render: () => { } },
+    { id: "farms", title: "Farms", render: () => { } },
+    { id: "songs", title: "Songs", render: () => { } },
+    { id: "users", title: "Users", render: () => { } },
+    { id: "recipes", title: "Recipes", render: () => { } },
+    { id: "products", title: "Products", render: () => { } },
+    { id: "menu", title: "Menu", render: () => { } },
+    { id: "media", title: "Media", render: () => { } },
+    { id: "crops", title: "Crops", render: () => { } },
+    { id: "baitoworkers", title: "Workers", render: () => { } },
+    { id: "baitos", title: "Baitos", render: () => { } },
+    { id: "artists", title: "Artists", render: () => { } },
+  ];
+
+  // // --- Tabs
+  // const tabs = [
+  //   { id: "all", title: "All", render: () => {} },
+  //   { id: "events", title: "Events", render: () => {} },
+  //   { id: "places", title: "Places", render: () => {} },
+  //   { id: "feedposts", title: "Social", render: () => {} },
+  //   { id: "merch", title: "Merch", render: () => {} },
+  //   { id: "blogposts", title: "Posts", render: () => {} },
+  //   { id: "farms", title: "Farms", render: () => {} },
+  // ];
+
+  const tabsUI = createTabs(tabs, "search-tabs", "all", (tabId) => {
+    currentTab = tabId;
+    const query = document.getElementById("search-query").value.trim();
+    if (query) fetchSearchResults();
+  });
+
+  const tabContainer = createElement("div", { class: "tabs-container R6-Wf" }, [tabsUI]);
+
+  // --- Results container
   const resultsContainer = createElement("div", {
     id: "search-results",
     class: "hvflex"
   });
 
-  // Tabs
-  const tabs = [
-    { title: "All", id: "all", render: () => switchTab("all") },
-    { title: "Events", id: "events", render: () => switchTab("events") },
-    { title: "Places", id: "places", render: () => switchTab("places") },
-    { title: "Social", id: "social", render: () => switchTab("social") },
-    { title: "Merch", id: "merch", render: () => switchTab("merch") },
-  ];
-
-  const tabsUI = createTabs(tabs, "search-tabs", "all");
-
-  const tabContainer = createElement("div", {
-    class: "tabs-container R6-Wf"
-  }, [tabsUI]);
-
+  // --- Append structure
+  searchContainer.appendChild(searchBar);
+  searchContainer.appendChild(autocompleteList);
   searchContainer.appendChild(tabContainer);
   searchContainer.appendChild(resultsContainer);
-
   container.appendChild(searchContainer);
 
-  // Wire listeners
+  // --- Listeners
   searchButton.addEventListener("click", fetchSearchResults);
   searchInput.addEventListener("input", handleAutocomplete);
   searchInput.addEventListener("keydown", handleKeyboardNavigation);
@@ -98,112 +100,14 @@ export async function displaySearchForm(container) {
       autocompleteList.innerHTML = "";
     }
   });
-
-  // --- Internal switch logic (tab content filtering or re-rendering)
-  function switchTab(tabId) {
-    // Replace this with real filtering logic later
-    resultsContainer.innerHTML = "";
-    resultsContainer.appendChild(createElement("p", {}, [`Showing results for: ${tabId}`]));
-  }
 }
 
-
-// async function displaySearchForm(container) {
-//   const d3container = document.createElement("div");
-//   d3container.classList.add("vflex");
-
-//   const searchContainer = document.createElement("div");
-//   searchContainer.classList.add("search-container");
-
-//   // Search Input Section
-//   const searchBar = document.createElement("div");
-//   // searchBar.classList.add("search-bar", "d3");
-//   searchBar.classList.add("d3");
-
-//   const searchInput = document.createElement("input");
-//   searchInput.id = "search-query";
-//   searchInput.className = "search-field";
-//   searchInput.placeholder = "Search anything...";
-//   searchInput.required = true;
-
-//   const searchButton = document.createElement("button");
-//   searchButton.id = "search-button";
-//   searchButton.className = "search-btn";
-//   searchButton.innerHTML = `
-//     <svg class="srchicon" viewBox="0 0 24 24" width="100%" height="100%" role="img" stroke="#000000">
-//       <circle cx="11" cy="11" r="8"></circle>
-//       <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-//     </svg>`;
-
-//   // Autocomplete dropdown
-//   const autocompleteList = document.createElement("ul");
-//   autocompleteList.id = "autocomplete-list";
-//   autocompleteList.classList.add("autocomplete-list");
-
-//   searchBar.appendChild(searchInput);
-//   searchBar.appendChild(searchButton);
-//   d3container.appendChild(searchBar);
-//   d3container.appendChild(autocompleteList);
-//   searchContainer.appendChild(d3container);
-
-//   // Tabs Section
-//   const tabContainer = document.createElement("div");
-//   tabContainer.classList.add("tabs-container", "R6-Wf");
-
-//   const tabButtonCon = document.createElement("div");
-//   tabButtonCon.classList.add("tab-buttons");
-
-//   const tabs = [
-//     { title: "All", id: "all" },
-//     { title: "Events", id: "events" },
-//     { title: "Places", id: "places" },
-//     { title: "Social", id: "social" },
-//     { title: "Merch", id: "merch" },
-//   ];
-
-//   tabs.forEach((tab, index) => {
-//     const tabButton = document.createElement("div");
-//     tabButton.classList.add("tab-button");
-//     tabButton.textContent = tab.title;
-//     tabButton.dataset.type = tab.id;
-
-//     if (index === 0) {
-//       tabButton.classList.add("active");
-//     }
-
-//     tabButton.addEventListener("click", () => switchTab(tab.id));
-//     tabButtonCon.appendChild(tabButton);
-//   });
-
-//   tabContainer.appendChild(tabButtonCon);
-//   searchContainer.appendChild(tabContainer);
-
-//   // Results Section
-//   const searchResultsContainer = document.createElement("div");
-//   searchResultsContainer.id = "search-results";
-//   searchResultsContainer.className = "hvflex";
-//   searchContainer.appendChild(searchResultsContainer);
-
-//   container.appendChild(searchContainer);
-
-//   // Event Listeners
-//   searchButton.addEventListener("click", fetchSearchResults);
-//   searchInput.addEventListener("input", handleAutocomplete);
-//   searchInput.addEventListener("keydown", handleKeyboardNavigation);
-//   document.addEventListener("click", (e) => {
-//     if (!searchContainer.contains(e.target)) {
-//       autocompleteList.innerHTML = "";
-//     }
-//   });
-// }
-
-
-// Function to fetch autocomplete suggestions
+// --- Autocomplete logic
 async function handleAutocomplete(event) {
   const query = event.target.value.trim();
   const autocompleteList = document.getElementById("autocomplete-list");
 
-  if (query.length < 1) {
+  if (!query) {
     autocompleteList.innerHTML = "";
     return;
   }
@@ -214,36 +118,33 @@ async function handleAutocomplete(event) {
 
     autocompleteList.innerHTML = "";
     suggestions.forEach((suggestion) => {
-      const item = document.createElement("li");
-      item.classList.add("autocomplete-item");
-      item.textContent = suggestion;
-      item.addEventListener("click", () => {
+      const li = document.createElement("li");
+      li.classList.add("autocomplete-item");
+      li.textContent = suggestion;
+      li.addEventListener("click", () => {
         document.getElementById("search-query").value = suggestion;
         autocompleteList.innerHTML = "";
-        fetchSearchResults(); // Perform search immediately
+        fetchSearchResults();
       });
-      autocompleteList.appendChild(item);
+      autocompleteList.appendChild(li);
     });
-  } catch (error) {
-    console.error("Error fetching autocomplete suggestions:", error);
+  } catch (err) {
+    console.error("Autocomplete error:", err);
   }
 }
 
-// Handle keyboard navigation in autocomplete
 function handleKeyboardNavigation(event) {
   const autocompleteList = document.getElementById("autocomplete-list");
   const items = autocompleteList.querySelectorAll(".autocomplete-item");
 
-  if (items.length === 0) return;
+  if (!items.length) return;
 
   let index = Array.from(items).findIndex((item) => item.classList.contains("selected"));
 
   if (event.key === "ArrowDown") {
-    if (index < items.length - 1) index++;
-    else index = 0;
+    index = (index + 1) % items.length;
   } else if (event.key === "ArrowUp") {
-    if (index > 0) index--;
-    else index = items.length - 1;
+    index = (index - 1 + items.length) % items.length;
   } else if (event.key === "Enter") {
     if (index >= 0) {
       items[index].click();
@@ -255,209 +156,175 @@ function handleKeyboardNavigation(event) {
   }
 
   items.forEach((item) => item.classList.remove("selected"));
-  items[index].classList.add("selected");
+  if (index >= 0) items[index].classList.add("selected");
 }
 
-// Function to display search section
-async function displaySearch(searchsec) {
-  const srchsec = document.createElement("div");
-  srchsec.id = "srch";
-  searchsec.appendChild(srchsec);
-  displaySearchForm(srchsec);
-}
-
-// Function to handle tab switching
-function switchTab(selectedType) {
-  document.querySelectorAll(".tab-button").forEach((button) => {
-    button.classList.remove("active");
-  });
-  document.querySelector(`[data-type="${selectedType}"]`).classList.add("active");
-
-  // Re-fetch results if there's an active search query
-  if (document.getElementById("search-query").value.trim()) {
-    fetchSearchResults();
-  }
-}
-
-// Generic API fetch function
+// --- Fetch wrapper
 async function apiFetch(endpoint) {
   try {
     const response = await fetch(endpoint);
-    if (!response.ok) throw new Error("Failed to fetch data");
+    if (!response.ok) throw new Error("Failed to fetch");
     const text = await response.text();
     return text ? JSON.parse(text) : [];
-  } catch (error) {
-    console.error(`API Fetch Error: ${error}`);
-    Toast(`API Fetch Error: ${error}`, "error");
+  } catch (err) {
+    Toast(`API Fetch Error: ${err}`, "error");
     return [];
   }
 }
 
+// --- Search request
 async function fetchSearchResults() {
   const query = document.getElementById("search-query").value.trim();
-  const activeTab = document.querySelector(".tab-button.active").dataset.type;
-
   if (!query) {
     Toast("Please enter a search query.", "error");
     return;
   }
 
   try {
-    const url = `${SEARCH_URL}/search/${activeTab}?query=${encodeURIComponent(query)}`;
+    const url = `${SEARCH_URL}/search/${currentTab}?query=${encodeURIComponent(query)}`;
     const results = await apiFetch(url);
-    displaySearchResults(activeTab, results);
-  } catch (error) {
+    displaySearchResults(currentTab, results);
+  } catch (err) {
     Toast("Error fetching search results.", "error");
   }
 }
 
-// Helper function to create a result card element
+// --- Render results
+function displaySearchResults(entityType, data) {
+  const container = document.getElementById("search-results");
+  container.innerHTML = "";
+
+  if (entityType === "all" && typeof data === "object" && !Array.isArray(data)) {
+    if (data.events?.length) {
+      container.appendChild(createElement("h2", {}, ["Events"]));
+      data.events.forEach((item) => container.appendChild(createCard("events", item)));
+    }
+    if (data.places?.length) {
+      container.appendChild(createElement("h2", {}, ["Places"]));
+      data.places.forEach((item) => container.appendChild(createCard("places", item)));
+    }
+    if ((!data.events?.length) && (!data.places?.length)) {
+      container.innerHTML = "<p>No results found.</p>";
+    }
+  } else if (Array.isArray(data)) {
+    if (!data.length) {
+      container.innerHTML = "<p>No results found.</p>";
+      return;
+    }
+    data.forEach((item) => container.appendChild(createCard(entityType, item)));
+  } else {
+    container.innerHTML = "<p>No results found.</p>";
+  }
+}
+
 function createCard(entityType, item) {
-  const card = document.createElement("div");
-  card.classList.add("result-card", entityType);
+  const card = createElement("div", { class: `result-card ${entityType}` });
 
-  // Header (Image + Info)
-  const header = document.createElement("div");
-  header.classList.add("result-header");
+  // Header with image and title
+  const header = createElement("div", { class: "result-header" });
 
-  // Image (if exists)
-  let imageSrc = "";
-  let altText = "";
-  if (entityType === "events") {
-    // imageSrc = `${SRC_URL}/eventpic/thumb/${item.eventid}.jpg`;
-    imageSrc = resolveImagePath(EntityType.EVENT, PictureType.THUMB, `${item.eventid}.jpg`);
-    altText = item.title || "Event";
-  } else if (entityType === "places") {
-    // imageSrc = `${SRC_URL}/placepic/thumb/${item.placeid}.jpg`;
-    imageSrc = resolveImagePath(EntityType.PLACE, PictureType.THUMB, `${item.placeid}.jpg`);
-    altText = item.name || "Place";
-  }
-  if (imageSrc) {
-    const image = document.createElement("img");
-    image.src = imageSrc;
-    image.loading = "lazy";
-    image.alt = altText;
-    image.classList.add("result-image");
-    header.appendChild(image);
+  if (item.image) {
+    header.appendChild(
+      createElement("img", {
+        src: resolveImagePath(EntityType.EVENT, PictureType.THUMB, `${item.image}.jpg`),
+        alt: item.title || entityType,
+        loading: "lazy",
+        class: "result-image"
+      })
+    );
   }
 
-  // Info section
-  const info = document.createElement("div");
-  info.classList.add("result-info");
-  if (entityType === "events") {
-    const title = document.createElement("h3");
-    title.textContent = item.title || "No Title";
-    info.appendChild(title);
-  } else if (entityType === "places") {
-    const name = document.createElement("h3");
-    name.textContent = item.name || "No Name";
-    info.appendChild(name);
-  }
-  if (item.category) {
-    const category = document.createElement("p");
-    category.classList.add("category");
-    category.textContent = `🏷️ ${item.category}`;
-    info.appendChild(category);
-  }
+  const info = createElement("div", { class: "result-info" }, [
+    createElement("h3", {}, [item.title || "No Title"])
+  ]);
   header.appendChild(info);
   card.appendChild(header);
 
-  // Details section
-  const details = document.createElement("div");
-  details.classList.add("result-details");
-  if (entityType === "events") {
-    details.innerHTML = `
-      <strong>Location:</strong> ${item.location || "N/A"} 
-      <br>
-      <strong>Date:</strong> ${item.date ? new Date(item.date).toLocaleString() : "N/A"} 
-      <br>
-      <em>${item.description || "No description available."}</em>
-    `;
-  } else if (entityType === "places") {
-    details.innerHTML = `
-      <strong>Address:</strong> ${item.address || "N/A"} 
-      <br>
-      <strong>Rating:</strong> ${item.rating || "Not Rated"} 
-      <br>
-      <em>Description: ${item.description || "No description available."}</em>
-    `;
-  }
+  // Details
+  const details = createElement("div", { class: "result-details" }, [
+    createElement("em", {}, [item.description || "No description available."])
+  ]);
   card.appendChild(details);
 
-  // Footer (Buttons)
-  const footer = document.createElement("div");
-  footer.classList.add("result-footer");
-  if (entityType === "events" && item.eventid) {
-    const cta = document.createElement("a");
-    cta.href = `/event/${item.eventid}`;
-    cta.textContent = "View Details";
-    cta.classList.add("btn");
-    cta.target = "_blank";
-    footer.appendChild(cta);
-  } else if (entityType === "places" && item.placeid) {
-    const cta = document.createElement("a");
-    cta.href = `/place/${item.placeid}`;
-    cta.textContent = "View on Map";
-    cta.classList.add("btn");
-    cta.target = "_blank";
-    footer.appendChild(cta);
+  // Footer with link to detail page
+  const footer = createElement("div", { class: "result-footer" });
+  if (item.id) {
+    footer.appendChild(
+      createElement("a", {
+        href: `/${entityType}/${item.id}`,
+        class: "btn",
+        target: "_blank"
+      }, ["View Details"])
+    );
   }
-  if (footer.children.length > 0) {
-    card.appendChild(footer);
-  }
+  if (footer.children.length) card.appendChild(footer);
+
   return card;
 }
 
-// Function to display search results
-function displaySearchResults(entityType, data) {
-  const searchResultsContainer = document.getElementById("search-results");
-  searchResultsContainer.innerHTML = ""; // Clear previous results
+// function createCard(entityType, item) {
+//   const card = document.createElement("div");
+//   card.classList.add("result-card", entityType);
 
-  // Handle the "all" tab, which returns an object with both events and places
-  if (entityType === "all" && typeof data === "object" && !Array.isArray(data)) {
-    // Display events if available
-    if (data.events && data.events.length > 0) {
-      const eventsHeader = document.createElement("h2");
-      eventsHeader.textContent = "Events";
-      searchResultsContainer.appendChild(eventsHeader);
-      data.events.forEach((item) => {
-        const card = createCard("events", item);
-        searchResultsContainer.appendChild(card);
-      });
-    }
+//   const header = document.createElement("div");
+//   header.classList.add("result-header");
 
-    // Display places if available
-    if (data.places && data.places.length > 0) {
-      const placesHeader = document.createElement("h2");
-      placesHeader.textContent = "Places";
-      searchResultsContainer.appendChild(placesHeader);
-      data.places.forEach((item) => {
-        const card = createCard("places", item);
-        searchResultsContainer.appendChild(card);
-      });
-    }
+//   let imageSrc = "";
+//   let altText = "";
+//   if (entityType === "events") {
+//     imageSrc = resolveImagePath(EntityType.EVENT, PictureType.THUMB, `${item.eventid}.jpg`);
+//     altText = item.title || "Event";
+//   } else if (entityType === "places") {
+//     imageSrc = resolveImagePath(EntityType.PLACE, PictureType.THUMB, `${item.placeid}.jpg`);
+//     altText = item.name || "Place";
+//   }
+//   if (imageSrc) {
+//     const img = document.createElement("img");
+//     img.src = imageSrc;
+//     img.alt = altText;
+//     img.loading = "lazy";
+//     img.classList.add("result-image");
+//     header.appendChild(img);
+//   }
 
-    // If neither events nor places have results, show a message
-    if (
-      (!data.events || data.events.length === 0) &&
-      (!data.places || data.places.length === 0)
-    ) {
-      searchResultsContainer.innerHTML = "<p>No results found.</p>";
-    }
-  }
-  // Otherwise, assume data is an array (for "events" or "places" tabs)
-  else if (Array.isArray(data)) {
-    if (data.length === 0) {
-      searchResultsContainer.innerHTML = "<p>No results found.</p>";
-      return;
-    }
-    data.forEach((item) => {
-      const card = createCard(entityType, item);
-      searchResultsContainer.appendChild(card);
-    });
-  } else {
-    searchResultsContainer.innerHTML = "<p>No results found.</p>";
-  }
-}
+//   const info = document.createElement("div");
+//   info.classList.add("result-info");
+//   if (entityType === "events") {
+//     info.appendChild(createElement("h3", {}, [item.title || "No Title"]));
+//   } else if (entityType === "places") {
+//     info.appendChild(createElement("h3", {}, [item.name || "No Name"]));
+//   }
+//   if (item.category) {
+//     info.appendChild(createElement("p", { class: "category" }, [`🏷️ ${item.category}`]));
+//   }
+//   header.appendChild(info);
+//   card.appendChild(header);
 
-export { displaySearch };
+//   const details = document.createElement("div");
+//   details.classList.add("result-details");
+//   if (entityType === "events") {
+//     details.innerHTML = `
+//       <strong>Location:</strong> ${item.location || "N/A"}<br>
+//       <strong>Date:</strong> ${item.date ? new Date(item.date).toLocaleString() : "N/A"}<br>
+//       <em>${item.description || "No description available."}</em>`;
+//   } else if (entityType === "places") {
+//     details.innerHTML = `
+//       <strong>Address:</strong> ${item.address || "N/A"}<br>
+//       <strong>Rating:</strong> ${item.rating || "Not Rated"}<br>
+//       <em>${item.description || "No description available."}</em>`;
+//   }
+//   card.appendChild(details);
+
+//   const footer = document.createElement("div");
+//   footer.classList.add("result-footer");
+//   if (entityType === "events" && item.eventid) {
+//     footer.appendChild(createElement("a", { href: `/event/${item.eventid}`, class: "btn", target: "_blank" }, ["View Details"]));
+//   } else if (entityType === "places" && item.placeid) {
+//     footer.appendChild(createElement("a", { href: `/place/${item.placeid}`, class: "btn", target: "_blank" }, ["View on Map"]));
+//   }
+//   if (footer.children.length) card.appendChild(footer);
+
+//   return card;
+// }
+
+export { displaySearchForm as displaySearch };

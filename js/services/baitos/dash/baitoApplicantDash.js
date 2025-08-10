@@ -3,6 +3,7 @@ import { createElement } from "../../../components/createElement.js";
 import { formatRelativeTime } from "../../../utils/dateUtils.js";
 import { navigate } from "../../../routes/index.js";
 import Snackbar from "../../../components/ui/Snackbar.mjs";
+import Notify from "../../../components/ui/Notify.mjs";
 
 export async function baitoApplicantDash(content) {
     content.innerHTML = "";

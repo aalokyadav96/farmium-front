@@ -5,6 +5,7 @@ import Button from "../../../components/base/Button.js";
 import { navigate } from "../../../routes/index.js";
 import { addToCart } from "../../cart/addToCart.js";
 import { resolveImagePath, EntityType, PictureType } from "../../../utils/imagePaths.js";
+import { editFarm } from "./editFarm.js";
 
 // ─────────── Render the farm’s top‐level detail block ───────────
 export function renderFarmDetails(farm, isCreator) {
@@ -16,14 +17,14 @@ export function renderFarmDetails(farm, isCreator) {
   const actions = createElement("div", { class: "farm-actions" });
   if (isCreator) {
     actions.append(
-      Button("✏️ Edit", `edit-${farm.id}`, {
+      Button("✏️ Edit", `edit-${farm.farmid}`, {
         click: () =>
           editFarm(true, farm, document.getElementById("farm-detail"))
       }),
-      Button("🗑️ Delete", `delete-${farm.id}`, {
+      Button("🗑️ Delete", `delete-${farm.farmid}`, {
         click: async () => {
           if (!confirm(`Delete farm "${farm.name}"?`)) return;
-          const res = await apiFetch(`/farms/${farm.id}`, "DELETE");
+          const res = await apiFetch(`/farms/${farm.farmid}`, "DELETE");
           if (res.success) navigate("/farms");
           else alert("Failed to delete.");
         }
@@ -108,52 +109,15 @@ export async function renderCrops(
 }
 
 // ─────────── Individual crop card ───────────
-// function createCropCard(crop, farm, farmId, mainContainer, isLoggedIn, isCreator) {
-//   const card = createElement("div", { class: "crop-card" });
 
-//   if (crop.imageUrl) {
-//     card.appendChild(createElement("img", {
-//       src: `${SRC_URL}${crop.imageUrl}`,
-//       alt: crop.name
-//     }));
-//   }
-
-//   const ageDesc       = crop.createdAt ? `${getAgeInDays(crop.createdAt)} days old` : "Unknown age";
-//   const perishable    = crop.expiryDate ? `🧊 Expires: ${crop.expiryDate}` : "Stable";
-//   const stockStatus   = crop.quantity <= 0 ? "❌ Out of Stock" : "✅ Available";
-
-//   card.append(
-//     createElement("h4", {}, [crop.name]),
-//     createElement("p", {}, [`💰 ${crop.price} per ${crop.unit}`]),
-//     createElement("p", {}, [`📦 Stock: ${crop.quantity}`]),
-//     createElement("p", {}, [`📅 Harvested: ${crop.harvestDate || "Unknown"}`]),
-//     createElement("p", {}, [`📆 ${perishable}`]),
-//     createElement("p", {}, [`🕓 ${ageDesc}`]),
-//     createElement("p", {}, [`📌 ${stockStatus}`])
-//   );
-
-//   if (crop.history?.length > 1) {
-//     card.append(...createPriceHistoryToggle(crop.history));
-//   }
-
-//   if (isCreator) {
-//     card.append(...createCreatorControls(crop, farmId, mainContainer));
-//   } else {
-//     card.append(...createUserControls(crop, farm.name, isLoggedIn));
-//   }
-
-//   return card;
-// }
 function createCropCard(crop, farmName, farmId, mainContainer, isLoggedIn, isCreator) {
   const card = createElement("div", { class: "crop-card" });
 
-  const img = crop.imageUrl
-  ? createElement("img", {
-      src: resolveImagePath(EntityType.FARM, PictureType.BANNER, crop.imageUrl),
-      alt: crop.name,
-      class: "crop__image"
-    })
-  : createElement("div", { class: "crop__image placeholder" }, ["No Image"]);
+  const img = createElement("img", {
+    src: resolveImagePath(EntityType.CROP, PictureType.THUMB, crop.imageUrl),
+    alt: crop.name,
+    class: "crop__image"
+  });
 
 
   const formatDate = (isoStr) =>
@@ -176,6 +140,7 @@ function createCropCard(crop, farmName, farmId, mainContainer, isLoggedIn, isCre
   }).format(crop.price);
 
   card.append(
+    img,
     createElement("h4", {}, [crop.name]),
     createElement("p", {}, [`💰 ${price} per ${crop.unit}`]),
     createElement("p", {}, [`📦 Stock: ${crop.quantity}`]),
@@ -209,25 +174,48 @@ function createPriceHistoryToggle(history) {
 
 // ─────────── Creator controls (edit/delete) ───────────
 function createCreatorControls(crop, farmId, mainContainer) {
-  const editBtn = createElement("button", { class: "edit-btn" }, ["✏️ Edit"]);
-  editBtn.onclick = () => {
-    mainContainer.textContent = "";
-    editCrop(farmId, crop, mainContainer);
-  };
+  // const editBtn = createElement("button", { class: "edit-btn" }, ["✏️ Edit"]);
+  // editBtn.onclick = () => {
+  //   mainContainer.textContent = "";
+  //   editCrop(farmId, crop, mainContainer);
+  // };
 
-  const deleteBtn = createElement("button", { class: "btn btn-danger" }, ["🗑️ Delete"]);
-  deleteBtn.onclick = async () => {
-    if (!confirm(`Delete crop "${crop.name}"?`)) return;
-    const res = await apiFetch(`/farms/${farmId}/crops/${crop.id}`, "DELETE");
-    if (res.success) {
-      const upd = await apiFetch(`/farms/${farmId}`);
-      if (upd.success && upd.farm) {
-        await renderCrops(upd.farm, document.querySelector(".crop-list"), farmId, mainContainer, true, "name", true);
-      }
-    } else {
-      alert("❌ Failed to delete crop.");
+  const editBtn = Button("✏️ Edit", "", {
+    click: () => {
+      mainContainer.textContent = "";
+      editCrop(farmId, crop, mainContainer);
     }
-  };
+  }, "edit-btn buttonx");
+
+  const deleteBtn = Button("🗑️ Delete", "", {
+    click: async () => {
+      if (!confirm(`Delete crop "${crop.name}"?`)) return;
+      const res = await apiFetch(`/farms/${farmId}/crops/${crop.id}`, "DELETE");
+      if (res.success) {
+        const upd = await apiFetch(`/farms/${farmId}`);
+        if (upd.success && upd.farm) {
+          await renderCrops(upd.farm, document.querySelector(".crop-list"), farmId, mainContainer, true, "name", true);
+        }
+      } else {
+        alert("❌ Failed to delete crop.");
+      }
+
+    }
+  }, "btn-danger buttonx");
+
+  // const deleteBtn = createElement("button", { class: "btn btn-danger" }, ["🗑️ Delete"]);
+  // deleteBtn.onclick = async () => {
+  //   if (!confirm(`Delete crop "${crop.name}"?`)) return;
+  //   const res = await apiFetch(`/farms/${farmId}/crops/${crop.id}`, "DELETE");
+  //   if (res.success) {
+  //     const upd = await apiFetch(`/farms/${farmId}`);
+  //     if (upd.success && upd.farm) {
+  //       await renderCrops(upd.farm, document.querySelector(".crop-list"), farmId, mainContainer, true, "name", true);
+  //     }
+  //   } else {
+  //     alert("❌ Failed to delete crop.");
+  //   }
+  // };
 
   return [editBtn, deleteBtn];
 }

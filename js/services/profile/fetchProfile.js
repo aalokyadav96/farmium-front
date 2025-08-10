@@ -36,6 +36,7 @@
 import { API_URL, getState, setState } from "../../state/state.js";
 import { apiFetch } from "../../api/api.js";
 import Snackbar from '../../components/ui/Snackbar.mjs';
+import Notify from "../../components/ui/Notify.mjs";
 
 async function fetchProfile() {
     const token = getState("token");

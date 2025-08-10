@@ -3,7 +3,7 @@ import {generateVideoPlayer} from "./vidpopHelpers";
 
 const Vidpop = (mediaSrc, type, videoid, options = {}) => {
 
-  const { poster = "#", theme = "light", qualities = [], subtitles = [] } = options;
+  const { poster = null, theme = "light", qualities = [], subtitles = [] } = options;
 
   const sightbox = document.createElement("div");
   sightbox.className = `sightbox theme-${theme}`;
@@ -35,9 +35,16 @@ const Vidpop = (mediaSrc, type, videoid, options = {}) => {
 
 
 function removePopup(popupElement) {
-  if (popupElement && popupElement.parentNode) {
-    popupElement.parentNode.removeChild(popupElement);
-  }
+  if (!popupElement || !popupElement.parentNode) return;
+
+  popupElement.classList.add("fade-out"); // CSS should handle opacity transition
+
+  setTimeout(() => {
+    if (popupElement.parentNode) {
+      popupElement.parentNode.removeChild(popupElement);
+    }
+  }, 300); // match the CSS transition duration
 }
+
 
 export default Vidpop;

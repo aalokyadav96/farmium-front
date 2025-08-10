@@ -3,6 +3,7 @@ import { createElement } from "../../../components/createElement.js";
 import { SRC_URL, apiFetch } from "../../../api/api.js";
 import { navigate } from "../../../routes/index.js";
 import Button from "../../../components/base/Button.js";
+import { resolveImagePath, PictureType, EntityType } from "../../../utils/imagePaths.js";
 
 
 
@@ -15,6 +16,12 @@ function renderFarmCards(farms, grid, isLoggedIn) {
 
 function FarmCard(farm, isLoggedIn) {
     const card = createElement("div", { class: "farm__card" });
+
+    const img = createElement("img", {
+        src: resolveImagePath(EntityType.FARM, PictureType.THUMB, farm.photo),
+        alt: farm.name,
+        class: "farm__image"
+    });
 
     const badgeWrap = createFarmBadges(farm);
     const header = createElement("div", { class: "farm__header" }, [
@@ -33,12 +40,12 @@ function FarmCard(farm, isLoggedIn) {
     ]);
 
     const actions = createElement("div", { class: "farm__actions" }, [
-        Button("View", `farm-${farm.id}`, {
-            click: () => navigate(`/farm/${farm.id}`)
+        Button("View", `farm-${farm.farmid}`, {
+            click: () => navigate(`/farm/${farm.farmid}`)
         }, "farm__button")
     ]);
 
-    card.append(header, badgeWrap, meta, cropsSection, actions);
+    card.append(img, header, badgeWrap, meta, cropsSection, actions);
     return card;
 }
 
@@ -49,13 +56,11 @@ function createCropList(crops) {
     for (const crop of items) {
         const cropCard = createElement("div", { class: "crop__card" });
 
-        const img = crop.imageUrl
-            ? createElement("img", {
-                src: SRC_URL + crop.imageUrl,
-                alt: crop.name,
-                class: "crop__image"
-            })
-            : createElement("div", { class: "crop__image placeholder" }, ["No Image"]);
+        const img = createElement("img", {
+            src: resolveImagePath(EntityType.CROP, PictureType.THUMB, crop.imageUrl),
+            alt: crop.name,
+            class: "crop__image"
+        });
 
         const badge = crop.outOfStock ? "Out of Stock" : crop.featured ? "Featured" : "";
         const badgeClass = crop.outOfStock ? "out" : crop.featured ? "featured" : "";
@@ -93,19 +98,19 @@ function renderFeaturedFarm(container, farm) {
 
     const section = createElement("section", { class: "farm__featured" }, [
         createElement("h3", {}, ["🌟 Featured Farm"]),
-        farm.photo ? createElement("img", {
-            src: SRC_URL + farm.photo,
+        createElement("img", {
+            src: resolveImagePath(EntityType.FARM, PictureType.THUMB, farm.photo),
             alt: farm.name,
             class: "farm__featured-photo"
-        }) : "",
+        }),
         createElement("h4", {}, [farm.name]),
         createElement("p", {}, [farm.location]),
         createElement("p", {}, [farm.description || "No description provided."]),
         createElement("p", { class: "farm__featured-rating" }, [
             `⭐ ${farm.avgRating?.toFixed(1) || "N/A"} (${farm.reviewCount || 0} reviews)`
         ]),
-        Button("View", `featured-${farm.id}`, {
-            click: () => navigate(`/farm/${farm.id}`)
+        Button("View", `featured-${farm.farmid}`, {
+            click: () => navigate(`/farm/${farm.farmid}`)
         }, "farm__button")
     ]);
 
@@ -114,14 +119,14 @@ function renderFeaturedFarm(container, farm) {
 
 function renderCTAFarm(container) {
     const section = createElement("section", { class: "farm__Cta" }, [
-        Button("Buy Tools","buytools-crp-btn",{
-            click: () => {navigate('/tools')}
+        Button("Buy Tools", "buytools-crp-btn", {
+            click: () => { navigate('/tools') }
         }, "buttonx"),
-        Button("Chats","chatss-frm-btn",{
-            click: () => {navigate('/merechats')}
+        Button("Chats", "chatss-frm-btn", {
+            click: () => { navigate('/merechats') }
         }, "buttonx"),
-        Button("Create Farm","crt-frm-btn",{
-            click: () => {navigate('/create-farm')}
+        Button("Create Farm", "crt-frm-btn", {
+            click: () => { navigate('/create-farm') }
         }, "buttonx"),
     ]);
 

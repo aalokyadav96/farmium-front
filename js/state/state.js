@@ -1,8 +1,8 @@
 // --- API URLs ---
 const API_URL = "http://localhost:4000/api/v1";
-const AGI_URL = "http://localhost:4000/api/v1";
+const AGI_URL = "http://localhost:4000/agi/v1";
 const SRC_URL = "http://localhost:4000/static";
-const SEARCH_URL = "http://localhost:4000/api/search";
+const SEARCH_URL = "http://localhost:12000/api/v1";
 // const API_URL = "https://gallium.onrender.com/api/v1";
 // const AGI_URL = "https://gallium.onrender.com/api/v1";
 // const SRC_URL = "https://gallium.onrender.com/static";

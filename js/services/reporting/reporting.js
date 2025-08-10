@@ -5,6 +5,7 @@ import { apiFetch } from "../../api/api.js";
 import { createElement } from "../../components/createElement.js";
 import Modal from "../../components/ui/Modal.mjs";
 import Snackbar from "../../components/ui/Snackbar.mjs";
+import Notify from "../../components/ui/Notify.mjs";
 
 // Predefined reasons for reporting
 const REPORT_REASONS = [

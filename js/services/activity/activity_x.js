@@ -1,6 +1,7 @@
 // src/utils/activityLogger.js
 import {state} from "../../state/state.js";
 import Snackbar from "../../components/ui/Snackbar.mjs";
+import Notify from "../../components/ui/Notify.mjs";
 
 const DEFAULT_API_BASE = "/api/activity";
 const DEFAULT_SYNC_PATH = "/log";

@@ -1,6 +1,8 @@
 import { navigate } from "../../routes/index.js";
 import SnackBar from '../../components/ui/Snackbar.mjs';
 import { createFormField, addEventEventListeners } from "./createEventHelpers.js";
+import { createElement } from "../../components/createElement.js";
+import Notify from "../../components/ui/Notify.mjs";
 
 async function createEventForm(isLoggedIn, content) {
     const createSection = document.createElement("div");
@@ -38,10 +40,10 @@ async function createEventForm(isLoggedIn, content) {
             { type: "url", id: "website-url", label: "Website URL" },
             { type: "file", id: "event-banner", label: "Event Banner", accept: "image/*" },
             { type: "file", id: "event-seating", label: "Event Seating", accept: "image/*" },
-            
+
         ];
-        
-        
+
+
         formFields.forEach(field => {
             if (field.id === "event-place") {
                 // Wrap input in a container for positioning
@@ -70,13 +72,13 @@ async function createEventForm(isLoggedIn, content) {
         createSection.appendChild(createButton);
 
         content.appendChild(createSection);
-        
+
         const eventPlaceInput = createSection.querySelector("#event-place");
 
         // Add event listeners
         addEventEventListeners(eventPlaceInput, createButton);
     } else {
-        SnackBar("Please log in to create an event.", 3000);
+        Notify("Please log in to create an event.", {type: "warning", duration: 3000, dismissible: true});
         navigate('/login');
     }
 }

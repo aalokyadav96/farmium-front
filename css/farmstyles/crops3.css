@@ -13,7 +13,6 @@
   
   .catalogue-main {
     flex: 3;
-    min-width: 300px;
   }
   
   .top-controls {
@@ -92,6 +91,7 @@
     max-height: 140px;
     object-fit: contain;
     margin-bottom: 8px;
+    background-color: #000;
   }
   
   .crop-card h4 {

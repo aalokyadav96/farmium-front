@@ -4,7 +4,7 @@
 /* @import url(navx11.css); */
 @import url(navwave.css);
 @import url(authpage.css);
-@import url(profile.css);
+@import url(profilex.css);
 @import url(chat1.css);
 @import url(form1.css);
 @import url(adminpage.css);
@@ -36,4 +36,8 @@
 @import url(inistyles/baitos2.css);
 @import url(inistyles/baitopage.css);
 @import url(inistyles/baitodash.css);
-@import url(inistyles/shop1.css);
+@import url(inistyles/shop2.css);
+/**/
+@import url(subpages/nearby.css);
+@import url(subpages/media.css);
+@import url(subpages/reviews.css);

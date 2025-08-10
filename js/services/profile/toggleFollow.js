@@ -2,6 +2,7 @@ import { setState, getState } from '../../state/state.js';
 import { apiFetch } from "../../api/api.js";
 import Snackbar from '../../components/ui/Snackbar.mjs';
 import { fetchProfile } from './fetchProfile.js';
+import Notify from "../../components/ui/Notify.mjs";
 
 async function toggleFollow(userId, followButton, profile) {
     if (!getState("token")) {

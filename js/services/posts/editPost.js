@@ -2,6 +2,7 @@ import { renderPostForm, handlePostSubmit } from './createOrEditPost.js';
 import { createElement } from "../../components/createElement.js";
 import { apiFetch } from "../../api/api.js";
 import Snackbar from '../../components/ui/Snackbar.mjs';
+import Notify from "../../components/ui/Notify.mjs";
 
 export async function editPost(isLoggedIn, postId, contentContainer) {
     contentContainer.innerHTML = '';

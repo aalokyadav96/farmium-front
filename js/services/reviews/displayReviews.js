@@ -3,70 +3,150 @@ import { createElement } from "../../components/createElement.js";
 import { apiFetch } from "../../api/api.js";
 import { handleAddReview, handleEditReview, handleDeleteReview } from "./createReview.js";
 
-// Create a review item component
-function ReviewItem(isCreator, { reviewerName, rating, comment, onEdit, onDelete }) {
-    let actions;
-    let authorOfReview = `"${reviewerName}"` == localStorage.getItem("user");
-    if (!isCreator && !!authorOfReview) {
-        actions = createElement("div", { class: "review-actions" }, [
-            Button("Edit", "edit-review-btn", { click: onEdit }),
-            Button("Delete", "delete-review-btn", { click: onDelete }),
-        ]);
-    } else {
-        actions = null;
-    }
-    console.log(isCreator);
-    return createElement("div", { class: "review-item" }, [
-        createElement("h3", {}, [reviewerName]),
-        createElement("p", {}, [`Ratings: ${rating}`]),
-        createElement("p", {}, [comment]),
-        ...(actions ? [actions] : []), // Spread operator to add `actions` if not null
-    ]);
-
+function clearElement(el) {
+    while (el.firstChild) el.removeChild(el.firstChild);
 }
 
-// Display reviews for the given entity
+// Single review component
+function ReviewItem(isCreator, { reviewerName, rating, comment, date, onEdit, onDelete }) {
+    const currentUser = localStorage.getItem("user");
+    const isAuthor = reviewerName === currentUser;
+
+    let actions = null;
+    if (!isCreator && isAuthor) {
+        actions = createElement("div", { class: "review-actions" }, [
+            Button("Edit", "edit-review-btn", { click: onEdit }),
+            Button("Delete", "delete-review-btn", { click: onDelete })
+        ]);
+    }
+
+    return createElement("div", { class: "review-item" }, [
+        createElement("div", { class: "review-header" }, [
+            createElement("h3", {}, [reviewerName || "Anonymous"]),
+            createElement("span", { class: "review-date" }, [date || ""])
+        ]),
+        createElement("p", { class: "review-rating" }, [`Rating: ${rating}`]),
+        createElement("p", { class: "review-comment" }, [comment]),
+        ...(actions ? [actions] : [])
+    ]);
+}
+
+// Display all reviews for an entity
 async function displayReviews(reviewsContainer, isCreator, isLoggedIn, entityType, entityId) {
-    reviewsContainer.innerHTML = ""; // Clear existing reviews
-    reviewsContainer.appendChild(createElement('h2', "", ["Reviews"]));
-    const newcon = document.createElement('div');
+    clearElement(reviewsContainer);
+    reviewsContainer.appendChild(createElement("h2", {}, ["Reviews"]));
+
+    const actionContainer = createElement("div", { class: "review-action-container" });
 
     if (!isCreator && isLoggedIn) {
         const addButton = Button("Add Review", "add-review-btn", {
-            click: () => handleAddReview(newcon, entityType, entityId),
+            click: () => handleAddReview(actionContainer, entityType, entityId)
         });
         reviewsContainer.appendChild(addButton);
     }
 
-    reviewsContainer.appendChild(newcon);
+    reviewsContainer.appendChild(actionContainer);
+
     try {
-        const response = await apiFetch(`/reviews/${entityType}/${entityId}`);
-        if (response.ok) {
-            const { reviews } = await response;
-            if (reviews && reviews.length > 0) {
-                reviews.forEach((review) => {
-                    reviewsContainer.appendChild(
-                        ReviewItem(isCreator, {
-                            reviewerName: review.userid ? review.userid : "Anonymous",
-                            rating: review.rating,
-                            comment: review.comment,
-                            date: new Date(review.date).toLocaleString(),
-                            onEdit: () => handleEditReview(review.reviewid, entityType, entityId),
-                            onDelete: () => handleDeleteReview(review.reviewid, entityType, entityId),
-                        })
-                    );
-                });
-            } else {
-                reviewsContainer.appendChild(createElement("p", {}, ["No reviews yet."]));
-            }
+        const { reviews } = await apiFetch(`/reviews/${entityType}/${entityId}`);
+
+        if (Array.isArray(reviews) && reviews.length > 0) {
+            reviews.forEach((review) => {
+                reviewsContainer.appendChild(
+                    ReviewItem(isCreator, {
+                        reviewerName: review.userid || "Anonymous",
+                        rating: review.rating,
+                        comment: review.comment,
+                        date: review.date ? new Date(review.date).toLocaleString() : "",
+                        onEdit: () => handleEditReview(review.reviewid, entityType, entityId),
+                        onDelete: () => handleDeleteReview(review.reviewid, entityType, entityId)
+                    })
+                );
+            });
         } else {
-            throw new Error(`API error: ${response.statusText}`);
+            reviewsContainer.appendChild(
+                createElement("p", { class: "no-reviews" }, ["No reviews yet."])
+            );
         }
     } catch (error) {
         console.error("Error fetching reviews:", error);
-        reviewsContainer.appendChild(createElement("p", {}, ["Failed to load reviews."]));
+        reviewsContainer.appendChild(
+            createElement("p", { class: "error-message" }, ["Failed to load reviews."])
+        );
     }
-
 }
 
 export { displayReviews };
+
+// import { Button } from "../../components/base/Button.js";
+// import { createElement } from "../../components/createElement.js";
+// import { apiFetch } from "../../api/api.js";
+// import { handleAddReview, handleEditReview, handleDeleteReview } from "./createReview.js";
+
+// // Create a review item component
+// function ReviewItem(isCreator, { reviewerName, rating, comment, onEdit, onDelete }) {
+//     let actions;
+//     let authorOfReview = `"${reviewerName}"` == localStorage.getItem("user");
+//     if (!isCreator && !!authorOfReview) {
+//         actions = createElement("div", { class: "review-actions" }, [
+//             Button("Edit", "edit-review-btn", { click: onEdit }),
+//             Button("Delete", "delete-review-btn", { click: onDelete }),
+//         ]);
+//     } else {
+//         actions = null;
+//     }
+//     console.log(isCreator);
+//     return createElement("div", { class: "review-item" }, [
+//         createElement("h3", {}, [reviewerName]),
+//         createElement("p", {}, [`Ratings: ${rating}`]),
+//         createElement("p", {}, [comment]),
+//         ...(actions ? [actions] : []), // Spread operator to add `actions` if not null
+//     ]);
+
+// }
+
+// // Display reviews for the given entity
+// async function displayReviews(reviewsContainer, isCreator, isLoggedIn, entityType, entityId) {
+//     reviewsContainer.innerHTML = ""; // Clear existing reviews
+//     reviewsContainer.appendChild(createElement('h2', "", ["Reviews"]));
+//     const newcon = document.createElement('div');
+
+//     if (!isCreator && isLoggedIn) {
+//         const addButton = Button("Add Review", "add-review-btn", {
+//             click: () => handleAddReview(newcon, entityType, entityId),
+//         });
+//         reviewsContainer.appendChild(addButton);
+//     }
+
+//     reviewsContainer.appendChild(newcon);
+//     try {
+//         const response = await apiFetch(`/reviews/${entityType}/${entityId}`);
+//         if (response.ok) {
+//             const { reviews } = await response;
+//             if (reviews && reviews.length > 0) {
+//                 reviews.forEach((review) => {
+//                     reviewsContainer.appendChild(
+//                         ReviewItem(isCreator, {
+//                             reviewerName: review.userid ? review.userid : "Anonymous",
+//                             rating: review.rating,
+//                             comment: review.comment,
+//                             date: new Date(review.date).toLocaleString(),
+//                             onEdit: () => handleEditReview(review.reviewid, entityType, entityId),
+//                             onDelete: () => handleDeleteReview(review.reviewid, entityType, entityId),
+//                         })
+//                     );
+//                 });
+//             } else {
+//                 reviewsContainer.appendChild(createElement("p", {}, ["No reviews yet."]));
+//             }
+//         } else {
+//             throw new Error(`API error: ${response.statusText}`);
+//         }
+//     } catch (error) {
+//         console.error("Error fetching reviews:", error);
+//         reviewsContainer.appendChild(createElement("p", {}, ["Failed to load reviews."]));
+//     }
+
+// }
+
+// export { displayReviews };

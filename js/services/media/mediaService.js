@@ -1,14 +1,16 @@
 import { SRC_URL, state } from "../../state/state.js";
 import { apiFetch } from "../../api/api.js";
 import SnackBar from "../../components/ui/Snackbar.mjs";
-import Lightbox from '../../components/ui/Lightbox.mjs';
+// import Lightbox from '../../components/ui/Lightbox.mjs';
 import VidPlay from '../../components/ui/VidPlay.mjs';
 import Modal from '../../components/ui/Modal.mjs';
 import { Button } from "../../components/base/Button.js";
 import { createElement } from "../../components/createElement.js";
+import Notify from "../../components/ui/Notify.mjs";
 
 import { resolveImagePath, PictureType, EntityType } from "../../utils/imagePaths.js";
 import { reportPost } from "../reporting/reporting.js";
+import Sightbox from "../../components/ui/SightBox.mjs";
 
 
 let mediaItems = []; // Ensure this is globally scoped
@@ -31,7 +33,7 @@ async function uploadMedia(isLoggedIn, entityType, entityId, mediaList, modal) {
         // Upload media through the API
         const uploadResponse = await apiFetch(`/media/${entityType}/${entityId}`, "POST", formData);
 
-        if (uploadResponse && uploadResponse.id) {  // Check if the response contains an 'id'
+        if (uploadResponse && uploadResponse.mediaid) {  // Check if the response contains an 'id'
             SnackBar("Media uploaded successfully!");
             modal.remove();
             document.body.style.overflow = "";
@@ -61,7 +63,7 @@ async function deleteMedia(mediaId, entityType, entityId) {
                 }
 
                 // Optionally update global mediaItems array if used
-                mediaItems = mediaItems.filter((media) => media.id !== mediaId);
+                mediaItems = mediaItems.filter((media) => media.mediaid !== mediaId);
             } else {
                 const errorData = await response.json();
                 alert(`Failed to delete media: ${errorData.message || 'Unknown error'}`);
@@ -128,7 +130,7 @@ function displayNewMedia(isLoggedIn, mediaData, mediaList) {
     if (isCreator) {
         const deleteBtn = createElement("button", {
             class: "delete-media-btn",
-            "data-media-id": mediaData.id,
+            "data-media-id": mediaData.mediaid,
             "data-entity-id": mediaData.entityid,
         }, ["Delete"]);
         mediaItem.appendChild(deleteBtn);
@@ -138,178 +140,470 @@ function displayNewMedia(isLoggedIn, mediaData, mediaList) {
     mediaItems.push(mediaData);
 }
 
+// Observer for lazy loading and video auto-pause
+const lazyMediaObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+        const el = entry.target;
 
-// Render single media item
+        if (entry.isIntersecting) {
+            // Load when visible
+            if (el.dataset.src) {
+                el.src = el.dataset.src;
+                delete el.dataset.src;
+            }
+            // Start buffering if video
+            if (el.tagName === "VIDEO" && el.paused) {
+                el.load();
+            }
+        } else {
+            // Pause videos when out of view
+            if (el.tagName === "VIDEO" && !el.paused) {
+                el.pause();
+            }
+        }
+    });
+}, {
+    rootMargin: "100px 0px",
+    threshold: 0.1
+});
+
 function renderMediaItem(media, index, isLoggedIn, entityType, entityId) {
     const mediaItem = createElement("div", { class: "media-item" });
 
     if (!media.url) {
-        console.error("Invalid media URL");
+        console.warn(`Media item missing URL (ID: ${media.mediaid || "unknown"})`);
         return mediaItem;
     }
 
+    let figureContent;
+
     if (media.type === "image") {
         const img = createElement("img", {
-            src: resolveImagePath(EntityType.MEDIA, PictureType.THUMB, media.url),
+            "data-src": resolveImagePath(EntityType.MEDIA, PictureType.THUMB, media.url),
             loading: "lazy",
             alt: media.caption || "Media Image",
             class: "media-img",
-            "data-index": index,
+            "data-index": index
         });
+        lazyMediaObserver.observe(img);
 
         const caption = createElement("figcaption", {}, [media.caption || "No caption provided"]);
-        const figure = createElement("figure", {}, [img, caption]);
+        figureContent = [img, caption];
 
-        mediaItem.appendChild(figure);
     } else if (media.type === "video") {
         const video = createElement("video", {
             class: "media-video",
             controls: false,
-            // poster: `${SRC_URL}/uploads/${media.id}.jpg`, // optionally use resolveImagePath if you want
-            poster: resolveImagePath(EntityType.MEDIA, PictureType.THUMB, media.id + ".jpg"),
+            poster: resolveImagePath(EntityType.MEDIA, PictureType.THUMB, `${media.mediaid}.jpg`),
+            "data-src": resolveImagePath(EntityType.MEDIA, PictureType.VIDEO, media.url),
+            "data-index": index
         });
+        lazyMediaObserver.observe(video);
 
         const caption = createElement("figcaption", {}, [media.caption || "No caption provided"]);
-        const figure = createElement("figure", {}, [video, caption]);
+        figureContent = [video, caption];
 
-        mediaItem.appendChild(figure);
+    } else {
+        console.warn(`Unsupported media type: ${media.type}`);
+        return mediaItem;
     }
+
+    mediaItem.appendChild(createElement("figure", {}, figureContent));
 
     // Creator-only delete
     if (isLoggedIn && state.user === media.creatorid) {
-        const deleteButton = createElement("button", {
-            class: "delete-media-btn",
-            "data-media-id": media.id,
-        }, ["Delete"]);
-
-        deleteButton.addEventListener("click", async () => {
+        const deleteBtn = createActionButton("delete-media-btn", "Delete", async () => {
             try {
-                await deleteMedia(media.id, entityType, entityId);
+                await deleteMedia(media.mediaid, entityType, entityId);
                 mediaItem.remove();
-            } catch (error) {
-                console.error("Failed to delete media:", error);
+            } catch (err) {
+                console.error("Failed to delete media:", err);
             }
         });
-
-        mediaItem.appendChild(deleteButton);
+        mediaItem.appendChild(deleteBtn);
     }
 
     // Report button
-    const reportButton = createElement("button", {
-        class: "report-btn"
-    }, ["Report"]);
-
-    reportButton.addEventListener("click", () => {
-        reportPost(media.id, "media");
+    const reportBtn = createActionButton("report-btn", "Report", () => {
+        reportPost(media.meidaid, "media");
     });
+    mediaItem.appendChild(reportBtn);
 
-    mediaItem.appendChild(reportButton);
     return mediaItem;
 }
 
-
-
-async function displayMedia(content, entityType, entityId, isLoggedIn) {
-    content.innerHTML = ""; // Clear existing content
-    content.appendChild(createElement("h2", "", ["Media Gallery"]));
-
-    const response = await apiFetch(`/media/${entityType}/${entityId}`);
-    const mediaData = response;
-
-    const mediaList = createElement("div", { class: "hvflex" });
-    content.appendChild(mediaList);
-
-    if (isLoggedIn) {
-        const addMediaButton = Button("Add Media", "add-media-btn", {
-            click: () => showMediaUploadForm(isLoggedIn, entityType, entityId, mediaList),
-        });
-        content.prepend(addMediaButton);
-    }
-
-    if (mediaData.length === 0) {
-        mediaList.appendChild(
-            createElement("p", {}, ["No media available for this entity."])
-        );
-    } else {
-        const mediaCards = []; // For Lightbox
-        const videoCards = []; // For VidPlay
-
-        mediaData.forEach((media, index) => {
-            const mediaItem = renderMediaItem(media, index, isLoggedIn, entityType, entityId);
-            mediaList.appendChild(mediaItem);
-
-            if (media.type === "image") {
-                mediaCards.push(
-                    resolveImagePath(EntityType.MEDIA, PictureType.PHOTO, media.url)
-                );
-            } else if (media.type === "video") {
-                videoCards.push(
-                    resolveImagePath(EntityType.MEDIA, PictureType.VIDEO, media.url)
-                );
-            }
-        });
-
-        // Add Lightbox functionality
-        mediaList.querySelectorAll(".media-img").forEach((img, index) => {
-            img.addEventListener("click", () => Lightbox(mediaCards, index));
-        });
-
-        // Add VidPlay functionality
-        mediaList.querySelectorAll(".media-video").forEach((video, index) => {
-            video.addEventListener("click", () => playVideo(videoCards, index, entityId));
-        });
-    }
+function createActionButton(className, label, onClick) {
+    const btn = createElement("button", { class: className }, [label]);
+    btn.addEventListener("click", onClick);
+    return btn;
 }
 
-// async function displayMedia(content, entityType, entityId, isLoggedIn) {
-//     content.innerHTML = ""; // Clear existing content
-//     content.appendChild(createElement('h2',"",["Media Gallery"]));
-//     const response = await apiFetch(`/media/${entityType}/${entityId}`);
-//     const mediaData = response;
+export async function displayMedia(content, entityType, entityId, isLoggedIn) {
+    clearElement(content);
+    content.appendChild(createElement("h2", {}, ["Media Gallery"]));
 
-//     const mediaList = createElement("div", { class: "hvflex" });
-//     // const mediaList = createElement("div", { class: "grid-4" });
-//     content.appendChild(mediaList);
+    const mediaData = await apiFetch(`/media/${entityType}/${entityId}`);
+    const mediaList = createElement("div", { class: "hvflex" });
 
-//     // Add "Add Media" button for logged-in users
-//     if (isLoggedIn) {
-//         const addMediaButton = Button("Add Media", "add-media-btn", {
-//             click: () => showMediaUploadForm(isLoggedIn, entityType, entityId, mediaList),
-//         });
-//         content.prepend(addMediaButton);
+    if (isLoggedIn) {
+        const addMediaBtn = Button("Add Media", "add-media-btn", {
+            click: () => showMediaUploadForm(isLoggedIn, entityType, entityId, mediaList)
+        });
+        content.prepend(addMediaBtn);
+    }
+
+    content.appendChild(mediaList);
+
+    if (!Array.isArray(mediaData) || mediaData.length === 0) {
+        mediaList.appendChild(createElement("p", {}, ["No media available for this entity."]));
+        return;
+    }
+
+    const imageUrls = [];
+    const videoUrls = [];
+
+    mediaData.forEach((media, index) => {
+        const item = renderMediaItem(media, index, isLoggedIn, entityType, entityId);
+        mediaList.appendChild(item);
+
+        if (media.type === "image") {
+            imageUrls.push(resolveImagePath(EntityType.MEDIA, PictureType.PHOTO, media.url));
+        } else if (media.type === "video") {
+            videoUrls.push(resolveImagePath(EntityType.MEDIA, PictureType.VIDEO, media.url));
+        }
+    });
+
+    // Lightbox for images
+    mediaList.querySelectorAll(".media-img").forEach((img, i) => {
+        img.addEventListener("click", () => Sightbox(imageUrls, i));
+    });
+
+    // Video player for videos
+    mediaList.querySelectorAll(".media-video").forEach((video, i) => {
+        video.addEventListener("click", () => playVideo(videoUrls, i, entityId));
+    });
+}
+
+function clearElement(el) {
+    while (el.firstChild) el.removeChild(el.firstChild);
+}
+
+// // IntersectionObserver for lazy loading media
+// const lazyMediaObserver = new IntersectionObserver((entries, observer) => {
+//     entries.forEach(entry => {
+//         if (entry.isIntersecting) {
+//             const el = entry.target;
+
+//             if (el.tagName === "IMG" && el.dataset.src) {
+//                 el.src = el.dataset.src;
+//                 delete el.dataset.src;
+//             }
+
+//             if (el.tagName === "VIDEO" && el.dataset.src) {
+//                 el.src = el.dataset.src;
+//                 delete el.dataset.src;
+//             }
+
+//             observer.unobserve(el);
+//         }
+//     });
+// }, {
+//     rootMargin: "100px 0px", // start loading a bit before visible
+//     threshold: 0.1
+// });
+
+// function renderMediaItem(media, index, isLoggedIn, entityType, entityId) {
+//     const mediaItem = createElement("div", { class: "media-item" });
+
+//     if (!media.url) {
+//         console.warn(`Media item missing URL (ID: ${media.id || "unknown"})`);
+//         return mediaItem;
 //     }
 
-//     if (mediaData.length === 0) {
-//         mediaList.appendChild(
-//             createElement("p", {},["No media available for this entity."])
-//         );
+//     let figureContent;
+
+//     if (media.type === "image") {
+//         const img = createElement("img", {
+//             "data-src": resolveImagePath(EntityType.MEDIA, PictureType.THUMB, media.url),
+//             loading: "lazy",
+//             alt: media.caption || "Media Image",
+//             class: "media-img",
+//             "data-index": index
+//         });
+//         lazyMediaObserver.observe(img);
+
+//         const caption = createElement("figcaption", {}, [media.caption || "No caption provided"]);
+//         figureContent = [img, caption];
+
+//     } else if (media.type === "video") {
+//         const video = createElement("video", {
+//             class: "media-video",
+//             controls: false,
+//             poster: resolveImagePath(EntityType.MEDIA, PictureType.THUMB, `${media.id}.jpg`),
+//             "data-src": resolveImagePath(EntityType.MEDIA, PictureType.VIDEO, media.url),
+//             "data-index": index
+//         });
+//         lazyMediaObserver.observe(video);
+
+//         const caption = createElement("figcaption", {}, [media.caption || "No caption provided"]);
+//         figureContent = [video, caption];
+
 //     } else {
-//         const mediaCards = []; // For Lightbox
-//         const videoCards = []; // For VidPlay
+//         console.warn(`Unsupported media type: ${media.type}`);
+//         return mediaItem;
+//     }
 
-//         mediaData.forEach((media, index) => {
-//             const mediaItem = renderMediaItem(media, index, isLoggedIn, entityType, entityId);
-//             mediaList.appendChild(mediaItem);
+//     mediaItem.appendChild(createElement("figure", {}, figureContent));
 
-//             if (media.type === "image") {
-//                 mediaCards.push(`${SRC_URL}/uploads/${media.url}`);
-//             } else if (media.type === "video") {
-//                 videoCards.push(`${SRC_URL}/uploads/${media.url}`);
+//     // Creator-only delete
+//     if (isLoggedIn && state.user === media.creatorid) {
+//         const deleteBtn = createActionButton("delete-media-btn", "Delete", async () => {
+//             try {
+//                 await deleteMedia(media.id, entityType, entityId);
+//                 mediaItem.remove();
+//             } catch (err) {
+//                 console.error("Failed to delete media:", err);
 //             }
 //         });
-
-//         // Add Lightbox functionality
-//         mediaList.querySelectorAll(".media-img").forEach((img, index) => {
-//             img.addEventListener("click", () => Lightbox(mediaCards, index));
-//         });
-
-//         // Add VidPlay functionality
-//         mediaList.querySelectorAll(".media-video").forEach((video, index) => {
-//             video.addEventListener("click", () => playVideo(videoCards, index, entityId));
-//         });
-
+//         mediaItem.appendChild(deleteBtn);
 //     }
+
+//     // Report button
+//     const reportBtn = createActionButton("report-btn", "Report", () => {
+//         reportPost(media.id, "media");
+//     });
+//     mediaItem.appendChild(reportBtn);
+
+//     return mediaItem;
 // }
+
+// function createActionButton(className, label, onClick) {
+//     const btn = createElement("button", { class: className }, [label]);
+//     btn.addEventListener("click", onClick);
+//     return btn;
+// }
+
+// export async function displayMedia(content, entityType, entityId, isLoggedIn) {
+//     clearElement(content);
+//     content.appendChild(createElement("h2", {}, ["Media Gallery"]));
+
+//     const mediaData = await apiFetch(`/media/${entityType}/${entityId}`);
+//     const mediaList = createElement("div", { class: "hvflex" });
+
+//     if (isLoggedIn) {
+//         const addMediaBtn = Button("Add Media", "add-media-btn", {
+//             click: () => showMediaUploadForm(isLoggedIn, entityType, entityId, mediaList)
+//         });
+//         content.prepend(addMediaBtn);
+//     }
+
+//     content.appendChild(mediaList);
+
+//     if (!Array.isArray(mediaData) || mediaData.length === 0) {
+//         mediaList.appendChild(createElement("p", {}, ["No media available for this entity."]));
+//         return;
+//     }
+
+//     const imageUrls = [];
+//     const videoUrls = [];
+
+//     mediaData.forEach((media, index) => {
+//         const item = renderMediaItem(media, index, isLoggedIn, entityType, entityId);
+//         mediaList.appendChild(item);
+
+//         if (media.type === "image") {
+//             imageUrls.push(resolveImagePath(EntityType.MEDIA, PictureType.PHOTO, media.url));
+//         } else if (media.type === "video") {
+//             videoUrls.push(resolveImagePath(EntityType.MEDIA, PictureType.VIDEO, media.url));
+//         }
+//     });
+
+//     // Lightbox for images
+//     mediaList.querySelectorAll(".media-img").forEach((img, i) => {
+//         img.addEventListener("click", () => Sightbox(imageUrls, i));
+//     });
+
+//     // Video player for videos
+//     mediaList.querySelectorAll(".media-video").forEach((video, i) => {
+//         video.addEventListener("click", () => playVideo(videoUrls, i, entityId));
+//     });
+// }
+
+// function clearElement(el) {
+//     while (el.firstChild) el.removeChild(el.firstChild);
+// }
+
+// // // Render single media item
+// // function renderMediaItem(media, index, isLoggedIn, entityType, entityId) {
+// //     const mediaItem = createElement("div", { class: "media-item" });
+
+// //     if (!media.url) {
+// //         console.error("Invalid media URL");
+// //         return mediaItem;
+// //     }
+
+// //     if (media.type === "image") {
+// //         const img = createElement("img", {
+// //             src: resolveImagePath(EntityType.MEDIA, PictureType.THUMB, media.url),
+// //             loading: "lazy",
+// //             alt: media.caption || "Media Image",
+// //             class: "media-img",
+// //             "data-index": index,
+// //         });
+
+// //         const caption = createElement("figcaption", {}, [media.caption || "No caption provided"]);
+// //         const figure = createElement("figure", {}, [img, caption]);
+
+// //         mediaItem.appendChild(figure);
+// //     } else if (media.type === "video") {
+// //         const video = createElement("video", {
+// //             class: "media-video",
+// //             controls: false,
+// //             // poster: `${SRC_URL}/uploads/${media.id}.jpg`, // optionally use resolveImagePath if you want
+// //             poster: resolveImagePath(EntityType.MEDIA, PictureType.THUMB, media.id + ".jpg"),
+// //         });
+
+// //         const caption = createElement("figcaption", {}, [media.caption || "No caption provided"]);
+// //         const figure = createElement("figure", {}, [video, caption]);
+
+// //         mediaItem.appendChild(figure);
+// //     }
+
+// //     // Creator-only delete
+// //     if (isLoggedIn && state.user === media.creatorid) {
+// //         const deleteButton = createElement("button", {
+// //             class: "delete-media-btn",
+// //             "data-media-id": media.id,
+// //         }, ["Delete"]);
+
+// //         deleteButton.addEventListener("click", async () => {
+// //             try {
+// //                 await deleteMedia(media.id, entityType, entityId);
+// //                 mediaItem.remove();
+// //             } catch (error) {
+// //                 console.error("Failed to delete media:", error);
+// //             }
+// //         });
+
+// //         mediaItem.appendChild(deleteButton);
+// //     }
+
+// //     // Report button
+// //     const reportButton = createElement("button", {
+// //         class: "report-btn"
+// //     }, ["Report"]);
+
+// //     reportButton.addEventListener("click", () => {
+// //         reportPost(media.id, "media");
+// //     });
+
+// //     mediaItem.appendChild(reportButton);
+// //     return mediaItem;
+// // }
+
+
+
+// // async function displayMedia(content, entityType, entityId, isLoggedIn) {
+// //     content.innerHTML = ""; // Clear existing content
+// //     content.appendChild(createElement("h2", "", ["Media Gallery"]));
+
+// //     const response = await apiFetch(`/media/${entityType}/${entityId}`);
+// //     const mediaData = response;
+
+// //     const mediaList = createElement("div", { class: "hvflex" });
+// //     content.appendChild(mediaList);
+
+// //     if (isLoggedIn) {
+// //         const addMediaButton = Button("Add Media", "add-media-btn", {
+// //             click: () => showMediaUploadForm(isLoggedIn, entityType, entityId, mediaList),
+// //         });
+// //         content.prepend(addMediaButton);
+// //     }
+
+// //     if (mediaData.length === 0) {
+// //         mediaList.appendChild(
+// //             createElement("p", {}, ["No media available for this entity."])
+// //         );
+// //     } else {
+// //         const mediaCards = []; // For Lightbox
+// //         const videoCards = []; // For VidPlay
+
+// //         mediaData.forEach((media, index) => {
+// //             const mediaItem = renderMediaItem(media, index, isLoggedIn, entityType, entityId);
+// //             mediaList.appendChild(mediaItem);
+
+// //             if (media.type === "image") {
+// //                 mediaCards.push(
+// //                     resolveImagePath(EntityType.MEDIA, PictureType.PHOTO, media.url)
+// //                 );
+// //             } else if (media.type === "video") {
+// //                 videoCards.push(
+// //                     resolveImagePath(EntityType.MEDIA, PictureType.VIDEO, media.url)
+// //                 );
+// //             }
+// //         });
+
+// //         // Add Lightbox functionality
+// //         mediaList.querySelectorAll(".media-img").forEach((img, index) => {
+// //             img.addEventListener("click", () => Sightbox(mediaCards, index));
+// //         });
+
+// //         // Add VidPlay functionality
+// //         mediaList.querySelectorAll(".media-video").forEach((video, index) => {
+// //             video.addEventListener("click", () => playVideo(videoCards, index, entityId));
+// //         });
+// //     }
+// // }
+
+// // // async function displayMedia(content, entityType, entityId, isLoggedIn) {
+// // //     content.innerHTML = ""; // Clear existing content
+// // //     content.appendChild(createElement('h2',"",["Media Gallery"]));
+// // //     const response = await apiFetch(`/media/${entityType}/${entityId}`);
+// // //     const mediaData = response;
+
+// // //     const mediaList = createElement("div", { class: "hvflex" });
+// // //     // const mediaList = createElement("div", { class: "grid-4" });
+// // //     content.appendChild(mediaList);
+
+// // //     // Add "Add Media" button for logged-in users
+// // //     if (isLoggedIn) {
+// // //         const addMediaButton = Button("Add Media", "add-media-btn", {
+// // //             click: () => showMediaUploadForm(isLoggedIn, entityType, entityId, mediaList),
+// // //         });
+// // //         content.prepend(addMediaButton);
+// // //     }
+
+// // //     if (mediaData.length === 0) {
+// // //         mediaList.appendChild(
+// // //             createElement("p", {},["No media available for this entity."])
+// // //         );
+// // //     } else {
+// // //         const mediaCards = []; // For Lightbox
+// // //         const videoCards = []; // For VidPlay
+
+// // //         mediaData.forEach((media, index) => {
+// // //             const mediaItem = renderMediaItem(media, index, isLoggedIn, entityType, entityId);
+// // //             mediaList.appendChild(mediaItem);
+
+// // //             if (media.type === "image") {
+// // //                 mediaCards.push(`${SRC_URL}/uploads/${media.url}`);
+// // //             } else if (media.type === "video") {
+// // //                 videoCards.push(`${SRC_URL}/uploads/${media.url}`);
+// // //             }
+// // //         });
+
+// // //         // Add Lightbox functionality
+// // //         mediaList.querySelectorAll(".media-img").forEach((img, index) => {
+// // //             img.addEventListener("click", () => Lightbox(mediaCards, index));
+// // //         });
+
+// // //         // Add VidPlay functionality
+// // //         mediaList.querySelectorAll(".media-video").forEach((video, index) => {
+// // //             video.addEventListener("click", () => playVideo(videoCards, index, entityId));
+// // //         });
+
+// // //     }
+// // // }
 
 /********
  * 
@@ -375,4 +669,5 @@ function showMediaUploadForm(isLoggedIn, entityType, entityId, mediaList) {
 /******************* */
 
 
-export { displayMedia, renderMediaItem, showMediaUploadForm, uploadMedia, displayNewMedia, deleteMedia, addMediaEventListeners };
+// export { displayMedia, renderMediaItem, showMediaUploadForm, uploadMedia, displayNewMedia, deleteMedia, addMediaEventListeners };
+export { renderMediaItem, showMediaUploadForm, uploadMedia, displayNewMedia, deleteMedia, addMediaEventListeners };

@@ -2,6 +2,7 @@ import { createElement } from "../../components/createElement.js";
 import Snackbar from '../../components/ui/Snackbar.mjs';
 import { navigate } from "../../routes/index.js";
 import { apiFetch } from "../../api/api.js";
+import Notify from "../../components/ui/Notify.mjs";
 
 const categoryMap = {
     News: ["Politics", "Sports", "Economy", "Technology", "World"],
@@ -33,6 +34,26 @@ function createInputGroup(labelText, inputElement, extraNode = null) {
     wrapper.appendChild(label);
     wrapper.appendChild(inputElement);
     if (extraNode) wrapper.appendChild(extraNode);
+
+    if (inputElement.type === "file") {
+        const previewContainer = createElement("div", {
+            style: "display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;",
+        });
+        wrapper.appendChild(previewContainer);
+
+        inputElement.addEventListener("change", (e) => {
+            previewContainer.innerHTML = "";
+            const files = Array.from(e.target.files);
+            files.forEach((file) => {
+                const img = createElement("img", {
+                    src: URL.createObjectURL(file),
+                    style: "max-width: 150px; max-height: 150px; object-fit: cover; border-radius: 6px;",
+                });
+                previewContainer.appendChild(img);
+            });
+        });
+    }
+
     return wrapper;
 }
 
@@ -129,7 +150,7 @@ function renderPostForm(postData = {}, onSubmit) {
     const submitBtn = createElement('button', {
         type: 'submit',
         class: 'btn btn-primary'
-    }, [postData._id ? 'Update Post' : 'Create Post']);
+    }, [postData.postid ? 'Update Post' : 'Create Post']);
 
     const cancelBtn = createElement('button', {
         type: 'button',
@@ -152,7 +173,7 @@ function renderPostForm(postData = {}, onSubmit) {
     form.addEventListener('submit', async e => {
         e.preventDefault();
         submitBtn.disabled = true;
-        await onSubmit(form, !!postData._id, postData._id);
+        await onSubmit(form, !!postData.postid, postData.postid);
         submitBtn.disabled = false;
     });
 
@@ -161,12 +182,12 @@ function renderPostForm(postData = {}, onSubmit) {
 
 async function handlePostSubmit(form, isEdit = false, existingId = null) {
     const formData = new FormData(form);
-    const title       = formData.get("title")?.trim();
-    const content     = formData.get("textcontent")?.trim();
-    const category    = formData.get("category-main");
+    const title = formData.get("title")?.trim();
+    const content = formData.get("textcontent")?.trim();
+    const category = formData.get("category-main");
     const subcategory = formData.get("category-sub");
     const referenceId = formData.get("reference-id")?.trim();
-    const files       = form.querySelector('#images')?.files;
+    const files = form.querySelector('#images')?.files;
 
     if (!title || !content || !category || !subcategory) {
         Snackbar("Please fill in all required fields.", 3000);
@@ -199,7 +220,7 @@ async function handlePostSubmit(form, isEdit = false, existingId = null) {
             }
             cleaned.append(`images_${index + 1}`, file); // unique field names
         });
-        
+
     }
 
     try {
@@ -225,196 +246,3 @@ function validateImage(file) {
 }
 
 export { renderPostForm, handlePostSubmit };
-
-// import { createElement } from "../../components/createElement.js";
-// import Snackbar from '../../components/ui/Snackbar.mjs';
-// import { navigate } from "../../routes/index.js";
-// import { apiFetch } from "../../api/api.js";
-
-// const categoryMap = {
-//     News: ["Politics", "Sports", "Economy", "Technology", "World"],
-//     Blog: ["Travel", "Food", "Lifestyle", "Personal", "Health"],
-//     Review: ["Book", "Movie", "Product", "Place", "Event"],
-//     Tutorial: ["Coding", "Cooking", "DIY", "Design"],
-//     Opinion: ["Editorial", "Analysis", "Satire"],
-//     Interview: ["Expert", "Celebrity", "Case Study"]
-// };
-
-// // Utility function to build a select element
-// function createSelect(id, name, options, selectedValue = '') {
-//     const select = createElement('select', { id, name, required: true });
-//     select.appendChild(createElement('option', { value: '' }, [`Select ${name}`]));
-//     options.forEach(opt =>
-//         select.appendChild(
-//             createElement('option', {
-//                 value: opt,
-//                 selected: opt === selectedValue
-//             }, [opt])
-//         )
-//     );
-//     return select;
-// }
-
-// function createInputGroup(labelText, inputElement, extraNode = null) {
-//     const wrapper = createElement('div', { class: 'form-group' });
-//     const label = createElement('label', { for: inputElement.id }, [labelText]);
-//     wrapper.appendChild(label);
-//     wrapper.appendChild(inputElement);
-//     if (extraNode) wrapper.appendChild(extraNode);
-//     return wrapper;
-// }
-
-// function populateSubCategories(selectEl, mainCategory, selected = '') {
-//     selectEl.innerHTML = '';
-//     selectEl.appendChild(createElement('option', { value: '' }, ['Select sub category']));
-//     const subs = categoryMap[mainCategory];
-//     if (!subs) {
-//         Snackbar("No subcategories found for selected category.", 3000);
-//         return;
-//     }
-//     subs.forEach(sub =>
-//         selectEl.appendChild(
-//             createElement('option', {
-//                 value: sub,
-//                 selected: sub === selected
-//             }, [sub])
-//         )
-//     );
-// }
-
-// function renderPostForm(postData = {}, onSubmit) {
-//     const form = createElement('form');
-
-//     const mainCategorySelect = createSelect(
-//         'category-main',
-//         'category-main',
-//         Object.keys(categoryMap),
-//         postData.category
-//     );
-
-//     const subCategorySelect = createSelect(
-//         'category-sub',
-//         'category-sub',
-//         categoryMap[postData.category] || [],
-//         postData.subcategory
-//     );
-
-//     const titleInput = createElement('input', {
-//         type: 'text',
-//         id: 'title',
-//         name: 'title',
-//         placeholder: 'Post title',
-//         required: true,
-//         value: postData.title || ''
-//     });
-
-//     const contentTextarea = createElement('textarea', {
-//         id: 'textcontent',
-//         name: 'textcontent',
-//         placeholder: 'Write your post...',
-//         required: true,
-//         rows: 6
-//     });
-//     contentTextarea.value = postData.content || '';
-//     const charCount = createElement('span', { class: 'char-count' }, [`${contentTextarea.value.length} chars`]);
-//     contentTextarea.addEventListener('input', () => {
-//         charCount.textContent = `${contentTextarea.value.length} chars`;
-//     });
-
-//     const imageInput = createElement('input', {
-//         type: 'file',
-//         id: 'images',
-//         name: 'images',
-//         multiple: true,
-//         accept: 'image/*'
-//     });
-
-//     mainCategorySelect.addEventListener('change', e => {
-//         populateSubCategories(subCategorySelect, e.target.value);
-//     });
-
-//     const submitBtn = createElement('button', {
-//         type: 'submit',
-//         class: 'btn btn-primary'
-//     }, [postData._id ? 'Update Post' : 'Create Post']);
-
-//     const cancelBtn = createElement('button', {
-//         type: 'button',
-//         class: 'btn btn-secondary',
-//         style: 'margin-left: 10px;'
-//     }, ['Cancel']);
-//     cancelBtn.addEventListener('click', () => navigate('/posts'));
-
-//     form.append(
-//         createInputGroup('Main Category', mainCategorySelect),
-//         createInputGroup('Sub Category', subCategorySelect),
-//         createInputGroup('Title', titleInput),
-//         createInputGroup('Content', contentTextarea, charCount),
-//         createInputGroup('Images', imageInput),
-//         submitBtn,
-//         cancelBtn
-//     );
-
-//     form.addEventListener('submit', async e => {
-//         e.preventDefault();
-//         submitBtn.disabled = true;
-//         await onSubmit(form, !!postData._id, postData._id);
-//         submitBtn.disabled = false;
-//     });
-
-//     return form;
-// }
-
-// async function handlePostSubmit(form, isEdit = false, existingId = null) {
-//     const formData = new FormData(form);
-//     const title       = formData.get("title")?.trim();
-//     const content     = formData.get("textcontent")?.trim();
-//     const category    = formData.get("category-main");
-//     const subcategory = formData.get("category-sub");
-//     const files       = form.querySelector('#images')?.files;
-
-//     if (!title || !content || !category || !subcategory) {
-//         Snackbar("Please fill in all required fields.", 3000);
-//         return;
-//     }
-
-//     const cleaned = new FormData();
-//     cleaned.append("title", title);
-//     cleaned.append("content", content);
-//     cleaned.append("category", category);
-//     cleaned.append("subcategory", subcategory);
-
-//     if (files && files.length) {
-//         for (let file of files) {
-//             const error = validateImage(file);
-//             if (error) {
-//                 Snackbar(error, 3000);
-//                 return;
-//             }
-//             cleaned.append("images", file);
-//         }
-//     }
-
-//     try {
-//         Snackbar(isEdit ? "Updating post..." : "Creating post...", 2000);
-//         const endpoint = isEdit
-//             ? `/posts/post/${existingId}`
-//             : '/posts/post';
-//         const method = isEdit ? 'PUT' : 'POST';
-//         const result = await apiFetch(endpoint, method, cleaned);
-//         Snackbar(isEdit ? "Post updated!" : "Post created!", 3000);
-//         navigate(`/post/${isEdit ? existingId : result.postid}`);
-//     } catch (err) {
-//         Snackbar(`Error: ${err.message || err}`, 3000);
-//     }
-// }
-
-// function validateImage(file) {
-//     const maxSize = 5 * 1024 * 1024;
-//     const validTypes = ["image/jpeg", "image/png", "image/webp"];
-//     if (!validTypes.includes(file.type)) return "Only JPG, PNG or WebP images allowed.";
-//     if (file.size > maxSize) return "Image too large (max 5 MB).";
-//     return null;
-// }
-
-// export { renderPostForm, handlePostSubmit };

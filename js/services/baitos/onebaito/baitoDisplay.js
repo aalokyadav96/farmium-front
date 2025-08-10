@@ -8,7 +8,8 @@ import Button from "../../../components/base/Button.js";
 import { showApplicantsModal } from "../dash/baitoEmployerDash.js";
 import { ImageGallery } from "../../../components/ui/IMageGallery.mjs";
 import { displayReviews } from "../../reviews/displayReviews.js";
-import SnackBar from "../../../components/ui/Snackbar.mjs";
+import Notify from "../../../components/ui/Notify.mjs";
+
 import { meChat } from "../../mechat/plugnplay.js";
 import { resolveImagePath, EntityType, PictureType } from "../../../utils/imagePaths.js";
 
@@ -65,7 +66,7 @@ function renderOwnerControls(baito) {
       click: async () => {
         if (!confirm("Delete this job permanently?")) return;
         try {
-          await apiFetch(`/baitos/baito/${baito._id}`, "DELETE");
+          await apiFetch(`/baitos/baito/${baito.baitoid}`, "DELETE");
           Snackbar("✅ Deleted", 2000);
           navigate("/baitos");
         } catch {
@@ -74,7 +75,7 @@ function renderOwnerControls(baito) {
       }
     }, "buttonx btn-danger"),
     Button("📜 Application History", "app-history-btn", {
-      click: () => storeApplicationHistory(baito._id)
+      click: () => storeApplicationHistory(baito.baitoid)
     }, "buttonx btn-secondary"),
     Button("Chats", "chats-btn-baito", {
       click: () => navigate("/merechats")
@@ -110,8 +111,8 @@ function renderApplicantControls(baito, baitoid, isOwner, container, isLoggedIn)
     Button("⭐ Save Job", "save-job-btn", {
       click: () => {
         const saved = JSON.parse(localStorage.getItem("savedJobs") || "[]");
-        if (!saved.includes(baito._id)) {
-          saved.push(baito._id);
+        if (!saved.includes(baito.baitoid)) {
+          saved.push(baito.baitoid);
           localStorage.setItem("savedJobs", JSON.stringify(saved));
           Snackbar("Saved!", 2000);
         }
@@ -346,7 +347,7 @@ export async function displayBaito(isLoggedIn, baitoid, contentContainer) {
     const cleanImageNames = baito.images?.filter(Boolean) || [];
     if (cleanImageNames.length) {
       const fullURLs = cleanImageNames.map(name =>
-        resolveImagePath(EntityType.BAITO, PictureType.BANNER, name)
+        resolveImagePath(EntityType.BAITO, PictureType.PHOTO, name)
       );
       section.appendChild(ImageGallery(fullURLs));
     }
@@ -379,7 +380,7 @@ export async function displayBaito(isLoggedIn, baitoid, contentContainer) {
               createElement("div", { class: "baito-related-card" }, [
                 createElement("p", {}, [job.title || "Untitled"]),
                 Button("View", "", {
-                  click: () => navigate(`/baito/${job._id}`)
+                  click: () => navigate(`/baito/${job.baitoid}`)
                 }, "btn btn-sm")
               ])
             );

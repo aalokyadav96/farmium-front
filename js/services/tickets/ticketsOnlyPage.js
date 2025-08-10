@@ -3,6 +3,7 @@ import { createElement } from "../../components/createElement.js";
 import { apiFetch } from "../../api/api.js";
 import SnackBar from "../../components/ui/Snackbar.mjs";
 import { state } from "../../state/state.js";
+import Notify from "../../components/ui/Notify.mjs";
 
 // Fetch Event Data
 async function fetchEventData(eventId) {

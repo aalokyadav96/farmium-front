@@ -1,6 +1,7 @@
 import { state, setState } from "../../state/state.js";
 import { apiFetch } from "../../api/api.js";
 import Snackbar from "../../components/ui/Snackbar.mjs";
+import Notify from "../../components/ui/Notify.mjs";
 
 /**
  * Generic toggle action (e.g., follow/unfollow, subscribe/unsubscribe)

@@ -3,7 +3,6 @@ import { SRC_URL, apiFetch } from "../../api/api.js";
 import { createElement } from "../../components/createElement.js";
 import { renderPlaceDetails } from "./renderPlaceDetails.js";
 import { displayMedia } from "../media/mediaService.js";
-import Snackbar from "../../components/ui/Snackbar.mjs";
 import { displayReviews } from "../reviews/displayReviews.js";
 import { persistTabs } from "../../utils/persistTabs.js";
 import { displayPlaceInfo } from "./placeTabs.js";
@@ -21,6 +20,7 @@ import {
   displayPlaceEvents,
   displayPlaceDetailsFallback,
 } from "./customTabs.js";
+import Notify from "../../components/ui/Notify.mjs";
 
 export default async function displayPlace(isLoggedIn, placeId, contentContainer) {
   if (!placeId || !contentContainer || !(contentContainer instanceof HTMLElement)) {
@@ -77,7 +77,7 @@ export default async function displayPlace(isLoggedIn, placeId, contentContainer
       title: "Share",
       onclick: () => {
         navigator.clipboard.writeText(location.href);
-        Snackbar("Link copied to clipboard", 2000);
+        Notify("Link copied to clipboard", {type: "success", duration: 3000, dismissible: true});
       },
       style: "cursor:pointer;font-size:16px;border:none;background:none;"
     }, ["🔗"]);
@@ -207,7 +207,7 @@ export default async function displayPlace(isLoggedIn, placeId, contentContainer
     contentContainer.appendChild(
       createElement("h1", {}, [`Error loading place: ${err.message}`])
     );
-    Snackbar("Failed to load place details. Please try again later.", 3000);
+    Notify("Failed to load place details. Please try again later.", {type: "warning", duration: 3000, dismissible: true});
   }
 }
 

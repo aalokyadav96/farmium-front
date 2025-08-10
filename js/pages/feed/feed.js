@@ -1,4 +1,4 @@
-import { displayFeed } from "../../services/feed/feedService.js";
+import { displayFeed } from "../../services/feed/fetchFeed.js";
 
 async function Feed(isLoggedIn, contentContainer) {
     contentContainer.innerHTML = '';

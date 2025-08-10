@@ -1,8 +1,8 @@
 import { apiFetch } from "../../api/api.js";
-import SnackBar from '../../components/ui/Snackbar.mjs';
+import Notify from "../../components/ui/Notify.mjs";
 import { navigate } from "../../routes/index.js";
 import displayPlace from "./displayPlace.js";
-import {editPlaceForm, updatePlace, deletePlace} from "./editPlace.js";
+import { editPlaceForm, updatePlace, deletePlace } from "./editPlace.js";
 
 /***************  Code to find duplicate ids  ******************/
 // const allIds = Array.from(document.querySelectorAll('[id]')).map(el => el.id);
@@ -12,7 +12,7 @@ import {editPlaceForm, updatePlace, deletePlace} from "./editPlace.js";
 
 async function createPlace(isLoggedIn) {
     if (!isLoggedIn) {
-        SnackBar("Please log in to create a place.", 3000);
+        Notify("Please log in to create a place.", { type: "warning", dismissible: true, duration: 3000 });
         navigate('/login');
         return;
     }
@@ -27,18 +27,18 @@ async function createPlace(isLoggedIn) {
 
     // Validate input fields
     if (!name || !address || !description || !category || !capacity) {
-        SnackBar("Please fill in all required fields.", 3000);
+        Notify("Please fill in all required fields.", { type: "warning", dismissible: true, duration: 3000 });
         return;
     }
     if (!Number.isInteger(Number(capacity)) || capacity <= 0) {
-        SnackBar("Capacity must be a positive integer.", 3000);
+        Notify("Capacity must be a positive integer.", { type: "warning", dismissible: true, duration: 3000 });
         return;
     }
 
     // Validate banner file size and type (optional)
     const bannerError = validateBanner(bannerFile);
     if (bannerError) {
-        SnackBar(bannerError, 3000);
+        Notify(bannerError, { type: "warning", dismissible: true, duration: 3000 });
         return;
     }
 
@@ -54,12 +54,12 @@ async function createPlace(isLoggedIn) {
     }
 
     try {
-        SnackBar("Creating place...", 3000); // Show progress feedback
+        Notify("Creating place...", { type: "warning", dismissible: true, duration: 3000 });
         const result = await apiFetch('/places/place', 'POST', formData);
-        SnackBar(`Place created successfully: ${result.name}`, 3000);
+        Notify(`Place created successfully: ${result.name}`, { type: "warning", dismissible: true, duration: 3000 });
         navigate('/place/' + result.placeid); // Navigate to the new place's page
     } catch (error) {
-        SnackBar(`Error creating place: ${error.message || error}`, 3000);
+        Notify(`Error creating place: ${error.message || error}`, { type: "warning", dismissible: true, duration: 3000 });
     }
 }
 
@@ -72,19 +72,16 @@ function validateBanner(file) {
 
 async function analyticsPlace(isLoggedIn, placeId) {
     if (!isLoggedIn) {
-
-        SnackBar("Please log in to view your place analytics.", 3000);
+        Notify("Please log in to view your place analytics.", { type: "warning", dismissible: true, duration: 3000 });
         return;
     }
     if (confirm("Are you sure you want to view your place analytics?")) {
         try {
             // await apiFetch(`/places/place/${placeId}`, 'DELETE');
-
-            // SnackBar("Place deleted successfully.", 3000);
+            Notify("Hi.", { type: "warning", dismissible: true, duration: 3000 });
             // navigate('/places'); // Redirect to home or another page
         } catch (error) {
-
-            // SnackBar(`Error deleting place: ${error.message || 'Unknown error'}`, 3000);
+            Notify("Oops.", { type: "warning", dismissible: true, duration: 3000 });
         }
     }
 }

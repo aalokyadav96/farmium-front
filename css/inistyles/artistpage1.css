@@ -1,32 +1,52 @@
 .artistpage {
-    max-width: 960px;
-    margin: auto;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.05);
-  }
-  
-  /* Flex utilities */
-  .hflex {
-    display: flex;
-    gap: 12px;
-  }
-  
-  .hflex-sb {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-  }
-  
-  .hcen {
-    justify-content: center;
-    margin: 16px 0;
-  }
-  
-  /* Photo section */
-  .photocon {
-    margin-bottom: 16px;
-  }
-  
+  max-width: 960px;
+  margin: auto;
+  border-radius: 8px;
+}
+
+/* Flex utilities */
+.hflex {
+  display: flex;
+  gap: 12px;
+}
+
+.hflex-sb {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hcen {
+  justify-content: center;
+  margin: 16px 0;
+}
+
+/* Photo section */
+.photocon {
+  margin-bottom: 16px;
+}
+
+.artist-photo {
+  max-width: 110%;
+  max-height: 14rem;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 1px solid #eee;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+}
+
+.artist-banner {
+  max-width: 100%;
+  max-height: 14rem;
+  object-fit: cover;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  aspect-ratio: 5 / 2;
+  margin: 0 auto;
+}
+
+/*   
   .artist-photo {
     width: 120px;
     height: 120px;
@@ -40,10 +60,10 @@
     max-height: 120px;
     object-fit: cover;
     border-radius: 8px;
-  }
-  
-  /* Buttons */
-  /* .buttonx {
+  } */
+
+/* Buttons */
+/* .buttonx {
     padding: 8px 14px;
     background: #0077cc;
     color: white;
@@ -57,99 +77,89 @@
     background: #005fa3;
   }
    */
-  /* Tabs */
-  .tabs-container {
-    margin-top: 24px;
-  }
-  
-  .tab-buttons {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 12px;
-  }
-  
-  .tab-button {
-    padding: 8px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 500;
-  }
-  
-  .tab-button.active {
-    background: #0077cc;
-    color: white;
-  }
-  
-  .tab-content {
-    display: none;
-    padding: 16px;
-    border-radius: 6px;
-  }
-  
-  .tab-content.active {
-    display: block;
-  }
-  
-  /* Artist Info */
-  .artist-container {
-    padding: 12px;
-  }
-  
-  .artist-name {
-    font-size: 1.75rem;
-    margin-bottom: 8px;
-  }
-  
-  .artist-details p {
-    margin: 6px 0;
-    font-size: 0.95rem;
-  }
-  
-  /* Band Members */
-  .band-members {
-    margin-top: 16px;
-  }
-  
-  .member-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 12px;
-  }
-  
-  .member-photo {
-    width: 60px;
-    height: 60px;
-    object-fit: cover;
-    border-radius: 50%;
-    box-shadow: 0 0 3px rgba(0,0,0,0.1);
-  }
-  
-  .member-text span {
-    font-size: 0.95rem;
-  }
-  
-  /* Socials */
-  .socials {
-    margin-top: 16px;
-  }
-  
-  .social-link {
-    display: inline-block;
-    margin-top: 4px;
-    color: #0077cc;
-    text-decoration: none;
-    font-size: 0.95rem;
-  }
-  
-  .social-link:hover {
-    text-decoration: underline;
-  }
-  
-  /* Edit/Delete Buttons */
-  .edit-artist-btn,
-  .del-artist-btn {
-    margin-top: 16px;
-    margin-right: 8px;
-  }
-  
+/* Tabs */
+.tabs-container {
+  margin-top: 24px;
+}
+
+.tab-buttons {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.tab-button {
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.tab-button.active {
+  background: #0077cc;
+  color: white;
+}
+
+
+/* Artist Info */
+.artist-container {
+  padding: 12px;
+}
+
+.artist-name {
+  font-size: 1.75rem;
+  margin-bottom: 8px;
+}
+
+.artist-details p {
+  margin: 6px 0;
+  font-size: 0.95rem;
+}
+
+/* Band Members */
+.band-members {
+  margin-top: 16px;
+}
+
+.member-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.member-photo {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 50%;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
+}
+
+.member-text span {
+  font-size: 0.95rem;
+}
+
+/* Socials */
+.socials {
+  margin-top: 16px;
+}
+
+.social-link {
+  display: inline-block;
+  margin-top: 4px;
+  color: #0077cc;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.social-link:hover {
+  text-decoration: underline;
+}
+
+/* Edit/Delete Buttons */
+.edit-artist-btn,
+.del-artist-btn {
+  margin-top: 16px;
+  margin-right: 8px;
+}

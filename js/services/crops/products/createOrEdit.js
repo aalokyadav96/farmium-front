@@ -70,26 +70,6 @@ export function renderItemForm(container, mode, itemData, type, onDone) {
     });
   }
 
-  // const categoryGroup = createFormGroup({
-  //   label: "Category",
-  //   inputType: "select",
-  //   inputId: "category",
-  //   inputValue: itemData?.category || "",
-  //   isRequired: true,
-  //   options: [
-  //     { value: "", label: "Select category" },
-  //     { value: "Spices", label: "Spices" },
-  //     { value: "Pickles", label: "Pickles" },
-  //     { value: "Flour", label: "Flour" },
-  //     { value: "Oils", label: "Oils" },
-  //     { value: "Honey", label: "Honey" },
-  //     { value: "Tea & Coffee", label: "Tea & Coffee" },
-  //     { value: "Dry Fruits", label: "Dry Fruits" },
-  //     { value: "Natural Sweeteners", label: "Natural Sweeteners" }
-  //   ]
-  // });
-
-
   const priceGroup = createFormGroup({
     label: "Price (₹)",
     inputType: "number",
@@ -162,6 +142,23 @@ export function renderItemForm(container, mode, itemData, type, onDone) {
     multiple: true
   });
 
+  const previewContainer = createElement("div", {
+    style: "display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;",
+  });
+  imageGroup.appendChild(previewContainer);
+  
+  imageGroup.querySelector("input").addEventListener("change", (e) => {
+    previewContainer.innerHTML = "";
+    const files = Array.from(e.target.files);
+    files.forEach((file) => {
+      const img = createElement("img", {
+        src: URL.createObjectURL(file),
+        style: "max-width: 150px; max-height: 150px; object-fit: cover; border-radius: 6px;",
+      });
+      previewContainer.appendChild(img);
+    });
+  });
+
   const featuredGroup = createFormGroup({
     label: "Featured?",
     inputType: "checkbox",
@@ -206,7 +203,7 @@ export function renderItemForm(container, mode, itemData, type, onDone) {
   ]);
   form.appendChild(actions);
 
-  if (mode === "edit" && itemData?.id) {
+  if (mode === "edit" && itemData?.productid) {
     const deleteBtn = Button(
       `Delete ${type}`,
       `delete-${type}-btn`,
@@ -214,7 +211,7 @@ export function renderItemForm(container, mode, itemData, type, onDone) {
         click: async () => {
           if (!confirm(`Delete this ${type}?`)) return;
           try {
-            await apiFetch(`/farm/${type}/${itemData.id}`, "DELETE");
+            await apiFetch(`/farm/${type}/${itemData.productid}`, "DELETE");
             onDone();
           } catch (err) {
             alert("Delete failed");
@@ -245,20 +242,21 @@ export function renderItemForm(container, mode, itemData, type, onDone) {
     formData.append("featured", form.featured.checked);
 
     const fileInput = form.querySelector("#images");
-    for (const file of fileInput.files) {
-      formData.append("images", file);
-    }
+    Array.from(fileInput.files).forEach((file, index) => {
+      formData.append(`images_${index + 1}`, file);
+    });
+    
 
     const url =
       mode === "create"
         ? `/farm/${type}`
-        : `/farm/${type}/${itemData.id}`;
+        : `/farm/${type}/${itemData.productid}`;
     const method = mode === "create" ? "POST" : "PUT";
 
     try {
       const res = await apiFetch(url, method, formData);
 
-      if (!res.id) throw new Error("Request failed");
+      if (!res.productid) throw new Error("Request failed");
       onDone();
     } catch (err) {
       alert(`${mode === "create" ? "Create" : "Update"} failed`);

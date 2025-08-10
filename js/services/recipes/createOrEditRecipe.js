@@ -186,7 +186,7 @@ function renderRecipeForm(container, mode = "create", recipe = null) {
     const formData = new FormData(form);
 
     const endpoint = mode === "edit"
-      ? `/recipes/recipe/${recipe?._id || recipe?.id}`
+      ? `/recipes/recipe/${recipe?.recipeid || recipe?.id}`
       : "/recipes";
 
     const method = mode === "edit" ? "PUT" : "POST";

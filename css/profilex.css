@@ -1,0 +1,196 @@
+/* Container */
+.profilepage {
+  max-width: 1000px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+/* Horizontal & Vertical Flex Helpers */
+/* .hflex {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+} */
+
+.vflex {
+  /* display: flex; */
+  /* flex-direction: column; */
+  gap: 8px;
+}
+
+/* Main Profile Layout */
+.profile-container {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.05);
+  overflow: hidden;
+  flex-wrap: wrap;
+}
+
+.channel {
+  width: 100%;
+  margin: 0 auto;
+  max-width: var(--feed-maxw);
+}
+
+/* Banner */
+.channel > span {
+  width: 100%;
+  display: block;
+}
+
+.bg_img {
+  display: block;
+  width: 100%;
+  height: 200px;
+  background-size: cover;
+  background-position: center;
+  border-bottom: 1px solid #eee;
+}
+
+/* Banner Edit Button */
+.edit-banner-pic {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+}
+
+/* Profile Area */
+.profile_area {
+  position: relative;
+  margin-top: -60px; /* pull profile pic over banner */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.thumb {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #fff;
+}
+
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Edit Profile Pic Button */
+.edit-profile-pic {
+  position: absolute;
+  bottom: 0;
+  right: calc(50% - 60px);
+  transform: translate(50%, 50%);
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+}
+
+/* Details Section */
+.profile-details {
+  padding: 16px;
+}
+
+.profile-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.profile-actions .btn,
+.profile-actions .dropdown-item {
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
+
+.profile-actions .btn {
+  background: #0077cc;
+  color: #fff;
+}
+
+.profile-actions .dropdown-item {
+  background: #eee;
+  color: #333;
+}
+
+.username {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #555;
+}
+
+.bio {
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: #666;
+}
+
+.profile-info {
+  font-size: 14px;
+  color: #444;
+}
+
+.info-item {
+  margin-bottom: 4px;
+}
+
+/* Statistics */
+.statistics {
+  display: flex;
+  justify-content: space-around;
+  padding: 12px;
+  border-top: 1px solid #eee;
+  background: #fafafa;
+}
+
+.statistics p {
+  margin: 0;
+  font-size: 14px;
+  gap: 4px;
+}
+
+.statistics strong {
+  font-size: 16px;
+}
+
+/* Followers / Following Container */
+.followcon {
+  padding: 12px;
+  border-top: 1px solid #eee;
+}
+
+/* Load User Data Button */
+#load-user-data {
+  display: block;
+  margin: 16px auto;
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  background: #28a745;
+  color: #fff;
+  cursor: pointer;
+}
+
+.udata-info {
+  padding: 12px;
+  font-size: 14px;
+  color: #333;
+}

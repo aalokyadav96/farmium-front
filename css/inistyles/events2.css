@@ -62,7 +62,7 @@
     gap: 1rem;
   }
   
-  .event-card {
+  .events-main .event-card {
     width: 100%;
     max-width: 320px;
     border: 1px solid #ddd;
@@ -72,7 +72,7 @@
     transition: transform 0.2s ease;
   }
   
-  .event-card:hover {
+  .events-main .event-card:hover {
     transform: scale(1.01);
   }
   

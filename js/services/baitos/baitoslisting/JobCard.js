@@ -9,14 +9,15 @@ import { resolveImagePath, EntityType, PictureType } from "../../../utils/imageP
 export function buildCard(job) {
   const bannerFilename = job.banner || "placeholder.jpg";
   const imgSrc = resolveImagePath(EntityType.BAITO, PictureType.THUMB, bannerFilename);
+  console.log("-----",imgSrc);
 
   const wageText = job.wage ? `💴 ¥${Number(job.wage).toLocaleString()}/hr` : "💴 Not specified";
   const tags = Array.isArray(job.tags) ? job.tags : [];
   const typeInfo = job.type ? `🕒 ${job.type}` : "";
   const shift = job.shift ? `• ${job.shift}` : "";
 
-  const saveBtn = Button("⭐ Save", `save-${job._id}`, {
-    click: () => saveJob(job._id)
+  const saveBtn = Button("⭐ Save", `save-${job.baitoid}`, {
+    click: () => saveJob(job.baitoid)
   }, "buttonx btn-bookmark");
 
   const badgeTags = tags.length
@@ -50,8 +51,8 @@ export function buildCard(job) {
     ]),
     ...(badgeTags ? [badgeTags] : []),
     createElement("div", { class: "baito-actions" }, [
-      Button("🔎 View Details", `view-${job._id}`, {
-        click: () => navigate(`/baito/${job._id}`)
+      Button("🔎 View Details", `view-${job.baitoid}`, {
+        click: () => navigate(`/baito/${job.baitoid}`)
       }, "buttonx btn-secondary"),
       saveBtn
     ])

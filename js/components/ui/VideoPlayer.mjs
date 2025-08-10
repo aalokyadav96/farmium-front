@@ -15,7 +15,9 @@ const VideoPlayer = (
 
   const container = document.createElement("div");
   container.className = `video-container theme-${theme}`;
-
+  container.setAttribute("role", "region");
+  container.setAttribute("aria-label", "Video Player Container");
+  
   const controlsContainer = document.createElement("div");
   controlsContainer.className = "hflex-sb vcon";
 
@@ -38,11 +40,16 @@ const VideoPlayer = (
 
   if (availableResolutions) {
     const { selector, qualities } = createQualitySelector(video, baseSrc, availableResolutions);
+    if (selector) controlsContainer.appendChild(selector);
     availableQualities = qualities;
-    controlsContainer.appendChild(selector);
   }
+  if (!availableResolutions || availableResolutions.length === 0) {
+    availableQualities = ["original"];
+  }
+  
+  // if (!controls) togglePlayOnClick(video);
 
-  const theaterButton = Button("Theater Mode", "theater", {
+  const theaterButton = Button("Wide Screen", "theater", {
     click: () =>
       Vidpop(src, "video", videoId, {
         poster,

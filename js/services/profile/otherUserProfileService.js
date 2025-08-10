@@ -4,6 +4,7 @@ import profilGen from "./renderUserProfile.js";
 import {attachProfileEventListeners} from "./userProfileService.js";
 // import {displayFollowSuggestions} from "./displayFollowSugg.js";
 import {displayUserProfileData} from "./displayProfileData.js";
+import Notify from "../../components/ui/Notify.mjs";
 
 async function displayUserProfile(isLoggedIn, content, username) {
     // const content = document.getElementById("content");

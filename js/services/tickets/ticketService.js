@@ -3,6 +3,7 @@ import { clearTicketForm, deleteTicket, editTicket } from "./editTicket.js";
 import SnackBar from "../../components/ui/Snackbar.mjs";
 import { displayNewTicket, displayTickets } from "./displayTickets.js";
 import Modal from "../../components/ui/Modal.mjs";
+import Notify from "../../components/ui/Notify.mjs";
 
 // Add ticket to the event
 async function addTicket(eventId, ticketList) {

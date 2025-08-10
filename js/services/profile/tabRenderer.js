@@ -1,6 +1,7 @@
 import { fetchUserProfileData } from "./fetchProfile.js";
 import { renderEntityData } from "./entityRenderer.js";
 import Snackbar from "../../components/ui/Snackbar.mjs";
+import Notify from "../../components/ui/Notify.mjs";
 
 /** Fetch and render data only when the tab is first opened. */
 async function renderTabContent(container, username, entityType) {

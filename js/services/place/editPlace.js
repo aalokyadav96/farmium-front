@@ -1,8 +1,9 @@
 
 import { apiFetch } from "../../api/api.js";
-import SnackBar from '../../components/ui/Snackbar.mjs';
+import { createElement } from "../../components/createElement.js";
 import { navigate } from "../../routes/index.js";
 import displayPlace from "./displayPlace.js";
+import Notify from "../../components/ui/Notify.mjs";
 
 
 const categoryMap = {
@@ -43,6 +44,24 @@ export function createFormGroup({ label, inputType, inputId, inputValue = '', pl
         inputElement = document.createElement('input');
         inputElement.type = inputType;
         inputElement.value = inputValue;
+
+        const previewContainer = createElement("div", {
+            style: "display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;",
+        });
+        group.appendChild(previewContainer);
+
+        inputElement.addEventListener("change", (e) => {
+            previewContainer.innerHTML = "";
+            const files = Array.from(e.target.files);
+            files.forEach((file) => {
+                const img = createElement("img", {
+                    src: URL.createObjectURL(file),
+                    style: "max-width: 150px; max-height: 150px; object-fit: cover; border-radius: 6px;",
+                });
+                previewContainer.appendChild(img);
+            });
+        });
+
     }
 
     inputElement.id = inputId;
@@ -144,13 +163,13 @@ async function editPlaceForm(isLoggedIn, placeId, content) {
         });
 
     } catch (error) {
-        SnackBar(`Error loading place: ${error.message}`, 3000);
+        Notify(`Error loading place: ${error.message}`, {type: "warning", duration: 3000, dismissible: true});
     }
 }
 
 async function updatePlace(isLoggedIn, placeId) {
     if (!isLoggedIn) {
-        SnackBar("Please log in to update place.", 3000);
+        Notify("Please log in to update place.", {type: "warning", duration: 3000, dismissible: true});
         return;
     }
 
@@ -163,7 +182,7 @@ async function updatePlace(isLoggedIn, placeId) {
     const bannerFile = bannerInput?.files[0] || null;
 
     if (!name || !capacity || !category || !address || !description) {
-        SnackBar("Please fill in all required fields.", 3000);
+        Notify("Please fill in all required fields.", {type: "warning", duration: 3000, dismissible: true});
         return;
     }
 
@@ -177,29 +196,26 @@ async function updatePlace(isLoggedIn, placeId) {
 
     try {
         const result = await apiFetch(`/places/place/${placeId}`, 'PUT', formData);
-        SnackBar(`Place updated successfully: ${result.name}`, 3000);
+        Notify(`Place updated successfully: ${result.name}`, {type: "warning", duration: 3000, dismissible: true});
         displayPlace(isLoggedIn, placeId);
     } catch (error) {
-        SnackBar(`Error updating place: ${error.message}`, 3000);
+        Notify(`Error updating place: ${error.message}`, {type: "warning", duration: 3000, dismissible: true});
     }
 }
 
 
 async function deletePlace(isLoggedIn, placeId) {
     if (!isLoggedIn) {
-
-        SnackBar("Please log in to delete your place.", 3000);
+        Notify("Please log in to delete your place.", {type: "warning", duration: 3000, dismissible: true});
         return;
     }
     if (confirm("Are you sure you want to delete this place?")) {
         try {
             await apiFetch(`/places/place/${placeId}`, 'DELETE');
-
-            SnackBar("Place deleted successfully.", 3000);
+            Notify("Place deleted successfully.", {type: "warning", duration: 3000, dismissible: true});
             navigate('/places'); // Redirect to home or another page
         } catch (error) {
-
-            SnackBar(`Error deleting place: ${error.message || 'Unknown error'}`, 3000);
+            Notify(`Error deleting place: ${error.message || 'Unknown error'}`, {type: "warning", duration: 3000, dismissible: true});
         }
     }
 }

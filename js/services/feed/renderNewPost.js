@@ -15,3 +15,4 @@ export function renderNewPost(post, i, container) {
 // }
 
 // export { renderNewPost, renderPost };
+export { renderPost };

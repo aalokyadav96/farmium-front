@@ -7,6 +7,7 @@ import SnackBar from "../../components/ui/Snackbar.mjs";
 import Modal from "../../components/ui/Modal.mjs";
 import { handlePurchase } from "../payment/pay.js";
 import { EntityType, PictureType, resolveImagePath } from "../../utils/imagePaths.js";
+import Notify from "../../components/ui/Notify.mjs";
 
 // // Add Menu to the event
 // async function addMenu(placeId, menuList) {

@@ -3,23 +3,6 @@ import { createElement } from "../../../components/createElement";
 import Button from "../../../components/base/Button";
 import { navigate } from "../../../routes";
 
-// export function cropAside(cropData) {
-//     return createElement("div","",[
-//     createElement("h3", {}, ["🌟 Featured Crops"]),
-//     createElement("div", { class: "featured-list" }),
-//     createElement("h3", {}, ["💸 Deals"]),
-//     createElement("div", { class: "promo-box" }, [
-//       createPromoLink("🧃 Buy 2 kg Tomatoes, get 10% off!", "Tomato", cropData),
-//       createPromoLink("🥭 Fresh Mangoes now ₹40/kg!", "Mango", cropData)
-//     ]),
-//     createElement("h3", {}, ["📅 Seasonal Picks"]),
-//     createElement("div", { class: "promo-box" }, [
-//       createElement("p", {}, ["🍉 Watermelons are ripe this week"]),
-//       createElement("p", {}, ["🌽 Baby corn harvest starting soon"])
-//     ])
-// ]);
-// }
-
 export function cropAside(cropData) {
     return createElement("div", "", [
         createElement("h3", {}, ["CTA Buttons"]),

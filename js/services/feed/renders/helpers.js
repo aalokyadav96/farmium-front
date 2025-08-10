@@ -8,11 +8,43 @@ import { createCommentsSection } from "../../comments/comments.js";
 import { createElement } from "../../../components/createElement.js";
 import { resolveImagePath, EntityType, PictureType } from "../../../utils/imagePaths.js";
 // import {  } from "../../../constants/enums.js";
+import Notify from "../../../components/ui/Notify.mjs";
 
 /**
  * Create the post header (user avatar, username, timestamp)
  */
 
+
+// export function createPostHeader(post) {
+//     const userPicUrl = resolveImagePath(EntityType.USER, PictureType.THUMB, `${post.userid}.jpg`);
+//     const fallbackPic = resolveImagePath(EntityType.USER, PictureType.THUMB, "default.png");
+
+//     const img = createElement("img", {
+//         loading: "lazy",
+//         src: userPicUrl,
+//         alt: "Profile Picture",
+//         class: "profile-thumb",
+//         onerror: `this.onerror=null;this.src='${fallbackPic}'`
+//     });
+
+//     const userIconLink = createElement("a", {
+//         href: `/user/${post.username}`,
+//         class: "user-icon"
+//     }, [img]);
+
+//     const usernameDiv = createElement("div", { class: "username" }, [post.username]);
+//     const timestampDiv = createElement("div", { class: "timestamp" }, [post.timestamp]);
+
+//     const userTimeDiv = createElement("div", { class: "user-time" }, [
+//         usernameDiv,
+//         timestampDiv
+//     ]);
+
+//     return createElement("div", { class: "post-header hflex" }, [
+//         userIconLink,
+//         userTimeDiv
+//     ]);
+// }
 
 export function createPostHeader(post) {
     const userPicUrl = resolveImagePath(EntityType.USER, PictureType.THUMB, `${post.userid}.jpg`);
@@ -31,8 +63,25 @@ export function createPostHeader(post) {
         class: "user-icon"
     }, [img]);
 
+    // Format timestamp
+    let formattedTime = "";
+    if (post.timestamp) {
+        try {
+            const date = new Date(post.timestamp);
+            formattedTime = date.toLocaleString(undefined, {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+            });
+        } catch {
+            formattedTime = post.timestamp; // fallback if parsing fails
+        }
+    }
+
     const usernameDiv = createElement("div", { class: "username" }, [post.username]);
-    const timestampDiv = createElement("div", { class: "timestamp" }, [post.timestamp]);
+    const timestampDiv = createElement("div", { class: "timestamp" }, [formattedTime]);
 
     const userTimeDiv = createElement("div", { class: "user-time" }, [
         usernameDiv,
@@ -44,7 +93,6 @@ export function createPostHeader(post) {
         userTimeDiv
     ]);
 }
-
 
 // export function createPostHeader(post) {
 //     const userPicUrl = `${SRC_URL}/userpic/thumb/${post.userid}.jpg`;

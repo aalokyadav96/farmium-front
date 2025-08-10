@@ -2,7 +2,6 @@
     max-width: 1000px;
     margin: auto;
     border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.05);
   }
   
   .tabs-container {
@@ -33,12 +32,10 @@
     display: none;
   }
   
-  .tab-content.active {
-    display: block;
-  }
   
   .baitospage {
     display: flex;
+    flex-wrap: wrap;
     gap: 16px;
   }
   
@@ -109,6 +106,7 @@
   
   .baito-card {
     display: flex;
+    flex-wrap: wrap;
     gap: 12px;
     border-radius: 8px;
     box-shadow: 0 0 5px rgba(0,0,0,0.05);
@@ -217,7 +215,7 @@
   
   #worker-list.grid-view {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 16px;
   }
   
@@ -226,6 +224,7 @@
     box-shadow: 0 0 5px rgba(0,0,0,0.05);
     padding: 12px;
     display: flex;
+    flex-wrap: wrap;
     gap: 12px;
   }
   

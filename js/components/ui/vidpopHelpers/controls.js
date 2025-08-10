@@ -24,7 +24,14 @@ export function createControls(video, mediaSrc, qualities, videoid, videoPlayer)
   const speedDropdown = createSpeedDropdown(video);
   // const filterSelector = createFilterSelector(video);
 
-  const muteButton = Button("🔇", "mute", { click: () => video.muted = !video.muted });
+  const muteButton = Button(video.muted ? "🔇" : "🔊", "mute", {
+    click: () => {
+      video.muted = !video.muted;
+      muteButton.textContent = video.muted ? "🔇" : "🔊";
+      muteButton.setAttribute("title", video.muted ? "Muted" : "Unmuted");
+    }
+  });
+  
   const fullscreenButton = Button("⛶", "fullscreen", { click: () => toggleFullScreen(videoPlayer) });
   const pipButton = Button("PiP", "pip", { click: () => togglePictureInPicture(video) });
   const dragBox = Button("P", "drag", { click: () => setupVideoUtilityFunctions(video, videoid) });

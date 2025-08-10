@@ -1,7 +1,11 @@
 import { API_URL, state } from "../../state/state.js";
 import { apiFetch } from "../../api/api.js";
 import { navigate } from "../../routes/index.js";
-import SnackBar from '../../components/ui/Snackbar.mjs';
+import { createElement } from "../../components/createElement.js";
+import Notify from "../../components/ui/Notify.mjs";
+
+
+
 // Function to create form fields
 function createFormField(field) {
     const formGroup = document.createElement("div");
@@ -34,6 +38,25 @@ function createFormField(field) {
     } else {
         inputElement = document.createElement("input");
         inputElement.type = field.type;
+
+        const previewContainer = createElement("div", {
+            style: "display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;",
+        });
+        formGroup.appendChild(previewContainer);
+
+        if (inputElement.type == "file") {
+            inputElement.addEventListener("change", (e) => {
+                previewContainer.innerHTML = "";
+                const files = Array.from(e.target.files);
+                files.forEach((file) => {
+                    const img = createElement("img", {
+                        src: URL.createObjectURL(file),
+                        style: "max-width: 150px; max-height: 150px; object-fit: cover; border-radius: 6px;",
+                    });
+                    previewContainer.appendChild(img);
+                });
+            });
+        }
     }
 
     inputElement.id = field.id;
@@ -156,13 +179,13 @@ async function createEvent(isLoggedIn) {
         const place = document.getElementById("event-place");
         const placeID = place.dataset.id || "";
         const placeName = place.value;
-        
+
         // Get selected artists
         // const artistSelect = document.getElementById("artist-select");
         // const selectedArtists = Array.from(artistSelect.selectedOptions).map(option => option.value);
 
         if (!title || !date || !time || !place || !location || !description || !category) {
-            SnackBar("Please fill in all required fields.", 3000);
+            Notify("Please fill in all required fields.", { type: "warning", duration: 3000, dismissible: true });
             return;
         }
 
@@ -193,10 +216,10 @@ async function createEvent(isLoggedIn) {
 
         try {
             const result = await apiFetch('/events/event', 'POST', formData);
-            SnackBar(`Event created successfully: ${result.title}`, 3000);
+            Notify(`Event created successfully: ${result.title}`, { type: "warning", duration: 3000, dismissible: true });
             navigate('/event/' + result.eventid);
         } catch (error) {
-            SnackBar(`Error creating event: ${error.message}`, 3000);
+            Notify(`Error creating event: ${error.message}`, { type: "warning", duration: 3000, dismissible: true });
         }
     } else {
         navigate('/login');

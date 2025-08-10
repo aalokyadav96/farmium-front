@@ -8,6 +8,7 @@ import { generateFormField } from "./generators.js";
 import { deleteProfile } from "./userProfileService.js";
 import { createElement } from "../../components/createElement.js";
 import Button from '../../components/base/Button.js';
+import Notify from "../../components/ui/Notify.mjs";
 
 async function editProfile(content) {
     content.replaceChildren(); // Clear content

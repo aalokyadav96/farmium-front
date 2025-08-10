@@ -3,6 +3,7 @@ import Snackbar from "../../components/ui/Snackbar.mjs";
 import { navigate } from "../../routes/index.js";
 // import { toggleFollow } from "./toggleFollow.js";
 import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
+import Notify from "../../components/ui/Notify.mjs";
 
 async function displayFollowSuggestions(userid, suggestionsSection) {
     suggestionsSection.innerHTML = ""; // Clear previous content

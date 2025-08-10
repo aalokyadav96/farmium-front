@@ -9,6 +9,7 @@ import {
 import { loadContent, navigate } from "../../routes/index.js";
 import Snackbar from "../../components/ui/Snackbar.mjs";
 import { fetchProfile } from "../profile/fetchProfile.js";
+import Notify from "../../components/ui/Notify.mjs";
 
 function decodeJWT(token) {
   try {

@@ -15,6 +15,7 @@ export const EntityType = {
   CROP: "crop",
   PLACE: "place",
   RECIPE: "recipe",
+  PRODUCT: "product",
   MEDIA: "media",
   MERCH: "merch",
   MENU: "menu",

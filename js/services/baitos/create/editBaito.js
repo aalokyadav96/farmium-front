@@ -4,6 +4,7 @@ import { navigate } from "../../../routes/index.js";
 import { apiFetch } from "../../../api/api.js";
 import { createFormGroup } from "../../../components/createFormGroup.js";
 import { SRC_URL } from "../../../api/api.js";
+import Notify from "../../../components/ui/Notify.mjs";
 
 export function editBaito(baito) {
     const container = document.querySelector("#content");
@@ -175,9 +176,9 @@ export function editBaito(baito) {
 
         try {
             Snackbar("Updating baito...", 2000);
-            const result = await apiFetch(`/baitos/baito/${baito._id}`, "PUT", payload);
+            const result = await apiFetch(`/baitos/baito/${baito.baitoid}`, "PUT", payload);
             Snackbar("Baito updated successfully!", 3000);
-            navigate(`/baito/${baito._id}`);
+            navigate(`/baito/${baito.baitoid}`);
         } catch (err) {
             Snackbar(`Error: ${err.message || "Failed to update baito."}`, 3000);
         } finally {

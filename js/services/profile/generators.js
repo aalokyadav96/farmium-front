@@ -5,6 +5,7 @@ import { handleError } from "../../utils/utils.js";
 import Snackbar from '../../components/ui/Snackbar.mjs';
 import { createForm } from "../../components/createForm.js"; 
 import { showLoadingMessage, removeLoadingMessage, capitalize } from "./profileHelpers.js";
+import Notify from "../../components/ui/Notify.mjs";
 
 import { createElement } from "../../components/createElement.js";
 

@@ -2,7 +2,6 @@
   max-width: 900px;
   margin: auto;
   border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.05);
 }
 
 .post-detail {
@@ -115,7 +114,7 @@
 .btn-danger:hover {
   background: #c82333;
 }
-
+/* 
 .post-actions {
   display: flex;
   gap: 12px;
@@ -193,7 +192,7 @@
 
 .comment-form button:hover {
   background: #005fa3;
-}
+} */
 
 .post-comments {
   margin-top: 16px;

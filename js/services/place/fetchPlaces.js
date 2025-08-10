@@ -1,5 +1,5 @@
 import { apiFetch } from "../../api/api";
-import Snackbar from "../../components/ui/Snackbar.mjs";
+import Notify from "../../components/ui/Notify.mjs";
 
 /**
  * Fetch paginated places with optional filters.
@@ -25,7 +25,7 @@ async function fetchPlaces(page = 1, limit = 20, queryParams = {}) {
             return null;
         }
         console.error("Error fetching places:", error);
-        Snackbar(`Error fetching places: ${error.message || 'Unknown error'}`, 3000);
+        Notify(`Error fetching places: ${error.message || 'Unknown error'}`, {type: "warning", duration: 3000, dismissible: true});
         return null;
     }
 }

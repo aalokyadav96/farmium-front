@@ -10,7 +10,6 @@
   
   .posts-main {
     flex: 3;
-    min-width: 300px;
   }
   
   .posts-main h2 {

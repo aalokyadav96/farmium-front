@@ -8,6 +8,7 @@ import { handlePurchase } from '../payment/paymentService.js';
 // import { handlePurchase } from '../payment/pay.js';
 import SnackBar from "../../components/ui/Snackbar.mjs";
 import Modal from "../../components/ui/Modal.mjs";
+import Notify from "../../components/ui/Notify.mjs";
 
 import { EntityType, PictureType, resolveImagePath } from "../../utils/imagePaths.js";
 import { reportPost } from "../reporting/reporting.js";
@@ -43,20 +44,35 @@ async function addMerchandise(entityType, eventId, merchList) {
     if (merchImageFile) {
         formData.append('image', merchImageFile);
     }
-
     try {
         const response = await apiFetch(`/merch/${entityType}/${eventId}`, 'POST', formData);
-
-        if (response && response.data.merchid) {
-            SnackBar("Merchandise added successfully!");
-            displayNewMerchandise(response.data, merchList);  // Display the newly added merchandise
-            clearMerchForm();  // Optionally clear the form after success
-        } else {
-            alert(`Failed to add merchandise: ${response?.message || 'Unknown error'}`);
+        if (!response || !response.data || !response.data.merchid) {
+            throw new Error(response?.message || 'Invalid server response.');
         }
+    
+        SnackBar(response.message || "Merchandise added successfully.");
+        displayNewMerchandise(response.data, merchList);
+        clearMerchForm();
+    
     } catch (error) {
+        console.error(`Error adding merchandise: ${error.message}`);
         alert(`Error adding merchandise: ${error.message}`);
     }
+    
+
+    // try {
+    //     const response = await apiFetch(`/merch/${entityType}/${eventId}`, 'POST', formData);
+
+    //     if (response && response.data.merchid) {
+    //         SnackBar("Merchandise added successfully!");
+    //         displayNewMerchandise(response.data, merchList);  // Display the newly added merchandise
+    //         clearMerchForm();  // Optionally clear the form after success
+    //     } else {
+    //         alert(`Failed to add merchandise: ${response?.message || 'Unknown error'}`);
+    //     }
+    // } catch (error) {
+    //     alert(`Error adding merchandise: ${error.message}`);
+    // }
 }
 
 // Clear the merchandise form
@@ -170,7 +186,6 @@ async function editMerchForm(entityType, merchId, eventId) {
                 if (updateResponse.success) {
                     alert('Merchandise updated successfully!');
                     modal.remove();
-                    document.body.style.overflow="";
                 } else {
                     alert(`Failed to update merchandise: ${updateResponse.message}`);
                 }
@@ -241,7 +256,7 @@ function addMerchForm(entityType, eventId, merchList) {
         modal.remove();
     });
 
-    cancelButton.addEventListener("click", () => {modal.remove();document.body.style.overflow="";});
+    cancelButton.addEventListener("click", () => { modal.remove(); document.body.style.overflow = ""; });
 }
 
 function displayNewMerchandise(merchData, merchList) {
@@ -264,7 +279,7 @@ function displayNewMerchandise(merchData, merchList) {
     if (merchData.merch_pic) {
         const merchImage = document.createElement("img");
         // merchImage.src = `${SRC_URL}/merchpic/${merchData.merch_pic}`;
-        merchImage.src = resolveImagePath(EntityType.MERCH, PictureType.THUMB, data.merch_pic);
+        merchImage.src = resolveImagePath(EntityType.MERCH, PictureType.THUMB, merchData.merch_pic);
         merchImage.alt = merchData.name;
         merchImage.loading = "lazy";
         merchImage.style.maxWidth = "160px";
@@ -278,7 +293,7 @@ function displayNewMerchandise(merchData, merchList) {
 async function displayMerchandise(merchcon, merchData, entityType, eventId, isCreator, isLoggedIn) {
     merchcon.appendChild(createElement('h2', "", ["Merchandise"]));
     var merchList = document.createElement('div');
-    merchList.className = "merchcon hflex-wrap";
+    merchList.className = "merchcon hvflex";
 
     if (isCreator) {
         const button = Button("Add Merchandise", "add-merch", {

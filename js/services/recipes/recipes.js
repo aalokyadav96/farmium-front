@@ -329,8 +329,8 @@ async function renderRecipeGrid(container, isLoggedIn, reset = false) {
             createElement("span", { class: "tag" }, [tag])
           ) || []
         ),
-        Button("View Recipe", `view-${recipe.id}`, {
-          click: () => navigate(`/recipe/${recipe.id}`),
+        Button("View Recipe", `view-${recipe.recipeid}`, {
+          click: () => navigate(`/recipe/${recipe.recipeid}`),
         }),
       ]);
     

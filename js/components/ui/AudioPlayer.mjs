@@ -1,32 +1,33 @@
 import "../../../css/ui/AudioPlayer.css";
 
 function AudioPlayer(audioSrc) {
-  console.log(audioSrc);
   const player = document.createElement("div");
   player.id = "audio-player-container";
-
-  // **MAKE MINI-MODE THE DEFAULT**
   player.classList.add("mini-mode");
+  player.setAttribute("role", "region");
+  player.setAttribute("aria-label", "Audio Player");
 
-  // Poster image
+  // === POSTER IMAGE ===
   const img = document.createElement("img");
-  img.src = audioSrc.poster;
+  img.src = audioSrc.poster || "";
   img.alt = "Audio Thumbnail";
   img.className = "audio-poster";
 
-  // Audio element
+  // === AUDIO ELEMENT ===
   const audio = document.createElement("audio");
   audio.src = audioSrc.src;
   audio.controls = false;
   audio.preload = "metadata";
+  audio.playbackRate = 1;
 
   // === CONTROLS CONTAINER ===
   const controlsContainer = document.createElement("div");
   controlsContainer.className = "controls-container";
 
+  // Play / Pause
   const playButton = document.createElement("button");
   playButton.textContent = "Play";
-  playButton.onclick = function () {
+  playButton.onclick = () => {
     if (audio.paused) {
       audio.play();
       playButton.textContent = "Pause";
@@ -36,6 +37,15 @@ function AudioPlayer(audioSrc) {
     }
   };
 
+  // Mute / Unmute
+  const muteButton = document.createElement("button");
+  muteButton.textContent = "Mute";
+  muteButton.onclick = () => {
+    audio.muted = !audio.muted;
+    muteButton.textContent = audio.muted ? "Unmute" : "Mute";
+  };
+
+  // Seek bar
   const seekBar = document.createElement("input");
   seekBar.type = "range";
   seekBar.min = 0;
@@ -44,12 +54,19 @@ function AudioPlayer(audioSrc) {
   seekBar.className = "seek-bar";
 
   audio.addEventListener("timeupdate", () => {
-    seekBar.value = (audio.currentTime / audio.duration) * 100;
-  });
-  seekBar.addEventListener("input", () => {
-    audio.currentTime = (seekBar.value / 100) * audio.duration;
+    if (!isNaN(audio.duration)) {
+      seekBar.value = (audio.currentTime / audio.duration) * 100;
+    }
+    updateTimeDisplay();
   });
 
+  seekBar.addEventListener("input", () => {
+    if (!isNaN(audio.duration)) {
+      audio.currentTime = (seekBar.value / 100) * audio.duration;
+    }
+  });
+
+  // Volume
   const volumeSlider = document.createElement("input");
   volumeSlider.type = "range";
   volumeSlider.min = 0;
@@ -61,6 +78,7 @@ function AudioPlayer(audioSrc) {
     audio.volume = volumeSlider.value;
   });
 
+  // Speed
   const speedSelect = document.createElement("select");
   [0.5, 1, 1.5, 2].forEach((speed) => {
     const option = document.createElement("option");
@@ -68,25 +86,74 @@ function AudioPlayer(audioSrc) {
     option.textContent = `${speed}x`;
     speedSelect.appendChild(option);
   });
+  speedSelect.value = "1";
   speedSelect.className = "speed-select";
   speedSelect.addEventListener("change", () => {
-    audio.playbackRate = speedSelect.value;
+    audio.playbackRate = parseFloat(speedSelect.value);
+  });
+
+  // Time Display
+  const timeDisplay = document.createElement("span");
+  timeDisplay.className = "time-display";
+  timeDisplay.textContent = "00:00 / 00:00";
+
+  const updateTimeDisplay = () => {
+    const format = (s) => {
+      const m = Math.floor(s / 60);
+      const sec = Math.floor(s % 60);
+      return `${m.toString().padStart(2, "0")}:${sec
+        .toString()
+        .padStart(2, "0")}`;
+    };
+    if (!isNaN(audio.duration)) {
+      timeDisplay.textContent = `${format(audio.currentTime)} / ${format(
+        audio.duration
+      )}`;
+    }
+  };
+
+  // Buffering Indicator
+  const bufferingIndicator = document.createElement("span");
+  bufferingIndicator.className = "buffering-indicator";
+  bufferingIndicator.textContent = "Loading...";
+  bufferingIndicator.style.display = "none";
+
+  audio.addEventListener("waiting", () => {
+    bufferingIndicator.style.display = "inline-block";
+  });
+
+  audio.addEventListener("playing", () => {
+    bufferingIndicator.style.display = "none";
+  });
+
+  audio.addEventListener("seeking", () => {
+    bufferingIndicator.style.display = "inline-block";
+  });
+
+  audio.addEventListener("seeked", () => {
+    bufferingIndicator.style.display = "none";
   });
 
   controlsContainer.appendChild(playButton);
+  controlsContainer.appendChild(muteButton);
   controlsContainer.appendChild(seekBar);
+  controlsContainer.appendChild(timeDisplay);
+  controlsContainer.appendChild(bufferingIndicator);
   controlsContainer.appendChild(volumeSlider);
   controlsContainer.appendChild(speedSelect);
 
-  // === LYRICS CONTAINER ===
+  // === LYRICS ===
   const lyricsContainer = document.createElement("div");
   lyricsContainer.id = "lyrics-container";
-  audioSrc.lyricsData.forEach((lyric) => {
-    const p = document.createElement("p");
-    p.textContent = lyric.text;
-    p.dataset.time = lyric.time;
-    lyricsContainer.appendChild(p);
-  });
+
+  if (Array.isArray(audioSrc.lyricsData)) {
+    audioSrc.lyricsData.forEach((lyric) => {
+      const p = document.createElement("p");
+      p.textContent = lyric.text;
+      p.dataset.time = lyric.time;
+      lyricsContainer.appendChild(p);
+    });
+  }
 
   function updateLyrics() {
     const t = audio.currentTime;
@@ -98,6 +165,7 @@ function AudioPlayer(audioSrc) {
     const active = lyricsContainer.querySelector("p.active");
     if (active) active.scrollIntoView({ behavior: "smooth", block: "center" });
   }
+
   audio.addEventListener("timeupdate", updateLyrics);
 
   // === DARK MODE TOGGLE ===
@@ -111,30 +179,156 @@ function AudioPlayer(audioSrc) {
       : "🌙 Dark Mode";
   };
 
-  // // === MINI / FULL-PLAYER TOGGLE ===
-  // const miniToggle = document.createElement("button");
-  // // since we're *in* mini-mode by default, offer the "expand" action
-  // miniToggle.textContent = "🔼 Full View";
-  // miniToggle.className = "mini-toggle";
-  // miniToggle.onclick = () => {
-  //   const isMini = player.classList.toggle("mini-mode");
-  //   miniToggle.textContent = isMini ? "🔼 Full View" : "🔽 Mini Player";
-  // };
-
-  // const toggleControls = document.createElement("div");
-  // toggleControls.className = "toggle-controls";
-  // toggleControls.appendChild(themeToggle);
-  // toggleControls.appendChild(miniToggle);
-
   // === APPEND ALL ===
   player.appendChild(img);
   player.appendChild(audio);
   player.appendChild(controlsContainer);
   player.appendChild(lyricsContainer);
-  // player.appendChild(toggleControls);
+  player.appendChild(themeToggle);
 
   return player;
 }
 
 export default AudioPlayer;
 export { AudioPlayer };
+
+// import "../../../css/ui/AudioPlayer.css";
+
+// function AudioPlayer(audioSrc) {
+//   console.log(audioSrc);
+//   const player = document.createElement("div");
+//   player.id = "audio-player-container";
+
+//   // **MAKE MINI-MODE THE DEFAULT**
+//   player.classList.add("mini-mode");
+
+//   // Poster image
+//   const img = document.createElement("img");
+//   img.src = audioSrc.poster;
+//   img.alt = "Audio Thumbnail";
+//   img.className = "audio-poster";
+
+//   // Audio element
+//   const audio = document.createElement("audio");
+//   audio.src = audioSrc.src;
+//   audio.controls = false;
+//   audio.preload = "metadata";
+
+//   // === CONTROLS CONTAINER ===
+//   const controlsContainer = document.createElement("div");
+//   controlsContainer.className = "controls-container";
+
+//   const playButton = document.createElement("button");
+//   playButton.textContent = "Play";
+//   playButton.onclick = function () {
+//     if (audio.paused) {
+//       audio.play();
+//       playButton.textContent = "Pause";
+//     } else {
+//       audio.pause();
+//       playButton.textContent = "Play";
+//     }
+//   };
+
+//   const seekBar = document.createElement("input");
+//   seekBar.type = "range";
+//   seekBar.min = 0;
+//   seekBar.max = 100;
+//   seekBar.value = 0;
+//   seekBar.className = "seek-bar";
+
+//   audio.addEventListener("timeupdate", () => {
+//     seekBar.value = (audio.currentTime / audio.duration) * 100;
+//   });
+//   seekBar.addEventListener("input", () => {
+//     audio.currentTime = (seekBar.value / 100) * audio.duration;
+//   });
+
+//   const volumeSlider = document.createElement("input");
+//   volumeSlider.type = "range";
+//   volumeSlider.min = 0;
+//   volumeSlider.max = 1;
+//   volumeSlider.step = 0.1;
+//   volumeSlider.value = audio.volume;
+//   volumeSlider.className = "volume-slider";
+//   volumeSlider.addEventListener("input", () => {
+//     audio.volume = volumeSlider.value;
+//   });
+
+//   const speedSelect = document.createElement("select");
+//   [0.5, 1, 1.5, 2].forEach((speed) => {
+//     const option = document.createElement("option");
+//     option.value = speed;
+//     option.textContent = `${speed}x`;
+//     speedSelect.appendChild(option);
+//   });
+//   speedSelect.className = "speed-select";
+//   speedSelect.addEventListener("change", () => {
+//     audio.playbackRate = speedSelect.value;
+//   });
+
+//   controlsContainer.appendChild(playButton);
+//   controlsContainer.appendChild(seekBar);
+//   controlsContainer.appendChild(volumeSlider);
+//   controlsContainer.appendChild(speedSelect);
+
+//   // === LYRICS CONTAINER ===
+//   const lyricsContainer = document.createElement("div");
+//   lyricsContainer.id = "lyrics-container";
+//   audioSrc.lyricsData.forEach((lyric) => {
+//     const p = document.createElement("p");
+//     p.textContent = lyric.text;
+//     p.dataset.time = lyric.time;
+//     lyricsContainer.appendChild(p);
+//   });
+
+//   function updateLyrics() {
+//     const t = audio.currentTime;
+//     const lines = lyricsContainer.querySelectorAll("p");
+//     lines.forEach((el) => {
+//       const tm = parseFloat(el.dataset.time);
+//       el.classList.toggle("active", t >= tm);
+//     });
+//     const active = lyricsContainer.querySelector("p.active");
+//     if (active) active.scrollIntoView({ behavior: "smooth", block: "center" });
+//   }
+//   audio.addEventListener("timeupdate", updateLyrics);
+
+//   // === DARK MODE TOGGLE ===
+//   const themeToggle = document.createElement("button");
+//   themeToggle.textContent = "🌙 Dark Mode";
+//   themeToggle.className = "theme-toggle";
+//   themeToggle.onclick = () => {
+//     player.classList.toggle("dark-mode");
+//     themeToggle.textContent = player.classList.contains("dark-mode")
+//       ? "☀️ Light Mode"
+//       : "🌙 Dark Mode";
+//   };
+
+//   // // === MINI / FULL-PLAYER TOGGLE ===
+//   // const miniToggle = document.createElement("button");
+//   // // since we're *in* mini-mode by default, offer the "expand" action
+//   // miniToggle.textContent = "🔼 Full View";
+//   // miniToggle.className = "mini-toggle";
+//   // miniToggle.onclick = () => {
+//   //   const isMini = player.classList.toggle("mini-mode");
+//   //   miniToggle.textContent = isMini ? "🔼 Full View" : "🔽 Mini Player";
+//   // };
+
+//   // const toggleControls = document.createElement("div");
+//   // toggleControls.className = "toggle-controls";
+//   // toggleControls.appendChild(themeToggle);
+//   // toggleControls.appendChild(miniToggle);
+
+//   // === APPEND ALL ===
+//   player.appendChild(img);
+//   player.appendChild(audio);
+//   player.appendChild(controlsContainer);
+//   player.appendChild(lyricsContainer);
+//   // player.appendChild(toggleControls);
+
+//   return player;
+// }
+
+// export default AudioPlayer;
+// export { AudioPlayer };

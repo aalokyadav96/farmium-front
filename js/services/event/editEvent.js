@@ -1,14 +1,14 @@
 import { apiFetch } from "../../api/api.js";
 import { navigate } from "../../routes/index.js";
-import SnackBar from '../../components/ui/Snackbar.mjs';
 import { createFormGroup } from "../../components/createFormGroup.js";
 import Button from "../../components/base/Button.js";
 import { addAutoConListeners } from "./createEventHelpers.js";
+import Notify from "../../components/ui/Notify.mjs";
 
 
 async function updateEvent(isLoggedIn, eventId) {
   if (!isLoggedIn) {
-    SnackBar("Please log in to update the event.", 3000);
+    Notify("Please log in to update the event.", {type: "warning", duration: 3000, dismissible: true});
     return;
   }
 
@@ -28,7 +28,8 @@ async function updateEvent(isLoggedIn, eventId) {
 
   // Validate required fields
   if (!category || !title || !date || !time || !place || !location || !description) {
-    SnackBar("Please fill in all required fields.", 3000);
+    Notify("Please fill in all required fields.", {type: "warning", duration: 3000, dismissible: true});
+    return;
     return;
   }
 
@@ -67,11 +68,11 @@ async function updateEvent(isLoggedIn, eventId) {
 
   try {
     const result = await apiFetch(`/events/event/${eventId}`, "PUT", formData);
-    SnackBar(`Event updated successfully: ${result.title}`, 3000);
+    Notify(`Event updated successfully: ${result.title}`, {type: "warning", duration: 3000, dismissible: true});
     // navigate(`/event/${result.eventid}`);
   } catch (error) {
     console.error("Update Event Error:", error);
-    SnackBar(`Error updating event: ${error.message}`, 3000);
+    Notify(`Error updating event: ${error.message}`, {type: "warning", duration: 3000, dismissible: true});
   }
 }
 
@@ -278,7 +279,7 @@ async function editEventForm(isLoggedIn, eventId) {
 
   } catch (error) {
     console.error("Edit Event Form Error:", error);
-    SnackBar(`Error loading event: ${error.message}`, 3000);
+    Notify(`Error loading event: ${error.message}`, {type: "warning", duration: 3000, dismissible: true});
   }
 }
 

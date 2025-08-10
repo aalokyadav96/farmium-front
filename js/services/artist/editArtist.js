@@ -5,6 +5,7 @@ import Button from "../../components/base/Button.js";
 import { createFormGroup } from "../../components/createFormGroup.js";
 import { createElement } from "../../components/createElement";
 createElement
+import Notify from "../../components/ui/Notify.mjs";
 
 export async function deleteArtistForm(isLoggedIn, artistID, isCreator) {
     alert("noted");
