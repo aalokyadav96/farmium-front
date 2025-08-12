@@ -1,4 +1,3 @@
-/* Scoped styles for your improved #pageheader component */
 .main-header {
     display: flex;
     justify-content: space-between;
@@ -13,19 +12,16 @@
   .logo-link {
     font-size: 1.4rem;
     font-weight: 700;
-    /* color: #2c3e50; */
     color: var(--color-fg);
     text-decoration: none;
   }
   
-  /* Header content container */
   .header-content {
     display: flex;
     align-items: center;
     gap: 6px;
   }
   
-  /* Icon buttons like search and theme toggler */
   .iconic-button {
     display: flex;
     align-items: center;
@@ -43,7 +39,6 @@
     border-radius: 50%;
   }
   
-  /* Dropdown menus */
   .dropdown {
     position: relative;
   }
@@ -97,7 +92,6 @@
     stroke: var(--color-bg);
   }
   
-  /* Profile dropdown */
   .profile-pic {
     width: 40px;
     height: 40px;
@@ -112,7 +106,6 @@
     align-items: center;
   }
   
-  /* Login button */
   .login-btn {
     background-color: #3498db;
     color: #fff;
@@ -126,7 +119,6 @@
     background-color: #2980b9;
   }
   
-  /* Logout button */
   .logout {
     background: none;
     border: none;

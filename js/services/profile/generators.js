@@ -1,83 +1,157 @@
-import { getState, setState } from "../../state/state.js"; // You forgot this
-import { SRC_URL } from "../../state/state.js";
+import { getState, setState } from "../../state/state.js";
 import { apiFetch } from "../../api/api.js";
-import { handleError } from "../../utils/utils.js";
-import Snackbar from '../../components/ui/Snackbar.mjs';
-import { createForm } from "../../components/createForm.js"; 
+import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
+import Snackbar from "../../components/ui/Snackbar.mjs";
 import { showLoadingMessage, removeLoadingMessage, capitalize } from "./profileHelpers.js";
-import Notify from "../../components/ui/Notify.mjs";
-
 import { createElement } from "../../components/createElement.js";
+import { handleError } from "../../utils/utils.js";
+import Sightbox from "../../components/ui/SightBox.mjs";
+import { openCropper } from "../../utils/cropper.js";
 
-async function updatePicture(type) {
+
+// async function updatePictureWithCrop(type, aspect) {}
+async function updatePictureWithCrop(type) {
     if (!getState("token")) {
-        Snackbar(`Please log in to update your ${type} picture.`, 3000);
-        return;
+      Snackbar(`Please log in to update your ${type} picture.`, 3000);
+      return false;
     }
-
-    const fileInput = document.getElementById(`edit-${type}-picture`);
-    if (!fileInput || !fileInput.files[0]) {
-        Snackbar(`No ${type} picture selected.`, 3000);
-        return;
-    }
-
-    showLoadingMessage(`Updating ${type} picture...`);
-
-    try {
-        const formData = new FormData();
-        formData.append(`${type}_picture`, fileInput.files[0]);
-
-        const updatedProfile = await apiFetch(`/profile/${type}`, 'PUT', formData);
-        if (!updatedProfile) throw new Error(`No response received for ${type} picture update.`);
-
-        const currentProfile = getState("userProfile") || {};
-        setState({ userProfile: { ...currentProfile, ...updatedProfile } }, true);
-
-        Snackbar(`${capitalize(type)} picture updated successfully.`, 3000);
-        window.location.pathname = window.location.pathname;
-    } catch (error) {
-        console.error(`Error updating ${type} picture:`, error);
-        handleError(`Error updating ${type} picture. Please try again.`);
-    } finally {
-        removeLoadingMessage();
-    }
-}
-
-
-function generateBannerForm(content, pic) {
-    const bannerPictureSrc = `${SRC_URL}/userpic/banner/${pic}`;
-    const fields = [
-        {
-            label: "Banner Picture",
-            id: "edit-banner-picture",
-            currentSrc: bannerPictureSrc,
-            previewId: "banner-picture-preview",
-        },
-    ];
-    return createForm(content, fields, "edit-banner-form", "update-banner-pics-btn", "Update Banner Pics", () => {
-        const formData = new FormData(document.getElementById("edit-banner-form"));
-        updateProfilePics('banner', formData);
+  
+    const fileInput = createElement("input", { type: "file", accept: "image/*", style: "display:none;" });
+    document.body.appendChild(fileInput);
+    fileInput.click();
+  
+    return new Promise((resolve) => {
+      fileInput.addEventListener("change", async () => {
+        if (!fileInput.files?.[0]) {
+          document.body.removeChild(fileInput);
+          return resolve(false);
+        }
+  
+        const croppedBlob = await openCropper({
+          file: fileInput.files[0],
+          type
+        });
+  
+        document.body.removeChild(fileInput);
+  
+        if (!croppedBlob) return resolve(false);
+  
+        showLoadingMessage(`Updating ${type} picture...`);
+        try {
+          const formData = new FormData();
+          formData.append(`${type}_picture`, croppedBlob, `${type}.jpg`);
+  
+          // Preserve the original API endpoint
+          const response = await apiFetch(`/profile/${type}`, 'PUT', formData);
+  
+          if (!response) throw new Error(`No response for ${type} picture update.`);
+  
+          // Determine the correct key for the response image name
+          const imageKey = type === "avatar" ? "profile_picture" : `${type}_picture`;
+          const newImageName = response[imageKey];
+          if (!newImageName) throw new Error("No image name returned from server.");
+  
+          // Update local profile state with new image name
+          const currentProfile = getState("userProfile") || {};
+          setState({
+            userProfile: {
+              ...currentProfile,
+              [imageKey]: newImageName
+            }
+          }, true);
+  
+          Snackbar(`${capitalize(type)} picture updated successfully.`, 3000);
+  
+          // Update preview image src immediately
+          const preview = document.getElementById(`${type}-picture-preview`);
+          if (preview) {
+            const pictureType = (type === "banner") ? PictureType.BANNER : PictureType.THUMB;
+            preview.src = resolveImagePath(EntityType.USER, pictureType, newImageName) + `?t=${Date.now()}`;
+          }
+  
+          resolve(true);
+        } catch (err) {
+          console.error(`Error updating ${type} picture:`, err);
+          handleError(`Error updating ${type} picture. Please try again.`);
+          resolve(false);
+        } finally {
+          removeLoadingMessage();
+        }
+      }, { once: true });
     });
+  }
+  
+
+
+
+function createBanner(profile) {
+    const bgImg = createElement("span", { class: "bg_img" });
+    const banncon = createElement("span", { style: "position: relative;" });
+
+    const bannerFilename = profile.banner_picture || "default.webp";
+    const bannerPath = resolveImagePath(EntityType.USER, PictureType.BANNER, bannerFilename);
+    const sightPath = resolveImagePath(EntityType.USER, PictureType.BANNER, bannerFilename);
+
+    bgImg.style.backgroundImage = `url(${bannerPath})`;
+    bgImg.addEventListener("click", () => Sightbox(sightPath, "image"));
+
+    appendChildren(banncon, createBannerEditButton(profile), bgImg);
+    return banncon;
 }
 
-function generateAvatarForm(content, pic) {
-    const profilePictureSrc = `${SRC_URL}/userpic/${pic}`;
-    const fields = [
-        {
-            label: "Profile Picture",
-            id: "edit-avatar-picture",
-            currentSrc: profilePictureSrc,
-            previewId: "profile-picture-preview",
-        },
-    ];
-    return createForm(content, fields, "edit-avatar-form", "update-avatar-pics-btn", "Update Profile Pics", () => {
-        const formData = new FormData(document.getElementById("edit-avatar-form"));
-        updateProfilePics('avatar', formData);
+function createBannerEditButton(profile) {
+    if (profile.userid !== getState("user")) return document.createDocumentFragment();
+    const editButton = createElement("button", { class: "edit-banner-pic" }, ["B"]);
+    // editButton.addEventListener("click", () => updatePictureWithCrop("banner", "3/1"));
+    editButton.addEventListener("click", () => updatePictureWithCrop("banner"));
+    return editButton;
+}
+
+function createProfilePicture(profile) {
+    const profileArea = createElement("div", { class: "profile_area" });
+    const thumb = createElement("span", { class: "thumb" });
+
+    const thumbSrc = resolveImagePath(EntityType.USER, PictureType.THUMB, `${profile.userid}.jpg`);
+    const fullSrc = resolveImagePath(EntityType.USER, PictureType.PHOTO, profile.profile_picture);
+
+    const img = new Image();
+    img.src = thumbSrc;
+    img.alt = "Profile Picture";
+    img.loading = "lazy";
+    img.onerror = () => { img.src = "/assets/icon-192.png"; };
+    img.classList.add("imgful");
+
+    thumb.appendChild(img);
+
+    if (profile.profile_picture) {
+        thumb.addEventListener("click", () => Sightbox(fullSrc, "image"));
+    }
+
+    profileArea.appendChild(thumb);
+
+    if (profile.userid === getState("user")) {
+        const editProfileButton = createElement("button", { class: "edit-profile-pic" }, ["P"]);
+        // editProfileButton.addEventListener("click", () => updatePictureWithCrop("avatar", "1/1"));
+        editProfileButton.addEventListener("click", () => updatePictureWithCrop("avatar"));
+        profileArea.appendChild(editProfileButton);
+    }
+
+    return profileArea;
+}
+
+export {
+    createBanner,
+    createBannerEditButton,
+    createProfilePicture,
+    updatePictureWithCrop,
+};
+
+// Utility: append multiple children safely
+function appendChildren(parent, ...children) {
+    children.forEach(child => {
+        if (child instanceof Node) parent.appendChild(child);
+        else console.error("Invalid child passed to appendChildren:", child);
     });
-}
-
-async function updateProfilePics(type) {
-    await updatePicture(type);
 }
 
 function generateFormField(label, id, type, value = "") {
@@ -108,5 +182,5 @@ function generateFormField(label, id, type, value = "") {
     return wrapper;
 }
 
+export { generateFormField, appendChildren };
 
-export { generateBannerForm, generateAvatarForm, generateFormField };

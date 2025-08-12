@@ -1,8 +1,4 @@
-.adminpage {
-    padding: 1rem;
-    color: #222;
-  }
-  
+
   .adminpage h2 {
     margin-bottom: 1rem;
     font-size: 1.75rem;
@@ -13,7 +9,6 @@
   .admin-btn {
     padding: 0.4rem 0.8rem;
     font-size: 0.9rem;
-    background-color: #f0f0f0;
     border: 1px solid #ccc;
     cursor: pointer;
     transition: background-color 0.2s ease;
@@ -55,7 +50,6 @@
   .admin-summary {
     margin-bottom: 1rem;
     font-size: 0.95rem;
-    background: #f9f9f9;
     padding: 0.5rem 0.75rem;
     border-left: 4px solid #666;
   }
@@ -74,13 +68,11 @@
     margin-bottom: 1rem;
     border-radius: 4px;
     overflow: hidden;
-    background-color: #fff;
     box-shadow: 0 1px 2px rgba(0,0,0,0.05);
   }
   
   .report-header {
     padding: 0.5rem 1rem;
-    background-color: #eee;
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
@@ -114,7 +106,6 @@
   
   .report-expanded {
     padding: 1rem;
-    background-color: #fafafa;
     border-top: 1px solid #ccc;
   }
   
@@ -133,7 +124,6 @@
   
   .notified-pending {
     font-size: 0.8rem;
-    color: #888;
     margin-top: 0.3rem;
     display: inline-block;
   }
@@ -159,7 +149,6 @@
   }
   
   .entity-section {
-    background: #fff;
     border: 1px solid #ccc;
     padding: 1rem;
     font-family: monospace;
@@ -176,7 +165,6 @@
   }
   
   pre {
-    background: #f4f4f4;
     padding: 0.5rem;
     white-space: pre-wrap;
     word-wrap: break-word;

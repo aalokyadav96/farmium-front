@@ -13,33 +13,33 @@ export const staticRoutes = {
   "/profile": { moduleImport: () => import("../pages/profile/userProfile.js"), functionName: "MyProfile", protected: true },
   "/settings": { moduleImport: () => import("../pages/profile/settings.js"), functionName: "Settings", protected: true },
 
-  "/posts": { moduleImport: () => import("../pages/posts/posts.js"), functionName: "Posts" },
-  "/create-post": { moduleImport: () => import("../pages/posts/createNewPost.js"), functionName: "CreatePost", protected: true },
-  "/create-artist": { moduleImport: () => import("../pages/artist/createArtist.js"), functionName: "CreateArtist", protected: true },
-  "/create-event": { moduleImport: () => import("../pages/events/createEvent.js"), functionName: "CreateEvent", protected: true },
-  "/events": { moduleImport: () => import("../pages/events/events.js"), functionName: "Events" },
-  "/artists": { moduleImport: () => import("../pages/artist/artists.js"), functionName: "Artists" },
+  // "/posts": { moduleImport: () => import("../pages/posts/posts.js"), functionName: "Posts" },
+  // "/create-post": { moduleImport: () => import("../pages/posts/createNewPost.js"), functionName: "CreatePost", protected: true },
+  // "/create-artist": { moduleImport: () => import("../pages/artist/createArtist.js"), functionName: "CreateArtist", protected: true },
+  // "/create-event": { moduleImport: () => import("../pages/events/createEvent.js"), functionName: "CreateEvent", protected: true },
+  // "/events": { moduleImport: () => import("../pages/events/events.js"), functionName: "Events" },
+  // "/artists": { moduleImport: () => import("../pages/artist/artists.js"), functionName: "Artists" },
 
-  "/places": { moduleImport: () => import("../pages/places/places.js"), functionName: "Places" },
-  "/create-place": { moduleImport: () => import("../pages/places/createPlace.js"), functionName: "CreatePlace", protected: true },
+  // "/places": { moduleImport: () => import("../pages/places/places.js"), functionName: "Places" },
+  // "/create-place": { moduleImport: () => import("../pages/places/createPlace.js"), functionName: "CreatePlace", protected: true },
 
-  "/baitos": { moduleImport: () => import("../pages/baitos/baitos.js"), functionName: "Baitos" },
-  "/baitos/dash": { moduleImport: () => import("../pages/baitos/baitoDash.js"), functionName: "BaitoDash" },
-  "/baitos/hire": { moduleImport: () => import("../pages/baitos/hireWorkers.js"), functionName: "HireWorkers" },
-  "/baitos/create-profile": { moduleImport: () => import("../pages/baitos/createProfile.js"), functionName: "CreateBaitoProfile" },
-  "/create-baito": { moduleImport: () => import("../pages/baitos/createNewBaito.js"), functionName: "CreateBaito", protected: true },
+  // "/baitos": { moduleImport: () => import("../pages/baitos/baitos.js"), functionName: "Baitos" },
+  // "/baitos/dash": { moduleImport: () => import("../pages/baitos/baitoDash.js"), functionName: "BaitoDash" },
+  // "/baitos/hire": { moduleImport: () => import("../pages/baitos/hireWorkers.js"), functionName: "HireWorkers" },
+  // "/baitos/create-profile": { moduleImport: () => import("../pages/baitos/createProfile.js"), functionName: "CreateBaitoProfile" },
+  // "/create-baito": { moduleImport: () => import("../pages/baitos/createNewBaito.js"), functionName: "CreateBaito", protected: true },
 
   "/cart": { moduleImport: () => import("../pages/cart/cart.js"), functionName: "Cart", protected: true },
   "/my-orders": { moduleImport: () => import("../pages/cart/myorders.js"), functionName: "MyOrders", protected: true },
 
-  "/itinerary": { moduleImport: () => import("../pages/itinerary/itinerary.js"), functionName: "Itinerary" },
-  "/create-itinerary": { moduleImport: () => import("../pages/itinerary/createItinerary.js"), functionName: "CreateItinerary", protected: true },
-  "/edit-itinerary": { moduleImport: () => import("../pages/itinerary/editItinerary.js"), functionName: "EditItinerary", protected: true },
+  // "/itinerary": { moduleImport: () => import("../pages/itinerary/itinerary.js"), functionName: "Itinerary" },
+  // "/create-itinerary": { moduleImport: () => import("../pages/itinerary/createItinerary.js"), functionName: "CreateItinerary", protected: true },
+  // "/edit-itinerary": { moduleImport: () => import("../pages/itinerary/editItinerary.js"), functionName: "EditItinerary", protected: true },
 
-  "/booking": { moduleImport: () => import("../pages/booking/booking.js"), functionName: "Booking" },
+  // "/booking": { moduleImport: () => import("../pages/booking/booking.js"), functionName: "Booking" },
   "/search": { moduleImport: () => import("../pages/search/search.js"), functionName: "Search" },
-  "/feed": { moduleImport: () => import("../pages/feed/feed.js"), functionName: "Feed" },
-  "/social": { moduleImport: () => import("../pages/tumblr/tumblr.js"), functionName: "Tumblr" },
+  // "/feed": { moduleImport: () => import("../pages/feed/feed.js"), functionName: "Feed" },
+  // "/social": { moduleImport: () => import("../pages/tumblr/tumblr.js"), functionName: "Tumblr" },
   "/merechats": { moduleImport: () => import("../pages/merechats/merechats.js"), functionName: "Mechat", protected: true },
   "/livechat": { moduleImport: () => import("../pages/livechat/chats.js"), functionName: "LiveChats", protected: true },
   "/chats": { moduleImport: () => import("../pages/userchat/chats.js"), functionName: "Chats" },
@@ -52,25 +52,10 @@ export const staticRoutes = {
   "/grocery": { moduleImport: () => import("../pages/crop/crops.js"), functionName: "Crops" },
 
   "/recipes": { moduleImport: () => import("../pages/recipe/recipes.js"), functionName: "Recipes" },
-  "/shop": { moduleImport: () => import("../pages/shop/shop.js"), functionName: "Shop", protected: true },
+  // "/shop": { moduleImport: () => import("../pages/shop/shop.js"), functionName: "Shop", protected: true },
 };
 
 export const dynamicRoutes = [
-  {
-    pattern: /^\/event\/([\w-]+)\/tickets$/,
-    moduleImport: () => import("../pages/events/eventTicketsPage.js"),
-    functionName: "EventTickets",
-    protected: true,
-    argBuilder: safeArgBuilder
-  },
-  {
-    // pattern: /^\/products\/([\w-]+)\/([a-f\d]{24})$/,
-    pattern: /^\/products\/(product|tool)\/([\w-]+)$/,
-    moduleImport: () => import("../pages/product/product.js"),
-    functionName: "Product",
-    protected: false,
-    argBuilder: safeArgBuilder
-  },
   {
     pattern: /^\/user\/([\w-]+)$/,
     moduleImport: () => import("../pages/profile/userProfile.js"),
@@ -78,20 +63,69 @@ export const dynamicRoutes = [
     protected: false,
     argBuilder: safeArgBuilder
   },
-  {
-    pattern: /^\/event\/([\w-]+)$/,
-    moduleImport: () => import("../pages/events/eventPage.js"),
-    functionName: "Event",
-    protected: false,
-    argBuilder: safeArgBuilder
-  },
-  {
-    pattern: /^\/artist\/([\w-]+)$/,
-    moduleImport: () => import("../pages/artist/artistPage.js"),
-    functionName: "Artist",
-    protected: false,
-    argBuilder: safeArgBuilder
-  },
+  // {
+  //   pattern: /^\/event\/([\w-]+)\/tickets$/,
+  //   moduleImport: () => import("../pages/events/eventTicketsPage.js"),
+  //   functionName: "EventTickets",
+  //   protected: true,
+  //   argBuilder: safeArgBuilder
+  // },
+  // {
+  //   pattern: /^\/event\/([\w-]+)$/,
+  //   moduleImport: () => import("../pages/events/eventPage.js"),
+  //   functionName: "Event",
+  //   protected: false,
+  //   argBuilder: safeArgBuilder
+  // },
+  // {
+  //   pattern: /^\/artist\/([\w-]+)$/,
+  //   moduleImport: () => import("../pages/artist/artistPage.js"),
+  //   functionName: "Artist",
+  //   protected: false,
+  //   argBuilder: safeArgBuilder
+  // },
+  // {
+  //   pattern: /^\/place\/([\w-]+)$/,
+  //   moduleImport: () => import("../pages/places/placePage.js"),
+  //   functionName: "Place",
+  //   protected: false,
+  //   argBuilder: safeArgBuilder
+  // },
+  // {
+  //   pattern: /^\/post\/([\w-]+)$/,
+  //   moduleImport: () => import("../pages/posts/displayPost.js"),
+  //   functionName: "Post",
+  //   protected: false,
+  //   argBuilder: safeArgBuilder
+  // },
+  // {
+  //   pattern: /^\/feedpost\/([\w-]+)$/,
+  //   moduleImport: () => import("../pages/feed/postDisplay.js"),
+  //   functionName: "Post",
+  //   protected: false,
+  //   argBuilder: safeArgBuilder
+  // },
+  // {
+  //   pattern: /^\/itinerary\/([\w-]+)$/,
+  //   moduleImport: () => import("../pages/itinerary/itineraryDisplay.js"),
+  //   functionName: "Itinerary",
+  //   protected: false,
+  //   argBuilder: safeArgBuilder
+  // },
+  // {
+  //   pattern: /^\/hashtag\/([\w-]+)$/,
+  //   moduleImport: () => import("../pages/hashtag/hashtagPage.js"),
+  //   functionName: "Hashtag",
+  //   protected: false,
+  //   argBuilder: safeArgBuilder
+  // },
+  // {
+  //   pattern: /^\/baito\/([\w-]+)$/,
+  //   moduleImport: () => import("../pages/baitos/displayBaito.js"),
+  //   functionName: "Baito",
+  //   protected: false,
+  //   argBuilder: safeArgBuilder
+  // },
   {
     pattern: /^\/chat\/([\w-]+)$/,
     moduleImport: () => import("../pages/userchat/chat.js"),
@@ -114,44 +148,10 @@ export const dynamicRoutes = [
     argBuilder: safeArgBuilder
   },
   {
-    pattern: /^\/place\/([\w-]+)$/,
-    moduleImport: () => import("../pages/places/placePage.js"),
-    functionName: "Place",
-    protected: false,
-    argBuilder: safeArgBuilder
-  },
-  {
-    pattern: /^\/post\/([\w-]+)$/,
-    moduleImport: () => import("../pages/posts/displayPost.js"),
-    functionName: "Post",
-    protected: false,
-    argBuilder: safeArgBuilder
-  },
-  {
-    pattern: /^\/feedpost\/([\w-]+)$/,
-    moduleImport: () => import("../pages/feed/postDisplay.js"),
-    functionName: "Post",
-    protected: false,
-    argBuilder: safeArgBuilder
-  },
-  {
-    pattern: /^\/itinerary\/([\w-]+)$/,
-    moduleImport: () => import("../pages/itinerary/itineraryDisplay.js"),
-    functionName: "Itinerary",
-    protected: false,
-    argBuilder: safeArgBuilder
-  },
-  {
-    pattern: /^\/hashtag\/([\w-]+)$/,
-    moduleImport: () => import("../pages/hashtag/hashtagPage.js"),
-    functionName: "Hashtag",
-    protected: false,
-    argBuilder: safeArgBuilder
-  },
-  {
-    pattern: /^\/baito\/([\w-]+)$/,
-    moduleImport: () => import("../pages/baitos/displayBaito.js"),
-    functionName: "Baito",
+    // pattern: /^\/products\/([\w-]+)\/([a-f\d]{24})$/,
+    pattern: /^\/products\/(product|tool)\/([\w-]+)$/,
+    moduleImport: () => import("../pages/product/product.js"),
+    functionName: "Product",
     protected: false,
     argBuilder: safeArgBuilder
   },

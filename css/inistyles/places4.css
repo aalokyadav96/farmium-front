@@ -1,0 +1,146 @@
+.places-layout {
+    display: flex;
+    gap: var(--space-lg);
+    background: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-base);
+    padding: var(--space-md);
+    box-sizing: border-box;
+  }
+  
+  /* Main + Aside layout for desktop */
+  .places-main {
+    flex: 3;
+  }
+  
+  .places-aside {
+    flex: 1;
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    height: fit-content;
+  }
+  
+  .places-main h2,
+  .places-aside h3 {
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--space-md);
+  }
+  
+  /* Controls row */
+  .place-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+  }
+  
+  .place-controls input,
+  .place-controls select {
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-base);
+    background: var(--color-bg);
+    color: var(--color-fg);
+  }
+  
+  #btn-toggle-view {
+    margin-left: auto;
+  }
+  
+  
+  /* Places grid */
+  #places.hvflex {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: var(--space-md);
+  }
+  
+  /* Place card */
+  .place-card {
+    background: var(--color-bg);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .place-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  }
+  .place-card img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .place-info {
+    padding: var(--space-md);
+  }
+  .place-info h3 {
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--space-sm);
+  }
+  .place-info p {
+    margin: var(--space-xs) 0;
+    font-size: var(--font-size-sm);
+    color: var(--color-muted);
+  }
+  .place-info strong {
+    color: var(--color-fg);
+  }
+  
+  /* Badge */
+  .badge {
+    display: inline-block;
+    background: var(--color-accent);
+    color: var(--color-btn-fg);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+  }
+  
+  /* Actions sidebar buttons */
+  .places-aside button {
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-size-base);
+    border: none;
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--space-sm);
+    cursor: pointer;
+    background: var(--color-btn-bg);
+    color: var(--color-btn-fg);
+    transition: background 0.2s ease;
+  }
+  .places-aside button.secondary {
+    background: var(--color-fg);
+    color: var(--color-bg);
+  }
+  .places-aside button:hover {
+    background: var(--color-btn-hover-bg);
+  }
+  
+  /* Mobile responsive adjustments */
+  @media (max-width: 768px) {
+    .places-layout {
+      flex-direction: column;
+    }
+    .places-aside {
+      /* order: -1; */
+      width: 100%;
+    }
+    .place-controls {
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+    #btn-toggle-view {
+      margin-left: 0;
+    }
+    #places.hvflex {
+      grid-template-columns: 1fr;
+    }
+  }
+  

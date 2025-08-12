@@ -36,32 +36,8 @@
     min-width: 150px;
   }
   
-  /* Category Chips */
-  .category-chips {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
-  
-  .category-chip {
-    padding: 0.4rem 0.8rem;
-    border: none;
-    border-radius: 16px;
-    cursor: pointer;
-    font-size: 0.9rem;
-  }
-  
-  .category-chip:hover {
-    background: #ddd;
-  }
   
   /* Events Grid */
-  .hvflex {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-  
   .events-main .event-card {
     width: 100%;
     max-width: 320px;

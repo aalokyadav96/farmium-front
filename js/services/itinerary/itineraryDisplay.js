@@ -1,4 +1,6 @@
 import { apiFetch } from "../../api/api.js";
+import { createElement } from "../../components/createElement.js";
+import Modal from "../../components/ui/Modal.mjs";
 import { navigate } from "../../routes/index.js";
 import { state } from "../../state/state.js";
 import { editItinerary } from "./itineraryEdit.js";
@@ -105,7 +107,7 @@ function displayItinerary(isLoggedIn, divContainerNode) {
       { label: 'View', fn: () => viewItinerary(it.itineraryid) },
       { label: 'Fork', fn: () => forkItinerary(it.itineraryid) },
     ];
-    
+
     if (isCreator) {
       buttons.push(
         { label: 'Edit', fn: () => editItinerary(isLoggedIn, rightPane, it.itineraryid) },
@@ -114,7 +116,7 @@ function displayItinerary(isLoggedIn, divContainerNode) {
         ...(!it.published ? [{ label: 'Publish', fn: () => publishItinerary(it.itineraryid) }] : [])
       );
     }
-    
+
     buttons.forEach(({ label, fn }) => {
       const btn = document.createElement('button');
       btn.textContent = label;
@@ -122,21 +124,105 @@ function displayItinerary(isLoggedIn, divContainerNode) {
       btn.addEventListener('click', fn);
       li.appendChild(btn);
     });
-    
+
     return li;
   }
 
-  async function viewItinerary(id) {
-    rightPane.innerHTML = '<p>Loading details…</p>';
+  async function openViewModal(id) {
+    const modalLoading = Modal({
+      title: 'Loading Itinerary Details…',
+      content: 'Loading...',
+      onClose: () => { }, // no special cleanup needed here
+      size: 'large',
+      closeOnOverlayClick: true,
+    });
+
     try {
       const it = await apiFetch(`/itineraries/all/${id}`);
-      renderItineraryDetails(it);
+
+      const contentNode = renderItineraryDetailsContent(it);
+      // Replace modal content with actual details:
+      modalLoading.querySelector('.modal-body').replaceWith(contentNode);
+
+      // Update title:
+      const titleEl = modalLoading.querySelector('.modal-header h3');
+      titleEl.textContent = it.name;
     } catch {
-      rightPane.innerHTML = '<p>Error loading itinerary details.</p>';
+      const body = modalLoading.querySelector('.modal-body');
+      body.textContent = 'Error loading itinerary details.';
     }
   }
 
-  function renderItineraryDetails(it) { 
+  
+  function renderItineraryDetailsContent(it) {
+    const container = createElement('div',{class:"itinerarycon"},[]);
+
+    const meta = document.createElement('p');
+    meta.innerHTML = `
+      <strong>Status:</strong> ${it.status} &nbsp;|&nbsp;
+      <strong>Start:</strong> ${it.start_date} &nbsp;|&nbsp;
+      <strong>End:</strong> ${it.end_date}
+    `;
+    container.appendChild(meta);
+
+    const desc = document.createElement('p');
+    desc.innerHTML = `<strong>Description:</strong> ${it.description || 'N/A'}`;
+    container.appendChild(desc);
+
+    if (!Array.isArray(it.days) || it.days.length === 0) {
+      const noSchedule = document.createElement('p');
+      noSchedule.textContent = 'No schedule available.';
+      container.appendChild(noSchedule);
+      return container;
+    }
+
+    it.days.forEach((day, di) => {
+      const dayDiv = document.createElement('div');
+      dayDiv.className = 'itinerary-day';
+
+      const dayHeader = document.createElement('h3');
+      dayHeader.textContent = `Day ${di + 1}: ${day.date}`;
+      dayDiv.appendChild(dayHeader);
+
+      day.visits.forEach((visit, vi) => {
+        const visitDiv = document.createElement('div');
+        visitDiv.className = 'itinerary-visit';
+
+        if (vi > 0 && visit.transport) {
+          const transP = document.createElement('p');
+          transP.innerHTML = `<strong>Transport:</strong> ${visit.transport}`;
+          visitDiv.appendChild(transP);
+        }
+
+        const timeP = document.createElement('p');
+        timeP.innerHTML = `<strong>Time:</strong> ${visit.start_time} – ${visit.end_time}`;
+
+        const locP = document.createElement('p');
+        locP.innerHTML = `<strong>Location:</strong> ${visit.location}`;
+
+        visitDiv.append(timeP, locP);
+        dayDiv.appendChild(visitDiv);
+      });
+
+      container.appendChild(dayDiv);
+    });
+
+    return container;
+  }
+
+
+  async function viewItinerary(id) {
+    openViewModal(id);
+    // rightPane.innerHTML = '<p>Loading details…</p>';
+    // try {
+    //   const it = await apiFetch(`/itineraries/all/${id}`);
+    //   renderItineraryDetails(it);
+    // } catch {
+    //   rightPane.innerHTML = '<p>Error loading itinerary details.</p>';
+    // }
+  }
+
+  function renderItineraryDetails(it) {
     // Clear and build header
     rightPane.innerHTML = '';
     const h2 = document.createElement('h2');

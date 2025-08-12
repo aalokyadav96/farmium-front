@@ -1,3 +1,4 @@
+
 import { SRC_URL, apiFetch } from "../../../api/api.js";
 import { createElement } from "../../../components/createElement.js";
 import Button from "../../../components/base/Button.js";
@@ -45,13 +46,47 @@ export async function displayFarm(isLoggedIn, farmId, content) {
     })
   ]);
 
-
   // ——— Farm Info ———
   const farmDetails = renderFarmDetails(farm, isCreator);
+  const editFarm = createElement("div", {}, []); // Preserved editFarm div
+
+  // ——— Crop Section Setup ———
+  const cropsContainer = createElement("div", {
+    class: "crop-list grid-view"
+  });
+
+  const layoutToggle = createElement("div", { class: "layout-toggle" }, [
+    Button("🔲 Grid View", "grid-btn", {
+      click: () => {
+        cropsContainer.classList.remove("list-view");
+        cropsContainer.classList.add("grid-view");
+      }
+    }, "buttonx"),
+    Button("📃 List View", "list-btn", {
+      click: () => {
+        cropsContainer.classList.remove("grid-view");
+        cropsContainer.classList.add("list-view");
+      }
+    }, "buttonx")
+  ]);
+
+  const cropHeader = createElement("h3", {}, ["🌾 Available Crops"]);
+
+  const addCropButton = isCreator
+    ? createElement("button", { class: "add-crop-btn" }, ["➕ Add Crop"])
+    : null;
+
+  if (addCropButton) {
+    addCropButton.addEventListener("click", () => {
+      container.textContent = "";
+      import("../crop/createCrop.js").then(m => m.createCrop(farmId, container));
+    });
+  }
+
+  // ——— Aside Column ———
   const summaryStats = renderCropSummary(farm.crops || []);
   const cropDistribution = renderCropEmojiMap(farm.crops || []);
 
-  // ——— Reviews + CTA (some restricted) ———
   const reviewPlaceholder = createElement("div", { class: "review-block" }, [
     createElement("p", {}, ["⭐️⭐️⭐️⭐️☆ (4.2 avg based on 17 reviews)"]),
     Button("💬 Check reviews", "review-btn", {
@@ -87,57 +122,35 @@ export async function displayFarm(isLoggedIn, farmId, content) {
     reviewPlaceholder
   ]);
 
-  // ——— Crop Section ———
-  const cropsContainer = createElement("div", {
-    class: "crop-list grid-view"
-  });
-
-  const cropHeader = createElement("h3", {}, ["🌾 Available Crops"]);
-  const layoutToggle = createElement("div", { class: "layout-toggle" }, [
-    Button("🔲 Grid View", "grid-btn", {
-      click: () => {
-        cropsContainer.classList.remove("list-view");
-        cropsContainer.classList.add("grid-view");
-      }
-    }, "buttonx"),
-    Button("📃 List View", "list-btn", {
-      click: () => {
-        cropsContainer.classList.remove("grid-view");
-        cropsContainer.classList.add("list-view");
-      }
-    }, "buttonx")
-  ]);
-
-  const addCropButton = isCreator ? createElement("button", { class: "add-crop-btn" }, ["➕ Add Crop"]) : null;
-  if (addCropButton) {
-    addCropButton.addEventListener("click", () => {
-      container.textContent = "";
-      import("../crop/createCrop.js").then(m => m.createCrop(farmId, container));
-    });
-  }
-
-  const editFarm = createElement("div",{},[]);
-
-  const mainColumnChildren = [farmDetails, editFarm, cropHeader, layoutToggle, cropsContainer];
-  if (addCropButton) mainColumnChildren.push(addCropButton);
+  // ——— Main Column ———
+  const mainColumnChildren = [
+    banner,
+    farmDetails,
+    editFarm,
+    ...(addCropButton ? [addCropButton] : []),
+    cropHeader,
+    layoutToggle,
+    cropsContainer
+  ];
 
   const mainColumn = createElement("div", { class: "farm-main" }, mainColumnChildren);
   const layoutWrapper = createElement("div", { class: "farm-layout" }, [mainColumn, asideColumn]);
 
-  // ——— Optional Image Gallery ———
+  // ——— Gallery ———
   const imgarray = (farm.crops || []).map(crop => ({
-    // src: `${SRC_URL}${crop.imageUrl}`,
     src: resolveImagePath(EntityType.CROP, PictureType.THUMB, crop.imageUrl),
     alt: crop.name || "Crop Image"
   }));
+
   const gallery = createElement("div", { class: "gallery-block" }, [
     Gallery(imgarray)
   ]);
 
   const chatcon = createElement("div", { class: "onechatcon" }, []);
 
-  container.append(header, banner, layoutWrapper, gallery, chatcon);
+  // ——— Final Assembly ———
+  container.append(header, layoutWrapper, gallery, chatcon);
 
-  // ——— Render Crops (even if not logged in) ———
+  // ——— Render Crops ———
   await renderCrops(farm, cropsContainer, farmId, container, isLoggedIn, null, isCreator);
 }

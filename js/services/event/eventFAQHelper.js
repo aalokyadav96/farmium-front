@@ -3,6 +3,8 @@ import  Modal  from "../../components/ui/Modal.mjs";
 import { createElement } from "../../components/createElement.js";
 import { apiFetch } from "../../api/api.js"; // Assuming you have these utility functions
 import { Accordion } from "../../components/ui/Accordion.mjs";
+import { createFormGroup } from "../place/editPlace.js";
+
 
 async function displayEventFAQs(isCreator, faqContainer, eventId, faques) {
     faqContainer.innerHTML = ''; // Clear existing content
@@ -90,76 +92,76 @@ function renderFaqItem(title, content, container) {
 //         }
 //     });
 // }
-
 function showFaqForm(faqContainer, eventId) {
     // Prevent multiple modals
-    const existingForm = document.getElementById('faq-form');
-    if (existingForm) return;
-
-    const form = createElement('form', { id: 'faq-form', classes: ['faq-form'] });
-    const questionInput = createElement('input', {
-        type: 'text',
-        placeholder: 'Enter FAQ title',
-        required: true,
-        classes: ['faq-input'],
+    if (document.getElementById("faq-form")) return;
+  
+    const form = createElement("form", { id: "faq-form", classes: ["faq-form"] });
+  
+    const questionGroup = createFormGroup({
+      label: "FAQ Title",
+      inputType: "text",
+      inputId: "faq-title",
+      placeholder: "Enter FAQ title",
+      isRequired: true,
+      additionalProps: { className: "faq-input" }
     });
-    const answerInput = createElement('textarea', {
-        placeholder: 'Enter FAQ content',
-        required: true,
-        classes: ['faq-textarea'],
+  
+    const answerGroup = createFormGroup({
+      label: "FAQ Content",
+      inputType: "textarea",
+      inputId: "faq-content",
+      placeholder: "Enter FAQ content",
+      isRequired: true,
+      additionalProps: { className: "faq-textarea" }
     });
-
-    const submitButton = createElement('input', {
-        type: 'submit',
-        value: 'Add New FAQ',
-        classes: ['submit-faq-btn'],
+  
+    form.append(questionGroup, answerGroup);
+  
+    const submitButton = createElement("input", {
+      type: "submit",
+      value: "Add New FAQ",
+      className: "submit-faq-btn buttonx"
     });
-
-    form.appendChild(questionInput);
-    form.appendChild(answerInput);
+  
     form.appendChild(submitButton);
-
-    // Form submission handler
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        submitButton.disabled = true;
-
-        const title = questionInput.value.trim();
-        const content = answerInput.value.trim();
-
-        if (title && content) {
-            try {
-                const response = await apiFetch(`/events/event/${eventId}/faqs`, 'POST', {
-                    title,
-                    content,
-                });
-
-                if (response.success) {
-                    renderFaqItem(title, content, faqContainer);
-                    modal.remove(); // close modal after success
-                } else {
-                    alert('Failed to add FAQ. Please try again.');
-                }
-            } catch (error) {
-                console.error("Failed to add FAQ:", error);
-                alert('An error occurred while adding the FAQ.');
-            } finally {
-                submitButton.disabled = false;
-            }
+  
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      submitButton.disabled = true;
+  
+      const title = form.querySelector("#faq-title").value.trim();
+      const content = form.querySelector("#faq-content").value.trim();
+  
+      if (!title || !content) {
+        alert("Please fill out both fields.");
+        submitButton.disabled = false;
+        return;
+      }
+  
+      try {
+        const response = await apiFetch(`/events/event/${eventId}/faqs`, "POST", { title, content });
+  
+        if (response.success) {
+          renderFaqItem(title, content, faqContainer);
+          modal.remove();
         } else {
-            alert('Please fill out both fields.');
-            submitButton.disabled = false;
+          alert("Failed to add FAQ. Please try again.");
         }
+      } catch (error) {
+        console.error("Failed to add FAQ:", error);
+        alert("An error occurred while adding the FAQ.");
+      } finally {
+        submitButton.disabled = false;
+      }
     });
-
+  
     const modal = Modal({
-        title: "Add New FAQ",
-        content: form,
-        onClose: () => {
-            modal.remove(); // Manually remove modal from DOM
-        }
+      title: "Add New FAQ",
+      content: form,
+      onClose: () => modal.remove()
     });
-}
-
+  }
+  
 
 export { displayEventFAQs };

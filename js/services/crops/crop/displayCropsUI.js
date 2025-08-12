@@ -1,3 +1,4 @@
+// displayCropsUI.js
 import { createElement } from "../../../components/createElement";
 import { navigate } from "../../../routes";
 import { SRC_URL } from "../../../api/api";
@@ -5,12 +6,11 @@ import { cropAside } from "./cropAside.js";
 import { resolveImagePath, PictureType, EntityType } from "../../../utils/imagePaths.js";
 
 // --- Utility Functions ---
-
 function debounce(fn, delay = 300) {
   let timeout;
-  return (...args) => {
+  return function (...args) {
     clearTimeout(timeout);
-    timeout = setTimeout(() => fn(...args), delay);
+    timeout = setTimeout(() => fn.apply(this, args), delay);
   };
 }
 
@@ -28,8 +28,8 @@ function filterAndSortCrops(crops, { term, tags, sortBy }) {
 }
 
 function isSeasonal(crop) {
-  const now = new Date().getMonth() + 1;
-  return crop.seasonMonths.includes(now);
+  const nowMonth = new Date().getMonth() + 1;
+  return (crop.seasonMonths || []).includes(nowMonth);
 }
 
 function renderCropCard(crop, mode) {
@@ -38,39 +38,46 @@ function renderCropCard(crop, mode) {
 
   const formattedName = crop.name.toLowerCase().replace(/\s+/g, "_");
   const img = createElement("img", {
-    // src: `${SRC_URL}/uploads/generic/${crop.category}/${formattedName}.png`,
     src: resolveImagePath(EntityType.CROP, PictureType.THUMB, crop.imageUrl),
     alt: crop.name,
     loading: "lazy"
   });
 
-  const content = createElement("div", { class: "crop-content" }, [
-    createElement("h4", {}, [crop.name]),
-    createElement("p", { class: "crop-info" }, [
-      `₹${crop.minPrice} - ₹${crop.maxPrice} per ${crop.unit} • ${crop.availableCount} listings`
-    ]),
-    createElement("p", {
-      class: `season-indicator ${isSeasonal(crop) ? "in-season" : "off-season"}`
-    }, [isSeasonal(crop) ? "🟢 In Season" : "🔴 Off Season"]),
-    createElement("div", { class: "tag-wrap" }, crop.tags.map(tag =>
-      createElement("span", { class: "tag-pill" }, [tag])
-    ))
+  const info = createElement("p", { class: "crop-info" }, [
+    `₹${crop.minPrice} - ₹${crop.maxPrice} per ${crop.unit} • ${crop.availableCount} listings`
   ]);
 
+  const seasonStatus = isSeasonal(crop)
+    ? ["🟢 In Season", "in-season"]
+    : ["🔴 Off Season", "off-season"];
+
+  const season = createElement("p", {
+    class: `season-indicator ${seasonStatus[1]}`
+  }, [seasonStatus[0]]);
+
+  const tags = createElement("div", { class: "tag-wrap" },
+    crop.tags.map(tag =>
+      createElement("span", { class: "tag-pill" }, [tag])
+    )
+  );
+
+  const title = createElement("h4", {}, [crop.name]);
   const btn = createElement("button", {}, ["View Farms"]);
   btn.onclick = () => navigate(`/crop/${formattedName}`);
 
   if (isList) {
+    const content = createElement("div", { class: "crop-content" }, [
+      title, info, season, tags
+    ]);
     card.append(img, content, btn);
   } else {
-    card.append(img, ...content.children, btn);
+    card.append(img, title, info, season, tags, btn);
   }
 
   return card;
 }
 
 // --- Main Renderer ---
-
 export function renderCropInterface(container, cropData) {
   container.replaceChildren();
 
@@ -92,15 +99,12 @@ export function renderCropInterface(container, cropData) {
     createElement("option", { value: "za" }, ["Z → A"])
   ]);
 
-  const gridBtn = createElement("button", {}, ["🔲 Grid"]);
+  const gridBtn = createElement("button", { class: "active" }, ["🔲 Grid"]);
   const listBtn = createElement("button", {}, ["📃 List"]);
-  gridBtn.classList.add("active");
 
   const viewToggle = createElement("div", { class: "view-toggle" }, [gridBtn, listBtn]);
   const controls = createElement("div", { class: "top-controls" }, [
-    searchBox,
-    sortSelect,
-    viewToggle
+    searchBox, sortSelect, viewToggle
   ]);
   main.append(controls);
 
@@ -126,7 +130,6 @@ export function renderCropInterface(container, cropData) {
     tabButtons
   };
 
-  // Setup tabs and containers
   categories.forEach((cat, i) => {
     const btn = createElement("button", {}, [
       `${cat.charAt(0).toUpperCase() + cat.slice(1)} (${cropData[cat].length})`
@@ -149,9 +152,7 @@ export function renderCropInterface(container, cropData) {
     tabsWrapper.appendChild(pane);
   });
 
-  // Attach listeners
   gridBtn.onclick = () => {
-    viewMode = "grid";
     state.viewMode = "grid";
     gridBtn.classList.add("active");
     listBtn.classList.remove("active");
@@ -159,7 +160,6 @@ export function renderCropInterface(container, cropData) {
   };
 
   listBtn.onclick = () => {
-    viewMode = "list";
     state.viewMode = "list";
     listBtn.classList.add("active");
     gridBtn.classList.remove("active");
@@ -169,21 +169,16 @@ export function renderCropInterface(container, cropData) {
   sortSelect.onchange = () => updateAllTabs(state);
   searchBox.addEventListener("input", debounce(() => updateAllTabs(state)));
 
-  // Initial render
   updateAllTabs(state);
 
-  // Aside panel
   aside.append(cropAside(cropData));
 }
 
 // --- Internal Update Functions ---
-
 function updateTab(category, state) {
   const { cropData, tabs, viewMode, searchBox, sortSelect, activeTags } = state;
-
   const container = tabs[category];
-  container.innerHTML = "";
-  container.className = `tab-content ${viewMode}`;
+  container.replaceChildren();
 
   const filtered = filterAndSortCrops(cropData[category], {
     term: searchBox.value.trim().toLowerCase(),
@@ -203,7 +198,7 @@ function updateAllTabs(state) {
   });
 
   Array.from(tabButtons.children).forEach(btn => {
-    const matches = btn.textContent.toLowerCase().startsWith(currentTab);
-    btn.classList.toggle("active", matches);
+    const btnCategory = btn.textContent.split(" (")[0].toLowerCase();
+    btn.classList.toggle("active", btnCategory === currentTab.toLowerCase());
   });
 }

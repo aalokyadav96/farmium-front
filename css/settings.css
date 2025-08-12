@@ -8,7 +8,6 @@
     gap: 20px;
   }
   
-  /* Individual Setting Block */
   .setting-form {
     padding: 16px;
     border-radius: 8px;
@@ -25,7 +24,6 @@
     flex: 1;
   }
   
-  /* Select Dropdowns */
   .setting-form select,
   .setting-form input[type="time"] {
     padding: 8px;
@@ -36,7 +34,6 @@
     min-width: 160px;
   }
   
-  /* Toggle Switch */
   .toggle-switch {
     position: relative;
     display: inline-block;
@@ -70,8 +67,6 @@
     transition: 0.4s;
     border-radius: 50%;
   }
-  
-  /* Checked State */
   .toggle-switch input:checked + .slider {
     background-color: #0077cc;
   }

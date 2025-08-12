@@ -12,6 +12,7 @@ import Notify from "../../components/ui/Notify.mjs";
 
 import { EntityType, PictureType, resolveImagePath } from "../../utils/imagePaths.js";
 import { reportPost } from "../reporting/reporting.js";
+import { createFormGroup } from "../place/editPlace.js";
 
 // Add merchandise to the event
 async function addMerchandise(entityType, eventId, merchList) {
@@ -49,16 +50,16 @@ async function addMerchandise(entityType, eventId, merchList) {
         if (!response || !response.data || !response.data.merchid) {
             throw new Error(response?.message || 'Invalid server response.');
         }
-    
+
         SnackBar(response.message || "Merchandise added successfully.");
         displayNewMerchandise(response.data, merchList);
         clearMerchForm();
-    
+
     } catch (error) {
         console.error(`Error adding merchandise: ${error.message}`);
         alert(`Error adding merchandise: ${error.message}`);
     }
-    
+
 
     // try {
     //     const response = await apiFetch(`/merch/${entityType}/${eventId}`, 'POST', formData);
@@ -201,63 +202,86 @@ async function editMerchForm(entityType, merchId, eventId) {
 }
 
 function addMerchForm(entityType, eventId, merchList) {
-    const form = document.createElement("form");
-    form.id = "add-merch-form";
-
-    const merchNameInput = document.createElement("input");
-    merchNameInput.type = "text";
-    merchNameInput.id = "merch-name";
-    merchNameInput.placeholder = "Merchandise Name";
-    merchNameInput.required = true;
-
-    const merchPriceInput = document.createElement("input");
-    merchPriceInput.type = "number";
-    merchPriceInput.id = "merch-price";
-    merchPriceInput.placeholder = "Price";
-    merchPriceInput.required = true;
-
-    const merchStockInput = document.createElement("input");
-    merchStockInput.type = "number";
-    merchStockInput.id = "merch-stock";
-    merchStockInput.placeholder = "Stock Available";
-    merchStockInput.required = true;
-
-    const merchImageInput = document.createElement("input");
-    merchImageInput.type = "file";
-    merchImageInput.id = "merch-image";
-    merchImageInput.accept = "image/*";
-
-    const addButton = document.createElement("button");
-    addButton.type = "submit";
-    addButton.textContent = "Add Merchandise";
-
-    const cancelButton = document.createElement("button");
-    cancelButton.type = "button";
-    cancelButton.textContent = "Cancel";
-
-    form.append(
-        merchNameInput,
-        merchPriceInput,
-        merchStockInput,
-        merchImageInput,
-        addButton,
-        cancelButton
-    );
-
+    const form = createElement("form", { id: "add-merch-form", class: "create-section" });
+  
+    const fields = [
+      { label: "Merchandise Name", inputType: "text", inputId: "merch-name", placeholder: "Merchandise Name", isRequired: true },
+      { label: "Price", inputType: "number", inputId: "merch-price", placeholder: "Price", isRequired: true },
+      { label: "Stock Available", inputType: "number", inputId: "merch-stock", placeholder: "Stock Available", isRequired: true },
+      { label: "Merch Image", inputType: "file", inputId: "merch-image", additionalProps: { accept: "image/*" } }
+    ];
+  
+    fields.forEach(field => form.appendChild(createFormGroup(field)));
+  
+    const addButton = createElement("button", { type: "submit", class: "buttonx" }, ["Add Merchandise"]);
+    // const cancelButton = createElement("button", { type: "button" }, ["Cancel"]);
+    const cancelButton = Button("Cancel","",{
+        click : () => {
+            modal.remove();
+            document.body.style.overflow = "";
+        }
+    },"buttonx");
+  
+    form.append(addButton, cancelButton);
+  
     const modal = Modal({
-        title: "Add Merchandise",
-        content: form,
-        onClose: () => modal.remove()
+      title: "Add Merchandise",
+      content: form,
+      onClose: () => modal.remove()
     });
-
-    form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        await addMerchandise(entityType, eventId, merchList);
-        modal.remove();
+  
+    form.addEventListener("submit", async e => {
+      e.preventDefault();
+      await addMerchandise(entityType, eventId, merchList);
+      modal.remove();
     });
+  
+  }
+  
+// function addMerchForm(entityType, eventId, merchList) {
+//     const form = document.createElement("form");
+//     form.id = "add-merch-form";
+//     form.className = "create-section";
 
-    cancelButton.addEventListener("click", () => { modal.remove(); document.body.style.overflow = ""; });
-}
+//     const merchNameInput = createElement("div", { class: "form-group" }, [createElement("input", { type: "text", id: "merch-name", placeholder: "Merchandise Name", required: true }, [])]);
+
+//     const merchPriceInput = createElement("div", { class: "form-group" }, [createElement("input", { type: "number", id: "merch-price", placeholder: "Price", required: true }, [])]);
+
+//     const merchStockInput = createElement("div", { class: "form-group" }, [createElement("input", { type: "number", id: "merch-stock", placeholder: "Stock Available", required: true }, [])]);
+
+//     const merchImageInput = createElement("div", { class: "form-group" }, [createElement("input", { type: "file", id: "merch-image", accept: "image/*" }, [])]);
+
+//     const addButton = document.createElement("button");
+//     addButton.type = "submit";
+//     addButton.textContent = "Add Merchandise";
+
+//     const cancelButton = document.createElement("button");
+//     cancelButton.type = "button";
+//     cancelButton.textContent = "Cancel";
+
+//     form.append(
+//         merchNameInput,
+//         merchPriceInput,
+//         merchStockInput,
+//         merchImageInput,
+//         addButton,
+//         cancelButton
+//     );
+
+//     const modal = Modal({
+//         title: "Add Merchandise",
+//         content: form,
+//         onClose: () => modal.remove()
+//     });
+
+//     form.addEventListener("submit", async (e) => {
+//         e.preventDefault();
+//         await addMerchandise(entityType, eventId, merchList);
+//         modal.remove();
+//     });
+
+//     cancelButton.addEventListener("click", () => { modal.remove(); document.body.style.overflow = ""; });
+// }
 
 function displayNewMerchandise(merchData, merchList) {
     // const merchList = document.getElementById("merch-list");

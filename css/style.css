@@ -1,15 +1,13 @@
 @import url(theme.css);
 @import url(base.css);
 @import url(header5.css);
-/* @import url(navx11.css); */
 @import url(navwave.css);
 @import url(authpage.css);
-@import url(profilex.css);
+@import url(profilexx.css);
 @import url(chat1.css);
 @import url(form1.css);
 @import url(adminpage.css);
 @import url(home9.css);
-/* @import url(home6.css); */
 @import url(onechat1.css);
 @import url(merechat1.css);
 @import url(farmstyles.css);
@@ -19,25 +17,23 @@
 @import url(settings.css);
 @import url(udata.css);
 
-/**/
-
-/* @import url(inistyles/feed4.css); */
 @import url(inistyles/tumblr1.css);
 @import url(inistyles/feedimages.css); 
 @import url(inistyles/placepage1.css);
-@import url(inistyles/artistpage1.css);
+@import url(inistyles/artistpage2.css);
 @import url(inistyles/artists.css);
-@import url(inistyles/places3.css);
-@import url(inistyles/eventpage2.css);
-@import url(inistyles/itinerary.css);
+@import url(inistyles/places4.css);
+@import url(inistyles/eventpage3.css);
+@import url(inistyles/itinerary1.css);
 @import url(inistyles/events2.css);
 @import url(inistyles/posts3.css);
 @import url(inistyles/postpage1.css);
-@import url(inistyles/baitos2.css);
-@import url(inistyles/baitopage.css);
+@import url(inistyles/baitos5.css);
+@import url(inistyles/workers.css);
+@import url(inistyles/baitopage1.css);
 @import url(inistyles/baitodash.css);
 @import url(inistyles/shop2.css);
-/**/
+
 @import url(subpages/nearby.css);
 @import url(subpages/media.css);
 @import url(subpages/reviews.css);

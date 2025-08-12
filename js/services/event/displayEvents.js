@@ -18,10 +18,10 @@ async function renderEventsPage(layout) {
   aside.appendChild(
     createElement("div", { class: "sidebar-cta" }, [
       createElement("h3", {}, ["Actions"]),
-      Button("Create Event", "crt-evnt", { click: () => navigate("/create-event") }),
+      Button("Create Event", "crt-evnt", { click: () => navigate("/create-event") }, "buttonx"),
       createElement("a", { href: "/my-events", class: "cta-btn" }, ["My Events"]),
       createElement("a", { href: "/event-calendar", class: "cta-btn" }, ["Event Calendar"]),
-      Button("Browse Artists", "artsts-brws", { click: () => navigate("/artists") })
+      Button("Browse Artists", "artsts-brws", { click: () => navigate("/artists") }, "buttonx")
     ])
   );
 
@@ -45,7 +45,7 @@ async function renderEventsPage(layout) {
   const chipContainer = createElement("div", { class: "category-chips" }, []);
   main.appendChild(chipContainer);
 
-  const content = createElement("div", { id: "events", class: "hvflex" });
+  const content = createElement("div", { id: "events", class: "event-list hvflex" });
   main.appendChild(content);
 
   try {
@@ -126,12 +126,12 @@ function createEventCard(ev) {
   const savedEvents = getSavedEvents();
   let isSaved = savedEvents.includes(ev.eventid);
 
-  const bannerFilename = ev.banner_image || "placeholder.png";
-  const bannerUrl = resolveImagePath(EntityType.EVENT, PictureType.THUMB, bannerFilename);
+  // const bannerFilename = ev.banner || "placeholder.png";
+  const bannerUrl = resolveImagePath(EntityType.EVENT, PictureType.THUMB, ev.banner);
 
   const saveToggle = createElement("span", {
     title: "Save Event",
-    style: `cursor:pointer;font-size:18px;color:${isSaved ? "gold" : "gray"};margin-left:auto;`,
+    style: `cursor:pointer;font-size:18px;color:${isSaved ? "gold" : "white"};margin-left:auto;`,
     onclick: (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -165,9 +165,9 @@ function createEventCard(ev) {
     style: "width:100%;aspect-ratio:16/9;object-fit:cover;"
   });
 
-  bannerImg.onerror = () => {
-    bannerImg.src = resolveImagePath(EntityType.DEFAULT, PictureType.THUMB, "placeholder.png");
-  };
+  // bannerImg.onerror = () => {
+  //   bannerImg.src = resolveImagePath(EntityType.DEFAULT, PictureType.THUMB, "placeholder.png");
+  // };
 
   const eventLink = createElement("a", {
     href: `/event/${ev.eventid}`,

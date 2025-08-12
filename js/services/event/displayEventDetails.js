@@ -5,6 +5,8 @@ import { editEventForm } from "./editEvent.js";
 import { deleteEvent, viewEventAnalytics } from "./eventService.js";
 import { reportPost } from "../reporting/reporting.js";
 import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
+import { updateImageWithCrop } from "../../utils/bannerEditor.js"; // adjust path
+
 
 // --- Config ---
 const fieldConfig = [
@@ -155,10 +157,10 @@ async function displayEventDetails(content, eventData, isCreator, isLoggedIn) {
     content.replaceChildren();
 
     const eventWrapper = createElement("div", { class: `event-wrapper ${getEventColorClass(eventData.category)}` });
-    const eventCard = createElement("div", { class: "event-card hvflex" });
+    const eventCard = createElement("div", { class: "eventx-card hvflex" });
 
     eventCard.append(
-        createBannerSection(eventData),
+        createBannerSection(eventData, isCreator),
         createInfoSection(eventData, isCreator, isLoggedIn)
     );
 
@@ -166,13 +168,13 @@ async function displayEventDetails(content, eventData, isCreator, isLoggedIn) {
     content.appendChild(eventWrapper);
 }
 
-
-function createBannerSection(eventData) {
+function createBannerSection(eventData, isCreator) {
     const bannerSection = createElement("div", { class: "banner-section" });
 
-    const bannerSrc = resolveImagePath(EntityType.EVENT, PictureType.BANNER, `${eventData.banner_image}`);
+    const bannerSrc = resolveImagePath(EntityType.EVENT, PictureType.BANNER, eventData.banner);
 
     const bannerImage = createElement("img", {
+        id: "event-banner-img",              // unique ID for event banner image preview
         src: bannerSrc,
         alt: `Banner for ${eventData.title || "Event"}`,
         class: "event-banner-image"
@@ -183,8 +185,61 @@ function createBannerSection(eventData) {
     };
 
     bannerSection.appendChild(bannerImage);
+
+    if (isCreator) {
+    // Edit button
+    const bannerEditButton = createElement("button", { class: "edit-banner-pic" }, ["Edit Banner"]);
+    bannerEditButton.addEventListener("click", () => {
+        updateImageWithCrop({
+            entityType: EntityType.EVENT,
+            imageType: "banner",
+            stateKey: "banner",
+            stateEntityKey: "event",
+            previewElementId: "event-banner-img",   // Correct preview image ID for event
+            pictureType: PictureType.BANNER,
+            entityId: eventData.eventid   // pass event ID as entityId
+        });
+    });
+
+    bannerSection.appendChild(bannerEditButton);
+}
+
     return bannerSection;
 }
+
+// function createBannerSection(eventData) {
+//     const bannerSection = createElement("div", { class: "banner-section" });
+
+//     const bannerSrc = resolveImagePath(EntityType.EVENT, PictureType.BANNER, `${eventData.banner_image}`);
+
+//     const bannerImage = createElement("img", {
+//         src: bannerSrc,
+//         alt: `Banner for ${eventData.title || "Event"}`,
+//         class: "event-banner-image"
+//     });
+
+//     bannerImage.onerror = () => {
+//         bannerImage.src = resolveImagePath(EntityType.DEFAULT, PictureType.STATIC, "banner.jpg");
+//     };
+
+//     // Add Banner Edit Button here
+//     const bannerEditButton = createElement("button", { class: "edit-banner-pic" }, ["Edit Banner"]);
+//     bannerEditButton.addEventListener("click", () => {
+//       updateImageWithCrop({
+//         entityType: EntityType.EVENT,
+//         imageType: "banner",
+//         stateKey: "banner",
+//         stateEntityKey: "event",
+//         previewElementId: "place-banner-img",
+//         pictureType: PictureType.BANNER,
+//         placeId: eventData.eventid  // <-- pass placeid here
+//       });
+//     });
+
+//     bannerSection.appendChild(bannerEditButton);
+//     bannerSection.appendChild(bannerImage);
+//     return bannerSection;
+// }
 
 // --- Banner Section ---
 // function createBannerSection(eventData) {
@@ -239,9 +294,9 @@ function createActionSection(eventData, isCreator, isLoggedIn) {
 
     if (isLoggedIn && isCreator) {
         actions.push(
-            { text: '✏ Edit Event', onClick: () => editEventForm(isLoggedIn, eventData.eventid), classes: ['edit-btn',"buttonx"] },
+            { text: '✏ Edit Event', onClick: () => editEventForm(isLoggedIn, eventData.eventid), classes: ['edit-btn', "buttonx"] },
             { text: '🗑 Delete Event', onClick: () => deleteEvent(isLoggedIn, eventData.eventid), classes: ['delete-btn', 'buttonx'] },
-            { text: '📊 View Analytics', onClick: () => viewEventAnalytics(isLoggedIn, eventData.eventid), classes: ['analytics-btn',"buttonx"] }
+            { text: '📊 View Analytics', onClick: () => viewEventAnalytics(isLoggedIn, eventData.eventid), classes: ['analytics-btn', "buttonx"] }
         );
     } else if (isLoggedIn) {
         actions.push({ text: 'Report Event', onClick: () => reportPost(eventData.eventid, 'event') });

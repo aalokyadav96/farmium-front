@@ -35,6 +35,7 @@
   .placedetails {
     flex: 1;
     min-width: 280px;
+    position: relative;
   }
   
   #place-banner img {

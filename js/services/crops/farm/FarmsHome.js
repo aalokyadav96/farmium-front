@@ -43,7 +43,7 @@ function Grid() {
   return {
     container,
     render(farms) {
-      container.innerHTML = "";
+      container.replaceChildren();
       if (!farms.length) {
         container.appendChild(createElement("p", {}, ["No farms found."]));
       } else {
@@ -58,7 +58,7 @@ function Sidebar() {
   return {
     container,
     render(allFarms) {
-      container.innerHTML = "";
+      container.replaceChildren();
       renderCTAFarm(container);
       renderWeatherWidget(container);
       renderFeaturedFarm(container, allFarms[0]);
@@ -69,6 +69,38 @@ function Sidebar() {
     }
   };
 }
+
+// function Grid() {
+//   const container = createElement("div", { class: "farm__grid" });
+//   return {
+//     container,
+//     render(farms) {
+//       container.innerHTML = "";
+//       if (!farms.length) {
+//         container.appendChild(createElement("p", {}, ["No farms found."]));
+//       } else {
+//         renderFarmCards(farms, container, isLoggedIn, toggleFavorite);
+//       }
+//     }
+//   };
+// }
+
+// function Sidebar() {
+//   const container = createElement("div", { class: "farm__sidebar" });
+//   return {
+//     container,
+//     render(allFarms) {
+//       container.innerHTML = "";
+//       renderCTAFarm(container);
+//       renderWeatherWidget(container);
+//       renderFeaturedFarm(container, allFarms[0]);
+//       renderFarmStats(container, allFarms);
+//       renderFavorites(container);
+//       renderMap(container);
+//       renderRatings(container, allFarms);
+//     }
+//   };
+// }
 
 function renderFavorites(container) {
   if (!isLoggedIn) return;
@@ -129,18 +161,18 @@ function toggleFavorite(farmId) {
   if (currentSidebar) currentSidebar.render(state.farms);
 }
 
-export async function displayFarms(content, loggedIn) {
-  // container.innerHTML = "";
-  let container = createElement('div', { "class": "farmspage" }, []);
 
-  content.innerHTML = "";
+export async function displayFarms(content, loggedIn) {
+  content.replaceChildren();
+  let container = createElement("div", { class: "farmspage" });
   content.appendChild(container);
   isLoggedIn = loggedIn;
 
   const layout = createElement("div", { class: "farm-page" });
   const main = createElement("div", { class: "farm__main" });
   const side = createElement("aside", { class: "farm__side" });
-  layout.append(createElement("div", { class: "farm__layout" }, [main, side]));
+  const layoutInner = createElement("div", { class: "farm__layout" }, [main, side]);
+  layout.appendChild(layoutInner);
   container.appendChild(layout);
 
   const filters = createFilterControls(state, renderAll);
@@ -167,7 +199,7 @@ export async function displayFarms(content, loggedIn) {
       state.farms.push(...batch);
       state.page++;
     } else {
-      observer.disconnect(); // No more data to load
+      observer.disconnect();
     }
     state.isLoading = false;
   }

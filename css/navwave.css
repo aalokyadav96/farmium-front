@@ -1,10 +1,6 @@
 .primary-nav {
-  /* position: sticky; */
-  /* top: 0; */
   z-index: 1;
-  /* Above header content */
   background: var(--color-bg);
-  /* Needed to cover other content */
 }
 
 .navigation {
@@ -46,8 +42,6 @@
   text-decoration: none;
   padding: 0rem 0.6rem;
   border-radius: 0.25rem;
-  /* background: var(--nav-link-bg, #e0e0e0); */
-  /* color: var(--nav-link-color, #111); */
   color: var(--nav-link-active-color);
   transition: background 0.2s ease;
   font-size: 0.9rem;
@@ -63,16 +57,6 @@
   background: var(--nav-link-active-bg, #444);
   color: var(--nav-link-active-color, #fff);
 }
-
-/* .navigation__item:nth-child(odd) .navigation__link {
-    font-size: 1.1rem;
-    font-weight: 600;
-  }
-  
-  .navigation__item:nth-child(even) .navigation__link {
-    font-size: 0.85rem;
-    font-weight: 400;
-  } */
 
 .navigation__item:nth-child(3n + 1) .navigation__link {
   font-size: 1.1rem;
@@ -104,9 +88,7 @@
 }
 
 @media screen and (max-width: 400px) {
-  /* .navigation__item {
-      flex-basis: 33%;
-    } */
+
 }
 
 .navigation__toggle {

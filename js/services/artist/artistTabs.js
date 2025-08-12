@@ -49,27 +49,26 @@ async function renderMerchTab(container, artistID, isCreator, isLoggedIn) {
     }
 }
 
-
-
-async function renderEventsTab(container, artistID) {
+async function renderEventsTab(container, artistID, isCreator) {
     try {
         const events = await apiFetch(`/artists/${artistID}/events`);
 
         // Clear container
         container.innerHTML = "";
 
-        // Create New Event Button
-        const createEventBtn = createElement("button", { class: "create-event-btn action-btn buttonx" }, ["Create New Event"]);
-        createEventBtn.addEventListener("click", () => openEventModal(artistID));
-        container.appendChild(createEventBtn);
+        // Creator-specific actions
+        if (isCreator) {
+            const createEventBtn = createElement("button", { class: "create-event-btn action-btn buttonx" }, ["Create New Event"]);
+            createEventBtn.addEventListener("click", () => openEventModal(artistID));
+            container.appendChild(createEventBtn);
 
-        // Create New Event Button
-        const addArtistToEventBtn = createElement("button", { class: "action-btn buttonx" }, ["Add Artist to an Event"]);
-        addArtistToEventBtn.addEventListener("click", () => openAddToEventModal(artistID));
-        container.appendChild(addArtistToEventBtn);
+            const addArtistToEventBtn = createElement("button", { class: "action-btn buttonx" }, ["Add Artist to an Event"]);
+            addArtistToEventBtn.addEventListener("click", () => openAddToEventModal(artistID));
+            container.appendChild(addArtistToEventBtn);
+        }
 
         // Events List
-        if (events.length === 0) {
+        if (!events || events.length === 0) {
             container.appendChild(createElement("p", {}, ["No upcoming events."]));
             return;
         }
@@ -81,8 +80,9 @@ async function renderEventsTab(container, artistID) {
                 createElement("br"),
                 `${eventx.date} at ${eventx.venue} — ${eventx.city}, ${eventx.country}`,
                 createElement("br"),
-                // eventx.eventid ? createElement("a", { href: `/event/${eventx.eventid}/tickets`, target: "_blank" }, ["Tickets"]) : ""
-                eventx.eventid ? createElement("a", { href: `/event/${eventx.eventid}`, target: "_blank" }, ["View Event"]) : ""
+                eventx.eventid
+                    ? createElement("a", { href: `/event/${eventx.eventid}`, target: "_blank" }, ["View Event"])
+                    : ""
             ]);
             ul.appendChild(li);
         });
@@ -92,6 +92,7 @@ async function renderEventsTab(container, artistID) {
         container.appendChild(createElement("p", {}, ["Error loading events."]));
     }
 }
+
 
 // Open Event Creation Modal
 function openEventModal(artistID) {

@@ -1,18 +1,17 @@
-
+//farmListHelpers.js
 import { createElement } from "../../../components/createElement.js";
 import { SRC_URL, apiFetch } from "../../../api/api.js";
 import { navigate } from "../../../routes/index.js";
 import Button from "../../../components/base/Button.js";
 import { resolveImagePath, PictureType, EntityType } from "../../../utils/imagePaths.js";
 
-
-
 function renderFarmCards(farms, grid, isLoggedIn) {
-    grid.textContent = "";
+    grid.replaceChildren();
     for (const farm of farms) {
         grid.appendChild(FarmCard(farm, isLoggedIn));
     }
 }
+
 
 function FarmCard(farm, isLoggedIn) {
     const card = createElement("div", { class: "farm__card" });

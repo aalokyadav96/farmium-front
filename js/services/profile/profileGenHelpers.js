@@ -1,22 +1,15 @@
-import { SRC_URL, getState } from "../../state/state.js";
-import Sightbox from "../../components/ui/SightBox.mjs";
-import { toggleFollow } from "./toggleFollow.js";
-import Modal from "../../components/ui/Modal.mjs";
+import { getState } from "../../state/state.js";
 import { formatDate } from "./profileHelpers.js";
-import { generateBannerForm, generateAvatarForm } from "./generators.js";
 import { logout } from "../auth/authService.js";
 import { reportPost } from "../reporting/reporting.js";
 import Button from "../../components/base/Button.js";
 import { userChatInit } from "../userchat/chatPage.js";
-import { Imagex } from "../../components/base/Imagex.js";
-import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
+// import Snackbar from "../../components/ui/Snackbar.mjs";
+// import { createElement } from "../../components/createElement.js";
+// import { capitalize } from "./profileHelpers.js";
+import { toggleFollow } from "./toggleFollow.js";
 
-
-// /* Utility function to append multiple children */
-// function appendChildren(parent, ...children) {
-//     children.forEach(child => parent.appendChild(child));
-// }
-
+// Reuse appendChildren from profileImages.js or redefine here if needed
 function appendChildren(parent, ...children) {
     children.forEach(child => {
         if (child instanceof Node) {
@@ -27,236 +20,34 @@ function appendChildren(parent, ...children) {
     });
 }
 
-
-// Creates the banner image
-function createBanner(profile) {
-    const bgImg = document.createElement("span");
-    bgImg.classList.add("bg_img");
-
-    const banncon = document.createElement("span");
-    banncon.style.position = "relative";
-
-    // Resolve banner image path
-    const bannerFilename = profile.banner_picture || "default.webp";
-    const bannerPath = resolveImagePath(EntityType.USER, PictureType.THUMB, bannerFilename);
-    const sightPath = resolveImagePath(EntityType.USER, PictureType.BANNER, bannerFilename);
-
-    // Set banner as background image
-    bgImg.style.backgroundImage = `url(${bannerPath})`;
-
-    // Sightbox preview
-    bgImg.addEventListener("click", () => Sightbox(sightPath, "image"));
-
-    // Add edit button and image container
-    banncon.appendChild(createBannerEditButton(profile));
-    banncon.appendChild(bgImg);
-
-    return banncon;
-}
-// /* Creates the banner image */
-// function createBanner(profile) {
-//     const bgImg = document.createElement("span");
-//     bgImg.className = "bg_img";
-
-//     const banncon = document.createElement("span");
-//     banncon.style.position = "relative";
-
-//     // Use user's banner picture if available; otherwise, use default banner
-//     const bannerPicture = profile.banner_picture
-//         ? `${SRC_URL}/userpic/banner/${profile.banner_picture}`
-//         : `${SRC_URL}/userpic/banner/default.webp`;
-
-//     bgImg.style.backgroundImage = `url(${bannerPicture})`;
-//     bgImg.addEventListener("click", () => Sightbox(bannerPicture, "image"));
-
-//     banncon.appendChild(createBannerEditButton(profile));
-//     banncon.appendChild(bgImg);
-
-//     return banncon;
-// }
-
-
-function createBannerEditButton(profile) {
-    if (profile.userid !== getState("user")) return document.createDocumentFragment();
-
-    const editButton = document.createElement("button");
-    editButton.className = "edit-banner-pic";
-    editButton.textContent = "B";
-    editButton.addEventListener("click", () => {
-        const content = document.createElement("div");
-        const contentx = document.createElement("div");
-        content.appendChild(generateBannerForm(contentx, profile.banner_picture));
-
-        const modal = Modal({
-            title: "Edit Banner",
-            content,
-            onClose: () => modal.remove(),
-        });
-    });
-
-    return editButton;
-}
-
-// Creates the profile picture area
-function createProfilePicture(profile) {
-    const profileArea = document.createElement("div");
-    profileArea.classList.add("profile_area");
-
-    const thumb = document.createElement("span");
-    thumb.classList.add("thumb");
-
-    // Resolve image paths
-    const thumbSrc = resolveImagePath(EntityType.USER, PictureType.THUMB, `${profile.userid}.jpg`);
-    const fullSrc = resolveImagePath(EntityType.USER, PictureType.PHOTO, profile.profile_picture);
-
-    // const fullSrc = profile.profile_picture
-    //     ? `${SRC_URL}/userpic/${profile.profile_picture}` // kept as-is, fallback not handled yet
-    //     : `${SRC_URL}/userpic/default-profile.png`;
-
-    // Use Imagex component
-    const img = Imagex(
-        thumbSrc,
-        "Profile Picture",
-        "lazy",
-        "",
-        "imgful",
-        {},
-        "/assets/icon-192.png"
-    );
-
-    thumb.appendChild(img);
-
-    // Open full picture on click
-    if (profile.profile_picture) {
-        thumb.addEventListener("click", () => Sightbox(fullSrc, "image"));
-    }
-
-    profileArea.appendChild(thumb);
-
-    // Add edit button if current user is the profile owner
-    if (profile.userid === getState("user")) {
-        const editProfileButton = document.createElement("button");
-        editProfileButton.classList.add("edit-profile-pic");
-        editProfileButton.textContent = "P";
-
-        editProfileButton.addEventListener("click", () => {
-            const content = document.createElement("div");
-            const contentx = document.createElement("div");
-
-            content.id = "hfgfy";
-            contentx.id = "g54365";
-
-            const avatarPath = profile.profile_picture || "default-profile.png";
-            content.appendChild(generateAvatarForm(contentx, avatarPath));
-
-            const modal = Modal({
-                title: "Edit Profile Picture",
-                content,
-                onClose: () => modal.remove(),
-            });
-        });
-
-        profileArea.appendChild(editProfileButton);
-    }
-
-    return profileArea;
-}
-
-
-// /* Creates the profile picture area */
-// function createProfilePicture(profile) {
-//     const profileArea = document.createElement("div");
-//     profileArea.className = "profile_area";
-
-//     const thumb = document.createElement("span");
-//     thumb.className = "thumb";
-
-//     // Use default profile picture if none is available
-//     const profilexPic = profile.profile_picture ? `${SRC_URL}/userpic/${profile.profile_picture}` : `${SRC_URL}/userpic/default-profile.png`;
-
-//     const profilePic = profile.userid
-//         ? `${SRC_URL}/userpic/thumb/${profile.userid}.jpg`
-//         : `${SRC_URL}/userpic/thumb/thumb.jpg`;
-
-//     const img = document.createElement("img");
-//     img.src = profilePic;
-//     img.loading = "lazy";
-//     img.alt = "Profile Picture";
-//     img.className = "imgful";
-//     thumb.appendChild(img);
-
-//     // Add click event to open full image if available
-//     if (profile.profile_picture) {
-//         thumb.addEventListener("click", () => Sightbox(profilexPic, "image"));
-//     }
-
-//     profileArea.appendChild(thumb);
-
-//     // Add Edit Profile Pic button if user owns the profile
-//     if (profile.userid === getState("user")) {
-//         const editProfileButton = document.createElement("button");
-//         editProfileButton.className = "edit-profile-pic";
-//         editProfileButton.textContent = "P";
-//         editProfileButton.addEventListener("click", () => {
-//             const content = document.createElement("div");
-//             const contentx = document.createElement("div");
-//             content.id = "hfgfy";
-//             contentx.id = "g54365";
-//             content.appendChild(generateAvatarForm(contentx, profile.profile_picture || "default-profile.png"));
-
-//             const modal = Modal({
-//                 title: "Edit Profile Picture",
-//                 content,
-//                 onClose: () => modal.remove(),
-//             });
-//         });
-//         profileArea.appendChild(editProfileButton);
-
-//     }
-
-//     return profileArea;
-// }
-
-/* Creates the profile details section */
 function createProfileDetails(profile, isLoggedIn) {
     const profileDetails = document.createElement("div");
     profileDetails.className = "profile-details";
 
     const username = document.createElement("strong");
     username.className = "username";
-    // username.textContent = profile.username || "Not provided";
     username.textContent = `@${profile.username}`;
 
     const name = document.createElement("p");
     name.className = "name";
     name.textContent = profile.name || "";
 
-    // const email = document.createElement("p");
-    // email.className = "email";
-    // email.textContent = profile.email || "";
-
     const bio = document.createElement("p");
     bio.className = "bio";
     bio.textContent = profile.bio || "";
 
     const profileActions = createProfileActions(profile, isLoggedIn);
-
     const profileInfo = createProfileInfo(profile);
 
     appendChildren(profileDetails, profileActions, name, username, bio, profileInfo);
     return profileDetails;
 }
 
-/* Creates the profile actions (Edit, Follow, Delete) */
 function createProfileActions(profile, isLoggedIn) {
     const profileActions = document.createElement("div");
     profileActions.className = "profile-actions";
 
-    // if (isLoggedIn) {
-    // }
-
     if (profile.userid === getState("user")) {
-        // Logout Button
         const logoutButton = document.createElement("button");
         logoutButton.className = "dropdown-item logout-btn";
         logoutButton.textContent = "Logout";
@@ -284,27 +75,15 @@ function createProfileActions(profile, isLoggedIn) {
         }, "buttonx");
         profileActions.appendChild(sendMessagebtn);
 
-        // // Report button
-        // const reportButton = document.createElement("button");
-        // reportButton.className = "report-btn";
-        // reportButton.textContent = "Report";
-        // reportButton.addEventListener("click", () => {
-        //     reportPost(profile.userid, "user");
-        // });
-        // profileActions.appendChild(reportButton);
-
         const reportButton = Button("Report", "report-btn", {
             click: () => { reportPost(profile.userid, "user") }
         }, "report-btn", { backgroundColor: "#ee9090" });
-
         profileActions.appendChild(reportButton);
-
     }
 
     return profileActions;
 }
 
-/* Creates the profile information section */
 function createProfileInfo(profile) {
     const profileInfo = document.createElement("div");
     profileInfo.className = "profile-info";
@@ -312,7 +91,7 @@ function createProfileInfo(profile) {
     const infoItems = [
         { label: "Last Login", value: formatDate(profile.last_login) || "Never logged in" },
         { label: "Status", value: profile.online ? "Active" : "Inactive" },
-        // { label: "Verification Status", value: profile.is_verified ? "Verified" : "Not Verified" },
+        { label: "Verification Status", value: profile.is_verified ? "Verified" : "Not Verified" },
     ];
 
     infoItems.forEach(({ label, value }) => {
@@ -325,7 +104,6 @@ function createProfileInfo(profile) {
     return profileInfo;
 }
 
-/* Creates the statistics section */
 function createStatistics(profile) {
     const statistics = document.createElement("div");
     statistics.className = "statistics";
@@ -346,5 +124,10 @@ function createStatistics(profile) {
     return statistics;
 }
 
-
-export { createBanner, createBannerEditButton, createProfilePicture, createProfileDetails, createStatistics };
+export {
+    createProfileDetails,
+    createProfileActions,
+    createProfileInfo,
+    createStatistics,
+    appendChildren
+};

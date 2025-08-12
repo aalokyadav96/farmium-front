@@ -1,141 +1,130 @@
-/* 🌐 Chat Container */
 .merechatcon {
-    display: flex;
-    height: 100vh;
-  }
-  
-  /* 📁 Sidebar Styles */
-  .chat-sidebar {
-    width: 250px;
-    /* background-color: #2f3136;
-    color: #fff; */
-    padding: 10px;
-    overflow-y: auto;
-  }
-  
-  .chat-item {
-    display: block;
-    background: #40444b;
-    color: #fff;
-    border: none;
-    margin-bottom: 8px;
-    padding: 10px;
-    cursor: pointer;
-    border-radius: 6px;
-  }
-  .chat-item:hover {
-    background-color: #5865f2;
-  }
-  
-  /* 💬 Main Chat Area */
-  .chat-main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  /* 🔍 Search Bar */
-  .search-bar {
-    padding: 10px;
-    /* background: #e1e1e1; */
-  }
-  .chat-search {
-    width: 100%;
-    padding: 8px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-  }
-  
-  /* 💬 Message View */
-  .chat-view {
-    flex: 1;
-    padding: 10px;
-    overflow-y: auto;
-  }
-  
-  .message-list {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .message {
-    margin: 10px 0;
-    padding: 10px;
-    border-radius: 8px;
-    position: relative;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  }
-  
-  .message.mine {
-    align-self: flex-end;
-  }
-  
-  .message.theirs {
-    align-self: flex-start;
-  }
-  
-  .msg-header {
-    font-size: 0.85rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .msg-content {
-    margin-top: 5px;
-  }
-  
-  .msg-image {
-    max-width: 100%;
-    border-radius: 6px;
-  }
-  
-  /* 🎤 Input Area */
-  .message-input {
-    display: flex;
-    padding: 10px;
-    background-color: #fff;
-    border-top: 1px solid #ccc;
-  }
-  
-  .message-input input[type="text"] {
-    flex: 1;
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    margin-right: 10px;
-  }
-  
-  .message-input button {
-    padding: 10px;
-    border: none;
-    border-radius: 6px;
-    background-color: #5865f2;
-    color: white;
-    cursor: pointer;
-  }
-  
-  .file-upload-btn {
-    font-size: 1.2rem;
-  }
-  
-  /* 🟢 Presence */
-  .presence {
-    padding: 8px;
-    background: #e1e1e1;
-    text-align: right;
-    font-size: 0.9rem;
-  }
-  .presence-status {
-    color: green;
-    font-weight: bold;
-  }
-  .typing {
-    font-style: italic;
-    color: #555;
-  }
-  /**/
-  
+  display: flex;
+  height: 100vh;
+}
+
+.chat-sidebar {
+  width: 250px;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.chat-item {
+  display: block;
+  border: none;
+  margin-bottom: 8px;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.chat-item:hover {
+  background-color: #5865f2;
+}
+
+.chat-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.search-bar {
+  padding: 10px;
+}
+
+.chat-search {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.chat-view {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.message-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.message {
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 8px;
+  position: relative;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.message.mine {
+  align-self: flex-end;
+}
+
+.message.theirs {
+  align-self: flex-start;
+}
+
+.msg-header {
+  font-size: 0.85rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.msg-content {
+  margin-top: 5px;
+}
+
+.msg-image {
+  max-width: 100%;
+  border-radius: 6px;
+}
+
+.message-input {
+  display: flex;
+  padding: 10px;
+  border-top: 1px solid #ccc;
+}
+
+.message-input input[type="text"] {
+  flex: 1;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  margin-right: 10px;
+}
+
+.message-input button {
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  background-color: #5865f2;
+  color: white;
+  cursor: pointer;
+}
+
+.file-upload-btn {
+  font-size: 1.2rem;
+}
+
+.presence {
+  padding: 8px;
+  text-align: right;
+  font-size: 0.9rem;
+}
+
+.presence-status {
+  color: green;
+  font-weight: bold;
+}
+
+.typing {
+  font-style: italic;
+}
+
+
 
 .merechatcon .dropdown {
   position: absolute;
@@ -146,7 +135,7 @@
   display: none;
   flex-direction: column;
   min-width: 100px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   z-index: 10;
 }
 
@@ -174,7 +163,7 @@
   background: #f0f0f0;
   color: #2f3136;
 }
-/**/
+
 @media (max-width: 768px) {
   .merechatcon {
     flex-direction: column;

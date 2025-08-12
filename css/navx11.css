@@ -1,8 +1,8 @@
 .primary-nav {
   position: sticky;
   top: 0;
-  z-index: 1; /* Above header content */
-  background: var(--color-bg); /* Needed to cover other content */
+  z-index: 1;
+  background: var(--color-bg);
 }
 
 .navigation {
@@ -34,7 +34,6 @@
   text-decoration: none;
   cursor: pointer;
   letter-spacing: 0.6px;
-  /* font-weight: bold; */
 }
 
 .navigation__link:hover {
@@ -64,9 +63,7 @@
 }
 
 @media screen and (max-width: 400px) {
-  /* .navigation__item {
-    flex-basis: 33%;
-  } */
+
 }
 
 .navigation__toggle {
@@ -109,6 +106,6 @@
 
 .primary-nav .active {
   font-weight: bold;
-  color: var(--color-primary); /* Or whatever color suits your theme */
+  color: var(--color-primary); 
   border-bottom: 2px solid var(--color-primary);
 }

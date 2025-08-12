@@ -24,18 +24,13 @@
     cursor: pointer;
     font-size: 1rem;
   }
-  /* === Cart Page Scoped Styles === */
 
 #content {
   max-width: 960px;
   margin: 2rem auto;
   padding: 1rem;
-  /* font-family: sans-serif;
-  background-color: #fff;
-  color: #2d3748; */
 }
 
-/* Back Button */
 .back-button {
   background: none;
   border: none;
@@ -48,13 +43,11 @@
   text-decoration: underline;
 }
 
-/* Cart Heading */
 #content h2 {
   font-size: 1.5rem;
   margin-bottom: 1rem;
 }
 
-/* Tabs */
 .cart-tabs {
   display: flex;
   gap: 1rem;
@@ -74,7 +67,6 @@
   color: white;
 }
 
-/* Tab Panels */
 .cart-tab-panels {
   margin-bottom: 2rem;
 }
@@ -83,7 +75,6 @@
   display: block;
 }
 
-/* Cart Section */
 .cart-section {
   border: 1px solid #e2e8f0;
   border-radius: 6px;
@@ -91,7 +82,6 @@
   background-color: #f7fafc;
 }
 
-/* Table Styles */
 .cart-section table {
   width: 100%;
   border-collapse: collapse;
@@ -115,7 +105,6 @@
   text-align: center;
 }
 
-/* Quantity Control */
 .quantity-control {
   display: flex;
   align-items: center;
@@ -136,7 +125,6 @@
   font-weight: bold;
 }
 
-/* Remove Button */
 .cart-section td button {
   background: none;
   border: none;
@@ -148,13 +136,11 @@
   color: #c53030;
 }
 
-/* Subtotal Text */
 .cart-section p {
   font-size: 1rem;
   margin-top: 1rem;
 }
 
-/* Checkout Buttons */
 .cart-section button,
 #content > div > button {
   padding: 0.6rem 1.2rem;
@@ -170,7 +156,6 @@
   background-color: #276749;
 }
 
-/* Grand Total */
 #content > div h3 {
   font-size: 1.25rem;
   margin-bottom: 1rem;

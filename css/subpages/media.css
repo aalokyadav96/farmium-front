@@ -4,7 +4,6 @@
 .media-item {
     display: flex;
     flex-direction: column;
-    background: #fff;
     border: 1px solid #ddd;
     border-radius: 6px;
     overflow: hidden;
@@ -31,7 +30,6 @@
     width: 100%;
     height: 180px;
     object-fit: cover;
-    background: #f0f0f0;
     cursor: pointer;
 }
 
@@ -43,8 +41,6 @@
 .media-item figcaption {
     padding: 0.5rem;
     font-size: 0.85rem;
-    color: #666;
-    background: #fafafa;
     border-top: 1px solid #eee;
 }
 

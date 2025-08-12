@@ -1,4 +1,3 @@
-
 import { createElement } from "../../components/createElement.js";
 import { navigate } from "../../routes/index.js";
 import { createPlace } from "./placeService.js";
@@ -56,6 +55,41 @@ async function createPlaceForm(isLoggedIn, createSection) {
 
     fields.forEach(field => form.appendChild(createFormGroup(field)));
 
+    // TAGS FIELD
+    const tagWrapper = createElement("div", { class: "form-group" }, [
+        createElement("label", {}, ["Tags"]),
+        createElement("div", { style: "display:flex; gap:8px;" }, [
+            createElement("input", { type: "text", id: "tag-input", placeholder: "Add a tag" }),
+            createElement("button", { type: "button", id: "add-tag-btn" }, ["Add"])
+        ]),
+        createElement("div", { id: "tag-list", style: "margin-top:8px; display:flex; flex-wrap:wrap; gap:6px;" }, [])
+    ]);
+    form.appendChild(tagWrapper);
+
+    let tags = [];
+    const tagInput = tagWrapper.querySelector("#tag-input");
+    const tagList = tagWrapper.querySelector("#tag-list");
+
+    function renderTags() {
+        tagList.innerHTML = "";
+        tags.forEach((tag, index) => {
+            const chip = createElement("span", { style: "padding:4px 8px; background:var(--color-space); border-radius:var(--radius-sm); display:inline-flex; align-items:center; gap:4px;" }, [
+                tag,
+                createElement("button", { type: "button", style: "border:none; background:none; cursor:pointer; color:red;", onclick: () => { tags.splice(index, 1); renderTags(); } }, ["×"])
+            ]);
+            tagList.appendChild(chip);
+        });
+    }
+
+    tagWrapper.querySelector("#add-tag-btn").addEventListener("click", () => {
+        const val = tagInput.value.trim();
+        if (val && !tags.includes(val)) {
+            tags.push(val);
+            tagInput.value = "";
+            renderTags();
+        }
+    });
+
     // Handle subcategory options
     form.querySelector("#category-main").addEventListener('change', (e) => {
         const sub = form.querySelector("#category-sub");
@@ -69,24 +103,26 @@ async function createPlaceForm(isLoggedIn, createSection) {
         });
     });
 
+    // Submit handler
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const formData = new FormData(form);
+        formData.append("tags", JSON.stringify(tags));
+
         try {
             await createPlace(formData);
-            // const resp = await createPlace(formData);
             Notify("Place created successfully!", {duration:3000});
-            // navigate(`/place/${resp.placeid}`);
         } catch (err) {
             Notify("Failed to create place. Try again.", {duration:3000});
             console.error("Error creating place:", err);
         }
     });
 
+    // Submit button
     const submitButton = document.createElement('button');
     submitButton.type = 'submit';
     submitButton.textContent = 'Create Place';
-    submitButton.classList.add('btn', 'btn-primary'); // optional: styling class
+    submitButton.classList.add('btn', 'btn-primary');
     
     form.appendChild(submitButton);
     
@@ -94,6 +130,4 @@ async function createPlaceForm(isLoggedIn, createSection) {
     createSection.appendChild(form);
 }
 
-
 export { createPlaceForm };
-

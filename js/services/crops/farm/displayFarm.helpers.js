@@ -94,7 +94,7 @@ export async function renderCrops(
   farm, cropsContainer, farmId, mainContainer,
   isLoggedIn, sortBy = "name", isCreator = false
 ) {
-  cropsContainer.innerHTML = "";
+  cropsContainer.replaceChildren();
 
   if (!farm.crops?.length) {
     cropsContainer.append(createElement("p", {}, ["No crops listed yet."]));
@@ -109,7 +109,6 @@ export async function renderCrops(
 }
 
 // ─────────── Individual crop card ───────────
-
 function createCropCard(crop, farmName, farmId, mainContainer, isLoggedIn, isCreator) {
   const card = createElement("div", { class: "crop-card" });
 
@@ -118,7 +117,6 @@ function createCropCard(crop, farmName, farmId, mainContainer, isLoggedIn, isCre
     alt: crop.name,
     class: "crop__image"
   });
-
 
   const formatDate = (isoStr) =>
     isoStr ? new Date(isoStr).toLocaleDateString(undefined, {
@@ -166,23 +164,18 @@ function createCropCard(crop, farmName, farmId, mainContainer, isLoggedIn, isCre
 // ─────────── Price history toggler ───────────
 function createPriceHistoryToggle(history) {
   const toggle = createElement("button", {}, ["📈 Show Price History"]);
-  const historyBlock = createElement("pre", { class: "price-history hidden" });
-  historyBlock.textContent = history.map(p => `${p.date}: ₹${p.price}`).join("\n");
+  const historyBlock = createElement("pre", { class: "price-history hidden" }, [
+    history.map(p => `${p.date}: ₹${p.price}`).join("\n")
+  ]);
   toggle.addEventListener("click", () => historyBlock.classList.toggle("hidden"));
   return [toggle, historyBlock];
 }
 
 // ─────────── Creator controls (edit/delete) ───────────
 function createCreatorControls(crop, farmId, mainContainer) {
-  // const editBtn = createElement("button", { class: "edit-btn" }, ["✏️ Edit"]);
-  // editBtn.onclick = () => {
-  //   mainContainer.textContent = "";
-  //   editCrop(farmId, crop, mainContainer);
-  // };
-
   const editBtn = Button("✏️ Edit", "", {
     click: () => {
-      mainContainer.textContent = "";
+      mainContainer.replaceChildren();
       editCrop(farmId, crop, mainContainer);
     }
   }, "edit-btn buttonx");
@@ -199,23 +192,8 @@ function createCreatorControls(crop, farmId, mainContainer) {
       } else {
         alert("❌ Failed to delete crop.");
       }
-
     }
   }, "btn-danger buttonx");
-
-  // const deleteBtn = createElement("button", { class: "btn btn-danger" }, ["🗑️ Delete"]);
-  // deleteBtn.onclick = async () => {
-  //   if (!confirm(`Delete crop "${crop.name}"?`)) return;
-  //   const res = await apiFetch(`/farms/${farmId}/crops/${crop.id}`, "DELETE");
-  //   if (res.success) {
-  //     const upd = await apiFetch(`/farms/${farmId}`);
-  //     if (upd.success && upd.farm) {
-  //       await renderCrops(upd.farm, document.querySelector(".crop-list"), farmId, mainContainer, true, "name", true);
-  //     }
-  //   } else {
-  //     alert("❌ Failed to delete crop.");
-  //   }
-  // };
 
   return [editBtn, deleteBtn];
 }
@@ -223,11 +201,11 @@ function createCreatorControls(crop, farmId, mainContainer) {
 // ─────────── User controls (quantity + add to cart) ───────────
 export function createUserControls(crop, farmName, farmId, isLoggedIn) {
   let qty = 1;
-  const qtyDisplay = createElement("span", { class: "quantity-value" }, [qty]);
+  const qtyDisplay = createElement("span", { class: "quantity-value" }, [String(qty)]);
   const inc = createElement("button", {}, ["+"]);
   const dec = createElement("button", {}, ["−"]);
-  inc.onclick = () => { qty++; qtyDisplay.textContent = qty; };
-  dec.onclick = () => { if (qty > 1) { qty--; qtyDisplay.textContent = qty; } };
+  inc.onclick = () => { qty++; qtyDisplay.replaceChildren(String(qty)); };
+  dec.onclick = () => { if (qty > 1) { qty--; qtyDisplay.replaceChildren(String(qty)); } };
 
   const qtyWrap = createElement("div", { class: "quantity-control" }, [dec, qtyDisplay, inc]);
   const addBtn = createElement("button", { class: "a2c-crop" }, ["🛒 Add to Cart"]);

@@ -3,7 +3,8 @@ import Button from "../../components/base/Button.js";
 import { getState } from "../../state/state.js";
 import { displayUserProfileData } from "./otherUserProfileService.js";
 // import { displayFollowSuggestions } from "./displayFollowSugg.js";
-import { createBanner, createBannerEditButton, createProfilePicture, createProfileDetails, createStatistics } from "./profileGenHelpers.js";
+import {  createProfileDetails, createStatistics } from "./profileGenHelpers.js";
+import { createBanner, createProfilePicture } from "./generators.js";
 import { othusrdata } from "./otheruserdata.js";
 import { createElement } from "../../components/createElement.js";
 

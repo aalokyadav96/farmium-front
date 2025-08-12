@@ -2,8 +2,8 @@ button {
     border: 1px solid #9b9b9b;
     padding: 6px;
     border-radius: 5px;
-    background-color: var(--bg-color);
-    color: var(--text-color);
+    background-color: var(--color-bg);
+    color: var(--color-fg);
     width: fit-content;
     cursor: pointer;
     font-family: inherit;

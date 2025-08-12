@@ -8,10 +8,8 @@
 .play, .pause, .stop, .dld, .edit {
     border: none;
     cursor: pointer;
-    /* height: 48px; */
     outline: none;
     padding: 0;
-    /* width: 48px; */
 }
 .plypzstp {
     position: fixed;
@@ -22,7 +20,6 @@
     border: none;
 }
 
-/* Default fallback (mobile portrait) */
 @media (max-width: 767px) and (orientation: portrait) {
     .plypzstp {
         flex-direction: row;
@@ -35,7 +32,6 @@
     }
 }
 
-/* Mobile/Tablet Landscape */
 @media (max-width: 1024px) and (orientation: landscape) {
     .plypzstp {
         flex-direction: column;
@@ -51,7 +47,6 @@
     }
 }
 
-/* Tablet Portrait */
 @media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
     .plypzstp {
         flex-direction: row;
@@ -64,7 +59,6 @@
     }
 }
 
-/* Laptop/Desktop */
 @media (min-width: 1025px) and (max-width: 1280px) {
     .plypzstp {
         flex-direction: column;
@@ -81,7 +75,6 @@
     }
 }
 
-/* Large Desktop */
 @media (min-width: 1281px) {
     .plypzstp {
         flex-direction: column;
