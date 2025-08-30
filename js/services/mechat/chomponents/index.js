@@ -6,6 +6,8 @@ import { renderAvatar } from "./renderAvatar.js";
 import { renderMedia } from "./renderMedia.js";
 import { renderMenu } from "./renderMenu.js";
 
+
+
 function renderHeader(msg, time, isMine) {
   const sender = createElement("span", {
     class: "msg-sender",
@@ -28,9 +30,11 @@ function renderHeader(msg, time, isMine) {
 
   const menu = renderMenu(msg);
 
-  return createElement("div", { class: "msg-header" }, [
-    sender, timestamp, edited, status, menu
-  ]);
+  const headerChildren = [sender, timestamp, menu];
+  if (edited) headerChildren.splice(2, 0, edited);
+  if (status) headerChildren.push(status);
+
+  return createElement("div", { class: "msg-header" }, headerChildren);
 }
 
 function renderBody(msg) {
@@ -46,7 +50,7 @@ export function renderMessage(msg, { isInline = false } = {}) {
   if (msg.deleted) classes.push("deleted");
   if (msg.media)   classes.push("attachment");
 
-  // 24‑hour forced format
+  // 24-hour forced format
   const time = new Date(msg.createdAt)
     .toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 
@@ -54,83 +58,16 @@ export function renderMessage(msg, { isInline = false } = {}) {
   const header = renderHeader(msg, time, isMine);
   const body   = renderBody(msg);
 
-  // keyboard focusable; announce as article
-  return createElement("div", {
+  const msgBody = createElement("div", { class: "msg-body" }, [ header, body ]);
+
+  const root = createElement("div", {
     class: classes.join(" "),
     dataset: { id: msg.id },
     role: "article",
     "aria-label": `Message from ${msg.sender} at ${time}`,
     tabindex: "0"
-  }, [
-    avatar,
-    createElement("div", { class: "msg-body" }, [ header, body ])
-  ]);
+  }, [ avatar, msgBody ]);
+
+  if (msg.pending) root.setAttribute("data-pending", "true");
+  return root;
 }
-
-// // chomponents/index.js
-// import { createElement } from "../../../components/createElement";
-// import { getState, SRC_URL } from "../../../state/state";
-
-// import { renderAvatar } from "./renderAvatar.js";
-// import { renderMedia } from "./renderMedia.js";
-// import { renderMenu } from "./renderMenu.js";
-
-// export function renderMessage(msg, { isInline = false } = {}) {
-//     const isMine = msg.sender === getState("user");
-//     const bubbleClasses = ["message", isMine ? "mine" : "theirs"];
-//     if (msg.deleted) bubbleClasses.push("deleted");
-//     if (msg.media) bubbleClasses.push("attachment");
-
-//     const time = new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-
-//     const avatar = renderAvatar(msg, { isMine });
-
-//     const sender = createElement("span", {
-//         class: "msg-sender",
-//         "aria-label": `Sender: ${msg.sender}`
-//     }, [msg.sender]);
-
-//     const timestamp = createElement("span", {
-//         class: "msg-time",
-//         "aria-label": `Sent at ${time}`
-//     }, [time]);
-
-//     const status = isMine
-//         ? createElement("span", { class: "msg-status" }, ["✓"])
-//         : null;
-
-//     const menu = renderMenu(msg);
-
-//     const edited = msg.editedAt
-//         ? createElement("span", { class: "msg-edited" }, [" (edited)"])
-//         : null;
-
-//     const header = createElement("div", { class: "msg-header" }, [
-//         sender,
-//         timestamp,
-//         edited,
-//         status,
-//         menu
-//     ]);
-
-//     const body = createElement("div", { class: "msg-content" },
-//         msg.deleted
-//             ? ["[deleted]"]
-//             : renderMedia(msg)
-//     );
-
-//     const contentWrapper = createElement("div", { class: "msg-body" }, [body]);
-
-//     return createElement("div", {
-//         class: bubbleClasses.join(" "),
-//         dataset: { id: msg.id },
-//         role: "article",
-//         "aria-label": `Message from ${msg.sender} at ${time}`
-//     }, [
-//         avatar,
-//         createElement("div", { class: "msg-meta" }, [
-//             header,
-//             contentWrapper
-//         ])
-//     ]);
-// }

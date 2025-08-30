@@ -15,7 +15,7 @@
   .shopping-page {
     /* background: var(--fw-neutral-lighter); */
     /* color: var(--fw-neutral-dark); */
-    padding: var(--fw-gap);
+    /* padding: var(--fw-gap); */
     display: flex;
     flex-direction: column;
     gap: var(--fw-gap);

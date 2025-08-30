@@ -27,11 +27,6 @@
     border-radius: 6px;
   }
   
-  .cart-category h3 {
-    margin: 0;
-    font-size: 1.2rem;
-  }
-  
   .cart-cards {
     display: flex;
     flex-direction: column;

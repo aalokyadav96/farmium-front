@@ -1,23 +1,22 @@
 import { setState, getState } from '../../state/state.js';
 import { apiFetch } from "../../api/api.js";
-import Snackbar from '../../components/ui/Snackbar.mjs';
 import { fetchProfile } from './fetchProfile.js';
 import Notify from "../../components/ui/Notify.mjs";
 
 async function toggleFollow(userId, followButton, profile) {
     if (!getState("token")) {
-        Snackbar("Please log in to follow users.", 3000);
+        Notify("Please log in to follow users.", {type:"warning",duration:3000, dismissible:true});
         return;
     }
 
     if (!followButton) {
-        Snackbar("Follow button not found.", 3000);
+        Notify("Follow button not found.", {type:"info",duration:3000, dismissible:true});
         return;
     }
 
     if (!profile) {
         console.warn("Profile object not provided.");
-        Snackbar("Profile data is unavailable.", 3000);
+        Notify("Profile data is unavailable.", {type:"error",duration:3000, dismissible:true});
         return;
     }
 
@@ -53,13 +52,13 @@ async function toggleFollow(userId, followButton, profile) {
 
         followButton.disabled = false;
         console.error("Error toggling follow status:", error);
-        Snackbar(`Failed to update follow status: ${error.message}`, 3000);
+        Notify(`Failed to update follow status: ${error.message}`, {type:"error",duration:3000, dismissible:true});
         return;
     }
 
-    Snackbar(
+    Notify(
         `You have ${isFollowAction ? 'followed' : 'unfollowed'} ${profile.username || 'the user'}.`,
-        3000
+        {type:"success",duration:3000, dismissible:true}
     );
 }
 

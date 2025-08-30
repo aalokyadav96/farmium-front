@@ -1,0 +1,120 @@
+/* Base styles */
+  
+  .itinerary-con {
+    max-width: 800px;
+    margin: auto;
+    padding: 1rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05);
+  }
+  
+  .itinerary-meta {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+  
+  .itinerary-desc {
+    font-style: italic;
+    margin-bottom: 1rem;
+  }
+  
+  .timeline-day {
+    margin-bottom: 2rem;
+  }
+  
+  .day-header {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: #333;
+  }
+  
+  .visits-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  /* Visit card */
+  .visit-card {
+    background: #eef2f7;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    position: relative;
+  }
+  
+  .visit-info {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    font-size: 0.95rem;
+  }
+  
+  .visit-location {
+    font-weight: bold;
+  }
+  
+  /* Transport connector */
+  .transport-connector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin: 0.5rem 0;
+  }
+  
+  .transport-connector .line {
+    flex: 1;
+    height: 2px;
+    background: #ccc;
+    margin: 0 0.5rem;
+  }
+  
+  .transport-connector .arrow {
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 8px solid #666;
+  }
+  
+  .connector-label {
+    font-size: 0.85rem;
+    color: #666;
+    margin-left: 0.5rem;
+  }
+  
+  /* Transport icons */
+  .transport.airplane::before {
+    content: "✈️";
+    margin-right: 0.5rem;
+  }
+  .transport.car::before {
+    content: "🚗";
+    margin-right: 0.5rem;
+  }
+  .transport.train::before {
+    content: "🚆";
+    margin-right: 0.5rem;
+  }
+  .transport.walking::before {
+    content: "🚶";
+    margin-right: 0.5rem;
+  }
+  
+  /* Responsive tweaks */
+  @media (max-width: 600px) {
+    .visit-info {
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+  
+    .itinerary-meta {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  }
+  

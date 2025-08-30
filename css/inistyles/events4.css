@@ -1,0 +1,154 @@
+/* Base Layout */
+.event-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+/* Main Events Section */
+
+/* Search and Sort Controls */
+.event-controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.event-search,
+.event-sort {
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  flex: 1;
+}
+
+/* Category Chips */
+.category-chips {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.category-chip {
+  padding: 8px 14px;
+  font-size: 14px;
+  border: none;
+  border-radius: 20px;
+  background-color: #e0e0e0;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.category-chip:hover {
+  background-color: #cfd8dc;
+}
+
+/* Event List */
+.event-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+/* Event Card */
+.event-card {
+  width: calc(33% - 10px);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  overflow: hidden;
+  transition: transform 0.2s ease;
+}
+
+.event-card:hover {
+  transform: translateY(-4px);
+}
+
+.event-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.event-info {
+  padding: 4px 16px;
+}
+
+
+.event-info p {
+  font-size: 14px;
+  margin: 6px 0;
+}
+
+.event-info button {
+  padding: 6px 10px;
+  font-size: 12px;
+  border: none;
+  border-radius: 6px;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+}
+
+.event-info button:hover {
+  background-color: #0056b3;
+}
+
+/* Status Badge and Save Icon */
+.event-info > div {
+  margin-bottom: 8px;
+}
+
+.event-info span[title="Save Event"] {
+  color: #007bff;
+  transition: color 0.2s ease;
+}
+
+.event-info span[title="Save Event"]:hover {
+  color: #0056b3;
+}
+
+/* Sidebar */
+
+/* 
+.buttonx {
+  padding: 10px 16px;
+  font-size: 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+} */
+
+.primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.primary:hover {
+  background-color: #0056b3;
+}
+
+.secondary {
+  background-color: #e0e0e0;
+}
+
+.secondary:hover {
+  background-color: #cfd8dc;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .event-details {
+    flex-direction: column;
+  }
+
+  .event-card {
+    width: 100%;
+  }
+
+  .event-controls {
+    flex-direction: row;
+  }
+}

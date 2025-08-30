@@ -25,9 +25,9 @@ console.log(place);
     loading: "lazy",
   });
 
-  // bannerImg.onerror = () => {
-  //   bannerImg.src = resolveImagePath(EntityType.DEFAULT, PictureType.STATIC, "placeholder.png");
-  // };
+  bannerImg.onerror = () => {
+    bannerImg.src = resolveImagePath(EntityType.DEFAULT, PictureType.STATIC, "placeholder.png");
+  };
 
   const bannerSection = createElement("section", {
     id: "place-banner",

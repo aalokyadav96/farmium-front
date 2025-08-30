@@ -1,3 +1,4 @@
+import "../../../css/ui/createTabs.css";
 import { createDivButton, createContainer } from "../eventHelper.js";
 import { createElement } from "../../components/createElement.js";
 import { getRouteState, setRouteState } from "../../state/state.js";

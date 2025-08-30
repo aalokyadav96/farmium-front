@@ -1,8 +1,8 @@
-import { createArtistForm } from "../../services/artist/createArtist.js";
+import { createArtist } from "../../services/artist/createOrEditArtist.js";
 
 async function CreateArtist(isLoggedIn, contentContainer) {
     contentContainer.innerHTML = '';
-    createArtistForm(isLoggedIn, contentContainer);
+    createArtist(isLoggedIn, contentContainer);
 }
 
 export { CreateArtist };

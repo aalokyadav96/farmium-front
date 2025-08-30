@@ -1,4 +1,3 @@
-import Snackbar from '../../components/ui/Snackbar.mjs';
 import { fetchUserProfile } from "./fetchProfile.js";
 import profilGen from "./renderUserProfile.js";
 import {attachProfileEventListeners} from "./userProfileService.js";
@@ -32,7 +31,7 @@ async function displayUserProfile(isLoggedIn, content, username) {
         content.appendChild(errorMessage);
 
 
-        Snackbar("Error fetching user profile.", 3000);
+        Notify("Error fetching user profile.", {type:"error",duration:3000, dismissible:true});
     }
 }
 

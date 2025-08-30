@@ -1,5 +1,5 @@
 import { meChat } from "../../mechat/plugnplay";
 
-export async function farmChat(farmerId, container, farmId) {
-    meChat(farmerId, container, "farm", farmId);
+export async function farmChat(farmerId, farmId) {
+    meChat(farmerId, "farm", farmId);
 }

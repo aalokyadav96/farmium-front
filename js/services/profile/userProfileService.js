@@ -1,6 +1,5 @@
 import { getState } from '../../state/state.js';
 import { apiFetch } from "../../api/api.js";
-import Snackbar from '../../components/ui/Snackbar.mjs';
 import { navigate } from "../../routes/index.js";
 import { logout } from "../../services/auth/authService.js";
 import { fetchProfile } from "./fetchProfile.js";
@@ -54,7 +53,7 @@ function attachProfileEventListeners(content) {
 async function deleteProfile() {
     if (!getState("token")) {
 
-        Snackbar("Please log in to delete your profile.", 3000);
+        Notify("Please log in to delete your profile.", {type:"warning",duration:3000, dismissible:true});
         return;
     }
 
@@ -66,11 +65,11 @@ async function deleteProfile() {
     try {
         await apiFetch('/profile/delete', 'DELETE');
 
-        Snackbar("Profile deleted successfully.", 3000);
+        Notify("Profile deleted successfully.", {type:"success",duration:3000, dismissible:true});
         logout(true);
     } catch (error) {
 
-        Snackbar(`Failed to delete profile: ${error.message}`, 3000);
+        Notify(`Failed to delete profile: ${error.message}`, {type:"error",duration:3000, dismissible:true});
     }
 };
 

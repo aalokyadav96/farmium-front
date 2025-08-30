@@ -1,4 +1,4 @@
-import { displayOneChat } from "../../services/mechat/onechat.js";
+import { displayOneChat } from "../../services/mechat/merechat.js";
 
 async function OneChatPage(isLoggedIn, chatid, contentContainer) {
     contentContainer.innerHTML = '';

@@ -1,0 +1,219 @@
+/* Scoped to feed container */
+#feedpostcon {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 8px;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+  
+  /* Post card */
+  #feedpostcon .feed-item {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow 0.2s ease;
+  }
+  #feedpostcon .feed-item:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  }
+  
+  /* Media container */
+  #feedpostcon .post-media {
+    width: 100%;
+    background: #000;
+    position: relative;
+  }
+  #feedpostcon .video-container {
+    width: 100%;
+    position: relative;
+  }
+  #feedpostcon .videocon video {
+    width: 100%;
+    height: auto;
+    max-height: 60vh;
+    display: block;
+    /* border-bottom: 1px solid #eee; */
+    background: #000;
+  }
+  #feedpostcon .vcon {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px;
+    border-top: 1px solid #eee;
+  }
+  #feedpostcon .quality-selector {
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+  }
+  /* #feedpostcon .buttonx {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    background: #0078d4;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  #feedpostcon .buttonx:hover {
+    background: #005a9e;
+  } */
+  
+  /* Post header */
+  #feedpostcon .post-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+  }
+  #feedpostcon .user-icon img.profile-thumb {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  #feedpostcon .user-time {
+    display: flex;
+    flex-direction: column;
+  }
+  #feedpostcon .username {
+    font-weight: 600;
+    font-size: 15px;
+    color: #111;
+  }
+  #feedpostcon .timestamp {
+    font-size: 12px;
+    color: #666;
+  }
+  
+  /* Post meta (title, description, tags) */
+  #feedpostcon .post-meta {
+    padding: 8px 12px;
+    border-top: 1px solid #f0f0f0;
+  }
+  #feedpostcon .post-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 4px 0;
+    color: #111;
+  }
+  #feedpostcon .post-description {
+    font-size: 14px;
+    margin: 4px 0;
+    color: #444;
+  }
+  #feedpostcon .post-tags {
+    margin-top: 6px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  #feedpostcon .post-tags .tag {
+    display: inline-block;
+    background: #f3f2f1;
+    color: #333;
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    line-height: 1.4;
+  }
+  
+  /* Actions */
+  #feedpostcon .post-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    border-top: 1px solid #f0f0f0;
+    flex-wrap: wrap;
+  }
+  #feedpostcon .post-actions span {
+    font-size: 14px;
+    cursor: pointer;
+    color: #444;
+  }
+  #feedpostcon .post-actions span:hover {
+    color: #0078d4;
+  }
+  #feedpostcon .more-wrapper {
+    position: relative;
+    margin-left: auto;
+  }
+  #feedpostcon .more-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    color: #444;
+    padding: 4px 8px;
+  }
+  #feedpostcon .dropdown {
+    position: absolute;
+    right: 0;
+    top: 28px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+    min-width: 120px;
+  }
+  #feedpostcon .dropdown.hidden {
+    display: none;
+  }
+  #feedpostcon .dropdown button {
+    background: none;
+    border: none;
+    padding: 8px 12px;
+    text-align: left;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  #feedpostcon .dropdown button:hover {
+    background: #f5f5f5;
+  }
+  #feedpostcon .edit-btn {
+    background: #0078d4;
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+  }
+  #feedpostcon .edit-btn:hover {
+    background: #005a9e;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 600px) {
+    #feedpostcon .feed-item {
+      border-radius: 8px;
+    }
+    #feedpostcon .videocon video {
+      max-height: 40vh;
+    }
+    #feedpostcon .username {
+      font-size: 14px;
+    }
+    #feedpostcon .post-title {
+      font-size: 15px;
+    }
+    #feedpostcon .post-description {
+      font-size: 13px;
+    }
+  }
+  

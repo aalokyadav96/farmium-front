@@ -1,7 +1,6 @@
 import { SRC_URL, apiFetch } from "../../api/api.js";
 import { displayMerchandise } from "../merch/merchService.js";
 import { displayMedia } from "../media/mediaService.js";
-import { DEFAULT_IMAGE } from "../../state/state.js";
 import { createElement } from "../../components/createElement.js";
 import Modal from "../../components/ui/Modal.mjs";
 
@@ -92,6 +91,7 @@ async function renderEventsTab(container, artistID, isCreator) {
         container.appendChild(createElement("p", {}, ["Error loading events."]));
     }
 }
+
 
 
 // Open Event Creation Modal

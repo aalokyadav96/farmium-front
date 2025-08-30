@@ -56,7 +56,6 @@
     grid-auto-columns: 1fr;
     grid-template-areas: "one";
     overflow: hidden;
-    max-height: 82vh;
 }
 
 .preview_image_wrap__Q29V8 .PostPreviewImageView_image_item__dzD2P {

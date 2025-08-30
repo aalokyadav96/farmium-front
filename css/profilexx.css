@@ -10,6 +10,9 @@
   flex-wrap: wrap;
 }
 
+.logout-btn {
+  border: 1px solid red;
+}
 
 .bg_img {
   display: block;
@@ -21,18 +24,15 @@
 }
 
 .channel {
-  background: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
-  padding: 1rem;
   width: 100%;
   box-sizing: border-box;
 }
 
-.channel > span {
+.channel>span {
   position: relative;
   display: inline-block;
-  margin-bottom: 1rem;
   width: 100%;
   aspect-ratio: 3/1;
   overflow: hidden;
@@ -59,7 +59,7 @@
   position: absolute;
   top: 8px;
   right: 8px;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   border: none;
   color: white;
   font-weight: bold;
@@ -72,12 +72,12 @@
 }
 
 .edit-banner-pic:hover {
-  background: rgba(0,0,0,0.75);
+  background: rgba(0, 0, 0, 0.75);
 }
 
 .profile_area {
   position: relative;
-  margin-top: -60px;
+  margin: -60px auto 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -86,6 +86,7 @@
 .thumb {
   width: 120px;
   height: 120px;
+  position: relative;
   border-radius: 50%;
   overflow: hidden;
   border: 3px solid #fff;
@@ -99,16 +100,17 @@
 
 .edit-profile-pic {
   position: absolute;
-  bottom: 0;
-  right: calc(50% - 60px);
+  bottom: 50%;
+  right: 0%;
   transform: translate(50%, 50%);
-  background: rgba(0,0,0,0.6);
+  background: rgba(0, 0, 0, 0.6);
   color: #fff;
   border: none;
   border-radius: 50%;
   width: 32px;
   height: 32px;
   cursor: pointer;
+  /* right: calc(0%); */
 }
 
 .profile-actions {
@@ -123,7 +125,6 @@
 .profile-actions .dropdown-item {
   padding: 6px 12px;
   border-radius: 4px;
-  border: none;
   cursor: pointer;
 }
 
@@ -196,11 +197,11 @@
   font-size: 14px;
 }
 
-  .profile-details {
-    flex: 1 1 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-    min-width: 200px;
-    text-align: center;
-  }
+.profile-details {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-width: 200px;
+  text-align: center;
+}

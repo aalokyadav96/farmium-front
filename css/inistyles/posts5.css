@@ -1,0 +1,127 @@
+/* Scoped Styles for Posts Page */
+.posts-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  
+  /* Main Section */
+  
+  
+  /* Controls */
+  .post-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .post-search,
+  .post-sort {
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    flex: 1;
+  }
+  
+  /* Category Chips */
+  .category-chips {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .category-chip {
+    padding: 8px 14px;
+    font-size: 14px;
+    border: none;
+    border-radius: 20px;
+    background-color: #e0f2f1;
+    color: #00796b;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .category-chip:hover {
+    background-color: #b2dfdb;
+  }
+  
+  /* Posts Container */
+  .postscon {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  /* Post Card */
+  .post-card {
+    width: calc(33% - 10px);
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    overflow: hidden;
+    transition: transform 0.2s ease;
+  }
+  
+  .post-card:hover {
+    transform: translateY(-4px);
+  }
+  
+  .post-card a {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    border-radius: 8px;
+}
+  
+  /* Post Image */
+  .post-card img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    display: block;
+    border-radius: 10px;
+  }
+  
+  /* Post Info */
+  .post-info {
+    padding: 4px 10px;
+  }
+  
+  .post-info p {
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+  
+  /* Aside Section */
+  
+  .posts-aside .button {
+    padding: 10px 16px;
+    font-size: 14px;
+    border: none;
+    border-radius: 8px;
+    background-color: #00796b;
+    color: white;
+    cursor: pointer;
+    width: 100%;
+  }
+  
+  .posts-aside .button:hover {
+    background-color: #004d40;
+  }
+  
+  /* Responsive Layout */
+  @media (max-width: 768px) {
+    .posts-wrapper {
+      flex-direction: column;
+    }
+  
+    .post-card {
+      width: 100%;
+    }
+  
+    .post-controls {
+      flex-direction: row;
+    }
+  }
+  

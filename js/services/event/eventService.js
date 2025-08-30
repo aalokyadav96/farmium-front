@@ -7,11 +7,12 @@ import Notify from "../../components/ui/Notify.mjs";
 
 import { displayEventDetails } from "./displayEventDetails.js";
 import { displayEventVenue, displayEventFAQ, displayEventReviews, displayLostAndFound, displayContactDetails } from "./eventTabs.js";
-import { updateEvent, editEventForm } from "./editEvent.js";
+import { editEvent } from "./creadit.js";
 import { displayTickets } from "../tickets/ticketService.js";
 import { displayMerchandise } from "../merch/merchService.js";
 import { displayMedia } from "../media/mediaService.js";
 import { persistTabs } from "../../utils/persistTabs.js";
+import { createTabs } from "../../components/ui/createTabs.js";
 
 
 // --- Helpers ---
@@ -20,9 +21,9 @@ const confirmAndExecute = async (message, action, successMessage, errorMessage) 
     if (confirm(message)) {
         try {
             await action();
-            Notify(successMessage, {type: "warning", duration: 3000, dismissible: true});
+            Notify(successMessage, { type: "success", duration: 3000, dismissible: true });
         } catch (error) {
-            Notify(`${errorMessage}: ${error.message}`, {type: "warning", duration: 3000, dismissible: true});
+            Notify(`${errorMessage}: ${error.message}`, { type: "error", duration: 3000, dismissible: true });
         }
     }
 };
@@ -45,9 +46,10 @@ const createVenue = async (container, eventId, seatingplan, isLoggedIn) => {
 
 // Delete Event
 async function deleteEvent(isLoggedIn, eventId) {
-    if (!isLoggedIn) return 
-    Notify("Please log in to delete your event.", {type: "warning", duration: 3000, dismissible: true});
-
+    if (!isLoggedIn) {
+        Notify("Please log in to delete your event.", { type: "warning", duration: 3000, dismissible: true });
+        return
+    }
     await confirmAndExecute(
         "Are you sure you want to delete this event?",
         () => apiFetch(`/events/event/${eventId}`, "DELETE").then(() => navigate("/events")),
@@ -58,8 +60,10 @@ async function deleteEvent(isLoggedIn, eventId) {
 
 // View Analytics (placeholder)
 async function viewEventAnalytics(isLoggedIn) {
-    if (!isLoggedIn) return 
-    Notify("Please log in to view your event analytics.", {type: "warning", duration: 3000, dismissible: true});
+    if (!isLoggedIn) {
+        Notify("Please log in to view your event analytics.", { type: "warning", duration: 3000, dismissible: true });
+        return;
+    }
     confirm("Do you want to view event analytics?");
 }
 
@@ -95,35 +99,27 @@ const setupTabs = (eventData, eventId, isCreator, isLoggedIn) => {
     return tabs;
 };
 
-// Display Full Event
-
 async function displayEvent(isLoggedIn, eventId, content) {
     content.innerHTML = "";
     const container = createElement('div', { class: "eventpage" }, []);
     content.appendChild(container);
 
     try {
-        container.innerHTML = "";
-
         const eventData = await fetchEventData(eventId);
         const isCreator = isLoggedIn && state.user === eventData.creatorid;
 
         await displayEventDetails(container, eventData, isCreator, isLoggedIn);
-        container.appendChild(createElement('div', { id: "edittabs" }));
 
         const tabs = setupTabs(eventData, eventId, isCreator, isLoggedIn);
-        persistTabs(container, tabs, `event-tabs:${eventId}`);
 
-        // const tabs = setupTabs(eventData, eventId, isCreator, isLoggedIn);
-
-        // const tabStorageKey = `event-tabs:${eventId}`;
-        // const activeTabId = localStorage.getItem(tabStorageKey) || tabs[0]?.id;
-
-        // const tabsUI = createTabs(tabs, tabStorageKey, activeTabId, (newTabId) => {
-        //     localStorage.setItem(tabStorageKey, newTabId);
-        // });
-
-        // container.appendChild(tabsUI);
+        // Replace persistTabs with createTabs
+        const tabUI = createTabs(
+            tabs,
+            `event-tabs:${eventId}`, // routeKey for saving tab state
+            null,                     // initialTabId (optional)
+            (newTabId) => { /* optional callback */ }
+        );
+        container.appendChild(tabUI);
 
         if (eventData.seatingplan) {
             await createVenue(container, eventData.eventid, eventData.seatingplan, isLoggedIn);
@@ -134,41 +130,10 @@ async function displayEvent(isLoggedIn, eventId, content) {
         container.appendChild(
             createElement("h1", { textContent: `Error loading event details: ${error.message}` })
         );
-        Notify("Failed to load event details. Please try again later.", {type: "warning", duration: 3000, dismissible: true});
+        Notify("Failed to load event details. Please try again later.", { type: "error", duration: 3000, dismissible: true });
     }
 }
 
-
-// async function displayEvent(isLoggedIn, eventId, content) {
-//     content.innerHTML = "";
-//     let container = createElement('div',{"class":"eventpage"},[]);
-
-//     content.innerHTML = "";
-//     content.appendChild(container);
-//     try {
-//         container.innerHTML = "";
-//         const eventData = await fetchEventData(eventId);
-//         const isCreator = isLoggedIn && state.user === eventData.creatorid;
-
-//         await displayEventDetails(container, eventData, isCreator, isLoggedIn);
-
-//         container.appendChild(createElement('div', {id:"edittabs"}));
-
-//         const tabs = setupTabs(eventData, eventId, isCreator, isLoggedIn);
-//         container.appendChild(createTabs(tabs));
-
-//         if (eventData.seatingplan) {
-//             await createVenue(container, eventData.eventid, isLoggedIn);
-//         }
-
-//     } catch (error) {
-//         container.innerHTML = "";
-//         container.appendChild(
-//             createElement("h1", { textContent: `Error loading event details: ${error.message}` })
-//         );
-//         SnackBar("Failed to load event details. Please try again later.", 3000);
-//     }
-// }
 
 // Display Sections (direct sections instead of tabs)
 async function displayEventSections(wrapper, eventData, isCreator, isLoggedIn) {
@@ -194,8 +159,7 @@ async function displayEventSections(wrapper, eventData, isCreator, isLoggedIn) {
 
 // --- Exports ---
 export {
-    updateEvent,
-    editEventForm,
+    editEvent,
     fetchEventData,
     displayEvent,
     displayEventSections,
@@ -203,219 +167,3 @@ export {
     viewEventAnalytics
 };
 
-
-// // import { state } from "../../state/state.js";
-// // import { apiFetch } from "../../api/api.js";
-// // import { navigate } from "../../routes/index.js";
-// // import SnackBar from "../../components/ui/Snackbar.mjs";
-// // import { createElement } from "../../components/createElement.js";
-// // import { createTabs } from "../../components/ui/createTabs.js";
-
-// // import { displayEventDetails } from "./displayEventDetails.js";
-// // import { displayEventVenue } from "./eventTabs.js";
-// // import { updateEvent, editEventForm } from "./editEvent.js";
-// // import { displayTickets } from "../tickets/ticketService.js";
-// // import { displayMerchandise } from "../merch/merchService.js";
-// // import { displayMedia } from "../media/mediaService.js";
-
-// // import {
-// //     displayEventFAQ,
-// //     displayEventReviews,
-// //     // displayEventSchedule,
-// //     // displayLivestream,
-// //     displayLostAndFound,
-// //     displayContactDetails
-// // } from "./eventTabs.js";
-
-// // // 🗑 Delete Event
-// // async function deleteEvent(isLoggedIn, eventId) {
-// //     if (!isLoggedIn) return SnackBar("Please log in to delete your event.", 3000);
-
-// //     if (confirm("Are you sure you want to delete this event?")) {
-// //         try {
-// //             await apiFetch(`/events/event/${eventId}`, 'DELETE');
-// //             SnackBar("Event deleted successfully.", 3000);
-// //             navigate('/events');
-// //         } catch (error) {
-// //             SnackBar(`Error deleting event: ${error.message}`, 3000);
-// //         }
-// //     }
-// // }
-
-// // // 📊 Analytics (Placeholder for now)
-// // async function viewEventAnalytics(isLoggedIn, eventId) {
-// //     if (!isLoggedIn) return SnackBar("Please log in to view your event analytics.", 3000);
-// //     if (confirm("Do you want to view event analytics?")) {
-// //         // TODO: Implement logic
-// //     }
-// // }
-
-// // // 📥 Fetch Event Data
-// // async function fetchEventData(eventId) {
-// //     const eventData = await apiFetch(`/events/event/${eventId}`);
-// //     if (!eventData || !Array.isArray(eventData.tickets)) {
-// //         throw new Error("Invalid event data received.");
-// //     }
-// //     return eventData;
-// // }
-
-// // // 📄 Main Event Display
-// // // async function displayEvent(isLoggedIn, eventId, container) {
-// // //     try {
-// // //         const eventData = await fetchEventData(eventId);
-// // //         const isCreator = isLoggedIn && state.user === eventData.creatorid;
-
-// // //         container.innerHTML = '';
-
-// // //         const wrapper = createElement('div');
-// // //         await displayEventSections(wrapper, eventData, isCreator, isLoggedIn);
-
-// // //         container.appendChild(wrapper);
-// // //     } catch (error) {
-// // //         container.innerHTML = '';
-// // //         container.appendChild(
-// // //             createElement('h1', { textContent: `Error loading event details: ${error.message}` })
-// // //         );
-// // //         SnackBar("Failed to load event details. Please try again later.", 3000);
-// // //     }
-// // // }
-
-
-// // async function displayEvent(isLoggedIn, eventId, contentContainer) {
-// //     try {
-// //         const eventData = await fetchEventData(eventId);
-// //         const isCreator = isLoggedIn && state.user === eventData.creatorid;
-
-// //         contentContainer.innerHTML = '';
-// //         await displayEventDetails(contentContainer, eventData, isCreator, isLoggedIn);
-
-// //         // let container = document.createElement('div');
-// //         // contentContainer.appendChild(container);
-
-// //         const tabs = [
-// //             // { title: 'Reviews', id: 'reviews-tab', render: (container) => displayEventReviews(container, eventId, isCreator, isLoggedIn) },
-// //             // { title: 'Media', id: 'media-tab', render: (container) => displayMedia(container, 'event', eventId, isLoggedIn) },
-// //         ];
-
-// //         // let estatus = eventData.status;
-// //         // let estatus = "ongoing";
-
-// //         const then = new Date(eventData.date)
-// //         const now = new Date();
-// //         let timediff = then - now;
-// //         let estatus = timediff <= 0 ? "ongoing" : "active";
-
-// //         // Dynamically add tabs based on event status
-// //         if (estatus === "active") {
-// //             tabs.push(
-// //                 { title: 'Tickets', id: 'tickets-tab', render: (container) => displayTickets(container, eventData.tickets, eventId, isCreator, isLoggedIn) },
-// //                 { title: 'Merchandise', id: 'merch-tab', render: (container) => displayMerchandise(container, eventData.merch, "event", eventId, isCreator, isLoggedIn) },
-// //                 { title: 'FAQ', id: 'faq-tab', render: (container) => displayEventFAQ(container, isCreator, eventId, eventData.faqs) },
-// //                 // { title: 'Schedule', id: 'schedule-tab', render: (container) => displayEventSchedule(container, isCreator, eventData.schedule) },
-// //             );
-// //         } else if (estatus === "ongoing") {
-// //             tabs.push(
-// //                 // { title: 'Livestream', id: 'livestream-tab', render: (container) => displayLivestream(container, eventId, isLoggedIn) },
-// //                 { title: 'Reviews', id: 'reviews-tab', render: (container) => displayEventReviews(container, eventId, isCreator, isLoggedIn) },
-// //                 { title: 'Media', id: 'media-tab', render: (container) => displayMedia(container, 'event', eventId, isLoggedIn) },
-// //                 { title: 'Lost & Found', id: 'lnf-tab', render: (container) => displayLostAndFound(container, eventData.lostandfound) },
-// //                 { title: 'Contact', id: 'contact-tab', render: (container) => displayContactDetails(container, eventData.contactInfo) }
-// //             );
-// //         }
-
-// //         const tabContainer = createTabs(tabs);
-// //         contentContainer.appendChild(tabContainer);
-
-// //         // const tabContainer = createTabs(tabs, 'tickets-tab');
-
-// //     if (eventData.seatingplan) {
-// //         // Venue Details
-// //         const eventVenue = createElement('div',{id:'event-venue', "class":'tabs-container'},[]);
-// //         await displayEventVenue(eventVenue, isLoggedIn, eventData.eventid);
-
-// //         contentContainer.appendChild(eventVenue);
-// //     }
-
-// //         // contentContainer.appendChild(tabContainer);
-// //     } catch (error) {
-// //         contentContainer.innerHTML = '';
-// //         contentContainer.appendChild(createElement('h1', { textContent: `Error loading event details: ${error.message}` }));
-// //         SnackBar("Failed to load event details. Please try again later.", 3000);
-// //     }
-// // }
-
-
-
-// // // 🧱 Display All Sections
-// // async function displayEventSections(wrapper, eventData, isCreator, isLoggedIn) {
-// //     console.log(eventData);
-// //     wrapper.innerHTML = '';
-
-// //     // 1. Main Event Overview
-// //     await displayEventDetails(wrapper, eventData, isCreator, isLoggedIn);
-
-// //     // 2. Tabs Container
-// //     const tabsContainer = createElement('div', { class: 'tabs-container' });
-// //     wrapper.appendChild(tabsContainer);
-
-// //     // 3. Dynamically add sections
-// //     const sections = [
-// //         {
-// //             condition: eventData.tickets?.length,
-// //             renderer: () => displayTickets(section(), eventData.tickets, eventData.eventid, isCreator, isLoggedIn)
-// //         },
-// //         {
-// //             condition: eventData.faqs?.length,
-// //             renderer: () => displayEventFAQ(section(), isCreator, eventData.eventid, eventData.faqs)
-// //         },
-// //         {
-// //             condition: eventData.merch?.length,
-// //             renderer: () => displayMerchandise(section(), eventData.merch, eventData.eventid, isCreator, isLoggedIn)
-// //         },
-// //         // {
-// //         //     condition: eventData.schedule?.length,
-// //         //     renderer: () => displayEventSchedule(section(), isCreator, eventData.schedule)
-// //         // },
-// //         // {
-// //         //     condition: eventData.livestreamLink,
-// //         //     renderer: () => displayLivestream(section(), eventData.eventid, isLoggedIn)
-// //         // },
-// //         {
-// //             condition: eventData.reviews?.length,
-// //             renderer: () => displayEventReviews(section(), eventData.eventid, isCreator, isLoggedIn)
-// //         },
-// //         {
-// //             condition: eventData.media?.length,
-// //             renderer: () => displayMedia(section(), "event", eventData.eventid, isLoggedIn)
-// //         },
-// //         {
-// //             condition: eventData.lostandfound?.length,
-// //             renderer: () => displayLostAndFound(section(), eventData.lostandfound)
-// //         },
-// //         {
-// //             condition: eventData.contactInfo,
-// //             renderer: () => displayContactDetails(section(), eventData.contactInfo)
-// //         }
-// //     ];
-
-// //     sections.forEach(({ condition, renderer }) => {
-// //         // if (condition) renderer();
-// //         renderer();
-// //     });
-
-// //     function section() {
-// //         const el = createElement("section", { class: "event-section" });
-// //         tabsContainer.appendChild(el);
-// //         return el;
-// //     }
-// // }
-
-// // export {
-// //     updateEvent,
-// //     editEventForm,
-// //     fetchEventData,
-// //     displayEvent,
-// //     displayEventSections,
-// //     deleteEvent,
-// //     viewEventAnalytics
-// // };

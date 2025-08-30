@@ -1,5 +1,4 @@
 import { createElement } from "../../components/createElement.js";
-// import RenderMenu from "../../components/ui/MenuRender.mjs";
 import BookingForm from "../../components/ui/BookinggForm.mjs";
 import Button from "../../components/base/Button.js";
 import { apiFetch } from "../../api/api.js";

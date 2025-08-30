@@ -1,118 +1,107 @@
+/* Modal container */
 .modal {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   display: flex;
-  align-items: center;
   justify-content: center;
-  z-index: 1000;
+  align-items: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.modal--fade-in {
+  opacity: 1;
   pointer-events: auto;
-  animation: fadeIn 0.25s ease-out;
-  background-color: var(--color-bg);
 }
 
 .modal--fade-out {
-  animation: fadeOut 0.2s ease-in forwards;
+  opacity: 0;
+  pointer-events: none;
 }
 
+/* Overlay */
 .modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: -1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  pointer-events: auto;
 }
 
-/* Dialog Container */
+/* Dialog */
 .modal-dialog {
-  border: 1px solid var(--color-fg);
-  border-radius: 8px;
-  width: 100%;
-  max-height: 90vh;
+  position: relative;
+  border-radius: 6px;
+  max-width: 90%;
+  background-color: var(--color-bg);
+  max-height: 90%;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  z-index: 10;
+  pointer-events: auto;
   outline: none;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
-  transition: transform 0.25s ease, opacity 0.25s ease;
 }
 
-.modal--small .modal-dialog {
-  max-width: 360px;
-}
-
-.modal--medium .modal-dialog {
-  max-width: 600px;
-}
-
-.modal--large .modal-dialog {
-  max-width: 860px;
-}
+/* Sizes */
+.modal--small .modal-dialog { width: 300px; }
+.modal--medium .modal-dialog { width: 500px; }
+.modal--large .modal-dialog { width: 800px; }
 
 /* Header */
 .modal-header {
-  padding: 1rem 1.25rem;
-  border-bottom: 1px solid #eee;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #ddd;
 }
 
-.modal-header h3 {
-  margin: 0;
-  font-size: 1.1rem;
-  font-weight: 500;
-}
-
-/* Close Button */
 .modal-close {
-  background: none;
+  background: var(--color-bg);
+  color: var(--color-fg);
   border: none;
-  font-size: 1.5rem;
-  line-height: 1;
+  font-size: 1.4rem;
   cursor: pointer;
-  padding: 0 0.25rem;
-  transition: color 0.2s ease;
-}
-.modal-close:hover {
-  color: #111;
+  line-height: 1;
 }
 
 /* Body */
 .modal-body {
-  padding: 1rem 1.25rem;
+  padding: 16px;
   overflow-y: auto;
-  flex-grow: 1;
-  font-size: 0.95rem;
-  line-height: 1.5;
+  flex: 1 1 auto;
 }
 
 /* Footer */
 .modal-footer {
-  padding: 0.75rem 1.25rem;
-  border-top: 1px solid #eee;
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
+  padding: 12px 16px;
+  border-top: 1px solid #ddd;
+  text-align: right;
 }
 
-/* Fade Animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Scrollbar styling for body */
+.modal-body::-webkit-scrollbar {
+  width: 8px;
 }
 
-@keyframes fadeOut {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(16px);
-  }
+.modal-body::-webkit-scrollbar-track {
+  background: #f0f0f0;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 4px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .modal-dialog { width: 90%; }
 }

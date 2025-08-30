@@ -1,49 +1,36 @@
 import { createElement } from "../../../components/createElement.js";
-import { SRC_URL, apiFetch } from "../../../api/api.js";
-import Snackbar from "../../../components/ui/Snackbar.mjs";
+import { SRC_URL, apiFetch, apigFetch } from "../../../api/api.js";
 import { getState } from "../../../state/state.js";
 import { navigate } from "../../../routes/index.js";
-import { editBaito } from "../create/editBaito.js";
+import { createOrEditBaito } from "../create/createOrEditBaito.js";
 import Button from "../../../components/base/Button.js";
-import { showApplicantsModal } from "../dash/baitoEmployerDash.js";
+import { showApplicantsModal } from "../dash/BaitoDash.js";
 import { ImageGallery } from "../../../components/ui/IMageGallery.mjs";
 import { displayReviews } from "../../reviews/displayReviews.js";
 import Notify from "../../../components/ui/Notify.mjs";
-
 import { meChat } from "../../mechat/plugnplay.js";
 import { resolveImagePath, EntityType, PictureType } from "../../../utils/imagePaths.js";
 import { updateImageWithCrop } from "../../../utils/bannerEditor.js";
+import Sightbox from "../../../components/ui/SightBox.mjs";
 
-/**
- * Stub: Start chat with employer
- */
-function startChatWithEmployer(userId, baitoId, container) {
-  meChat(userId, container, "baito", baitoId);
+/** Open chat with employer */
+function startChatWithEmployer(userId, baitoId) {
+  meChat(userId, "baito", baitoId);
 }
 
-/**
- * Stub: Upload resume feature
- */
+/** Resume upload stub */
 function uploadResumeFeature() {
-  Notify("Resume upload feature is under development.", { duration: 1000 });
+  Notify("Resume upload feature is under development.", { type: "info", duration: 3000, dismissible: true });
 }
 
-/**
- * Stub: Leave a review
- */
-// function leaveReview(baitoId) {
-//   alert(`Leave review feature for job ${baitoId} is coming soon.`);
-// }
-
-/**
- * Stub: View application history (owner only)
- */
+/** Application history stub */
 function storeApplicationHistory(baitoId) {
-  Notify(`Application history for job ${baitoId} is coming soon.`, { duration: 1000 });
+  Notify(`Application history for job ${baitoId} is coming soon.`, { type: "info", duration: 3000, dismissible: true });
 }
 
+/** Expandable job description */
 function renderExpandableDescription(text = "") {
-  const descP = createElement("p", { class: "baito-description" }, []);
+  const descP = createElement("p", { class: "baito-description" });
   const isLong = text.length > 300;
   descP.textContent = isLong ? text.slice(0, 300) + "…" : text;
 
@@ -59,50 +46,58 @@ function renderExpandableDescription(text = "") {
   return createElement("div", {}, [descP, btn]);
 }
 
-function renderOwnerControls(baito) {
+/** Edit baito wrapper using new createOrEditBaito import */
+export function editBaito(baito, isLoggedIn, container) {
+  createOrEditBaito({ 
+    isLoggedIn, 
+    contentContainer: container, 
+    baito 
+  });
+}
+
+/** Controls for job owner */
+function renderOwnerControls(baito, container, isLoggedIn) {
   return createElement("div", { class: "baito-owner-controls" }, [
-    Button("✏️ Edit Job", "baito-edit-btn", { click: () => editBaito(baito) }, "buttonx btn-secondary"),
+    Button("✏️ Edit Job", "baito-edit-btn", { click: () => editBaito(baito, isLoggedIn, container) }, "buttonx btn-secondary"),
     Button("📨 View Applicants", "view-applicants-btn", { click: () => showApplicantsModal(baito) }, "buttonx btn-secondary"),
     Button("🗑 Delete Job", "delete-baito-btn", {
       click: async () => {
         if (!confirm("Delete this job permanently?")) return;
         try {
           await apiFetch(`/baitos/baito/${baito.baitoid}`, "DELETE");
-          Snackbar("✅ Deleted", 2000);
+          Notify("✅ Deleted", { type: "success", duration: 3000, dismissible: true });
           navigate("/baitos");
         } catch {
-          Snackbar("❌ Failed to delete.", 2000);
+          Notify("❌ Failed to delete.", { type: "error", duration: 3000, dismissible: true });
         }
       }
     }, "buttonx btn-danger"),
-    Button("📜 Application History", "app-history-btn", {
-      click: () => storeApplicationHistory(baito.baitoid)
-    }, "buttonx btn-secondary"),
-    Button("Chats", "chats-btn-baito", {
-      click: () => navigate("/merechats")
-    }, "buttonx btn-secondary")
+    Button("📜 Application History", "app-history-btn", { click: () => storeApplicationHistory(baito.baitoid) }, "buttonx btn-secondary"),
+    Button("Chats", "chats-btn-baito", { click: () => navigate("/merechats") }, "buttonx btn-secondary")
   ]);
 }
 
+/** Controls for applicants */
 function renderApplicantControls(baito, baitoid, isOwner, container, isLoggedIn) {
   return createElement("div", { class: "baito-user-controls" }, [
     Button("📩 Apply / Contact", "apply-btn", {
       click: async (e) => {
-        const btn = e.currentTarget;
-        if (!isLoggedIn) return Snackbar("Please log in to apply for this job.", 3000);
+        if (!isLoggedIn) return Notify("Please log in to apply for this job.", { type: "warning", duration: 3000, dismissible: true });
         const pitch = prompt("Write a short message to the employer:");
-        if (!pitch?.trim()) return Snackbar("Application cancelled.", 2000);
+        if (!pitch?.trim()) return Notify("Application cancelled.", { type: "success", duration: 3000, dismissible: true });
 
+        const btn = e.currentTarget;
         btn.disabled = true;
         btn.textContent = "Applying...";
+
         try {
           const form = new FormData();
           form.append("pitch", pitch.trim());
           const res = await apiFetch(`/baitos/baito/${baitoid}/apply`, "POST", form);
-          Snackbar(res.success ? "✅ Application sent!" : res.message, 3000);
+          Notify(res.success ? "✅ Application sent!" : res.message, { type: "success", duration: 3000, dismissible: true });
           btn.textContent = "Applied";
         } catch {
-          Snackbar("❌ Failed to apply.", 3000);
+          Notify("❌ Failed to apply.", { type: "error", duration: 3000, dismissible: true });
           btn.disabled = false;
           btn.textContent = "📩 Apply / Contact";
         }
@@ -115,7 +110,7 @@ function renderApplicantControls(baito, baitoid, isOwner, container, isLoggedIn)
         if (!saved.includes(baito.baitoid)) {
           saved.push(baito.baitoid);
           localStorage.setItem("savedJobs", JSON.stringify(saved));
-          Snackbar("Saved!", 2000);
+          Notify("Saved!", { type: "success", duration: 3000, dismissible: true });
         }
       }
     }, "buttonx btn-bookmark"),
@@ -126,49 +121,41 @@ function renderApplicantControls(baito, baitoid, isOwner, container, isLoggedIn)
         if (!reason?.trim()) return;
         try {
           await apiFetch(`/baitos/baito/${baitoid}/report`, "POST", { reason: reason.trim() });
-          Snackbar("✅ Report submitted", 2000);
+          Notify("✅ Report submitted", { type: "success", duration: 3000, dismissible: true });
         } catch {
-          Snackbar("❌ Failed to report", 2000);
+          Notify("❌ Failed to report", { type: "error", duration: 3000, dismissible: true });
         }
       }
     }, "buttonx btn-danger"),
 
-    Button("💬 Chat with Employer", "chat-btn", { click: () => startChatWithEmployer(baito.ownerId, baitoid, container) }, "buttonx btn-secondary"),
-    Button("📎 Upload Resume", "upload-resume-btn", { click: () => uploadResumeFeature() }, "buttonx btn-secondary"),
+    Button("💬 Chat with Employer", "chat-btn", { click: () => startChatWithEmployer(baito.ownerId, baitoid) }, "buttonx btn-secondary"),
+    Button("📎 Upload Resume", "upload-resume-btn", { click: uploadResumeFeature }, "buttonx btn-secondary"),
     Button("⭐ Leave Review", "leave-review-btn", { click: () => displayReviews(container, isOwner, isLoggedIn, "baito", baitoid) }, "buttonx btn-secondary")
   ]);
 }
 
+/** Fetch related jobs */
 async function fetchSimilarJobs(category, excludeId) {
   try {
-    const jobs = await apiFetch(`/baitos/related?category=${category}&exclude=${excludeId}`);
-    return jobs || [];
+    return await apigFetch(`/baitos/related?category=${category}&exclude=${excludeId}`) || [];
   } catch {
     console.warn("Failed to load similar jobs");
     return [];
   }
 }
 
+/** Employer info */
 function createEmployerSection(employer) {
   if (!employer) return null;
 
-  const avatar = employer.avatar
-    ? createElement("img", {
-        src: employer.avatar,
-        alt: "Employer",
-        class: "employer-avatar",
-      })
-    : null;
-
+  const avatar = employer.avatar ? createElement("img", { src: employer.avatar, alt: "Employer", class: "employer-avatar" }) : null;
   const name = createElement("span", {}, [employer.name || "Anonymous Employer"]);
-
-  const verifiedBadge = employer.verified
-    ? createElement("span", { class: "verified-badge" }, ["✅ Verified"])
-    : null;
+  const verifiedBadge = employer.verified ? createElement("span", { class: "verified-badge" }, ["✅ Verified"]) : null;
 
   return createElement("div", { class: "baito-employer" }, [avatar, name, verifiedBadge].filter(Boolean));
 }
 
+/** Job meta info */
 function createMetaSection(baito) {
   const metaLines = [
     baito.category && baito.subcategory ? `📂 ${baito.category} › ${baito.subcategory}` : null,
@@ -180,90 +167,85 @@ function createMetaSection(baito) {
     baito.createdAt ? `📅 Posted: ${new Date(baito.createdAt).toLocaleDateString()}` : null,
   ].filter(Boolean);
 
-  return createElement(
-    "div",
-    { class: "baito-meta" },
-    metaLines.map(line => createElement("p", {}, [line]))
-  );
+  return createElement("div", { class: "baito-meta" }, metaLines.map(line => createElement("p", {}, [line])));
 }
 
+/** Tags section */
 function createTagsSection(tags) {
-  if (!Array.isArray(tags) || tags.length === 0) return null;
-
-  return createElement(
-    "div",
-    { class: "baito-tags" },
-    tags.map(tag => createElement("span", { class: "baito-tag" }, [`#${tag.trim()}`]))
-  );
+  if (!Array.isArray(tags) || !tags.length) return null;
+  return createElement("div", { class: "baito-tags" }, tags.map(tag => createElement("span", { class: "baito-tag" }, [`#${tag.trim()}`])));
 }
 
+/** Requirements section */
 function createRequirementsSection(requirements) {
-  if (!requirements || (Array.isArray(requirements) && requirements.length === 0)) return null;
-
+  if (!requirements || (Array.isArray(requirements) && !requirements.length)) return null;
   const reqs = Array.isArray(requirements) ? requirements : [requirements];
-
   return createElement("div", { class: "baito-reqs" }, [
     createElement("h4", {}, ["📌 Requirements"]),
     createElement("ul", {}, reqs.map(r => createElement("li", {}, [r]))),
   ]);
 }
 
-function createBannerSection(baito) {
+/** Banner section */
+function createBannerSection(baito, isCreator) {
+  const sightPath = resolveImagePath(EntityType.BAITO, PictureType.BANNER, baito.banner);
   const bannerImg = createElement("img", {
-    src: resolveImagePath(EntityType.BAITO, PictureType.BANNER, baito.banner || "placeholder.jpg"),
+    src: sightPath,
     alt: "Job Banner",
     class: "baito-banner",
     loading: "lazy",
     id: "baito-banner-img",
   });
+  bannerImg.addEventListener("click", () => Sightbox(sightPath, "image"));
 
-  bannerImg.onerror = () => {
-    bannerImg.src = resolveImagePath(EntityType.DEFAULT, PictureType.STATIC, "placeholder.jpg");
-  };
+  const children = [bannerImg];
 
-  const bannerEditButton = createElement("button", { class: "edit-banner-pic" }, ["Edit Banner"]);
-  bannerEditButton.addEventListener("click", () => {
-    updateImageWithCrop({
-      entityType: EntityType.BAITO,
-      imageType: "banner",
-      stateKey: "banner",
-      stateEntityKey: "baito",
-      previewElementId: "baito-banner-img",
-      pictureType: PictureType.BANNER,
-      entityId: baito.baitoid,
+  if (isCreator) {
+    const bannerEditButton = createElement("button", { class: "edit-banner-pic" }, ["Edit Banner"]);
+    bannerEditButton.addEventListener("click", () => {
+      updateImageWithCrop({
+        entityType: EntityType.BAITO,
+        imageType: "banner",
+        stateKey: "banner",
+        stateEntityKey: "baito",
+        previewElementId: "baito-banner-img",
+        pictureType: PictureType.BANNER,
+        entityId: baito.baitoid,
+      });
     });
-  });
+    children.push(bannerEditButton);
+  }
 
-  return createElement("div", { class: "baito-banner-section" }, [bannerImg, bannerEditButton]);
+  return createElement("div", { class: "baito-banner-section" }, children);
 }
 
+/** Similar jobs section */
 async function appendSimilarJobs(section, category, excludeId) {
   const similarJobs = await fetchSimilarJobs(category, excludeId);
-  if (similarJobs.length === 0) return;
+  if (!similarJobs.length) return;
 
   const details = createElement("details", { class: "baito-related-details" }, [
     createElement("summary", {}, ["🔎 Similar Jobs"]),
   ]);
 
   similarJobs.slice(0, 4).forEach(job => {
-    details.appendChild(
-      createElement("div", { class: "baito-related-card" }, [
-        createElement("p", {}, [job.title || "Untitled"]),
-        Button("View", "", { click: () => navigate(`/baito/${job.baitoid}`) }, "btn btn-sm"),
-      ])
-    );
+    details.appendChild(createElement("div", { class: "baito-related-card" }, [
+      createElement("p", {}, [job.title || "Untitled"]),
+      Button("View", "", { click: () => navigate(`/baito/${job.baitoid}`) }, "btn btn-sm"),
+    ]));
   });
 
   section.appendChild(details);
 }
 
+/** Main display function */
 export async function displayBaito(isLoggedIn, baitoid, contentContainer) {
   contentContainer.innerHTML = "";
-
   try {
     const baito = await apiFetch(`/baitos/baito/${baitoid}`);
-    const section = createElement("div", { class: "baito-detail" });
+    if (!baito) throw new Error("Baito not found");
 
+    const section = createElement("div", { class: "baito-detail" });
     section.appendChild(createElement("h2", { class: "baito-title" }, [baito.title || "Untitled Job"]));
 
     const employerSection = createEmployerSection(baito.employer);
@@ -277,226 +259,41 @@ export async function displayBaito(isLoggedIn, baitoid, contentContainer) {
     const reqSection = createRequirementsSection(baito.requirements);
     if (reqSection) section.appendChild(reqSection);
 
-    if (baito.description) {
-      section.appendChild(renderExpandableDescription(baito.description));
-    }
+    if (baito.description) section.appendChild(renderExpandableDescription(baito.description));
 
-    section.appendChild(createBannerSection(baito));
+    const isOwner = getState("user") === baito.ownerId;
+    section.appendChild(createBannerSection(baito, isOwner));
 
     const reviewSec = createElement("div", {}, []);
-    const isOwner = getState("user") === baito.ownerId;
     const controls = isOwner
-      ? renderOwnerControls(baito)
+      ? renderOwnerControls(baito, contentContainer, isLoggedIn)
       : renderApplicantControls(baito, baitoid, isOwner, reviewSec, isLoggedIn);
 
     section.appendChild(controls);
     section.appendChild(reviewSec);
 
-    // Gallery
     const cleanImageNames = baito.images?.filter(Boolean) || [];
     if (cleanImageNames.length) {
-      const fullURLs = cleanImageNames.map(name =>
-        resolveImagePath(EntityType.BAITO, PictureType.PHOTO, name)
-      );
+      const fullURLs = cleanImageNames.map(name => resolveImagePath(EntityType.BAITO, PictureType.PHOTO, name));
       section.appendChild(ImageGallery(fullURLs));
     }
 
-    // Map
     if (baito.coords?.lat && baito.coords?.lng) {
-      section.appendChild(
-        createElement("iframe", {
-          src: `https://maps.google.com/maps?q=${baito.coords.lat},${baito.coords.lng}&z=15&output=embed`,
-          width: "100%",
-          height: "300",
-          class: "baito-map",
-          loading: "lazy",
-          allowfullscreen: true,
-        })
-      );
+      section.appendChild(createElement("iframe", {
+        src: `https://maps.google.com/maps?q=${baito.coords.lat},${baito.coords.lng}&z=15&output=embed`,
+        width: "100%",
+        height: "300",
+        class: "baito-map",
+        loading: "lazy",
+        allowfullscreen: true,
+      }));
     }
 
     await appendSimilarJobs(section, baito.category, baitoid);
 
     contentContainer.appendChild(section);
   } catch (error) {
-    contentContainer.appendChild(
-      createElement("p", {}, ["🚫 Unable to load job details. Please try again later."])
-    );
+    contentContainer.appendChild(createElement("p", {}, ["🚫 Unable to load job details. Please try again later."]));
     console.error("Failed to fetch baito:", error);
   }
 }
-
-
-// export async function displayBaito(isLoggedIn, baitoid, contentContainer) {
-//   contentContainer.innerHTML = "";
-
-//   try {
-//     const baito = await apiFetch(`/baitos/baito/${baitoid}`);
-//     const section = createElement("div", { class: "baito-detail" });
-
-//     section.appendChild(createElement("h2", { class: "baito-title" }, [baito.title || "Untitled Job"]));
-
-//     // Employer Info
-//     if (baito.employer) {
-//       const avatar = baito.employer.avatar
-//         ? createElement("img", {
-//           src: baito.employer.avatar,
-//           alt: "Employer",
-//           class: "employer-avatar"
-//         })
-//         : null;
-
-//       const name = createElement("span", {}, [baito.employer.name || "Anonymous Employer"]);
-
-//       const verifiedBadge = baito.employer.verified
-//         ? createElement("span", { class: "verified-badge" }, ["✅ Verified"])
-//         : null;
-
-//       section.appendChild(
-//         createElement("div", { class: "baito-employer" }, [avatar, name, verifiedBadge].filter(Boolean))
-//       );
-//     }
-
-//     // Meta Info
-//     const metaLines = [
-//       baito.category && baito.subcategory ? `📂 ${baito.category} › ${baito.subcategory}` : null,
-//       baito.wage ? `💴 Wage: ¥${Number(baito.wage).toLocaleString()}/hour` : null,
-//       baito.workHours ? `⏰ Hours: ${baito.workHours}` : null,
-//       baito.location ? `📍 Location: ${baito.location}` : null,
-//       baito.phone ? `📞 Contact: ${baito.phone}` : null,
-//       baito.deadline ? `⏳ Apply by: ${new Date(baito.deadline).toLocaleDateString()}` : null,
-//       baito.createdAt ? `📅 Posted: ${new Date(baito.createdAt).toLocaleDateString()}` : null
-//     ];
-
-//     section.appendChild(
-//       createElement("div", { class: "baito-meta" }, metaLines.filter(Boolean).map(t => createElement("p", {}, [t])))
-//     );
-
-//     // Tags
-//     if (Array.isArray(baito.tags) && baito.tags.length) {
-//       section.appendChild(
-//         createElement("div", { class: "baito-tags" },
-//           baito.tags.map(tag => createElement("span", { class: "baito-tag" }, [`#${tag.trim()}`]))
-//         )
-//       );
-//     }
-
-//     // Requirements
-//     const requirements = Array.isArray(baito.requirements)
-//       ? baito.requirements
-//       : baito.requirements
-//         ? [baito.requirements]
-//         : [];
-
-//     if (requirements.length) {
-//       section.appendChild(
-//         createElement("div", { class: "baito-reqs" }, [
-//           createElement("h4", {}, ["📌 Requirements"]),
-//           createElement("ul", {}, requirements.map(r => createElement("li", {}, [r])))
-//         ])
-//       );
-//     }
-
-//     // Description
-//     if (baito.description) {
-//       section.appendChild(renderExpandableDescription(baito.description));
-//     }
-//     // Banner Image
-//     const bannerImg = createElement("img", {
-//       src: resolveImagePath(EntityType.BAITO, PictureType.BANNER, baito.banner || "placeholder.jpg"),
-//       alt: "Job Banner",
-//       class: "baito-banner",
-//       loading: "lazy",
-//       id: "baito-banner-img",
-//     });
-
-//     bannerImg.onerror = () => {
-//       bannerImg.src = resolveImagePath(EntityType.DEFAULT, PictureType.STATIC, "placeholder.jpg");
-//     };
-
-//     // Edit button
-//     const bannerEditButton = createElement("button", { class: "edit-banner-pic" }, ["Edit Banner"]);
-//     bannerEditButton.addEventListener("click", () => {
-//       updateImageWithCrop({
-//         entityType: EntityType.BAITO,
-//         imageType: "banner",
-//         stateKey: "banner",
-//         stateEntityKey: "baito",
-//         previewElementId: "baito-banner-img",
-//         pictureType: PictureType.BANNER,
-//         entityId: baito.baitoid,  // Confirm this is correct ID property
-//       });
-//     });
-
-//     section.appendChild(bannerImg);
-//     section.appendChild(bannerEditButton);
-
-
-//     // Action Controls
-//     const reviewSec = createElement("div", {}, []);
-//     const isOwner = getState("user") === baito.ownerId;
-//     const controls = isOwner
-//       ? renderOwnerControls(baito)
-//       : renderApplicantControls(baito, baitoid, isOwner, reviewSec, isLoggedIn);
-
-//     section.appendChild(controls);
-//     section.appendChild(reviewSec);
-
-//     // Gallery
-//     const cleanImageNames = baito.images?.filter(Boolean) || [];
-//     if (cleanImageNames.length) {
-//       const fullURLs = cleanImageNames.map(name =>
-//         resolveImagePath(EntityType.BAITO, PictureType.PHOTO, name)
-//       );
-//       section.appendChild(ImageGallery(fullURLs));
-//     }
-
-//     // Map
-//     if (baito.coords?.lat && baito.coords?.lng) {
-//       section.appendChild(
-//         createElement("iframe", {
-//           src: `https://maps.google.com/maps?q=${baito.coords.lat},${baito.coords.lng}&z=15&output=embed`,
-//           width: "100%",
-//           height: "300",
-//           class: "baito-map",
-//           loading: "lazy",
-//           allowfullscreen: true
-//         })
-//       );
-//     }
-
-//     // Related Jobs
-//     if (baito.category) {
-//       try {
-//         const similarJobs = await apiFetch(`/baitos/related?category=${baito.category}&exclude=${baitoid}`);
-//         if (similarJobs.length) {
-//           const details = createElement("details", { class: "baito-related-details" }, [
-//             createElement("summary", {}, ["🔎 Similar Jobs"])
-//           ]);
-
-//           similarJobs.slice(0, 4).forEach(job => {
-//             details.appendChild(
-//               createElement("div", { class: "baito-related-card" }, [
-//                 createElement("p", {}, [job.title || "Untitled"]),
-//                 Button("View", "", {
-//                   click: () => navigate(`/baito/${job.baitoid}`)
-//                 }, "btn btn-sm")
-//               ])
-//             );
-//           });
-
-//           section.appendChild(details);
-//         }
-//       } catch {
-//         console.warn("Failed to load similar jobs");
-//       }
-//     }
-
-//     contentContainer.appendChild(section);
-//   } catch (error) {
-//     contentContainer.appendChild(
-//       createElement("p", {}, ["🚫 Unable to load job details. Please try again later."])
-//     );
-//     console.error("Failed to fetch baito:", error);
-//   }
-// }

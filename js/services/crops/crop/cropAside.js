@@ -1,11 +1,11 @@
-import { createPromoLink } from "./displayCrops.helpers";
+import { createPromoLink } from "./displayCropshelpers";
 import { createElement } from "../../../components/createElement";
 import Button from "../../../components/base/Button";
 import { navigate } from "../../../routes";
 
 export function cropAside(cropData) {
     return createElement("div", "", [
-        createElement("h3", {}, ["CTA Buttons"]),
+        createElement("h3", {}, ["Actions"]),
         createElement("div", { class: "cta-list" }, [
             Button("Buy Products","buyprds-crp-btn",{
                 click: () => {navigate('/products')}

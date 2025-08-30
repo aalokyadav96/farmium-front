@@ -1,4 +1,5 @@
-import { apiFetch } from "../../api/api.js";
+import { apiFetch, apigFetch } from "../../api/api.js";
+import Button from "../../components/base/Button.js";
 import { createElement } from "../../components/createElement.js";
 import Modal from "../../components/ui/Modal.mjs";
 import { navigate } from "../../routes/index.js";
@@ -13,41 +14,30 @@ function displayItinerary(isLoggedIn, divContainerNode) {
     return;
   }
 
-  // const isCreator = state.user?.userid === it.user_id;
   let isCreator = false;
 
-  // Main container layout: list on the left, details on the right
-  const layout = document.createElement('div');
-  layout.className = 'itinerary-layout';
-
-  const leftPane = document.createElement('div');
-  leftPane.className = 'itinerary-left';
-
-  const rightPane = document.createElement('div');
-  rightPane.className = 'itinerary-right';
-  rightPane.innerHTML = '<p>Select an itinerary to see details here.</p>';
-
+  // Main layout: left pane (list) / right pane (details)
+  const layout = createElement('div', { class: 'itinerary-layout' }, []);
+  const leftPane = createElement('div', { class: 'itinerary-left' }, []);
+  const rightPane = createElement('div', { class: 'itinerary-right' }, [
+    createElement('p', {}, ['Select an itinerary to see details here.'])
+  ]);
   layout.append(leftPane, rightPane);
   divContainerNode.appendChild(layout);
 
   // --- Search Form ---
-  const searchForm = document.createElement('form');
-  searchForm.id = 'searchForm';
-  searchForm.innerHTML = `
-    <input type="text" name="start_date" placeholder="Start Date (YYYY-MM-DD)">
-    <input type="text" name="location" placeholder="Location">
-    <input type="text" name="status" placeholder="Status (Draft/Confirmed)">
-    <button type="submit">Search</button>
-  `;
+  const searchForm = createElement('form', { id: 'searchForm', class: 'itinerary-search-form' }, [
+    createElement('input', { type: 'text', name: 'start_date', placeholder: 'Start Date (YYYY-MM-DD)' }),
+    createElement('input', { type: 'text', name: 'location', placeholder: 'Location' }),
+    createElement('input', { type: 'text', name: 'status', placeholder: 'Status (Draft/Confirmed)' }),
+    createElement('button', { type: 'submit' }, ['Search'])
+  ]);
 
   // --- Create Button ---
-  const createBtn = document.createElement('button');
-  createBtn.textContent = 'Create Itinerary';
-  createBtn.className = 'itinerary-create-btn';
+  const createBtn = createElement('button', { class: 'itinerary-create-btn' }, ['Create Itinerary']);
   createBtn.addEventListener('click', () => navigate('/create-itinerary'));
 
-  const listDiv = document.createElement('div');
-  listDiv.id = 'itineraryList';
+  const listDiv = createElement('div', { id: 'itineraryList' }, []);
 
   leftPane.append(searchForm, createBtn, listDiv);
 
@@ -64,11 +54,10 @@ function displayItinerary(isLoggedIn, divContainerNode) {
   loadItineraries();
 
   // --- Core Methods ---
-
   async function loadItineraries() {
     listDiv.innerHTML = '<p>Loading...</p>';
     try {
-      const list = await apiFetch('/itineraries');
+      const list = await apigFetch('/itineraries');
       renderItineraryList(list);
     } catch {
       listDiv.innerHTML = '<p>Error loading itineraries.</p>';
@@ -78,7 +67,7 @@ function displayItinerary(isLoggedIn, divContainerNode) {
   async function searchItineraries(qs) {
     listDiv.innerHTML = '<p>Searching...</p>';
     try {
-      const list = await apiFetch(`/itineraries/search?${qs}`);
+      const list = await apigFetch(`/itineraries/search?${qs}`);
       renderItineraryList(list);
     } catch {
       listDiv.innerHTML = '<p>Error searching itineraries.</p>';
@@ -91,37 +80,44 @@ function displayItinerary(isLoggedIn, divContainerNode) {
       listDiv.innerHTML = '<p>No itineraries found.</p>';
       return;
     }
-    const ul = document.createElement('ul');
+    const ul = createElement('ul', { class: 'itinerary-list' }, []);
     itineraries.forEach(it => ul.appendChild(createItineraryListItem(it)));
     listDiv.appendChild(ul);
   }
 
   function createItineraryListItem(it) {
-    // isCreator = state.user?.userid === it.user_id;
     isCreator = state.user === it.user_id;
-    console.log(isCreator);
-    const li = document.createElement('li');
-    li.style.marginBottom = '10px';
-    li.innerHTML = `<strong>${it.name}</strong> (${it.status}) `;
+
+    const li = createElement('li', { class: 'itinerary-list-item' }, [
+      createElement('strong', {}, [it.name]),
+      document.createTextNode(` (${it.status}) `)
+    ]);
+
     const buttons = [
       { label: 'View', fn: () => viewItinerary(it.itineraryid) },
-      { label: 'Fork', fn: () => forkItinerary(it.itineraryid) },
+      { label: 'Fork', fn: () => forkItinerary(it.itineraryid) }
     ];
 
     if (isCreator) {
       buttons.push(
-        { label: 'Edit', fn: () => editItinerary(isLoggedIn, rightPane, it.itineraryid) },
+        { label: 'Edit', fn: () => editItinerary(rightPane, isLoggedIn, it.itineraryid) },
         { label: 'Delete', fn: () => deleteItinerary(it.itineraryid) },
-        // Only show Publish if not already published
         ...(!it.published ? [{ label: 'Publish', fn: () => publishItinerary(it.itineraryid) }] : [])
       );
     }
 
+    // buttons.forEach(({ label, fn }) => {
+    //   const btn = createElement('button', { class: 'itinerary-btn' }, [label]);
+    //   btn.addEventListener('click', fn);
+    //   li.appendChild(btn);
+    // });
+
     buttons.forEach(({ label, fn }) => {
-      const btn = document.createElement('button');
-      btn.textContent = label;
-      btn.style.marginLeft = '5px';
-      btn.addEventListener('click', fn);
+      const btn = Button(label, `it-disp-${label}`, {
+        click: () => {
+          fn();
+        }
+       }, 'itinerary-btn buttonx secondary');
       li.appendChild(btn);
     });
 
@@ -132,19 +128,16 @@ function displayItinerary(isLoggedIn, divContainerNode) {
     const modalLoading = Modal({
       title: 'Loading Itinerary Details…',
       content: 'Loading...',
-      onClose: () => { }, // no special cleanup needed here
+      onClose: () => { },
       size: 'large',
       closeOnOverlayClick: true,
     });
 
     try {
       const it = await apiFetch(`/itineraries/all/${id}`);
-
       const contentNode = renderItineraryDetailsContent(it);
-      // Replace modal content with actual details:
       modalLoading.querySelector('.modal-body').replaceWith(contentNode);
 
-      // Update title:
       const titleEl = modalLoading.querySelector('.modal-header h3');
       titleEl.textContent = it.name;
     } catch {
@@ -153,134 +146,261 @@ function displayItinerary(isLoggedIn, divContainerNode) {
     }
   }
 
-  
   function renderItineraryDetailsContent(it) {
-    const container = createElement('div',{class:"itinerarycon"},[]);
-
-    const meta = document.createElement('p');
-    meta.innerHTML = `
-      <strong>Status:</strong> ${it.status} &nbsp;|&nbsp;
-      <strong>Start:</strong> ${it.start_date} &nbsp;|&nbsp;
-      <strong>End:</strong> ${it.end_date}
-    `;
+    const container = createElement('div', { class: 'itinerary-con timeline' }, []);
+  
+    // Meta info
+    const meta = createElement('div', { class: 'itinerary-meta' }, [
+      createElement('span', { class: 'status' }, [`Status: ${it.status}`]),
+      createElement('span', { class: 'dates' }, [`Start: ${it.start_date}`, `End: ${it.end_date}`])
+    ]);
     container.appendChild(meta);
-
-    const desc = document.createElement('p');
-    desc.innerHTML = `<strong>Description:</strong> ${it.description || 'N/A'}`;
+  
+    const desc = createElement('p', { class: 'itinerary-desc' }, [`Description: ${it.description || 'N/A'}`]);
     container.appendChild(desc);
-
-    if (!Array.isArray(it.days) || it.days.length === 0) {
-      const noSchedule = document.createElement('p');
-      noSchedule.textContent = 'No schedule available.';
-      container.appendChild(noSchedule);
+  
+    if (!Array.isArray(it.days) || !it.days.length) {
+      container.appendChild(createElement('p', { class: 'no-schedule' }, ['No schedule available.']));
       return container;
     }
-
+  
     it.days.forEach((day, di) => {
-      const dayDiv = document.createElement('div');
-      dayDiv.className = 'itinerary-day';
-
-      const dayHeader = document.createElement('h3');
-      dayHeader.textContent = `Day ${di + 1}: ${day.date}`;
+      const dayDiv = createElement('div', { class: 'itinerary-day timeline-day' }, []);
+      const dayHeader = createElement('h3', { class: 'day-header' }, [`Day ${di + 1}: ${day.date}`]);
       dayDiv.appendChild(dayHeader);
-
+  
+      const visitsContainer = createElement('div', { class: 'visits-container' }, []);
+  
       day.visits.forEach((visit, vi) => {
-        const visitDiv = document.createElement('div');
-        visitDiv.className = 'itinerary-visit';
-
-        if (vi > 0 && visit.transport) {
-          const transP = document.createElement('p');
-          transP.innerHTML = `<strong>Transport:</strong> ${visit.transport}`;
-          visitDiv.appendChild(transP);
+        const visitCard = createElement('div', { class: 'visit-card timeline-node' }, []);
+  
+        const time = createElement('span', { class: 'visit-time' }, [`${visit.start_time} – ${visit.end_time}`]);
+        const location = createElement('span', { class: 'visit-location' }, [visit.location]);
+        const infoRow = createElement('div', { class: 'visit-info' }, [time, location]);
+        visitCard.appendChild(infoRow);
+  
+        if (visit.transport) {
+          const transportBadge = createElement('span', { class: `transport ${visit.transport.toLowerCase()}` }, [visit.transport]);
+          visitCard.appendChild(transportBadge);
         }
-
-        const timeP = document.createElement('p');
-        timeP.innerHTML = `<strong>Time:</strong> ${visit.start_time} – ${visit.end_time}`;
-
-        const locP = document.createElement('p');
-        locP.innerHTML = `<strong>Location:</strong> ${visit.location}`;
-
-        visitDiv.append(timeP, locP);
-        dayDiv.appendChild(visitDiv);
+  
+        visitsContainer.appendChild(visitCard);
+  
+        // Add connector with arrow
+        if (vi < day.visits.length - 1 && visit.transport) {
+          const connector = createElement('div', { class: `transport-connector ${visit.transport.toLowerCase()}` }, []);
+          const line = createElement('div', { class: 'line' }, []);
+          const arrow = createElement('div', { class: 'arrow' }, []);
+          const label = createElement('span', { class: 'connector-label' }, [visit.transport]);
+  
+          connector.appendChild(line);
+          connector.appendChild(arrow);
+          connector.appendChild(label);
+          visitsContainer.appendChild(connector);
+        }
       });
-
+  
+      dayDiv.appendChild(visitsContainer);
       container.appendChild(dayDiv);
     });
-
+  
     return container;
   }
+  
+  // function renderItineraryDetailsContent(it) {
+  //   const container = createElement('div', { class: 'itinerary-con timeline' }, []);
+  
+  //   // Meta info
+  //   const meta = createElement('div', { class: 'itinerary-meta' }, [
+  //     createElement('span', { class: 'status' }, [`Status: ${it.status}`]),
+  //     createElement('span', { class: 'dates' }, [`Start: ${it.start_date}`, `End: ${it.end_date}`])
+  //   ]);
+  //   container.appendChild(meta);
+  
+  //   const desc = createElement('p', { class: 'itinerary-desc' }, [`Description: ${it.description || 'N/A'}`]);
+  //   container.appendChild(desc);
+  
+  //   if (!Array.isArray(it.days) || !it.days.length) {
+  //     container.appendChild(createElement('p', { class: 'no-schedule' }, ['No schedule available.']));
+  //     return container;
+  //   }
+  
+  //   it.days.forEach((day, di) => {
+  //     const dayDiv = createElement('div', { class: 'itinerary-day timeline-day' }, []);
+  //     const dayHeader = createElement('h3', { class: 'day-header' }, [`Day ${di + 1}: ${day.date}`]);
+  //     dayDiv.appendChild(dayHeader);
+  
+  //     const visitsContainer = createElement('div', { class: 'visits-container' }, []);
+  
+  //     day.visits.forEach((visit, vi) => {
+  //       const visitCard = createElement('div', { class: 'visit-card timeline-node' }, []);
+  
+  //       const time = createElement('span', { class: 'visit-time' }, [`${visit.start_time} – ${visit.end_time}`]);
+  //       const location = createElement('span', { class: 'visit-location' }, [visit.location]);
+  //       const infoRow = createElement('div', { class: 'visit-info' }, [time, location]);
+  //       visitCard.appendChild(infoRow);
+  
+  //       // Add transport badge inside the card if defined
+  //       if (visit.transport) {
+  //         const transportBadge = createElement('span', { class: `transport ${visit.transport.toLowerCase()}` }, [visit.transport]);
+  //         visitCard.appendChild(transportBadge);
+  //       }
+  
+  //       visitsContainer.appendChild(visitCard);
+  
+  //       // Add transport connector between visits
+  //       if (vi < day.visits.length - 1 && visit.transport) {
+  //         const nextTransport = createElement('div', { class: `transport-connector ${visit.transport.toLowerCase()}` }, [
+  //           visit.transport
+  //         ]);
+  //         visitsContainer.appendChild(nextTransport);
+  //       }
+  //     });
+  
+  //     dayDiv.appendChild(visitsContainer);
+  //     container.appendChild(dayDiv);
+  //   });
+  
+  //   return container;
+  // }
+  
 
+  // // function renderItineraryDetailsContent(it) {
+  // //   const container = createElement('div', { class: 'itinerary-con timeline' }, []);
+  
+  // //   // Meta info
+  // //   const meta = createElement('div', { class: 'itinerary-meta' }, [
+  // //     createElement('span', { class: 'status' }, [`Status: ${it.status}`]),
+  // //     createElement('span', { class: 'dates' }, [`Start: ${it.start_date}`, `End: ${it.end_date}`])
+  // //   ]);
+  // //   container.appendChild(meta);
+  
+  // //   const desc = createElement('p', { class: 'itinerary-desc' }, [`Description: ${it.description || 'N/A'}`]);
+  // //   container.appendChild(desc);
+  
+  // //   if (!Array.isArray(it.days) || !it.days.length) {
+  // //     container.appendChild(createElement('p', { class: 'no-schedule' }, ['No schedule available.']));
+  // //     return container;
+  // //   }
+  
+  // //   it.days.forEach((day, di) => {
+  // //     const dayDiv = createElement('div', { class: 'itinerary-day timeline-day' }, []);
+  // //     const dayHeader = createElement('h3', { class: 'day-header' }, [`Day ${di + 1}: ${day.date}`]);
+  // //     dayDiv.appendChild(dayHeader);
+  
+  // //     const visitsContainer = createElement('div', { class: 'visits-container' }, []);
+  
+  // //     day.visits.forEach((visit, vi) => {
+  // //       const visitCard = createElement('div', { class: 'visit-card timeline-node' }, []);
+  
+  // //       if (visit.transport) {
+  // //         const transportBadge = createElement('span', { class: `transport ${visit.transport.toLowerCase()}` }, [visit.transport]);
+  // //         visitCard.appendChild(transportBadge);
+  // //       }
+  
+  // //       const time = createElement('span', { class: 'visit-time' }, [`${visit.start_time} – ${visit.end_time}`]);
+  // //       const location = createElement('span', { class: 'visit-location' }, [visit.location]);
+  // //       const infoRow = createElement('div', { class: 'visit-info' }, [time, location]);
+  
+  // //       visitCard.appendChild(infoRow);
+  // //       visitsContainer.appendChild(visitCard);
+  // //     });
+  
+  // //     dayDiv.appendChild(visitsContainer);
+  // //     container.appendChild(dayDiv);
+  // //   });
+  
+  // //   return container;
+  // // }
+  
+  // // // function renderItineraryDetailsContent(it) {
+  // // //   const container = createElement('div', { class: 'itinerary-con' }, []);
+  
+  // // //   // Meta info
+  // // //   const meta = createElement('div', { class: 'itinerary-meta' }, [
+  // // //     createElement('span', { class: 'status' }, [`Status: ${it.status}`]),
+  // // //     createElement('span', { class: 'dates' }, [`Start: ${it.start_date}`, `End: ${it.end_date}`])
+  // // //   ]);
+  // // //   container.appendChild(meta);
+  
+  // // //   const desc = createElement('p', { class: 'itinerary-desc' }, [`Description: ${it.description || 'N/A'}`]);
+  // // //   container.appendChild(desc);
+  
+  // // //   if (!Array.isArray(it.days) || !it.days.length) {
+  // // //     container.appendChild(createElement('p', { class: 'no-schedule' }, ['No schedule available.']));
+  // // //     return container;
+  // // //   }
+  
+  // // //   it.days.forEach((day, di) => {
+  // // //     const dayDiv = createElement('div', { class: 'itinerary-day' }, []);
+  // // //     const dayHeader = createElement('h3', { class: 'day-header' }, [`Day ${di + 1}: ${day.date}`]);
+  // // //     dayDiv.appendChild(dayHeader);
+  
+  // // //     const visitsContainer = createElement('div', { class: 'visits-container' }, []);
+  // // //     day.visits.forEach((visit, vi) => {
+  // // //       const visitCard = createElement('div', { class: 'visit-card' }, []);
+  
+  // // //       if (visit.transport) {
+  // // //         const transportBadge = createElement('span', { class: `transport ${visit.transport.toLowerCase()}` }, [visit.transport]);
+  // // //         visitCard.appendChild(transportBadge);
+  // // //       }
+  
+  // // //       const time = createElement('span', { class: 'visit-time' }, [`${visit.start_time} – ${visit.end_time}`]);
+  // // //       const location = createElement('span', { class: 'visit-location' }, [visit.location]);
+  
+  // // //       const infoRow = createElement('div', { class: 'visit-info' }, [time, location]);
+  // // //       visitCard.appendChild(infoRow);
+  
+  // // //       visitsContainer.appendChild(visitCard);
+  // // //     });
+  
+  // // //     dayDiv.appendChild(visitsContainer);
+  // // //     container.appendChild(dayDiv);
+  // // //   });
+  
+  // // //   return container;
+  // // // }
+  
 
-  async function viewItinerary(id) {
+  // // // // function renderItineraryDetailsContent(it) {
+  // // // //   const container = createElement('div', { class: 'itinerary-con' }, []);
+
+  // // // //   const meta = createElement('p', {}, [
+  // // // //     document.createTextNode(`Status: ${it.status} | Start: ${it.start_date} | End: ${it.end_date}`)
+  // // // //   ]);
+  // // // //   container.appendChild(meta);
+
+  // // // //   const desc = createElement('p', {}, [`Description: ${it.description || 'N/A'}`]);
+  // // // //   container.appendChild(desc);
+
+  // // // //   if (!Array.isArray(it.days) || !it.days.length) {
+  // // // //     container.appendChild(createElement('p', {}, ['No schedule available.']));
+  // // // //     return container;
+  // // // //   }
+
+  // // // //   it.days.forEach((day, di) => {
+  // // // //     const dayDiv = createElement('div', { class: 'itinerary-day' }, []);
+  // // // //     const dayHeader = createElement('h3', {}, [`Day ${di + 1}: ${day.date}`]);
+  // // // //     dayDiv.appendChild(dayHeader);
+
+  // // // //     day.visits.forEach((visit, vi) => {
+  // // // //       const visitDiv = createElement('div', { class: 'itinerary-visit' }, []);
+  // // // //       if (vi > 0 && visit.transport) {
+  // // // //         visitDiv.appendChild(createElement('p', {}, [`Transport: ${visit.transport}`]));
+  // // // //       }
+  // // // //       visitDiv.appendChild(createElement('p', {}, [`Time: ${visit.start_time} – ${visit.end_time}`]));
+  // // // //       visitDiv.appendChild(createElement('p', {}, [`Location: ${visit.location}`]));
+  // // // //       dayDiv.appendChild(visitDiv);
+  // // // //     });
+
+  // // // //     container.appendChild(dayDiv);
+  // // // //   });
+
+  // // // //   return container;
+  // // // // }
+
+  function viewItinerary(id) {
     openViewModal(id);
-    // rightPane.innerHTML = '<p>Loading details…</p>';
-    // try {
-    //   const it = await apiFetch(`/itineraries/all/${id}`);
-    //   renderItineraryDetails(it);
-    // } catch {
-    //   rightPane.innerHTML = '<p>Error loading itinerary details.</p>';
-    // }
-  }
-
-  function renderItineraryDetails(it) {
-    // Clear and build header
-    rightPane.innerHTML = '';
-    const h2 = document.createElement('h2');
-    h2.textContent = it.name;
-    const meta = document.createElement('p');
-    meta.innerHTML = `
-      <strong>Status:</strong> ${it.status} &nbsp;|&nbsp;
-      <strong>Start:</strong> ${it.start_date} &nbsp;|&nbsp;
-      <strong>End:</strong> ${it.end_date}
-    `;
-    const desc = document.createElement('p');
-    desc.innerHTML = `<strong>Description:</strong> ${it.description || 'N/A'}`;
-
-    rightPane.append(h2, meta, desc);
-
-    // Render each day
-    if (!Array.isArray(it.days) || it.days.length === 0) {
-      rightPane.append(document.createElement('p').appendChild(document.createTextNode('No schedule available.')));
-      return;
-    }
-
-    it.days.forEach((day, di) => {
-      const dayDiv = document.createElement('div');
-      dayDiv.className = 'itinerary-day';
-
-      const dayHeader = document.createElement('h3');
-      dayHeader.textContent = `Day ${di + 1}: ${day.date}`;
-      dayDiv.appendChild(dayHeader);
-
-      day.visits.forEach((visit, vi) => {
-        const visitDiv = document.createElement('div');
-        visitDiv.className = 'itinerary-visit';
-
-        // Transport only for visits after the first one
-        if (vi > 0 && visit.transport) {
-          const transP = document.createElement('p');
-          transP.innerHTML = `<strong>Transport:</strong> ${visit.transport}`;
-          visitDiv.appendChild(transP);
-        }
-
-        const timeP = document.createElement('p');
-        timeP.innerHTML = `<strong>Time:</strong> ${visit.start_time} – ${visit.end_time}`;
-
-        const locP = document.createElement('p');
-        locP.innerHTML = `<strong>Location:</strong> ${visit.location}`;
-
-        visitDiv.append(timeP, locP);
-
-        dayDiv.appendChild(visitDiv);
-      });
-
-      rightPane.appendChild(dayDiv);
-    });
-  }
-
-  function editItineraryHandler(isLoggedIn, pane, id) {
-    pane.innerHTML = '';
-    editItinerary(isLoggedIn, pane, id);
   }
 
   async function deleteItinerary(id) {

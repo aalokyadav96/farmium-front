@@ -1,6 +1,5 @@
 import { apiFetch } from "../api/api";
 import { createElement } from "../components/createElement";
-import Snackbar from "../components/ui/Snackbar.mjs";
 import { CDN_URL } from "../state/state";
 // import { EntityType, PictureType } from "../../utils/imagePaths.js";
 import Notify from "../../components/ui/Notify.mjs";
@@ -108,7 +107,7 @@ export function uploadImagesWithQueue({
     const controllers = [];
 
     if (queue.length < files.length) {
-        Snackbar("Only .jpg and .png files are allowed.", 4000);
+        Notify("Only .jpg and .png files are allowed.", {type:"success",duration:3000, dismissible:true});
     }
 
     const slots = Array.from({ length: concurrency }, (_, i) => startNext(i));
@@ -145,7 +144,7 @@ export function uploadImagesWithQueue({
             failed.push({ file, error: err.message });
             bar.value = 0;
             bar.classList.add("error");
-            Snackbar(`Upload failed: ${file.name}`, 3000);
+            Notify(`Upload failed: ${file.name}`, {type:"success",duration:3000, dismissible:true});
         }
 
         await startNext(slotId);
@@ -161,89 +160,3 @@ export function uploadImagesWithQueue({
     };
 }
 
-
-
-// export function uploadImagesWithQueue({
-//     files,
-//     entityType,
-//     pictureType,
-//     entityId,
-//     token,
-//     containerEl,
-//     onComplete = () => {},
-//     onError = () => {},
-//     concurrency = 3
-// }) {
-//     const allowedTypes = ["image/jpeg", "image/png"];
-//     const queue = files.filter(file => allowedTypes.includes(file.type));
-//     const uploaded = [];
-//     const failed = [];
-//     const controllers = [];
-
-//     if (queue.length < files.length) {
-//         Snackbar("Only .jpg and .png files are allowed.", 4000);
-//     }
-
-//     const slots = Array.from({ length: concurrency }, (_, i) => startNext(i));
-
-//     function createProgressBar(fileName) {
-//         const label = createElement("div", {}, [`Uploading ${fileName}`]);
-//         const bar = createElement("progress", { max: 100, value: 0 });
-//         const wrapper = createElement("div", { class: "upload-progress-wrapper" }, [label, bar]);
-//         containerEl.appendChild(wrapper);
-//         return bar;
-//     }
-
-//     async function startNext(slotId) {
-//         if (!queue.length) return;
-
-//         const file = queue.shift();
-//         const controller = new AbortController();
-//         controllers.push(controller);
-
-//         const bar = createProgressBar(file.name);
-
-//         const exists = await fileAlreadyExists({
-//             entityType,
-//             pictureType,
-//             entityId,
-//             fileName: file.name
-//         });
-
-//         if (exists) {
-//             Snackbar(`${file.name} already exists. Skipping.`, 3000);
-//             uploaded.push({ file, skipped: true });
-//             bar.value = 100;
-//             return await startNext(slotId);
-//         }
-
-//         try {
-//             const result = await uploadFileInChunks({
-//                 file,
-//                 entityType,
-//                 pictureType,
-//                 entityId,
-//                 token,
-//                 signal: controller.signal,
-//                 onProgress: percent => bar.value = percent
-//             });
-//             uploaded.push(result);
-//         } catch (err) {
-//             failed.push({ file, error: err.message });
-//             bar.value = 0;
-//             bar.classList.add("error");
-//             Snackbar(`Upload failed: ${file.name}`, 3000);
-//         }
-
-//         await startNext(slotId);
-//     }
-
-//     Promise.all(slots).then(() => {
-//         if (uploaded.length) onComplete(uploaded);
-//         if (failed.length) onError(failed);
-//     });
-
-//     return {
-//         cancelAll: () => controllers.forEach(ctrl => ctrl.abort())
-//     };
-// }

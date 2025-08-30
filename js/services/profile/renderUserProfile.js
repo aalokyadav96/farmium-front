@@ -37,7 +37,7 @@ function profilGen(profile, isLoggedIn) {
 
     appendChildren(
         section,
-        createBanner(profile),
+        createBanner(profile, isLoggedIn),
         createProfilePicture(profile),
         createProfileDetails(profile, isLoggedIn),
         createStatistics(profile),

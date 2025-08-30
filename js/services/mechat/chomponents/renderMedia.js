@@ -1,85 +1,47 @@
-// chomponents/renderMedia.js
 import { createElement } from "../../../components/createElement";
-import { SRC_URL } from "../../../state/state";
 import { resolveImagePath, EntityType, PictureType } from "../../../utils/imagePaths.js";
+import { RenderImagePost } from "./renderImagePost.js";
+import { RenderVideoPost } from "./renderVideoPost.js";
+import { RenderAudioPost } from "./renderAudioPost.js";
 
 export function renderMedia(msg) {
-  if (!msg.media?.url || !msg.media?.type) {
-    return [ msg.content ];
+  const children = [];
+
+  // Always add plain text content if present
+  if (msg.content) {
+    children.push(msg.content);
   }
 
-  // const url  = `${SRC_URL}/uploads/farmchat/${msg.media.url}`;
-  const url  = resolveImagePath(EntityType.MECHAT, PictureType.THUMB, `${msg.media.url}`);
-  const type = msg.media.type;
+  // Create container for media
+  const mediaContainer = createElement("div", { class: "mediacon" }, []);
+  children.push(mediaContainer);
 
-  if (type.startsWith("image/")) {
-    return [ createElement("img", {
-      src: url,
-      class: "msg-image",
-      alt: "Image message"
-    }, []) ];
-  }
-  if (type.startsWith("audio/")) {
-    return [ createElement("audio", {
-      controls: true,
-      src: url,
-      class: "msg-audio"
-    }, []) ];
-  }
-  if (type.startsWith("video/")) {
-    return [ createElement("video", {
-      controls: true,
-      src: url,
-      class: "msg-video"
-    }, []) ];
+  // If no media, return early
+  if (!msg.media || !msg.media.url || !msg.media.type) {
+    return children;
   }
 
-  const filename = msg.media.url.split("/").pop();
-  return [ createElement("a", {
-    href: url,
-    download: filename,
-    class: "msg-file"
-  }, [ filename ]) ];
+  // Normalize type prefix (e.g. "image/jpeg" → "image")
+  const mime = msg.media.type.toLowerCase();
+
+  if (mime.startsWith("image/")) {
+    // RenderImagePost expects an array of urls
+    RenderImagePost(mediaContainer, [msg.media.url]);
+  } else if (mime.startsWith("video/")) {
+    RenderVideoPost(mediaContainer, [msg.media.url], msg.media.url);
+  } else if (mime.startsWith("audio/")) {
+    RenderAudioPost(mediaContainer, msg.media.url);
+  } else {
+    // Generic file download
+    const filename = msg.media.url.split("/").pop();
+    children.push(
+      createElement("a", {
+        href: resolveImagePath(EntityType.CHAT, PictureType.FILE, msg.media.url),
+        download: filename,
+        class: "msg-file"
+      }, [ filename ])
+    );
+  }
+
+  return children;
 }
-
-// // chomponents/renderMedia.js
-// import { createElement } from "../../../components/createElement.js";
-// import { SRC_URL } from "../../../state/state.js";
-
-// export function renderMedia(msg) {
-//     if (!msg.media?.url || !msg.media?.type) return [msg.content];
-
-//     const mediaURL = `${SRC_URL}/uploads/farmchat/${msg.media.url}`;
-//     const type = msg.media.type;
-
-//     if (type.startsWith("image/")) {
-//         return [createElement("img", {
-//             src: mediaURL,
-//             class: "msg-image",
-//             alt: "Image message"
-//         })];
-//     }
-
-//     if (type.startsWith("audio/")) {
-//         return [createElement("audio", {
-//             controls: true,
-//             src: mediaURL,
-//             class: "msg-audio"
-//         })];
-//     }
-
-//     if (type.startsWith("video/")) {
-//         return [createElement("video", {
-//             controls: true,
-//             src: mediaURL,
-//             class: "msg-video"
-//         })];
-//     }
-
-//     const filename = msg.media.url.split("/").pop();
-//     return [createElement("a", {
-//         href: mediaURL,
-//         download: filename,
-//         class: "msg-file"
-//     }, [filename])];
-// }

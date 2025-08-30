@@ -1,18 +1,18 @@
 import { getState, setState } from "../../state/state.js";
 import { apiFetch } from "../../api/api.js";
 import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
-import Snackbar from "../../components/ui/Snackbar.mjs";
 import { showLoadingMessage, removeLoadingMessage, capitalize } from "./profileHelpers.js";
 import { createElement } from "../../components/createElement.js";
 import { handleError } from "../../utils/utils.js";
-import Sightbox from "../../components/ui/SightBox.mjs";
+import SightBox from "../../components/ui/SightBox.mjs";
 import { openCropper } from "../../utils/cropper.js";
+import Notify from "../../components/ui/Notify.mjs";
 
 
 // async function updatePictureWithCrop(type, aspect) {}
 async function updatePictureWithCrop(type) {
     if (!getState("token")) {
-      Snackbar(`Please log in to update your ${type} picture.`, 3000);
+      Notify(`Please log in to update your ${type} picture.`, {type:"warning",duration:3000, dismissible:true});
       return false;
     }
   
@@ -60,7 +60,7 @@ async function updatePictureWithCrop(type) {
             }
           }, true);
   
-          Snackbar(`${capitalize(type)} picture updated successfully.`, 3000);
+          Notify(`${capitalize(type)} picture updated successfully.`, {type:"success",duration:3000, dismissible:true});
   
           // Update preview image src immediately
           const preview = document.getElementById(`${type}-picture-preview`);
@@ -82,8 +82,6 @@ async function updatePictureWithCrop(type) {
   }
   
 
-
-
 function createBanner(profile) {
     const bgImg = createElement("span", { class: "bg_img" });
     const banncon = createElement("span", { style: "position: relative;" });
@@ -93,7 +91,7 @@ function createBanner(profile) {
     const sightPath = resolveImagePath(EntityType.USER, PictureType.BANNER, bannerFilename);
 
     bgImg.style.backgroundImage = `url(${bannerPath})`;
-    bgImg.addEventListener("click", () => Sightbox(sightPath, "image"));
+    bgImg.addEventListener("click", () => SightBox(sightPath, "image"));
 
     appendChildren(banncon, createBannerEditButton(profile), bgImg);
     return banncon;
@@ -124,7 +122,7 @@ function createProfilePicture(profile) {
     thumb.appendChild(img);
 
     if (profile.profile_picture) {
-        thumb.addEventListener("click", () => Sightbox(fullSrc, "image"));
+        thumb.addEventListener("click", () => SightBox(fullSrc, "image"));
     }
 
     profileArea.appendChild(thumb);

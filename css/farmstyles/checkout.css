@@ -1,9 +1,4 @@
 
-  h2 {
-    font-size: 22px;
-    margin-bottom: 15px;
-  }
-  
   .address-form,
   .checkout-summary,
   .payment-details {
@@ -104,10 +99,6 @@
     margin-top: 10px;
   }
   
-  .payment-details h3 {
-    font-size: 16px;
-    margin: 15px 0 8px;
-  }
   
   .payment-method {
     margin-top: 20px;

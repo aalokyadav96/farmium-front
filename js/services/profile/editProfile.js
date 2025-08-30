@@ -1,7 +1,6 @@
 import { getState, setState } from '../../state/state.js';
 import { apiFetch } from "../../api/api.js";
 import { handleError } from "../../utils/utils.js";
-import Snackbar from '../../components/ui/Snackbar.mjs';
 import { renderPage, navigate } from "../../routes/index.js";
 import { showLoadingMessage, removeLoadingMessage } from "./profileHelpers.js";
 import { generateFormField } from "./generators.js";
@@ -15,7 +14,7 @@ async function editProfile(content) {
 
     const profile = getState("userProfile");
     if (!profile) {
-        Snackbar("Please log in to edit your profile.", 3000);
+        Notify("Please log in to edit your profile.", {type:"warning",duration:3000, dismissible:true});
         return;
     }
 
@@ -48,7 +47,7 @@ async function editProfile(content) {
 
     const cancelBtn = Button("Cancel", "cancel-profile-btn", {
         click: () => {
-            Snackbar("Profile editing canceled.", 2000);
+            Notify("Profile editing canceled.", {type:"info",duration:3000, dismissible:true});
             navigate("/profile");
             window.location.pathname = window.location.pathname;
         }
@@ -70,7 +69,7 @@ async function editProfile(content) {
 
 async function updateProfile(formData) {
     if (!getState("token")) {
-        Snackbar("Please log in to update your profile.", 3000);
+        Notify("Please log in to update your profile.", {type:"warning",duration:3000, dismissible:true});
         return;
     }
 
@@ -87,7 +86,7 @@ async function updateProfile(formData) {
     }
 
     if (Object.keys(updatedFields).length === 0) {
-        Snackbar("No changes were made to the profile.", 3000);
+        Notify("No changes were made to the profile.", {type:"info",duration:3000, dismissible:true});
         return;
     }
 
@@ -103,7 +102,7 @@ async function updateProfile(formData) {
         const mergedProfile = { ...currentProfile, ...updatedProfile };
         setState({ userProfile: mergedProfile }, true);
 
-        Snackbar("Profile updated successfully.", 3000);
+        Notify("Profile updated successfully.", {type:"success",duration:3000, dismissible:true});
         renderPage();
     } catch (error) {
         console.error("Error updating profile:", error);

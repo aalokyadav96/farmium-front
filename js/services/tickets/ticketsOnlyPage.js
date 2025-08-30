@@ -1,7 +1,6 @@
 import { displayTickets } from "../tickets/ticketService.js";
 import { createElement } from "../../components/createElement.js";
 import { apiFetch } from "../../api/api.js";
-import SnackBar from "../../components/ui/Snackbar.mjs";
 import { state } from "../../state/state.js";
 import Notify from "../../components/ui/Notify.mjs";
 
@@ -23,9 +22,9 @@ async function renderTicksPage(isLoggedIn, eventId, container) {
         console.log(eventData);
         const isCreator = isLoggedIn && state.user === eventData.creatorid;
 
-        const tickcon = createElement("div", {class:"tickcon"}, []);
+        const tickcon = createElement("div", { class: "tickcon" }, []);
 
-        container.appendChild(createElement("div", {id:"edittabs"},[]));
+        container.appendChild(createElement("div", { id: "edittabs" }, []));
         container.appendChild(tickcon);
 
         await displayTickets(tickcon, eventData.tickets, eventId, isCreator, isLoggedIn);
@@ -35,7 +34,7 @@ async function renderTicksPage(isLoggedIn, eventId, container) {
         container.appendChild(
             createElement("h1", { textContent: `Error loading event details: ${error.message}` })
         );
-        SnackBar("Failed to load event details. Please try again later.", 3000);
+        Notify("Failed to load event details. Please try again later.", { type: "error", duration: 3000 });
     }
 }
 

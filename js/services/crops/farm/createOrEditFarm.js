@@ -43,26 +43,26 @@ export function createFarmForm({ isEdit = false, farm = {}, onSubmit }) {
   const contactField = createInputField("text", "Contact", farm.contact || "", true);
   const availabilityField = createInputField("text", "Availability", farm.availabilityTiming || "");
 
-  const imageInput = createElement("input", { type: "file", accept: "image/*" });
-  const imagePreview = createElement("img", {
-    class: "preview",
-    style: "max-height:100px; margin-top:8px; display:none;"
-  });
+  // const imageInput = createElement("input", { type: "file", accept: "image/*" });
+  // const imagePreview = createElement("img", {
+  //   class: "preview",
+  //   style: "max-height:100px; margin-top:8px; display:none;"
+  // });
 
-  if (farm.image) {
-    imagePreview.src = farm.image;
-    imagePreview.style.display = "block";
-  }
+  // if (farm.image) {
+  //   imagePreview.src = farm.image;
+  //   imagePreview.style.display = "block";
+  // }
 
-  imageInput.addEventListener("change", () => {
-    const file = imageInput.files[0];
-    if (file) {
-      imagePreview.src = URL.createObjectURL(file);
-      imagePreview.style.display = "block";
-    } else {
-      imagePreview.style.display = "none";
-    }
-  });
+  // imageInput.addEventListener("change", () => {
+  //   const file = imageInput.files[0];
+  //   if (file) {
+  //     imagePreview.src = URL.createObjectURL(file);
+  //     imagePreview.style.display = "block";
+  //   } else {
+  //     imagePreview.style.display = "none";
+  //   }
+  // });
 
   const fields = [
     createLabeledField("Name", nameField),
@@ -71,7 +71,7 @@ export function createFarmForm({ isEdit = false, farm = {}, onSubmit }) {
     createLabeledField("Owner", ownerField),
     createLabeledField("Contact", contactField),
     createLabeledField("Availability", availabilityField),
-    createLabeledField("Photo", imageInput)
+    // createLabeledField("Photo", imageInput)
   ];
 
   const form = createForm(fields, async () => {
@@ -83,9 +83,9 @@ export function createFarmForm({ isEdit = false, farm = {}, onSubmit }) {
     formData.append("contact", contactField.value.trim());
     formData.append("availabilityTiming", availabilityField.value.trim());
 
-    if (imageInput.files.length > 0) {
-      formData.append("photo", imageInput.files[0]);
-    }
+    // if (imageInput.files.length > 0) {
+    //   formData.append("photo", imageInput.files[0]);
+    // }
 
     if (!isEdit) {
       formData.append("crops", JSON.stringify([])); // required by create API
@@ -94,6 +94,6 @@ export function createFarmForm({ isEdit = false, farm = {}, onSubmit }) {
     return await onSubmit(formData); // must return true or { success: true }
   }, isEdit ? "Update Farm" : "Create Farm");
 
-  form.appendChild(imagePreview);
+  // form.appendChild(imagePreview);
   return form;
 }

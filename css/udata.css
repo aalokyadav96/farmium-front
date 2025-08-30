@@ -43,35 +43,6 @@
   margin-bottom: 12px;
   flex-wrap: wrap;
 }
-
-.tab-button {
-  padding: 8px 14px;
-  background: #f4f4f4;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  color: #333;
-  transition: background 0.3s ease;
-}
-
-.tab-button:hover {
-  background: #e0e0e0;
-}
-
-.tab-button.active {
-  background: #0077cc;
-  color: white;
-}
-
-.tabs-content {
-  padding: 12px;
-  background: #fafafa;
-  border-radius: 8px;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.03);
-  font-size: 0.95rem;
-  color: #444;
-}
-
 #feedpost-container ul {
   list-style: none;
   padding: 0;

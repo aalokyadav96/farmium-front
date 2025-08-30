@@ -1,5 +1,4 @@
-import { SRC_URL, apiFetch } from "../../api/api.js";
-import Snackbar from "../../components/ui/Snackbar.mjs";
+import { SRC_URL, apigFetch } from "../../api/api.js";
 import { navigate } from "../../routes/index.js";
 // import { toggleFollow } from "./toggleFollow.js";
 import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
@@ -9,7 +8,7 @@ async function displayFollowSuggestions(userid, suggestionsSection) {
     suggestionsSection.innerHTML = ""; // Clear previous content
 
     try {
-        const suggestions = await apiFetch(`/suggestions/follow?userid=${userid}`);
+        const suggestions = await apigFetch(`/suggestions/follow?userid=${userid}`);
 
         if (suggestions && suggestions.length > 0) {
             const heading = document.createElement("h3");
@@ -81,7 +80,7 @@ async function displayFollowSuggestions(userid, suggestionsSection) {
         errorMessage.textContent = "Failed to load suggestions.";
         suggestionsSection.appendChild(errorMessage);
 
-        Snackbar("Error loading follow suggestions.", 3000);
+        Notify("Error loading follow suggestions.", {type:"error",duration:3000, dismissible:true});
     }
 }
 

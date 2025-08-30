@@ -1,9 +1,13 @@
 import { createElement } from "../../../components/createElement.js";
 import { Button } from "../../../components/base/Button.js";
 import { resolveImagePath, EntityType, PictureType } from "../../../utils/imagePaths.js";
-import { openHireWorkerModal } from "./WorkerModal.js";
+import { navigate } from "../../../routes/index.js"; // <-- use navigation
+import { getState } from "../../../state/state.js";
+
 
 export function HireWorkerCard(worker, isLoggedIn) {
+  const isSelf = getState("user") === worker.userid;
+
   const card = createElement("div", { class: "worker-card" });
 
   const photo = createElement("div", { class: "worker-photo", alt: "worker-photo" });
@@ -15,72 +19,39 @@ export function HireWorkerCard(worker, isLoggedIn) {
     alt: `${worker.name}'s profile photo`
   });
 
+  profileImg.onerror = () => {
+    profileImg.src = resolveImagePath(EntityType.DEFAULT, PictureType.STATIC, "placeholder.png");
+  };
+
   photo.appendChild(profileImg);
+
+  function renderDetail(icon, text) {
+    return text ? createElement("p", {}, [`${icon} ${text}`]) : null;
+  }
 
   const details = createElement("div", { class: "worker-details" }, [
     createElement("h3", {}, [worker.name || "Unnamed Worker"]),
-    worker.phone_number
-      ? createElement("p", {}, [`📞 ${worker.phone_number}`])
-      : null,
-    worker.preferred_roles
-      ? createElement("p", {}, [`🛠 Roles: ${worker.preferred_roles}`])
-      : null,
-    worker.address
-      ? createElement("p", {}, [`📍 ${worker.address}`])
-      : null,
-    worker.bio
-      ? createElement("p", {}, [`📝 ${worker.bio}`])
-      : null,
-    isLoggedIn
+    renderDetail("📞", worker.phone_number),
+    renderDetail("🛠", worker.preferred_roles),
+    renderDetail("📍", worker.address),
+    renderDetail("📝", worker.bio),
+    !isSelf && isLoggedIn
       ? Button("Hire", `hire-${worker.baito_user_id}`, {
           click: (e) => {
             e.stopPropagation();
-            openHireWorkerModal(worker);
+            navigate(`/baitos/worker/${worker.userid}`);
           }
         }, "btn btn-primary")
-      : createElement("p", { style: "color:gray;" }, ["🔒 Login to hire"])
+      : !isSelf
+        ? createElement("p", { style: "color:gray;" }, ["🔒 Login to hire"])
+        : null
   ].filter(Boolean));
 
   card.appendChild(photo);
   card.appendChild(details);
 
-  card.addEventListener("click", () => openHireWorkerModal(worker));
+  // Click anywhere on card to view profile
+  card.addEventListener("click", () => navigate(`/baitos/worker/${worker.userid}`));
 
   return card;
 }
-
-
-// import { createElement } from "../../../components/createElement.js";
-// import { Button } from "../../../components/base/Button.js";
-// import { SRC_URL } from "../../../api/api.js";
-// import { openHireWorkerModal } from "./WorkerModal.js";
-
-// export function HireWorkerCard(worker, isLoggedIn) {
-//   const photo = createElement("div", { class: "worker-photo", alt:"worker-photo" });
-
-//   if (worker.profile_picture) {
-//     photo.appendChild(createElement("img", {
-//       src: `${SRC_URL}/uploads/baitos/${worker.profile_picture}`,
-//       class: "profile-thumbnail"
-//     }));
-//   }
-
-//   const details = createElement("div", { class: "worker-details" }, [
-//     createElement("h3", {}, [worker.name]),
-//     createElement("p", {}, [`Phone: ${worker.phone_number}`]),
-//     createElement("p", {}, [`Roles: ${worker.preferred_roles}`]),
-//     createElement("p", {}, [`Location: ${worker.address}`]),
-//     createElement("p", {}, [`Bio: ${worker.bio}`]),
-//     isLoggedIn
-//       ? Button("Hire", `hire-${worker.baito_user_id}`, {
-//           click: () => console.log(`Hiring ${worker.name}`),
-//         })
-//       : createElement("p", {}, ["Login to hire"])
-//   ]);
-
-//   const card = createElement("div", { class: "worker-card" }, [photo, details]);
-
-//   card.addEventListener("click", () => openHireWorkerModal(worker));
-
-//   return card;
-// }

@@ -1,0 +1,155 @@
+/* Header */
+.farm-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.farm-header .breadcrumbs {
+  font-size: 14px;
+}
+
+/* Layout */
+.farm-layout {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+/* Main Section */
+.farm-main {
+  flex: 2;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.farm-banner {
+  position: relative;
+}
+
+/* Farm Banner */
+.farm-banner img {
+  width: 100%;
+  border-radius: 12px;
+  object-fit: cover;
+  display: block;
+  margin-bottom: 16px;
+}
+
+/* Farm Details */
+.farm-detail p {
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+/* Crop List */
+.crop-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 16px;
+}
+.crop-list.grid-view .crop-card {
+  flex: 1 1 calc(50% - 8px);
+}
+.crop-list.list-view .crop-card {
+  flex: 1 1 100%;
+}
+
+/* Crop Card */
+.crop-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  padding: 12px;
+  transition: transform 0.2s;
+}
+.crop-card:hover {
+  transform: translateY(-4px);
+}
+.crop-card img {
+  width: 100%;
+  border-radius: 8px;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  margin-bottom: 8px;
+}
+.crop-card h4 {
+  margin: 6px 0;
+  font-size: 18px;
+}
+.crop-card p {
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+/* Quantity Control */
+.quantity-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.quantity-control button {
+  padding: 4px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Crop Actions */
+.a2c-crop {
+  width: 100%;
+  background: #00796b;
+  color: white;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.a2c-crop:hover {
+  opacity: 0.9;
+}
+
+/* Layout Toggle Buttons */
+.layout-toggle {
+  margin: 12px 0;
+  display: flex;
+  gap: 8px;
+}
+
+/* Aside Section */
+.farm-aside {
+  flex: 1;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+.farm-aside h3, .farm-aside h4 {
+  margin-bottom: 12px;
+}
+.farm-aside p {
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+.farm-aside button {
+  display: block;
+  width: 100%;
+  margin-bottom: 12px;
+  background: #00796b;
+  color: white;
+  border-radius: 8px;
+  padding: 10px;
+}
+.farm-aside button:hover {
+  opacity: 0.9;
+}
+
+/* Responsive Layout */
+@media (max-width: 768px) {
+  .farm-layout {
+    flex-direction: column;
+  }
+  .crop-list.grid-view .crop-card {
+    flex: 1 1 100%;
+  }
+}

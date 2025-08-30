@@ -12,14 +12,6 @@
   border-radius: 4px;
 }
 
-.menu-card h3 {
-  margin: 10px 0;
-  text-overflow: ellipsis;
-  width: 100%;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
 .menu-card button {
   padding: 5px 10px;
   background-color: #4caf50;

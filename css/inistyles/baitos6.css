@@ -1,0 +1,142 @@
+/* Scoped Styles for Baitos Page */
+.baitospage {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+/* Main Section */
+
+
+/* Filter Toggle */
+.baito-filter-toggle {
+  margin-bottom: 20px;
+}
+
+.baito-filter-summary {
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.baito-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 10px 0;
+}
+
+.baito-filter-bar select,
+.baito-filter-bar input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  flex: 1;
+}
+
+.baito-filter-bar .btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.btn-secondary {
+  background-color: #e0f2f1;
+  color: #00796b;
+}
+
+.btn-secondary:hover {
+  background-color: #b2dfdb;
+}
+
+/* Baito List */
+.baito-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+/* Baito Card */
+.baito-card {
+  width: calc(33% - 10px);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  overflow: hidden;
+  transition: transform 0.2s;
+}
+
+.baito-card:hover {
+  transform: translateY(-4px);
+}
+
+.baito-card-img img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  display: block;
+}
+
+.baito-card-content {
+  padding: 12px 16px;
+}
+
+.baito-title {
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+
+.baito-company,
+.baito-meta,
+.baito-type-shift,
+.baito-loc-time {
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+/* Baito Actions */
+.baito-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* Pagination */
+.baito-pagination {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.baito-pagination .buttonx {
+  background-color: #e0f2f1;
+  color: #00796b;
+}
+
+/* Aside Section */
+
+
+
+#lang-toggle {
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+}
+
+/* Responsive Layout */
+@media (max-width: 768px) {
+  .baitospage {
+    flex-direction: column;
+  }
+
+  .baito-card {
+    width: 100%;
+  }
+}

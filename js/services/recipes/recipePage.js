@@ -5,69 +5,49 @@ import { SRC_URL, apiFetch } from "../../api/api.js";
 import { getState } from "../../state/state.js";
 import { editRecipe } from "./createOrEditRecipe.js";
 import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
+import Imagex from "../../components/base/Imagex.js";
+import { createCommentsSection } from "../comments/comments.js";
 
-
-function getStepKey(recipeId) {
-  return `completedSteps:${recipeId}`;
-}
-function getCommentsKey(recipeId) {
-  return `comments:${recipeId}`;
-}
-function getFavorites() {
-  return JSON.parse(localStorage.getItem("favoriteRecipes") || "[]");
-}
+function getStepKey(recipeId) { return `completedSteps:${recipeId}`; }
+function getCommentsKey(recipeId) { return `comments:${recipeId}`; }
+function getFavorites() { return JSON.parse(localStorage.getItem("favoriteRecipes") || "[]"); }
 function saveFavorite(recipeId, value) {
   let fav = getFavorites();
   if (value && !fav.includes(recipeId)) fav.push(recipeId);
-  else if (!value) fav = fav.filter((id) => id !== recipeId);
+  else if (!value) fav = fav.filter(id => id !== recipeId);
   localStorage.setItem("favoriteRecipes", JSON.stringify(fav));
 }
-function loadComments(recipeId) {
-  return JSON.parse(localStorage.getItem(getCommentsKey(recipeId)) || "[]");
-}
-function saveComments(recipeId, comments) {
-  localStorage.setItem(getCommentsKey(recipeId), JSON.stringify(comments));
-}
+function loadComments(recipeId) { return JSON.parse(localStorage.getItem(getCommentsKey(recipeId)) || "[]"); }
+function saveComments(recipeId, comments) { localStorage.setItem(getCommentsKey(recipeId), JSON.stringify(comments)); }
 
-export async function displayRecipe(content, isLoggedIn, recipeId, currentUser = null) {
-  let contentContainer = createElement('div',{"class":"recipepage"},[]);
-
+export async function displayRecipe(content, isLoggedIn, recipeId) {
   content.innerHTML = "";
+  const contentContainer = createElement('div', { class: "recipepage" });
   content.appendChild(contentContainer);
-  currentUser = getState("user");
-  
-  // 🧑‍🍳 FETCH recipe from backend
+
+  const currentUser = getState("user");
+
   let recipe;
   try {
     recipe = await apiFetch(`/recipes/recipe/${recipeId}`);
   } catch (err) {
     console.error("Error loading recipe:", err);
-    contentContainer.replaceChildren(
-      createElement("p", {}, ["Recipe not found or failed to load."])
-    );
+    contentContainer.replaceChildren(createElement("p", {}, ["Recipe not found or failed to load."]));
     return;
   }
 
-
-  // --- State from localStorage ---
   const completedSteps = new Set(JSON.parse(localStorage.getItem(getStepKey(recipeId)) || "[]"));
   let isFavorite = getFavorites().includes(recipeId);
-  let comments = loadComments(recipeId);
 
-  // --- Title & Version/Date ---
-  const titleEl = createElement("h2", {}, [recipe.title]);
+  // --- Title & Metadata ---
+  const titleEl = createElement("h2", {}, [recipe.title || "Untitled"]);
   const metaEls = [];
-  if (recipe.version) {
-    metaEls.push(createElement("p", { class: "version-info" }, [`Version ${recipe.version}`]));
-  }
-  if (recipe.lastUpdated) {
-    const date = new Date(recipe.lastUpdated).toLocaleDateString();
-    metaEls.push(createElement("p", { class: "version-info" }, [`Last updated: ${date}`]));
-  }
+  if (recipe.version) metaEls.push(createElement("p", { class: "version-info" }, [`Version ${recipe.version}`]));
+  if (recipe.lastUpdated) metaEls.push(createElement("p", { class: "version-info" }, [`Last updated: ${new Date(recipe.lastUpdated).toLocaleDateString()}`]));
 
   // --- Author Info ---
   const authorEl = createElement("p", { class: "author-info" });
-  if (currentUser && currentUser.id === recipe.userId) {
+  if (currentUser?.id === recipe.userId) {
     authorEl.textContent = "By You";
   } else {
     authorEl.textContent = "By ";
@@ -75,156 +55,101 @@ export async function displayRecipe(content, isLoggedIn, recipeId, currentUser =
     authorEl.appendChild(link);
   }
 
-  // --- Image Carousel with swipe support ---
+  // --- Image Carousel ---
   let imgIndex = 0;
-  const getImageAtIndex = (i) =>
-    resolveImagePath(EntityType.RECIPE, PictureType.THUMB, recipe.imageUrls?.[i]);
-  
-  const imageEl = createElement("img", {
-    src: getImageAtIndex(imgIndex),
-    alt: recipe.title,
-    class: "thumbnail",
-  });
-  
-  const updateImg = () => {
-    imageEl.src = getImageAtIndex(imgIndex);
-  };
-  
+  const images = Array.isArray(recipe.imageUrls) ? recipe.imageUrls : [];
+  const getImageAtIndex = i => resolveImagePath(EntityType.RECIPE, PictureType.PHOTO, images[i]);
+  const imageEl = Imagex({ src: getImageAtIndex(imgIndex) || "", alt: recipe.title, classes: "thumbnail" });
+
+  const updateImg = () => { if(images.length) imageEl.src = getImageAtIndex(imgIndex); };
   const prevBtn = Button("Prev", "prev-img", {}, "small-button");
   const nextBtn = Button("Next", "next-img", {}, "small-button");
-  
-  prevBtn.addEventListener("click", () => {
-    imgIndex = (imgIndex - 1 + recipe.imageUrls.length) % recipe.imageUrls.length;
-    updateImg();
-  });
-  
-  nextBtn.addEventListener("click", () => {
-    imgIndex = (imgIndex + 1) % recipe.imageUrls.length;
-    updateImg();
-  });
-  
-  // Swipe support
+  prevBtn.addEventListener("click", () => { if(images.length){ imgIndex = (imgIndex - 1 + images.length) % images.length; updateImg(); } });
+  nextBtn.addEventListener("click", () => { if(images.length){ imgIndex = (imgIndex + 1) % images.length; updateImg(); } });
   let touchStartX = 0;
-  imageEl.addEventListener("touchstart", e => {
-    touchStartX = e.changedTouches[0].screenX;
-  }, { passive: true });
-  
+  imageEl.addEventListener("touchstart", e => touchStartX = e.changedTouches[0].screenX, { passive: true });
   imageEl.addEventListener("touchend", e => {
     const dx = e.changedTouches[0].screenX - touchStartX;
-    if (dx > 50) prevBtn.click();
-    else if (dx < -50) nextBtn.click();
+    if(dx>50) prevBtn.click(); else if(dx<-50) nextBtn.click();
   }, { passive: true });
-  
-  const gallery = createElement("div", { class: "image-gallery" }, [
-    imageEl, prevBtn, nextBtn
-  ]);
-  
+  const gallery = createElement("div", { class: "image-gallery" }, [imageEl, prevBtn, nextBtn]);
 
-  // --- Info Box & Nutrition ---
-  const infoBox = createElement("div", { class: "recipe-info-box" }, [
-    createElement("p", {}, [recipe.description]),
-    createElement("p", {}, [`Prep Time: ${recipe.prepTime || "N/A"}`]),
-    createElement("div", { class: "tags" }, recipe.tags.map(tag =>
-      createElement("span", { class: "tag" }, [tag])
-    )),
-  ]);
-  if (recipe.nutrition) {
-    const nut = recipe.nutrition;
-    const nutEl = createElement("div", { class: "nutrition-info" }, [
-      createElement("h4", {}, ["Nutrition"]),
-      createElement("p", {}, [`Calories: ${nut.calories}`]),
-      createElement("p", {}, [`Protein: ${nut.protein}`]),
-      createElement("p", {}, [`Fat: ${nut.fat}`]),
-      createElement("p", {}, [`Carbs: ${nut.carbs}`]),
-    ]);
-    infoBox.appendChild(nutEl);
+  // --- Info Box ---
+  const infoBoxChildren = [
+    createElement("p", {}, [recipe.description || ""]),
+    createElement("p", {}, [`Cook Time: ${recipe.cookTime || "N/A"}`]),
+  ];
+  if (recipe.cuisine) infoBoxChildren.push(createElement("p", {}, [`Cuisine: ${recipe.cuisine}`]));
+  if (recipe.portionSize) infoBoxChildren.push(createElement("p", {}, [`Portion Size: ${recipe.portionSize}`]));
+  if (recipe.season) infoBoxChildren.push(createElement("p", {}, [`Season / Occasion: ${recipe.season}`]));
+  if (Array.isArray(recipe.dietary) && recipe.dietary.length) infoBoxChildren.push(createElement("p", {}, [`Dietary: ${recipe.dietary.join(", ")}`]));
+  if (recipe.videoUrl) {
+    const videoLink = createElement("a", { href: recipe.videoUrl, target: "_blank" }, ["Watch Video Tutorial"]);
+    infoBoxChildren.push(createElement("p", {}, [videoLink]));
   }
+  if (recipe.notes) infoBoxChildren.push(createElement("p", {}, [`Notes: ${recipe.notes}`]));
+  const infoBox = createElement("div", { class: "recipe-info-box" }, infoBoxChildren);
+
+  // --- Tags Section (visible, separate) ---
+  const tagsSection = createElement("div", { class: "tags-section" }, [
+    createElement("h3", {}, ["Tags"]),
+    createElement("div", { class: "tags" }, (Array.isArray(recipe.tags) ? recipe.tags : []).map(tag => createElement("span", { class: "tag" }, [tag])))
+  ]);
 
   // --- Ingredients List ---
   const ingList = createElement("ul", { class: "ingredients-list" });
+  (Array.isArray(recipe.ingredients) ? recipe.ingredients : []).forEach(ing => {
+    const li = createElement("li", {}, [
+      `${ing.quantity || ""} ${ing.unit || ""} ${ing.name || ""}`
+    ]);
 
-  if (Array.isArray(recipe.ingredients)) {
-    recipe.ingredients.forEach(ing => {
-      const li = createElement("li", {}, [
-        `${ing.quantity} ${ing.unit} ${ing.name}`
-      ]);
-  
-      if (!ing.itemId) {
-        li.appendChild(createElement("span", { class: "warning" }, ["Unavailable in store"]));
-      }
-  
-      if (isLoggedIn && ing.itemId) {
-        const item = {
-          category: ing.type,
-          item: ing.name,
-          quantity: ing.quantity,
-          price: ing.price || 10,
-          unit: ing.unit,
-        };
-        const btn = Button("Add to Cart", `add-${ing.itemId}`, {}, "small-button");
-        btn.addEventListener("click", () => addToCart(item));
-        li.appendChild(btn);
-      }
-  
-      if (Array.isArray(ing.alternatives) && ing.alternatives.length) {
-        const altHeader = createElement("p", { class: "alt-header" }, ["Try these alternatives:"]);
-        li.appendChild(altHeader);
-        const altUl = createElement("ul", {});
-        ing.alternatives.forEach(alt => {
-          const altLi = createElement("li", {}, [alt.name]);
-          if (isLoggedIn && alt.itemId) {
-            const altBtn = Button("Add to Cart", `add-${alt.itemId}`, {}, "small-button");
-            altBtn.addEventListener("click", () => addToCart({
-              category: alt.type,
-              item: alt.name,
-              quantity: ing.quantity,
-              price: alt.price || 10,
-              unit: ing.unit
-            }));
-            altLi.appendChild(altBtn);
-          }
-          altUl.appendChild(altLi);
-        });
-        li.appendChild(altUl);
-      }
-  
-      ingList.appendChild(li);
-    });
-  } else {
-    ingList.appendChild(createElement("li", {}, ["No ingredients available."]));
-  }
-  
+    if (!ing.itemId) li.appendChild(createElement("span", { class: "warning" }, ["Unavailable in store"]));
 
-  // --- Estimated Cost & Buy All ---
-  let totalCost = 0;
-  if (Array.isArray(recipe.ingredients)) {
-    recipe.ingredients.forEach(i => {
-      if (i.itemId) totalCost += (i.quantity * (i.price || 10));
-    });
-  }
-  
-  const costEl = isLoggedIn && totalCost
-    ? createElement("p", { class: "estimated-cost" }, [`Estimated Cost: ₹${totalCost}`])
-    : null;
-  const buyAllBtn = isLoggedIn && totalCost
-    ? Button("Buy All Ingredients", "buy-all", {}, "primary-button")
-    : null;
-    if (buyAllBtn) buyAllBtn.addEventListener("click", () => {
-      if (Array.isArray(recipe.ingredients)) {
-        recipe.ingredients.forEach(i => {
-          if (i.itemId) addToCart({
-            category: i.type,
-            item: i.name,
-            quantity: i.quantity,
-            price: i.price || 10,
-            unit: i.unit
-          });
-        });
-      }
-    });
-    
+    if (isLoggedIn && ing.itemId) {
+      const item = {
+        category: ing.type || "unknown",
+        item: ing.name || "Unknown Item",
+        quantity: ing.quantity || 1,
+        price: ing.price || 10,
+        unit: ing.unit || ""
+      };
+      const btn = Button("Add to Cart", `add-${ing.itemId}`, {}, "small-button");
+      btn.addEventListener("click", () => addToCart(item));
+      li.appendChild(btn);
+    }
 
-  // --- Steps, Progress & Audio & Timer ---
+    if (Array.isArray(ing.alternatives) && ing.alternatives.length) {
+      const altHeader = createElement("p", { class: "alt-header" }, ["Try these alternatives:"]);
+      li.appendChild(altHeader);
+
+      const altUl = createElement("ul", {});
+      ing.alternatives.forEach(alt => {
+        const altLi = createElement("li", {}, [alt.name || "Unknown Alternative"]);
+
+        if (isLoggedIn && alt.itemId) {
+          const altItem = {
+            category: alt.type || "unknown",
+            item: alt.name || "Unknown Item",
+            quantity: ing.quantity || 1,
+            price: alt.price || 10,
+            unit: ing.unit || ""
+          };
+          const altBtn = Button("Add to Cart", `add-${alt.itemId}`, {}, "small-button");
+          altBtn.addEventListener("click", () => addToCart(altItem));
+          altLi.appendChild(altBtn);
+        }
+
+        altUl.appendChild(altLi);
+      });
+
+      li.appendChild(altUl);
+    }
+
+    ingList.appendChild(li);
+  });
+  if (!ingList.childElementCount) ingList.appendChild(createElement("li", {}, ["No ingredients available."]));
+
+  // --- Steps Section ---
   const stepsContainer = createElement("div", { class: "steps-section" });
   const progressBar = createElement("div", { class: "progress-bar" });
   const progressFill = createElement("div", { class: "progress-fill" });
@@ -232,41 +157,33 @@ export async function displayRecipe(content, isLoggedIn, recipeId, currentUser =
   progressBar.append(progressFill, progressText);
 
   function updateProgress() {
-    const pct = Math.round((completedSteps.size / recipe.steps.length) * 100);
+    const stepsCount = Array.isArray(recipe.steps) ? recipe.steps.length : 0;
+    const pct = stepsCount ? Math.round((completedSteps.size / stepsCount) * 100) : 0;
     progressFill.style.width = `${pct}%`;
     progressText.textContent = `${pct}% done`;
   }
   updateProgress();
 
   const stepsOl = createElement("ol", {});
-  recipe.steps.forEach((stepObj, idx) => {
-    // support object or string
+  (Array.isArray(recipe.steps) ? recipe.steps : []).forEach((stepObj, idx) => {
     const text = typeof stepObj === "object" ? stepObj.text : stepObj;
     const duration = typeof stepObj === "object" ? stepObj.duration : null;
-
     const li = createElement("li", {});
     const checkbox = createElement("input", { type: "checkbox" });
     checkbox.checked = completedSteps.has(idx);
     checkbox.addEventListener("change", e => {
-      if (e.target.checked) completedSteps.add(idx);
-      else completedSteps.delete(idx);
+      e.target.checked ? completedSteps.add(idx) : completedSteps.delete(idx);
       localStorage.setItem(getStepKey(recipeId), JSON.stringify([...completedSteps]));
       updateProgress();
     });
-
     li.append(checkbox, createElement("span", {}, [text]));
 
-    // audio play
-    const playBtn = Button("🔊", `play-${idx}`, {}, "icon-button");
-    playBtn.addEventListener("click", () => {
-      const u = new SpeechSynthesisUtterance(text);
-      speechSynthesis.speak(u);
-    });
+    const playBtn = Button("🔊", "", {}, "icon-button");
+    playBtn.addEventListener("click", () => { speechSynthesis.speak(new SpeechSynthesisUtterance(text)); });
     li.appendChild(playBtn);
 
-    // timer
     if (duration) {
-      const timerBtn = Button("Start Timer", `timer-${idx}`, {}, "small-button");
+      const timerBtn = Button("Start Timer", "", {}, "small-button");
       const timerDisplay = createElement("span", { class: "timer-display" }, []);
       let timerId = null;
       timerBtn.addEventListener("click", () => {
@@ -287,60 +204,62 @@ export async function displayRecipe(content, isLoggedIn, recipeId, currentUser =
 
   // --- Comments Section ---
   const commentSection = createElement("div", { class: "comment-section" });
-  const commentList = createElement("ul", { class: "comment-list" });
-  function renderComments() {
-    commentList.replaceChildren();
-    comments.forEach(c => {
-      const time = new Date(c.ts).toLocaleString();
-      const item = createElement("li", {}, [
-        createElement("p", {}, [c.text]),
-        createElement("small", {}, [`— ${time}`])
-      ]);
-      commentList.appendChild(item);
-    });
-  }
-  renderComments();
-  const commentInput = createElement("textarea", { placeholder: "Leave a comment" });
-  const commentBtn = Button("Post Comment", "post-comment", {}, "primary-button");
-  commentBtn.addEventListener("click", () => {
-    const txt = commentInput.value.trim();
-    if (!txt) return;
-    const entry = { text: txt, ts: Date.now() };
-    comments.push(entry);
-    saveComments(recipeId, comments);
-    renderComments();
-    commentInput.value = "";
-  });
-  commentSection.append(createElement("h3", {}, ["Comments"]), commentList, commentInput, commentBtn);
+  const commentToggle = createElement("button", { class: "toggle-comments btn btn-link" }, ["💬 Show Comments"]);
 
-  // --- Share, Print, Favorite, Edit, Report, Back ---
+  let commentsEl = null;
+  let commentsVisible = false;
+  commentToggle.addEventListener("click", () => {
+    if (!commentsVisible) {
+      commentsEl = createCommentsSection(
+        recipe.recipeId,
+        recipe.comments || [],
+        "recipe",
+        getState("user")
+      );
+      commentSection.appendChild(commentsEl);
+      commentToggle.textContent = "💬 Hide Comments";
+      commentsVisible = true;
+    } else {
+      if (commentsEl) commentsEl.remove();
+      commentToggle.textContent = "💬 Show Comments";
+      commentsVisible = false;
+    }
+  });
+
+  const commentWrapper = createElement("div", { class: "post-comments" }, [
+    createElement("h4", {}, ["Comments"]),
+    commentToggle
+  ]);
+  commentSection.append(commentWrapper);
+
+  // --- Actions ---
   const actions = createElement("div", { class: "recipe-actions" });
-  // favorite toggle
-  const favBtn = Button(isFavorite ? "Unsave" : "Save Recipe", "fav-btn", {}, "secondary-button");
+  const favBtn = Button(isFavorite ? "Unsave" : "Save Recipe", "", {}, "secondary-button");
   favBtn.addEventListener("click", () => {
     isFavorite = !isFavorite;
     saveFavorite(recipeId, isFavorite);
     favBtn.textContent = isFavorite ? "Unsave" : "Save Recipe";
   });
-  // share / copy link
-  const shareBtn = Button("Copy Link", "share-btn", {}, "secondary-button");
+
+  const shareBtn = Button("Copy Link", "", {}, "secondary-button");
   shareBtn.addEventListener("click", () => navigator.clipboard.writeText(window.location.href));
-  const printBtn = Button("Print", "print-btn", {}, "secondary-button");
+
+  const printBtn = Button("Print", "", {}, "secondary-button");
   printBtn.addEventListener("click", () => window.print());
-  // edit if author
-  let editBtn = "";
-  if (currentUser === recipe.userId) {
-    editBtn = Button("Edit", "edit-btn", {}, "secondary-button");
-    // editBtn.addEventListener("click", () => alert("Edit form coming soon."));
-    editBtn.addEventListener("click", () => editRecipe(contentContainer,recipe));
+
+  let editBtn = null;
+  if (currentUser?.id === recipe.userId) {
+    editBtn = Button("Edit", "", {}, "secondary-button");
+    editBtn.addEventListener("click", () => editRecipe(contentContainer, recipe));
   }
-  const reportBtn = Button("Report", "report-btn", {}, "secondary-button");
+
+  const reportBtn = Button("Report", "", {}, "secondary-button");
   reportBtn.addEventListener("click", () => alert("Reported for review."));
-  const backBtn = Button("Back to Recipes", "back-btn", {}, "secondary-button");
+
+  const backBtn = Button("Back to Recipes", "", {}, "secondary-button");
   backBtn.addEventListener("click", () => history.back());
 
-  actions.append(favBtn, shareBtn, printBtn, editBtn, reportBtn, backBtn
-  );
+  actions.append(favBtn, shareBtn, printBtn, ...(editBtn ? [editBtn] : []), reportBtn, backBtn);
 
   // --- Mount everything ---
   const toMount = [
@@ -349,8 +268,7 @@ export async function displayRecipe(content, isLoggedIn, recipeId, currentUser =
     authorEl,
     gallery,
     infoBox,
-    costEl,
-    buyAllBtn,
+    tagsSection,
     createElement("h3", {}, ["Ingredients"]),
     ingList,
     progressBar,
@@ -358,14 +276,14 @@ export async function displayRecipe(content, isLoggedIn, recipeId, currentUser =
     stepsOl,
     actions,
     commentSection
-  ].filter(Boolean);
+  ];
 
   contentContainer.replaceChildren(...toMount);
 }
 
-// util
+// --- util ---
 function formatTime(sec) {
   const m = Math.floor(sec / 60);
   const s = sec % 60;
-  return `${m}:${s.toString().padStart(2, "0")}`;
+  return `${m}:${s.toString().padStart(2,"0")}`;
 }

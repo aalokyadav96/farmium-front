@@ -18,11 +18,6 @@
     flex-wrap: wrap;
   }
   
-  .setting-form h3 {
-    font-size: 1rem;
-    margin: 0;
-    flex: 1;
-  }
   
   .setting-form select,
   .setting-form input[type="time"] {

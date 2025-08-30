@@ -1,6 +1,5 @@
 // src/utils/activityLogger.js
 import {state} from "../../state/state.js";
-import Snackbar from "../../components/ui/Snackbar.mjs";
 import Notify from "../../components/ui/Notify.mjs";
 
 const DEFAULT_API_BASE = "/api/activity";
@@ -71,7 +70,7 @@ function configure({
 // ───────────────────────────────────────────────────────────────────────────────
 async function logActivity(action, metadata = {}) {
   if (!state.token) {
-    Snackbar("Please log in to log activities.", 3000);
+    Notify("Please log in to log activities.", {type:"warning",duration:3000, dismissible:true});
     return false;
   }
 
@@ -96,15 +95,15 @@ async function logActivity(action, metadata = {}) {
 
     if (!resp.ok) {
       const errBody = await resp.json().catch(() => ({}));
-      Snackbar(`Failed to log activity: ${errBody.error || "Unknown error"}`, 3000);
+      Notify(`Failed to log activity: ${errBody.error || "Unknown error"}`, {type:"error",duration:3000, dismissible:true});
       return false;
     }
 
-    Snackbar("Activity logged successfully.", 3000);
+    Notify("Activity logged successfully.", {type:"success",duration:3000, dismissible:true});
     return true;
   } catch (err) {
     console.error("Activity logging failed:", err);
-    Snackbar("Failed to log activity. Please try again.", 3000);
+    Notify("Failed to log activity. Please try again.", {type:"error",duration:3000, dismissible:true});
     return false;
   }
 }
@@ -127,7 +126,7 @@ function getUserMetadata() {
 // 5.2) Add one activity to the in‐memory queue (and persist)
 function queueActivity(action, additionalData = {}) {
   if (!state.token) {
-    Snackbar("Please log in to log activities.", 3000);
+    Notify("Please log in to log activities.", {type:"warning",duration:3000, dismissible:true});
     return;
   }
 
@@ -182,7 +181,7 @@ async function syncActivities() {
       if (!resp.ok) {
         const errBody = await resp.json().catch(() => ({}));
         console.error(`Failed to log activities: ${errBody.message || "Unknown error"}`);
-        Snackbar(`Failed to log activities: ${errBody.message || "Unknown error"}`, 3000);
+        Notify(`Failed to log activities: ${errBody.message || "Unknown error"}`, {type:"success",duration:3000, dismissible:true});
         isSyncing = false;
         return;
       }
@@ -190,7 +189,7 @@ async function syncActivities() {
       // Success: clear queue, persist empty queue, notify user
       activityQueue = [];
       persistQueue();
-      Snackbar("Activities logged successfully.", 3000);
+      Notify("Activities logged successfully.", {type:"success",duration:3000, dismissible:true});
       isSyncing = false;
     } catch (error) {
       if (error.name === "AbortError") {

@@ -1,0 +1,111 @@
+/* Container */
+.croppage {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Crop Title */
+.croppage h2.span {
+  font-size: 1.8rem;
+  cursor: pointer;
+  margin: 0 0 0.5rem 0;
+  transition: color 0.2s;
+}
+
+.croppage h2.span:hover {
+  color: #27ae60;
+}
+
+/* Meta info */
+.croppage p {
+  margin: 0.25rem 0;
+  font-size: 0.95rem;
+}
+
+/* Listings container */
+#listings-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+/* Crop Card */
+.crop-card {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.crop-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* Farm name link */
+.crop-card h3 a {
+  text-decoration: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.crop-card h3 a:hover {
+  color: #27ae60;
+}
+
+/* Crop image */
+.crop-card img {
+  width: 100%;
+  border-radius: 4px;
+  object-fit: cover;
+  max-height: 180px;
+}
+
+/* Quantity control */
+.quantity-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.quantity-control button {
+  padding: 0.2rem 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+
+.quantity-control button:hover {
+  background: #e0e0e0;
+}
+
+.quantity-value {
+  min-width: 20px;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* Add to Cart button */
+.a2c-crop {
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  background: #27ae60;
+  color: #fff;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.a2c-crop:hover {
+  background: #219150;
+}

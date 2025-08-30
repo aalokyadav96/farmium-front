@@ -1,75 +1,82 @@
+/* Wrapper */
 .auth-wrapper {
-    padding: 40px 20px;
-    display: flex;
-    justify-content: center;
-    background-color: #f9f9f9;
-  }
-  
-  .auth-box {
-    background-color: #fff;
-    padding: 30px;
-    max-width: 480px;
-    width: 100%;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-  }
-  
-  .auth-section {
-    margin-bottom: 30px;
-  }
-  
-  .auth-title {
-    font-size: 22px;
-    margin-bottom: 15px;
-    color: #333;
-    text-align: center;
-  }
-  
-  .auth-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
-  
-  .auth-form input {
-    padding: 10px;
-    font-size: 15px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    width: 100%;
-    box-sizing: border-box;
-  }
-  
-  .auth-form button[type="submit"] {
-    padding: 10px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    font-weight: bold;
-    font-size: 15px;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .auth-form button:hover {
-    background-color: #0056b3;
-  }
-  
-  .auth-divider {
-    text-align: center;
-    font-size: 15px;
-    color: #666;
-    margin: 10px 0 20px;
-  }
-  
-  .auth-terms {
-    font-size: 13px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  
-  .auth-terms input[type="checkbox"] {
-    accent-color: #28a745;
-  }
-  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #e0f7fa, #80deea);
+  padding: 20px;
+}
+
+/* Auth Box */
+.auth-box {
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 100%;
+}
+
+/* Section Titles */
+.auth-title {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #00796b;
+  text-align: center;
+}
+
+/* Forms */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.auth-form input[type="text"],
+.auth-form input[type="password"],
+.auth-form input[type="email"] {
+  padding: 12px;
+  border: 1px solid #b2dfdb;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.3s;
+}
+
+.auth-form input:focus {
+  border-color: #00796b;
+  outline: none;
+}
+
+/* Buttons */
+.auth-form button {
+  padding: 12px;
+  background-color: #00796b;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.auth-form button:hover {
+  background-color: #004d40;
+}
+
+/* Divider */
+.auth-divider {
+  text-align: center;
+  margin: 25px 0;
+  font-weight: bold;
+  color: #555;
+}
+
+/* Terms Checkbox */
+.auth-terms {
+  font-size: 14px;
+  color: #555;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

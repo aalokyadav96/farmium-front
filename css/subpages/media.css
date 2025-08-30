@@ -45,9 +45,9 @@
 }
 
 /* Action buttons */
-.delete-media-btn,
-.delete-btn,
-.report-btn {
+.media-item .delete-media-btn,
+.media-item .delete-btn,
+.media-item .report-btn {
     padding: 0.4rem 0.8rem;
     font-size: 0.85rem;
     border: none;
@@ -57,12 +57,12 @@
     transition: background 0.2s ease;
 }
 
-.delete-media-btn {
+.media-item .delete-media-btn {
     background: #dc3545;
     color: #fff;
 }
 
-.delete-media-btn:hover {
+.media-item .delete-media-btn:hover {
     background: #b02a37;
 }
 

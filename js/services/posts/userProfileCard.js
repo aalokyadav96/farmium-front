@@ -1,23 +1,21 @@
 import { createElement } from "../../components/createElement.js";
-import { SRC_URL } from "../../state/state.js";
 import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
 
 export function userProfileCard(profile = {
     username: "Anonymous",
     bio: "This user hasn't added a bio yet.",
-    avatarUrl: "/default-avatar.png",
+    avatarUrl: "default-avatar.png",
     postCount: 0,
     isFollowing: false
 }) {
     const card = createElement("div", { class: "user-profile-card" });
 
     const avatar = createElement("img", {
-        src: resolveImagePath(EntityType.USER, PictureType.THUMB, profile.avatarUrl),
+        src: profile.avatarUrl,
         alt: `${profile.username}'s avatar`,
         class: "avatar",
         loading: "lazy"
-      });
-      
+    });
 
     const name = createElement("h3", {}, [profile.username]);
     const bio = createElement("p", { class: "bio" }, [profile.bio]);
@@ -28,6 +26,7 @@ export function userProfileCard(profile = {
         onclick: () => {
             profile.isFollowing = !profile.isFollowing;
             followBtn.textContent = profile.isFollowing ? "Unfollow" : "Follow";
+            // TODO: sync follow state with backend API
         }
     }, [profile.isFollowing ? "Unfollow" : "Follow"]);
 

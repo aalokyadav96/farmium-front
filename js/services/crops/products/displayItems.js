@@ -1,4 +1,4 @@
-import { apiFetch } from "../../../api/api.js";
+import { apigFetch } from "../../../api/api.js";
 import { createElement } from "../../../components/createElement.js";
 import Button from "../../../components/base/Button.js";
 import { renderItemForm } from "./createOrEdit.js";
@@ -63,7 +63,7 @@ export async function displayItems(
 
   try {
     const qs = new URLSearchParams({ type, limit, offset, search, category });
-    const result = await apiFetch(`/farm/items?${qs.toString()}`);
+    const result = await apigFetch(`/farm/items?${qs.toString()}`);
     items = result.items || [];
     total = result.total ?? items.length;
   } catch (err) {

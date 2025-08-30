@@ -6,6 +6,7 @@ import { navigate } from "../../../routes/index.js";
 import { addToCart } from "../../cart/addToCart.js";
 import { resolveImagePath, EntityType, PictureType } from "../../../utils/imagePaths.js";
 import { editFarm } from "./editFarm.js";
+import Imagex from "../../../components/base/Imagex.js";
 
 // ─────────── Render the farm’s top‐level detail block ───────────
 export function renderFarmDetails(farm, isCreator) {
@@ -112,7 +113,13 @@ export async function renderCrops(
 function createCropCard(crop, farmName, farmId, mainContainer, isLoggedIn, isCreator) {
   const card = createElement("div", { class: "crop-card" });
 
-  const img = createElement("img", {
+  // const img = createElement("img", {
+  //   src: resolveImagePath(EntityType.CROP, PictureType.THUMB, crop.imageUrl),
+  //   alt: crop.name,
+  //   class: "crop__image"
+  // });
+
+  const img = Imagex({
     src: resolveImagePath(EntityType.CROP, PictureType.THUMB, crop.imageUrl),
     alt: crop.name,
     class: "crop__image"

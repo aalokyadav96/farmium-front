@@ -58,28 +58,6 @@ export function renderItemCard(item, type, isLoggedIn, container, refresh) {
         })]):"";
 
 
-  // const imageGallery = item.imageUrls?.length
-  // ? createElement(
-  //     "div",
-  //     { class: "image-gallery" },
-  //     item.imageUrls.map((url) =>
-  //       createElement("img", {
-  //         src: resolveImagePath(EntityType.PRODUCT, PictureType.PHOTO, url),
-  //         alt: item.name,
-  //         class: "thumbnail"
-  //       })
-  //     )
-  //   )
-  // : createElement("div", { class: "no-image" }, ["No Image"]);
-
-  // const imageGallery = createElement("div",{},[]);
-  // if (item.imageUrls?.length) {
-  //   const imgarray = item.imageUrls.map(path => ({
-  //     src: resolveImagePath(EntityType.PRODUCT, PictureType.PHOTO, path),
-  //     alt: item.title || "Post Image"
-  //   }));
-  //   imageGallery.appendChild(Carousel(imgarray));
-  // }
 
   const card = createElement("div", { class: `${type}-card` }, [
     imageGallery,

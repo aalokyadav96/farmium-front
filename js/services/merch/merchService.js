@@ -3,16 +3,15 @@ import { apiFetch } from "../../api/api.js";
 import MerchCard from '../../components/ui/MerchCard.mjs';
 import { Button } from "../../components/base/Button.js";
 import { createElement } from "../../components/createElement.js";
-import { SRC_URL } from "../../state/state.js";
 import { handlePurchase } from '../payment/paymentService.js';
 // import { handlePurchase } from '../payment/pay.js';
-import SnackBar from "../../components/ui/Snackbar.mjs";
 import Modal from "../../components/ui/Modal.mjs";
 import Notify from "../../components/ui/Notify.mjs";
 
 import { EntityType, PictureType, resolveImagePath } from "../../utils/imagePaths.js";
 import { reportPost } from "../reporting/reporting.js";
-import { createFormGroup } from "../place/editPlace.js";
+// import { createFormGroup } from "../place/editPlace.js";
+import { createFormGroup } from "../../components/createFormGroup.js";
 
 // Add merchandise to the event
 async function addMerchandise(entityType, eventId, merchList) {
@@ -51,7 +50,7 @@ async function addMerchandise(entityType, eventId, merchList) {
             throw new Error(response?.message || 'Invalid server response.');
         }
 
-        SnackBar(response.message || "Merchandise added successfully.");
+        Notify(response.message || "Merchandise added successfully.",{type:"success",duration:3000, dismissible:true});
         displayNewMerchandise(response.data, merchList);
         clearMerchForm();
 
@@ -65,7 +64,7 @@ async function addMerchandise(entityType, eventId, merchList) {
     //     const response = await apiFetch(`/merch/${entityType}/${eventId}`, 'POST', formData);
 
     //     if (response && response.data.merchid) {
-    //         SnackBar("Merchandise added successfully!");
+    //         Notify("Merchandise added successfully!");
     //         displayNewMerchandise(response.data, merchList);  // Display the newly added merchandise
     //         clearMerchForm();  // Optionally clear the form after success
     //     } else {
@@ -205,11 +204,12 @@ function addMerchForm(entityType, eventId, merchList) {
     const form = createElement("form", { id: "add-merch-form", class: "create-section" });
   
     const fields = [
-      { label: "Merchandise Name", inputType: "text", inputId: "merch-name", placeholder: "Merchandise Name", isRequired: true },
-      { label: "Price", inputType: "number", inputId: "merch-price", placeholder: "Price", isRequired: true },
-      { label: "Stock Available", inputType: "number", inputId: "merch-stock", placeholder: "Stock Available", isRequired: true },
-      { label: "Merch Image", inputType: "file", inputId: "merch-image", additionalProps: { accept: "image/*" } }
-    ];
+        { label: "Merchandise Name", type: "text", id: "merch-name", placeholder: "Merchandise Name", required: true },
+        { label: "Price", type: "number", id: "merch-price", placeholder: "Price", required: true },
+        { label: "Stock Available", type: "number", id: "merch-stock", placeholder: "Stock Available", required: true },
+        { label: "Merch Image", type: "file", id: "merch-image", additionalProps: { accept: "image/*" } }
+      ];
+      
   
     fields.forEach(field => form.appendChild(createFormGroup(field)));
   
@@ -238,51 +238,6 @@ function addMerchForm(entityType, eventId, merchList) {
   
   }
   
-// function addMerchForm(entityType, eventId, merchList) {
-//     const form = document.createElement("form");
-//     form.id = "add-merch-form";
-//     form.className = "create-section";
-
-//     const merchNameInput = createElement("div", { class: "form-group" }, [createElement("input", { type: "text", id: "merch-name", placeholder: "Merchandise Name", required: true }, [])]);
-
-//     const merchPriceInput = createElement("div", { class: "form-group" }, [createElement("input", { type: "number", id: "merch-price", placeholder: "Price", required: true }, [])]);
-
-//     const merchStockInput = createElement("div", { class: "form-group" }, [createElement("input", { type: "number", id: "merch-stock", placeholder: "Stock Available", required: true }, [])]);
-
-//     const merchImageInput = createElement("div", { class: "form-group" }, [createElement("input", { type: "file", id: "merch-image", accept: "image/*" }, [])]);
-
-//     const addButton = document.createElement("button");
-//     addButton.type = "submit";
-//     addButton.textContent = "Add Merchandise";
-
-//     const cancelButton = document.createElement("button");
-//     cancelButton.type = "button";
-//     cancelButton.textContent = "Cancel";
-
-//     form.append(
-//         merchNameInput,
-//         merchPriceInput,
-//         merchStockInput,
-//         merchImageInput,
-//         addButton,
-//         cancelButton
-//     );
-
-//     const modal = Modal({
-//         title: "Add Merchandise",
-//         content: form,
-//         onClose: () => modal.remove()
-//     });
-
-//     form.addEventListener("submit", async (e) => {
-//         e.preventDefault();
-//         await addMerchandise(entityType, eventId, merchList);
-//         modal.remove();
-//     });
-
-//     cancelButton.addEventListener("click", () => { modal.remove(); document.body.style.overflow = ""; });
-// }
-
 function displayNewMerchandise(merchData, merchList) {
     // const merchList = document.getElementById("merch-list");
 

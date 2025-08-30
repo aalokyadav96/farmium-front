@@ -68,4 +68,3 @@ export async function updateImageWithCrop({
     }, { once: true });
   });
 }
-

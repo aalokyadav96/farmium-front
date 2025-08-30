@@ -58,8 +58,8 @@ export function openCropperWithCropperJSBoundedFixedBox({ file, type = "avatar" 
     });
 
     // target crop in pixels
-    const cropTargetW = type === "banner" ? 1100 : 300;
-    const cropTargetH = type === "banner" ? 400 : 300;
+    const cropTargetW = type === "banner" ? 700 : 300;
+    const cropTargetH = type === "banner" ? 300 : 300;
     const aspectRatio = cropTargetW / cropTargetH;
 
     // compute a bounded stage size (fits viewport but stays comfortable)

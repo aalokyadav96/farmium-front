@@ -4,7 +4,6 @@ import { state } from "../../state/state.js";
 import { apiFetch } from "../../api/api.js";
 import { createElement } from "../../components/createElement.js";
 import Modal from "../../components/ui/Modal.mjs";
-import Snackbar from "../../components/ui/Snackbar.mjs";
 import Notify from "../../components/ui/Notify.mjs";
 
 // Predefined reasons for reporting
@@ -139,7 +138,7 @@ export function reportPost(targetId, targetType, parentType="", parentId="") {
         modalEl.remove();
         // 7.4) Success: record in localStorage & show Snackbar
         localStorage.setItem(storageKey, "true");
-        Snackbar("Thanks. We'll review this shortly.", 3000);
+        Notify("Thanks. We'll review this shortly.", {type:"success",duration:3000, dismissible:true});
         document.body.style.overflow = '';
       } else {
         // 7.5) Server returned an error
@@ -157,108 +156,3 @@ export function reportPost(targetId, targetType, parentType="", parentId="") {
     }
   });
 }
-
-// export function reportPost(postid) {
-//   // For now, just log or show a simple alert
-//   alert(`Reported post ID: ${postid}`);
-
-//   // Optionally send to backend
-//   /*
-//   fetch("/api/report", {
-//       method: "POST",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify({ postid })
-//   }).then(res => {
-//       if (res.ok) alert("Post reported.");
-//       else alert("Failed to report post.");
-//   });
-//   */
-// }
-
-
-// // Function to submit a report
-// async function submitReport(reportData) {
-//     const response = await fetch('/report', {
-//         method: 'POST',
-//         headers: { 'Content-Type': 'application/json' },
-//         body: JSON.stringify(reportData)
-//     });
-
-//     const result = await response.json();
-//     console.log(result.message);
-// }
-
-// // // Example usage
-// // const reportExample = {
-// //     reportedBy: "user123",
-// //     targetId: "comment987",
-// //     targetType: "comment",
-// //     reason: "Hate speech",
-// //     notes: "Contains offensive language"
-// // };
-
-// // submitReport(reportExample);
-
-
-// /*
-
-// API Endpoints
-// 1. Submit a Report
-// Method: POST
-
-// URL: /report
-
-// Payload:
-
-// json
-// {
-//   "reportedBy": "user123",
-//   "targetId": "post567",
-//   "targetType": "post",
-//   "reason": "Spam",
-//   "notes": "Contains repeated ads"
-// }
-// Response:
-
-// json
-// {
-//   "message": "Report submitted"
-// }
-// 2. Get All Reports (for moderation)
-// Method: GET
-
-// URL: /reports
-
-// Response:
-
-// json
-// [
-//   {
-//     "id": "abcd123",
-//     "reportedBy": "user123",
-//     "targetId": "post567",
-//     "targetType": "post",
-//     "reason": "Spam",
-//     "status": "pending",
-//     "createdAt": "2025-05-04T16:55:00Z"
-//   }
-// ]
-// 3. Update Report Status
-// Method: PUT
-
-// URL: /report/:id
-
-// Payload:
-
-// json
-// {
-//   "status": "resolved",
-//   "notes": "User warned, post removed"
-// }
-// Response:
-
-// json
-// {
-//   "message": "Report updated"
-// }
-// */

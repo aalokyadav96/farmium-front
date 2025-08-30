@@ -54,15 +54,45 @@ const PictureSubfolders = {
   [PictureType.FILE]: "files",
 };
 
-// Resolve image path with fallback
-export function resolveImagePath(entityType, pictureType, filename, fallback = "/assets/icon-192.png") {
-  console.log(entityType, pictureType, filename);
+export function resolveImagePath(entityType, pictureType, filename, fallback = "/assets/fallback.png") {
   if (!entityType || !pictureType || !filename || typeof filename !== "string") {
     return fallback;
   }
+
   const folder = PictureSubfolders[pictureType] || "misc";
-  return `${SRC_URL}/uploads/${entityType}/${folder}/${filename}`;
+
+  // Normalize enforced extensions
+  let finalName = filename;
+  if (pictureType === PictureType.THUMB) {
+    if (!filename.endsWith(".jpg")) {
+      finalName = filename.replace(/\.[^.]+$/, "") + ".jpg";
+    }
+  } else if (pictureType === PictureType.POSTER) {
+    if (!filename.endsWith(".jpg")) {
+      finalName = filename.replace(/\.[^.]+$/, "") + ".jpg";
+    }
+  } else if (isImageType(pictureType)) {
+    if (!filename.endsWith(".png")) {
+      finalName = filename.replace(/\.[^.]+$/, "") + ".png";
+    }
+  }
+
+  return `${SRC_URL}/uploads/${entityType}/${folder}/${finalName}`;
 }
+
+// Helper to check if type is image (non-thumb)
+function isImageType(pictureType) {
+  return [
+    PictureType.PHOTO,
+    PictureType.POSTER,
+    PictureType.BANNER,
+    PictureType.SEATING,
+    PictureType.MEMBER,
+    PictureType.IMAGE,
+    PictureType.GALLERY,
+  ].includes(pictureType);
+}
+
 
 /******HOW TO USE******/
 /*

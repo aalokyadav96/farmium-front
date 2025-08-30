@@ -1,4 +1,4 @@
-const CACHE_NAME = "app-cache-v10";
+const CACHE_NAME = "app-cache-v11";
 const OFFLINE_URL = "/offline.html";
 
 const STATIC_ASSETS = [
@@ -10,7 +10,10 @@ const STATIC_ASSETS = [
   "/js/assets/styles.css",
   "/assets/icon-128.png",
   "/assets/icon-192.png",
-  "/assets/icon-512.png"
+  "/assets/icon-512.png",
+  "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",
+  "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
+  "https://unpkg.com/leaflet.vectorgrid/dist/Leaflet.VectorGrid.bundled.js"
 ];
 
 // Precache on install
@@ -40,6 +43,15 @@ self.addEventListener("fetch", (event) => {
 
   if (req.method !== "GET") return;
 
+  // Map tiles (OSM raster or your backend vector .pbf)
+  if (
+    url.hostname.includes("tile.openstreetmap.org") ||
+    url.pathname.startsWith("/tiles/")
+  ) {
+    event.respondWith(staleWhileRevalidate(req));
+    return;
+  }
+  
   // HTML pages
   if (accept.includes("text/html")) {
     event.respondWith(

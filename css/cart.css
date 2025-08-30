@@ -43,10 +43,6 @@
   text-decoration: underline;
 }
 
-#content h2 {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-}
 
 .cart-tabs {
   display: flex;
@@ -154,9 +150,4 @@
 .cart-section button:hover,
 #content > div > button:hover {
   background-color: #276749;
-}
-
-#content > div h3 {
-  font-size: 1.25rem;
-  margin-bottom: 1rem;
 }

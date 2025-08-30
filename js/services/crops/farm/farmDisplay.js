@@ -7,6 +7,7 @@ import { navigate } from "../../../routes/index.js";
 import { getState } from "../../../state/state.js";
 import { resolveImagePath, EntityType, PictureType } from "../../../utils/imagePaths.js";
 
+import { updateImageWithCrop } from "../../../utils/bannerEditor.js"; // adjust path
 import {
   renderFarmDetails,
   renderCropSummary,
@@ -15,6 +16,7 @@ import {
 } from "./displayFarm.helpers.js";
 import { displayReviews } from "../../reviews/displayReviews.js";
 import { farmChat } from "./farmchat.js";
+import Imagex from "../../../components/base/Imagex.js";
 
 export async function displayFarm(isLoggedIn, farmId, content) {
   const container = createElement("div", { class: "farmpage" }, []);
@@ -40,12 +42,29 @@ export async function displayFarm(isLoggedIn, farmId, content) {
 
   // ——— Banner ———
   const banner = createElement("div", { class: "farm-banner" }, [
-    createElement("img", {
-      src: resolveImagePath(EntityType.FARM, PictureType.PHOTO, farm.photo),
+    Imagex({
+      src: resolveImagePath(EntityType.FARM, PictureType.BANNER, farm.photo),
       alt: farm.name
     })
   ]);
 
+  if (isCreator){
+    // Add Banner Edit Button here
+    const bannerEditButton = createElement("button", { class: "edit-banner-pic" }, ["Edit Banner"]);
+    bannerEditButton.addEventListener("click", () => {
+      updateImageWithCrop({
+        entityType: EntityType.FARM,
+        imageType: "banner",
+        stateKey: "banner",
+        stateEntityKey: "farm",
+        previewElementId: "farm-banner-img",
+        pictureType: PictureType.BANNER,
+        entityId: farmId  // <-- pass placeid here
+      });
+    });
+    
+    banner.appendChild(bannerEditButton);
+  }
   // ——— Farm Info ———
   const farmDetails = renderFarmDetails(farm, isCreator);
   const editFarm = createElement("div", {}, []); // Preserved editFarm div
@@ -108,7 +127,7 @@ export async function displayFarm(isLoggedIn, farmId, content) {
         click: () => alert("Pre-ordered"),
       }, "buttonx"),
       Button("Chat", "cta-chat-btn", {
-        click: () => farmChat(farm.createdBy, chatcon, farm.farmId)
+        click: () => farmChat(farm.createdBy, farm.farmId)
       }, "buttonx")
     ] : [
       createElement("p", {}, ["🔒 Log in to schedule a visit, pre-order, or chat with this farm."])

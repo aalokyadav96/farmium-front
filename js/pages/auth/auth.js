@@ -46,7 +46,7 @@ export function createLoginForm() {
     section.className = 'auth-section';
 
     const title = document.createElement('h2');
-    title.textContent = "Login";
+    title.textContent = "Log In";
     title.className = 'auth-title';
 
     const form = document.createElement("form");
@@ -70,14 +70,14 @@ function createSignupForm() {
     section.className = 'auth-section';
 
     const title = document.createElement('h2');
-    title.textContent = "Signup";
+    title.textContent = "Sign Up";
     title.className = 'auth-title';
 
     const form = document.createElement("form");
     form.className = 'auth-form';
 
-    const username = inputField("text", "Username", "signup-username", "signup-username");
-    const email = inputField("email", "Email", "signup-email", "signup-email");
+    const username = inputField("text", "Username", "signup-username", "username");
+    const email = inputField("email", "Email", "signup-email", "email");
     const password = inputField("password", "Password", "signup-password", "new-password");
 
     const termsLabel = document.createElement("label");

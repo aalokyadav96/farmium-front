@@ -1,59 +1,60 @@
 import "../../../css/ui/Modal.css";
+import { createElement } from "../../components/createElement.js";
 
 let openModals = 0;
+let bodyStyleEl = null;
 
-function createModalHeader(title, onClose) {
-  const header = document.createElement('div');
-  header.className = 'modal-header';
-
-  const heading = document.createElement('h3');
-  heading.textContent = title;
-  heading.id = `modal-title-${openModals}`;
-  header.appendChild(heading);
-
-  const closeButton = document.createElement('button');
-  closeButton.className = 'modal-close';
-  closeButton.textContent = '×';
-  closeButton.setAttribute('aria-label', 'Close');
-  closeButton.addEventListener('click', onClose);
-  header.appendChild(closeButton);
-
-  return { header, titleId: heading.id };
+function lockBodyScroll() {
+  if (!bodyStyleEl) {
+    bodyStyleEl = createElement("style", { id: "modal-body-style" }, [
+      document.createTextNode("body { overflow: hidden !important; }")
+    ]);
+    document.head.appendChild(bodyStyleEl);
+  }
 }
 
-function createModalBody(content) {
-  const body = document.createElement('div');
-  body.className = 'modal-body';
-
-  const contentNode = typeof content === 'function' ? content() : content;
-  if (contentNode instanceof HTMLElement) {
-    body.appendChild(contentNode);
-  } else {
-    body.textContent = contentNode?.toString() || '';
+function unlockBodyScroll() {
+  if (openModals === 0 && bodyStyleEl) {
+    bodyStyleEl.remove();
+    bodyStyleEl = null;
   }
+}
 
-  body.id = `modal-desc-${openModals}`;
+function makeHeader(title, onClose, uid) {
+  const heading = createElement("h3", { id: `modal-title-${uid}` }, [title]);
+  const closeBtn = createElement("button", { class: "modal-close", "aria-label": "Close" }, ["×"]);
+  closeBtn.addEventListener("click", onClose);
+  return { header: createElement("div", { class: "modal-header" }, [heading, closeBtn]), titleId: heading.id };
+}
+
+function makeBody(content, uid) {
+  const node = typeof content === "function" ? content() : content;
+  const children = node instanceof HTMLElement ? [node] : [document.createTextNode(node == null ? "" : String(node))];
+  const body = createElement("div", { class: "modal-body", id: `modal-desc-${uid}` }, children);
   return { body, descId: body.id };
 }
 
-function createModalFooter(actions) {
-  if (typeof actions !== 'function') return null;
-
-  const footer = document.createElement('div');
-  footer.className = 'modal-footer';
-
-  const content = actions();
-  if (content instanceof HTMLElement) {
-    footer.appendChild(content);
-  }
-  return footer;
+function simpleDurationMs(el) {
+  const cs = window.getComputedStyle(el);
+  const toMs = v => {
+    if (!v) return 0;
+    v = v.split(",")[0].trim();
+    if (v.endsWith("ms")) return parseFloat(v) || 0;
+    if (v.endsWith("s")) return (parseFloat(v) || 0) * 1000;
+    return parseFloat(v) || 0;
+  };
+  const dur = toMs(cs.animationDuration);
+  const delay = toMs(cs.animationDelay);
+  const tdur = toMs(cs.transitionDuration);
+  const tdelay = toMs(cs.transitionDelay);
+  return Math.max(dur + delay, tdur + tdelay, 0);
 }
 
 const Modal = ({
-  title,
-  content,
-  onClose,
-  size = 'medium',
+  title = "",
+  content = "",
+  onClose = null,
+  size = "medium",
   closeOnOverlayClick = true,
   autofocusSelector = null,
   returnDataOnClose = false,
@@ -61,18 +62,15 @@ const Modal = ({
   actions = null,
   onOpen = null,
   force = false
-}) => {
-  const modal = document.createElement('div');
-  modal.className = `modal modal--${size}`;
-  modal.style.zIndex = 1000 + openModals * 10;
+} = {}) => {
+  const uid = ++openModals;
+  const overlay = createElement("div", { class: "modal-overlay" });
+  const dialog = createElement("div", { class: "modal-dialog", tabindex: "-1", role: "dialog" });
+  const modal = createElement("div", { class: `modal modal--${size}`, style: `z-index:${1000 + uid * 10};` }, [overlay, dialog]);
 
-  const overlay = document.createElement('div');
-  overlay.className = 'modal-overlay';
-
-  const dialog = document.createElement('div');
-  dialog.className = 'modal-dialog';
-  dialog.setAttribute('tabindex', '-1');
-  dialog.setAttribute('role', 'dialog');
+  // Lock scroll & remember focus
+  lockBodyScroll();
+  const previouslyFocused = document.activeElement;
 
   const wrappedOnClose = (data) => {
     if (force) return;
@@ -82,96 +80,98 @@ const Modal = ({
   };
 
   if (closeOnOverlayClick && !force) {
-    overlay.addEventListener('click', () => wrappedOnClose());
+    overlay.addEventListener("click", () => wrappedOnClose());
   }
 
-  const { header, titleId } = createModalHeader(title, () => wrappedOnClose());
-  const { body, descId } = createModalBody(content);
-  const footer = createModalFooter(actions);
+  const { header, titleId } = makeHeader(title, () => wrappedOnClose(), uid);
+  const { body, descId } = makeBody(content, uid);
 
-  dialog.setAttribute('aria-modal', 'true');
-  dialog.setAttribute('aria-labelledby', titleId);
-  dialog.setAttribute('aria-describedby', descId);
+  dialog.setAttribute("aria-modal", "true");
+  dialog.setAttribute("aria-labelledby", titleId);
+  dialog.setAttribute("aria-describedby", descId);
 
   dialog.appendChild(header);
   dialog.appendChild(body);
-  if (footer) dialog.appendChild(footer);
 
-  modal.appendChild(overlay);
-  modal.appendChild(dialog);
+  if (typeof actions === "function") {
+    const act = actions();
+    if (act instanceof HTMLElement) {
+      const footer = createElement("div", { class: "modal-footer" }, [act]);
+      dialog.appendChild(footer);
+    }
+  }
 
-  const previouslyFocused = document.activeElement;
-  openModals++;
+  // Focus trap: keep it small and reliable
+  const focusableSel = "button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])";
+  function trap(e) {
+    const nodes = Array.from(dialog.querySelectorAll(focusableSel)).filter(n => !n.hasAttribute("disabled"));
+    if (!nodes.length) return;
 
-  const focusableSelectors = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+    const first = nodes[0];
+    const last = nodes[nodes.length - 1];
 
-  const trapFocus = (e) => {
-    if (force && e.key === 'Escape') return;
-    const focusableEls = dialog.querySelectorAll(focusableSelectors);
-    if (!focusableEls.length) return;
-
-    const firstEl = focusableEls[0];
-    const lastEl = focusableEls[focusableEls.length - 1];
-
-    if (e.key === 'Tab') {
-      if (e.shiftKey && document.activeElement === firstEl) {
+    if (e.key === "Tab") {
+      if (e.shiftKey && document.activeElement === first) {
         e.preventDefault();
-        lastEl.focus();
-      } else if (!e.shiftKey && document.activeElement === lastEl) {
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
         e.preventDefault();
-        firstEl.focus();
+        first.focus();
       }
-    } else if (e.key === 'Escape' && !force) {
+    } else if (e.key === "Escape" && !force) {
       wrappedOnClose();
-    } else if (e.key === 'Enter' && onConfirm) {
+    } else if (e.key === "Enter" && onConfirm) {
       e.preventDefault();
       onConfirm();
     }
-  };
+  }
+  dialog.addEventListener("keydown", trap);
 
-  dialog.addEventListener('keydown', trapFocus);
+  // appear
+  modal.classList.add("modal--fade-in");
 
-  modal.classList.add('modal--fade-in');
-  document.getElementById('app').appendChild(modal);
+  const container = document.getElementById("modalcon");
+  if (!container) {
+    // rollback state if no container found
+    dialog.removeEventListener("keydown", trap);
+    unlockBodyScroll();
+    openModals = Math.max(0, openModals - 1);
+    throw new Error('No element with id "modalcon" found');
+  }
+  container.appendChild(modal);
 
   if (onOpen) onOpen();
 
-  if (autofocusSelector) {
-    const el = dialog.querySelector(autofocusSelector);
-    el?.focus();
-  } else {
-    dialog.focus();
-  }
+  // autofocus
+  setTimeout(() => {
+    if (autofocusSelector) dialog.querySelector(autofocusSelector)?.focus();
+    else dialog.focus();
+  }, 0);
 
   function cleanup() {
-    dialog.removeEventListener('keydown', trapFocus);
-    modal.classList.remove('modal--fade-in');
-    modal.classList.add('modal--fade-out');
+    dialog.removeEventListener("keydown", trap);
+    modal.classList.remove("modal--fade-in");
+    modal.classList.add("modal--fade-out");
 
-    modal.addEventListener('animationend', () => {
+    // find reasonable timeout based on CSS; fallback 300ms
+    const ms = Math.max(simpleDurationMs(modal), simpleDurationMs(dialog), 300);
+    setTimeout(() => {
       modal.remove();
-    });
-
-    openModals = Math.max(0, openModals - 1);
-    previouslyFocused?.focus?.();
+      openModals = Math.max(0, openModals - 1);
+      unlockBodyScroll();
+      previouslyFocused?.focus?.();
+    }, ms + 40);
   }
 
+  // returnDataOnClose support (promise)
   if (returnDataOnClose) {
-    let resolvePromise;
-    const closed = new Promise((resolve) => {
-      resolvePromise = resolve;
-    });
-
+    let resolve;
+    const closed = new Promise(r => (resolve = r));
     const wrappedClose = (data) => {
       wrappedOnClose(data);
-      resolvePromise(data);
+      resolve(data);
     };
-
-    return {
-      modal,
-      close: wrappedClose,
-      closed,
-    };
+    return { modal, close: wrappedClose, closed };
   }
 
   return modal;
@@ -181,61 +181,79 @@ export default Modal;
 
 
 // import "../../../css/ui/Modal.css";
+// import { createElement } from "../../components/createElement.js";
 
 // let openModals = 0;
+// let bodyStyleEl = null; // Shared style element to prevent body scroll
+
+// function addBodyOverflowHidden() {
+//   if (!bodyStyleEl) {
+//     bodyStyleEl = createElement("style", { id: "modal-body-style" }, [
+//       document.createTextNode("body { overflow: hidden; }")
+//     ]);
+//     document.head.appendChild(bodyStyleEl);
+//   }
+// }
+
+// export function removeBodyOverflowHidden() {
+//   if (openModals === 0 && bodyStyleEl) {
+//     bodyStyleEl.remove();
+//     bodyStyleEl = null;
+//   }
+// }
 
 // function createModalHeader(title, onClose) {
-//   const header = document.createElement('div');
-//   header.className = 'modal-header';
+//   const heading = createElement("h3", {
+//     id: `modal-title-${openModals}`
+//   }, [document.createTextNode(title)]);
 
-//   const heading = document.createElement('h3');
-//   heading.textContent = title;
-//   heading.id = `modal-title-${openModals}`;
-//   header.appendChild(heading);
+//   const closeButton = createElement("button", {
+//     class: "modal-close",
+//     "aria-label": "Close"
+//   }, [document.createTextNode("×")]);
 
-//   const closeButton = document.createElement('button');
-//   closeButton.className = 'modal-close';
-//   closeButton.textContent = '×';
-//   closeButton.setAttribute('aria-label', 'Close');
-//   closeButton.addEventListener('click', onClose);
-//   header.appendChild(closeButton);
+//   closeButton.addEventListener("click", onClose);
+
+//   const header = createElement("div", { class: "modal-header" }, [
+//     heading,
+//     closeButton
+//   ]);
 
 //   return { header, titleId: heading.id };
 // }
 
 // function createModalBody(content) {
-//   const body = document.createElement('div');
-//   body.className = 'modal-body';
+//   const contentNode = typeof content === "function" ? content() : content;
 
-//   const contentNode = typeof content === 'function' ? content() : content;
+//   const children = [];
 //   if (contentNode instanceof HTMLElement) {
-//     body.appendChild(contentNode);
-//   } else {
-//     body.textContent = contentNode?.toString() || '';
+//     children.push(contentNode);
+//   } else if (contentNode != null) {
+//     children.push(document.createTextNode(contentNode.toString()));
 //   }
 
-//   body.id = `modal-desc-${openModals}`;
+//   const body = createElement("div", {
+//     class: "modal-body",
+//     id: `modal-desc-${openModals}`
+//   }, children);
+
 //   return { body, descId: body.id };
 // }
 
 // function createModalFooter(actions) {
-//   if (typeof actions !== 'function') return null;
-
-//   const footer = document.createElement('div');
-//   footer.className = 'modal-footer';
+//   if (typeof actions !== "function") return null;
 
 //   const content = actions();
-//   if (content instanceof HTMLElement) {
-//     footer.appendChild(content);
-//   }
-//   return footer;
+//   const children = content instanceof HTMLElement ? [content] : [];
+
+//   return createElement("div", { class: "modal-footer" }, children);
 // }
 
 // const Modal = ({
 //   title,
 //   content,
 //   onClose,
-//   size = 'medium',
+//   size = "medium",
 //   closeOnOverlayClick = true,
 //   autofocusSelector = null,
 //   returnDataOnClose = false,
@@ -244,17 +262,21 @@ export default Modal;
 //   onOpen = null,
 //   force = false
 // }) => {
-//   const modal = document.createElement('div');
-//   modal.className = `modal modal--${size}`;
-//   modal.style.zIndex = 1000 + openModals * 10;
+//   const overlay = createElement("div", { class: "modal-overlay" });
+//   const dialog = createElement("div", {
+//     class: "modal-dialog",
+//     tabindex: "-1",
+//     role: "dialog"
+//   });
 
-//   const overlay = document.createElement('div');
-//   overlay.className = 'modal-overlay';
+//   const modal = createElement("div", {
+//     class: `modal modal--${size}`,
+//     style: `z-index: ${1000 + openModals * 10};`
+//   }, [overlay, dialog]);
 
-//   const dialog = document.createElement('div');
-//   dialog.className = 'modal-dialog';
-//   dialog.setAttribute('tabindex', '-1');
-//   dialog.setAttribute('role', 'dialog');
+//   addBodyOverflowHidden();
+//   const previouslyFocused = document.activeElement;
+//   openModals++;
 
 //   const wrappedOnClose = (data) => {
 //     if (force) return;
@@ -264,42 +286,33 @@ export default Modal;
 //   };
 
 //   if (closeOnOverlayClick && !force) {
-//     overlay.addEventListener('click', () => wrappedOnClose());
+//     overlay.addEventListener("click", () => wrappedOnClose());
 //   }
 
 //   const { header, titleId } = createModalHeader(title, () => wrappedOnClose());
 //   const { body, descId } = createModalBody(content);
 //   const footer = createModalFooter(actions);
 
-//   dialog.setAttribute('aria-modal', 'true');
-//   dialog.setAttribute('aria-labelledby', titleId);
-//   dialog.setAttribute('aria-describedby', descId);
+//   dialog.setAttribute("aria-modal", "true");
+//   dialog.setAttribute("aria-labelledby", titleId);
+//   dialog.setAttribute("aria-describedby", descId);
 
 //   dialog.appendChild(header);
 //   dialog.appendChild(body);
 //   if (footer) dialog.appendChild(footer);
 
-//   modal.appendChild(overlay);
-//   modal.appendChild(dialog);
-
-//   const previouslyFocused = document.activeElement;
-
-//   openModals++;
-//   if (openModals === 1) {
-//     document.body.style.overflow = 'hidden';
-//   }
-
-//   const focusableSelectors = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+//   const focusableSelectors =
+//     "button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])";
 
 //   const trapFocus = (e) => {
-//     if (force && e.key === 'Escape') return;
+//     if (force && e.key === "Escape") return;
 //     const focusableEls = dialog.querySelectorAll(focusableSelectors);
 //     if (!focusableEls.length) return;
 
 //     const firstEl = focusableEls[0];
 //     const lastEl = focusableEls[focusableEls.length - 1];
 
-//     if (e.key === 'Tab') {
+//     if (e.key === "Tab") {
 //       if (e.shiftKey && document.activeElement === firstEl) {
 //         e.preventDefault();
 //         lastEl.focus();
@@ -307,43 +320,86 @@ export default Modal;
 //         e.preventDefault();
 //         firstEl.focus();
 //       }
-//     } else if (e.key === 'Escape' && !force) {
+//     } else if (e.key === "Escape" && !force) {
 //       wrappedOnClose();
-//     } else if (e.key === 'Enter' && onConfirm) {
+//     } else if (e.key === "Enter" && onConfirm) {
 //       e.preventDefault();
 //       onConfirm();
 //     }
 //   };
 
-//   dialog.addEventListener('keydown', trapFocus);
+//   dialog.addEventListener("keydown", trapFocus);
+//   modal.classList.add("modal--fade-in");
 
-//   modal.classList.add('modal--fade-in');
-//   document.getElementById('app').appendChild(modal);
+//   const modalContainer = document.getElementById("modalcon");
+//   if (!modalContainer) throw new Error('No element with id "modalcon" found');
+//   modalContainer.appendChild(modal);
 
 //   if (onOpen) onOpen();
 
 //   if (autofocusSelector) {
-//     const el = dialog.querySelector(autofocusSelector);
-//     el?.focus();
+//     dialog.querySelector(autofocusSelector)?.focus();
 //   } else {
 //     dialog.focus();
 //   }
 
 //   function cleanup() {
-//     dialog.removeEventListener('keydown', trapFocus);
-//     modal.classList.remove('modal--fade-in');
-//     modal.classList.add('modal--fade-out');
+//     dialog.removeEventListener("keydown", trapFocus);
+//     modal.classList.remove("modal--fade-in");
+//     modal.classList.add("modal--fade-out");
 
-//     modal.addEventListener('animationend', () => {
+//     let removed = false;
+//     const onRemoved = () => {
+//       if (removed) return;
+//       removed = true;
+
+//       ["animationend", "transitionend"].forEach((evt) => {
+//         modal.removeEventListener(evt, onRemoved);
+//         dialog.removeEventListener(evt, onRemoved);
+//       });
+
 //       modal.remove();
+//       openModals = Math.max(0, openModals - 1);
+//       removeBodyOverflowHidden();
+//       previouslyFocused?.focus?.();
+//     };
+
+//     ["animationend", "transitionend"].forEach((evt) => {
+//       modal.addEventListener(evt, onRemoved, { once: true });
+//       dialog.addEventListener(evt, onRemoved, { once: true });
 //     });
 
-//     openModals = Math.max(0, openModals - 1);
-//     if (openModals === 0) {
-//       document.body.style.overflow = '';
-//     }
+//     const maxMS = Math.max(getMaxDurationMS(modal), getMaxDurationMS(dialog));
+//     setTimeout(onRemoved, maxMS + 50);
+//   }
 
-//     previouslyFocused?.focus?.();
+//   function getMaxDurationMS(el) {
+//     const cs = window.getComputedStyle(el);
+//     const toMS = (v) => {
+//       const s = (v || "").trim();
+//       if (!s) return 0;
+//       if (s.endsWith("ms")) return parseFloat(s) || 0;
+//       if (s.endsWith("s")) return (parseFloat(s) || 0) * 1000;
+//       return (parseFloat(s) || 0) * 1000;
+//     };
+
+//     const maxSum = (durStr, delayStr) => {
+//       const durs = (durStr || "0s").split(",").map(toMS);
+//       const delays = (delayStr || "0s").split(",").map(toMS);
+//       const len = Math.max(durs.length, delays.length);
+//       let max = 0;
+//       for (let i = 0; i < len; i++) {
+//         const d = durs[i] ?? durs[durs.length - 1] ?? 0;
+//         const l = delays[i] ?? delays[delays.length - 1] ?? 0;
+//         if (d + l > max) max = d + l;
+//       }
+//       return max;
+//     };
+
+//     return Math.max(
+//       maxSum(cs.animationDuration, cs.animationDelay),
+//       maxSum(cs.transitionDuration, cs.transitionDelay)
+//     );
 //   }
 
 //   if (returnDataOnClose) {
@@ -357,11 +413,7 @@ export default Modal;
 //       resolvePromise(data);
 //     };
 
-//     return {
-//       modal,
-//       close: wrappedClose,
-//       closed,
-//     };
+//     return { modal, close: wrappedClose, closed };
 //   }
 
 //   return modal;
@@ -369,58 +421,28 @@ export default Modal;
 
 // export default Modal;
 
-
-// /*
-// // You can now use actions for buttons like:
-// actions: () => {
-//   const btn = document.createElement('button');
-//   btn.textContent = "Go to Cart";
-//   btn.onclick = () => {
-//     modal.close();
-//     navigate("/cart");
-//   };
-//   return btn;
-// }
-
-// */
-
-
 // // import "../../../css/ui/Modal.css";
 
-// // let openModals = 0; // Track open modals for scroll lock and stacking
+// // let openModals = 0;
+// // let bodyStyleEl = null; // Shared style element to prevent body scroll
 
-// // const Modal = ({
-// //   title,
-// //   content,
-// //   onClose,
-// //   size = 'medium',            // 'small', 'medium', 'large'
-// //   closeOnOverlayClick = true,
-// //   autofocusSelector = null,   // CSS selector to autofocus inside modal
-// //   returnDataOnClose = false,  // If true, onClose can receive data
-// //   onConfirm = null,           // callback for confirm action (Enter key)
-// // }) => {
-// //   const modal = document.createElement('div');
-// //   modal.className = `modal modal--${size}`;
-// //   modal.style.zIndex = 1000 + openModals * 10;
-
-// //   // Overlay
-// //   const overlay = document.createElement('div');
-// //   overlay.className = 'modal-overlay';
-
-// //   // If overlay click allowed, attach handler
-// //   if (closeOnOverlayClick) {
-// //     overlay.addEventListener('click', wrappedOnClose);
+// // function addBodyOverflowHidden() {
+// //   if (!bodyStyleEl) {
+// //     bodyStyleEl = document.createElement('style');
+// //     bodyStyleEl.id = 'modal-body-style';
+// //     bodyStyleEl.textContent = `body { overflow: hidden; }`;
+// //     document.head.appendChild(bodyStyleEl);
 // //   }
+// // }
 
-// //   // Dialog
-// //   const dialog = document.createElement('div');
-// //   dialog.className = 'modal-dialog';
-// //   dialog.setAttribute('tabindex', '-1');
-// //   dialog.setAttribute('role', 'dialog');
-// //   dialog.setAttribute('aria-modal', 'true');
-// //   dialog.setAttribute('aria-label', title);
+// // function removeBodyOverflowHidden() {
+// //   if (openModals === 0 && bodyStyleEl) {
+// //     bodyStyleEl.remove();
+// //     bodyStyleEl = null;
+// //   }
+// // }
 
-// //   // Header
+// // function createModalHeader(title, onClose) {
 // //   const header = document.createElement('div');
 // //   header.className = 'modal-header';
 
@@ -429,51 +451,105 @@ export default Modal;
 // //   heading.id = `modal-title-${openModals}`;
 // //   header.appendChild(heading);
 
-// //   // Close Button
 // //   const closeButton = document.createElement('button');
 // //   closeButton.className = 'modal-close';
 // //   closeButton.textContent = '×';
 // //   closeButton.setAttribute('aria-label', 'Close');
-// //   closeButton.addEventListener('click', wrappedOnClose);
+// //   closeButton.addEventListener('click', onClose);
 // //   header.appendChild(closeButton);
 
-// //   // Body
+// //   return { header, titleId: heading.id };
+// // }
+
+// // function createModalBody(content) {
 // //   const body = document.createElement('div');
 // //   body.className = 'modal-body';
-// //   const contentNode = (typeof content === 'function') ? content() : content;
+
+// //   const contentNode = typeof content === 'function' ? content() : content;
 // //   if (contentNode instanceof HTMLElement) {
 // //     body.appendChild(contentNode);
 // //   } else {
-// //     // Fallback: treat as text or node-like string (avoid innerHTML)
 // //     body.textContent = contentNode?.toString() || '';
 // //   }
+
 // //   body.id = `modal-desc-${openModals}`;
+// //   return { body, descId: body.id };
+// // }
 
-// //   // Associate body with dialog for screen readers
-// //   dialog.setAttribute('aria-describedby', body.id);
+// // function createModalFooter(actions) {
+// //   if (typeof actions !== 'function') return null;
 
-// //   // Assemble dialog
+// //   const footer = document.createElement('div');
+// //   footer.className = 'modal-footer';
+
+// //   const content = actions();
+// //   if (content instanceof HTMLElement) {
+// //     footer.appendChild(content);
+// //   }
+// //   return footer;
+// // }
+
+// // const Modal = ({
+// //   title,
+// //   content,
+// //   onClose,
+// //   size = 'medium',
+// //   closeOnOverlayClick = true,
+// //   autofocusSelector = null,
+// //   returnDataOnClose = false,
+// //   onConfirm = null,
+// //   actions = null,
+// //   onOpen = null,
+// //   force = false
+// // }) => {
+// //   const modal = document.createElement('div');
+// //   modal.className = `modal modal--${size}`;
+// //   modal.style.zIndex = 1000 + openModals * 10;
+
+// //   const overlay = document.createElement('div');
+// //   overlay.className = 'modal-overlay';
+
+// //   const dialog = document.createElement('div');
+// //   dialog.className = 'modal-dialog';
+// //   dialog.setAttribute('tabindex', '-1');
+// //   dialog.setAttribute('role', 'dialog');
+
+// //   // Disable body scroll if first modal
+// //   addBodyOverflowHidden();
+
+// //   const previouslyFocused = document.activeElement; // Save focused element for this modal
+// //   openModals++;
+
+// //   const wrappedOnClose = (data) => {
+// //     if (force) return;
+// //     cleanup();
+// //     if (returnDataOnClose) onClose?.(data);
+// //     else onClose?.();
+// //   };
+
+// //   if (closeOnOverlayClick && !force) {
+// //     overlay.addEventListener('click', () => wrappedOnClose());
+// //   }
+
+// //   const { header, titleId } = createModalHeader(title, () => wrappedOnClose());
+// //   const { body, descId } = createModalBody(content);
+// //   const footer = createModalFooter(actions);
+
+// //   dialog.setAttribute('aria-modal', 'true');
+// //   dialog.setAttribute('aria-labelledby', titleId);
+// //   dialog.setAttribute('aria-describedby', descId);
+
 // //   dialog.appendChild(header);
 // //   dialog.appendChild(body);
+// //   if (footer) dialog.appendChild(footer);
 
-// //   // Assemble modal
 // //   modal.appendChild(overlay);
 // //   modal.appendChild(dialog);
 
-// //   // Store element that triggered modal for focus return
-// //   const previouslyFocused = document.activeElement;
-
-// //   // Scroll lock: increase count and apply lock if first modal
-// //   openModals++;
-// //   if (openModals === 1) {
-// //     document.body.style.overflow = 'hidden';
-// //   }
-
-// //   // Focus trap selectors
 // //   const focusableSelectors = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
-// //   // Trap focus inside modal dialog
 // //   const trapFocus = (e) => {
+// //     if (force && e.key === 'Escape') return;
 // //     const focusableEls = dialog.querySelectorAll(focusableSelectors);
 // //     if (!focusableEls.length) return;
 
@@ -481,18 +557,14 @@ export default Modal;
 // //     const lastEl = focusableEls[focusableEls.length - 1];
 
 // //     if (e.key === 'Tab') {
-// //       if (e.shiftKey) {
-// //         if (document.activeElement === firstEl) {
-// //           e.preventDefault();
-// //           lastEl.focus();
-// //         }
-// //       } else {
-// //         if (document.activeElement === lastEl) {
-// //           e.preventDefault();
-// //           firstEl.focus();
-// //         }
+// //       if (e.shiftKey && document.activeElement === firstEl) {
+// //         e.preventDefault();
+// //         lastEl.focus();
+// //       } else if (!e.shiftKey && document.activeElement === lastEl) {
+// //         e.preventDefault();
+// //         firstEl.focus();
 // //       }
-// //     } else if (e.key === 'Escape') {
+// //     } else if (e.key === 'Escape' && !force) {
 // //       wrappedOnClose();
 // //     } else if (e.key === 'Enter' && onConfirm) {
 // //       e.preventDefault();
@@ -501,60 +573,109 @@ export default Modal;
 // //   };
 
 // //   dialog.addEventListener('keydown', trapFocus);
-
-// //   // Animation: Add fade-in class
 // //   modal.classList.add('modal--fade-in');
 
-// //   // Append modal to #app
-// //   document.getElementById('app').appendChild(modal);
+// //   const modalContainer = document.getElementById('modalcon');
+// //   if (!modalContainer) throw new Error('No element with id "modalcon" found');
+// //   modalContainer.appendChild(modal);
 
-// //   // Autofocus logic
+// //   if (onOpen) onOpen();
+
 // //   if (autofocusSelector) {
 // //     const el = dialog.querySelector(autofocusSelector);
-// //     if (el) el.focus();
-// //     else dialog.focus();
+// //     el?.focus();
 // //   } else {
 // //     dialog.focus();
 // //   }
 
-// //   // Cleanup function on close
+// //   // function cleanup() {
+// //   //   dialog.removeEventListener('keydown', trapFocus);
+// //   //   modal.classList.remove('modal--fade-in');
+// //   //   modal.classList.add('modal--fade-out');
+
+// //   //   modal.addEventListener('animationend', () => {
+// //   //     modal.remove();
+// //   //   });
+
+// //   //   openModals = Math.max(0, openModals - 1);
+
+// //   //   // Only remove body overflow when last modal is closed
+// //   //   removeBodyOverflowHidden();
+
+// //   //   // Restore focus only for this modal
+// //   //   previouslyFocused?.focus?.();
+// //   // }
+
 // //   function cleanup() {
 // //     dialog.removeEventListener('keydown', trapFocus);
 // //     modal.classList.remove('modal--fade-in');
 // //     modal.classList.add('modal--fade-out');
-
-// //     // Wait for fade-out animation to finish before removing modal
-// //     modal.addEventListener('animationend', () => {
+  
+// //     let removed = false;
+  
+// //     const onRemoved = () => {
+// //       if (removed) return;
+// //       removed = true;
+  
+// //       // Detach listeners just in case
+// //       ['animationend', 'transitionend'].forEach(evt => {
+// //         modal.removeEventListener(evt, onRemoved);
+// //         dialog.removeEventListener(evt, onRemoved);
+// //       });
+  
 // //       if (modal.parentNode) modal.parentNode.removeChild(modal);
+  
+// //       openModals = Math.max(0, openModals - 1);
+// //       removeBodyOverflowHidden();
+// //       previouslyFocused?.focus?.();
+// //     };
+  
+// //     // Listen on BOTH modal and dialog (transitionend doesn't bubble)
+// //     ['animationend', 'transitionend'].forEach(evt => {
+// //       modal.addEventListener(evt, onRemoved, { once: true });
+// //       dialog.addEventListener(evt, onRemoved, { once: true });
 // //     });
-
-// //     // Scroll unlock management
-// //     openModals = Math.max(0, openModals - 1);
-// //     if (openModals === 0) {
-// //       document.body.style.overflow = '';
-// //     }
-
-// //     // Return focus to previously focused element
-// //     if (previouslyFocused && previouslyFocused.focus) {
-// //       previouslyFocused.focus();
-// //     }
+  
+// //     // Fallback: compute the longest anim/transition and force-remove after it
+// //     const maxMS = Math.max(getMaxDurationMS(modal), getMaxDurationMS(dialog));
+// //     setTimeout(onRemoved, maxMS + 50); // small buffer
 // //   }
-
-// //   // Wrapper to handle optional return data on close
-// //   function wrappedOnClose(data) {
-// //     cleanup();
-// //     if (returnDataOnClose) {
-// //       onClose(data);
-// //     } else {
-// //       onClose();
-// //     }
+  
+// //   // Helper to compute the max total duration (duration + delay) in ms
+// //   function getMaxDurationMS(el) {
+// //     const cs = window.getComputedStyle(el);
+  
+// //     const toMS = (v) => {
+// //       const s = (v || '').trim();
+// //       if (!s) return 0;
+// //       if (s.endsWith('ms')) return parseFloat(s) || 0;
+// //       if (s.endsWith('s')) return (parseFloat(s) || 0) * 1000;
+// //       return (parseFloat(s) || 0) * 1000;
+// //     };
+  
+// //     const maxSum = (durStr, delayStr) => {
+// //       const durs = (durStr || '0s').split(',').map(toMS);
+// //       const delays = (delayStr || '0s').split(',').map(toMS);
+// //       const len = Math.max(durs.length, delays.length);
+// //       let max = 0;
+// //       for (let i = 0; i < len; i++) {
+// //         const d = durs[i] ?? durs[durs.length - 1] ?? 0;
+// //         const l = delays[i] ?? delays[delays.length - 1] ?? 0;
+// //         if (d + l > max) max = d + l;
+// //       }
+// //       return max;
+// //     };
+  
+// //     const anim = maxSum(cs.animationDuration, cs.animationDelay);
+// //     const trans = maxSum(cs.transitionDuration, cs.transitionDelay);
+// //     return Math.max(anim, trans);
 // //   }
+  
+  
 
-// //   // Return an object with modal element and a way to close programmatically + optional return data promise
 // //   if (returnDataOnClose) {
-// //     // Create a Promise that resolves on close with optional data
 // //     let resolvePromise;
-// //     const closePromise = new Promise((resolve) => {
+// //     const closed = new Promise((resolve) => {
 // //       resolvePromise = resolve;
 // //     });
 
@@ -563,14 +684,10 @@ export default Modal;
 // //       resolvePromise(data);
 // //     };
 
-// //     // Override close handlers to use wrappedClose
-// //     closeButton.onclick = () => wrappedClose();
-// //     overlay.onclick = closeOnOverlayClick ? () => wrappedClose() : null;
-
 // //     return {
 // //       modal,
 // //       close: wrappedClose,
-// //       closed: closePromise,
+// //       closed,
 // //     };
 // //   }
 
@@ -578,127 +695,3 @@ export default Modal;
 // // };
 
 // // export default Modal;
-
-// // /******Usage Example******* */
-
-// // // // Current style unchanged:
-// // // const modal = Modal({
-// // //   title: "Add Ticket",
-// // //   content: form,
-// // //   onClose: () => modal.remove()
-// // // });
-
-// // // // With data return and async close:
-// // // const { modal, close, closed } = Modal({
-// // //   title: "Confirm Action",
-// // //   content: confirmContent,
-// // //   onClose: (result) => console.log('Closed with:', result),
-// // //   returnDataOnClose: true,
-// // //   onConfirm: () => close(true) // example confirm closes modal with data
-// // // });
-
-// // // // Await user response if needed
-// // // closed.then(data => console.log('Modal closed with:', data));
-
-// // /********Usage Example end********* */
-
-// // // import "../../../css/ui/Modal.css";
-
-// // // const Modal = ({ title, content, onClose }) => {
-// // //   const modal = document.createElement('div');
-// // //   modal.className = 'modal';
-
-// // //   const overlay = document.createElement('div');
-// // //   overlay.className = 'modal-overlay';
-// // //   overlay.addEventListener('click', onClose);
-
-// // //   const dialog = document.createElement('div');
-// // //   dialog.className = 'modal-dialog';
-// // //   dialog.setAttribute('tabindex', '-1');
-// // //   dialog.setAttribute('role', 'dialog');
-// // //   dialog.setAttribute('aria-modal', 'true');
-// // //   dialog.setAttribute('aria-label', title);
-
-// // //   const header = document.createElement('div');
-// // //   header.className = 'modal-header';
-
-// // //   const heading = document.createElement('h3');
-// // //   heading.textContent = title;
-// // //   header.appendChild(heading);
-
-// // //   const closeButton = document.createElement('button');
-// // //   closeButton.className = 'modal-close';
-// // //   closeButton.textContent = '×';
-// // //   closeButton.setAttribute('aria-label', 'Close');
-// // //   closeButton.addEventListener('click', onClose);
-// // //   header.appendChild(closeButton);
-
-// // //   const body = document.createElement('div');
-// // //   body.className = 'modal-body';
-// // //   body.appendChild(content);
-
-// // //   dialog.appendChild(header);
-// // //   dialog.appendChild(body);
-
-// // //   modal.appendChild(overlay);
-// // //   modal.appendChild(dialog);
-
-// // //   // Prevent background scroll
-// // //   // document.body.style.overflow = 'hidden';
-
-// // //   // Focus trap support
-// // //   const focusableSelectors = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
-// // //   const trapFocus = (e) => {
-// // //     const focusableEls = dialog.querySelectorAll(focusableSelectors);
-// // //     const firstEl = focusableEls[0];
-// // //     const lastEl = focusableEls[focusableEls.length - 1];
-
-// // //     if (e.key === 'Tab') {
-// // //       if (e.shiftKey) {
-// // //         // Shift + Tab
-// // //         if (document.activeElement === firstEl) {
-// // //           e.preventDefault();
-// // //           lastEl.focus();
-// // //         }
-// // //       } else {
-// // //         // Tab
-// // //         if (document.activeElement === lastEl) {
-// // //           e.preventDefault();
-// // //           firstEl.focus();
-// // //         }
-// // //       }
-// // //     } else if (e.key === 'Escape') {
-// // //       onClose(); // Optional: close on ESC
-// // //     }
-// // //   };
-
-// // //   dialog.addEventListener('keydown', trapFocus);
-
-// // //   document.getElementById('app').appendChild(modal);
-
-// // //   // Autofocus the dialog
-// // //   dialog.focus();
-
-// // //   // Cleanup helper
-// // //   const cleanup = () => {
-// // //     document.body.style.overflow = '';
-// // //     dialog.removeEventListener('keydown', trapFocus);
-// // //   };
-
-// // //   // Attach cleanup on close
-// // //   const wrappedOnClose = () => {
-// // //     cleanup();
-// // //     onClose();
-// // //   };
-
-// // //   // Replace original listeners with wrapped version
-// // //   overlay.removeEventListener('click', onClose);
-// // //   overlay.addEventListener('click', wrappedOnClose);
-
-// // //   closeButton.removeEventListener('click', onClose);
-// // //   closeButton.addEventListener('click', wrappedOnClose);
-
-// // //   return modal;
-// // // };
-
-// // // export default Modal;

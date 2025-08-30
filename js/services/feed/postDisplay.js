@@ -1,34 +1,48 @@
-// import { SRC_URL, state } from "../../state/state.js";
 import { createElement } from "../../components/createElement.js";
-import Snackbar from "../../components/ui/Snackbar.mjs";
-// import Button from "../../components/base/Button.js";
 import { renderPost } from "./renderNewPost.js";
 import { apiFetch } from "../../api/api.js";
 import Notify from "../../components/ui/Notify.mjs";
+import { getState } from "../../state/state.js";
 
 async function displayPost(isLoggedIn, postId, contentContainer) {
+    if (!contentContainer) {
+        contentContainer = document.getElementById("content");
+    }
+
+    clearContainer(contentContainer);
+    contentContainer.appendChild(createElement("p", {}, ["Loading post..."]));
     try {
         const postData = await apiFetch(`/feed/post/${postId}`);
 
-        if (!contentContainer) {
-            contentContainer = document.getElementById("content");
-        }
-        contentContainer.innerHTML = "";
-        renderPost(postData, contentContainer, 0);
+        clearContainer(contentContainer);
+
+        let containerx = createElement("div",{id:"feedpostcon"},[]);
+        contentContainer.appendChild(containerx);
+
+        const isAuthor = getState("user") === postData.userid;
+        renderPost(postData, containerx, 0, { editable: isAuthor });
+
     } catch (error) {
-        contentContainer.innerHTML = "";
-        if (error.message === '404') {
+        clearContainer(contentContainer);
+
+        if (error.message === "404") {
             contentContainer.appendChild(
                 createElement("h1", {}, ["Post not found"])
             );
         } else {
-            // contentContainer.appendChild(
-            //     createElement("h1", {}, [`Error loading post details: ${error.message}`])
-            // );
-            Snackbar("Failed to load post details. Please try again later.", 3000);
+            Notify("Failed to load post details. Please try again later.", {
+                type: "error",
+                duration: 3000,
+                dismissible: true
+            });
         }
     }
 }
 
+function clearContainer(container) {
+    while (container.firstChild) {
+        container.removeChild(container.firstChild);
+    }
+}
 
 export { displayPost };

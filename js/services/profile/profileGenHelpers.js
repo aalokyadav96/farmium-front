@@ -3,10 +3,7 @@ import { formatDate } from "./profileHelpers.js";
 import { logout } from "../auth/authService.js";
 import { reportPost } from "../reporting/reporting.js";
 import Button from "../../components/base/Button.js";
-import { userChatInit } from "../userchat/chatPage.js";
-// import Snackbar from "../../components/ui/Snackbar.mjs";
-// import { createElement } from "../../components/createElement.js";
-// import { capitalize } from "./profileHelpers.js";
+
 import { toggleFollow } from "./toggleFollow.js";
 
 // Reuse appendChildren from profileImages.js or redefine here if needed
@@ -71,7 +68,7 @@ function createProfileActions(profile, isLoggedIn) {
         profileActions.appendChild(followButton);
 
         const sendMessagebtn = Button("Send Message", 'send-msg', {
-            click: () => userChatInit(profile.userid),
+            // click: () => userChatInit(profile.userid),
         }, "buttonx");
         profileActions.appendChild(sendMessagebtn);
 

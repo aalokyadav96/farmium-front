@@ -1,8 +1,8 @@
-import { createEventForm } from "../../services/event/createEventService.js";
+import { createEvent } from "../../services/event/creadit.js";
 
 async function CreateEvent(isLoggedIn, contentContainer) {
     contentContainer.innerHTML = '';
-    createEventForm(isLoggedIn, contentContainer);
+    createEvent(isLoggedIn, contentContainer);
 }
 
 export { CreateEvent };

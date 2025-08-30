@@ -1,16 +1,17 @@
 // --- API URLs ---
-// const API_URL = "http://localhost:4000/api/v1";
-// const AGI_URL = "http://localhost:4000/agi/v1";
-// const SRC_URL = "http://localhost:4000/static";
-// const SEARCH_URL = "http://localhost:12000/api/v1";
-// const SEARCH_URL = "http://localhost:4000/api/v1";
-const API_URL = "https://gallium.onrender.com/api/v1";
-const AGI_URL = "https://gallium.onrender.com/api/v1";
-const SRC_URL = "https://gallium.onrender.com/static";
-const SEARCH_URL = "https://gallium.onrender.com/api/v1";
+const API_URL = "http://localhost:4000/api/v1";
+// // const APIG_URL = "http://localhost:8370/api/g1";
+const APIG_URL = API_URL;
+const AGI_URL = "http://localhost:4000/agi/v1";
+const SRC_URL = "http://localhost:4000/static";
+// // const SEARCH_URL = "http://localhost:12000/api/v1";
+const SEARCH_URL = "http://localhost:4000/api/v1";
 
-const DEFAULT_IMAGE = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/wcAAwAB/hsbRWkAAAAASUVORK5CYII=`;
-const USER_PH = `data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMu...`;
+// const API_URL = "https://gallium.onrender.com/api/v1";
+// const APIG_URL = "https://gallium.onrender.com/api/g1";
+// const AGI_URL = "https://gallium.onrender.com/api/v1";
+// const SRC_URL = "https://gallium.onrender.com/static";
+// const SEARCH_URL = "https://gallium.onrender.com/api/v1";
 
 // --- Allowed and persisted keys ---
 const allowedKeys = new Set([
@@ -226,12 +227,10 @@ function setLoading(val) {
 export {
   state,
   API_URL,
+  APIG_URL,
   AGI_URL,
   SRC_URL,
   SEARCH_URL,
-  DEFAULT_IMAGE,
-  USER_PH,
-
   // core
   getState,
   setState,

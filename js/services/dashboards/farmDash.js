@@ -35,33 +35,6 @@ export function displayDash(content, isLoggedIn) {
   content.appendChild(dashContainer);
 }
 
-// export function displayDash(content, isLoggedIn) {
-//   content.innerHTML = "";
-
-//   if (!isLoggedIn) {
-//     const notLoggedInUI = createElement("div", { class: "dash-guest" }, [
-//       createElement("h2", {}, ["Welcome to your Dashboard"]),
-//       createElement("p", {}, ["Log in to access your farm stats, orders, and crop inventory."]),
-//       createElement("ul", {}, [
-//         createElement("li", {}, ["Track your crop inventory"]),
-//         createElement("li", {}, ["Manage and fulfill orders"]),
-//         createElement("li", {}, ["Save recipes and favorite crops"]),
-//       ]),
-//     ]);
-//     content.appendChild(notLoggedInUI);
-//     return;
-//   }
-
-//   const tabs = [
-//     { id: "overview", title: "Overview", render: renderOverviewTab },
-//     { id: "orders", title: "Orders", render: renderOrdersTab },
-//   ];
-
-//   const tabUI = createTabs(tabs, "farmdash-tabs");
-//   const dashContainer = createElement("div", { class: "farmdashpage" }, [tabUI]);
-//   content.appendChild(dashContainer);
-// }
-
 function renderOverviewTab(container) {
   container.replaceChildren();
 

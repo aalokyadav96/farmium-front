@@ -1,6 +1,5 @@
 import { API_URL, getState, setState } from "../../state/state.js";
 import { apiFetch } from "../../api/api.js";
-import Snackbar from '../../components/ui/Snackbar.mjs';
 import Notify from "../../components/ui/Notify.mjs";
 
 async function fetchProfile() {
@@ -21,11 +20,11 @@ async function fetchProfile() {
             } else {
                 const errorData = await response.json();
                 console.error(`Error fetching profile: ${response.status} - ${response.statusText}`, errorData);
-                Snackbar(`Error fetching profile: ${errorData.error || 'Unknown error'}`, 3000);
+                Notify(`Error fetching profile: ${errorData.error || 'Unknown error'}`, {type:"error",duration:3000, dismissible:true});
             }
         } catch (error) {
             console.error("Error fetching profile:", error);
-            Snackbar("An unexpected error occurred while fetching the profile.", 3000);
+            Notify("An unexpected error occurred while fetching the profile.", {type:"error",duration:3000, dismissible:true});
         }
     } else {
         setState({ userProfile: null }, true);

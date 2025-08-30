@@ -1,6 +1,4 @@
 .crop-about-wrapper {
-    color: #222;
-    background: #fafafa;
     padding: 2rem;
     max-width: 900px;
     margin: 0 auto;
@@ -19,7 +17,6 @@
   .crop-about-wrapper .crop-header .crop-scientific {
     font-size: 1.2rem;
     font-style: italic;
-    color: #666;
   }
   
   .crop-about-wrapper .crop-image-section {
@@ -35,22 +32,14 @@
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   }
   
-  .crop-about-wrapper .crop-section h2 {
-    font-size: 1.5rem;
-    margin-bottom: 0.75rem;
-    color: #2c3e50;
-  }
-  
   .crop-about-wrapper .crop-section p {
     font-size: 1rem;
-    color: #333;
     margin: 0.5rem 0;
   }
   
   .crop-about-wrapper .crop-section ul {
     padding-left: 1.25rem;
     list-style-type: disc;
-    color: #444;
   }
   
   .crop-about-wrapper .crop-section ul li {
@@ -72,7 +61,6 @@
   }
   
   .crop-about-wrapper .crop-section .crop-table th {
-    background-color: #f3f3f3;
     font-weight: 600;
     width: 30%;
   }

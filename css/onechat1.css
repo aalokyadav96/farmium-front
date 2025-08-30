@@ -213,3 +213,6 @@
     max-width: 100%;
     height: auto;
 }
+.videocon video {
+  width: 100%;
+}

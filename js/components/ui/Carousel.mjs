@@ -1,43 +1,196 @@
+import Imagex from "../base/Imagex";
 import "../../../css/ui/Carousel.css";
+import { playSVG } from "../svgs";
+
+// helper: convert svg string -> DOM element
+function createSVG(svgString) {
+    const template = document.createElement("template");
+    template.innerHTML = svgString.trim();
+    return template.content.firstChild;
+}
 
 const Carousel = (imagesArray) => {
     let currentIndex = 0;
+    let startX = 0;
+    let endX = 0;
 
     const carouselContainer = document.createElement('div');
-    carouselContainer.className = 'carousel';
+    carouselContainer.setAttribute("class", "carousel");
 
     const imageWrapper = document.createElement('div');
-    imageWrapper.className = 'carousel-image-wrapper';
+    imageWrapper.setAttribute("class", "carousel-image-wrapper");
 
-    const img = document.createElement('img');
-    img.src = imagesArray[0].src;
-    img.alt = imagesArray[0].alt || 'Carousel Image';
-    img.className = 'carousel-image';
+    const img = Imagex({
+        src: imagesArray[0].src,
+        alt: imagesArray[0].alt || 'Carousel Image',
+        class: 'carousel-image',
+    });
 
     imageWrapper.appendChild(img);
     carouselContainer.appendChild(imageWrapper);
 
-    const prevBtn = document.createElement('button');
-    prevBtn.className = 'carousel-btn prev';
-    prevBtn.textContent = '‹';
-
-    const nextBtn = document.createElement('button');
-    nextBtn.className = 'carousel-btn next';
-    nextBtn.textContent = '›';
-
     function updateImage(index) {
         currentIndex = (index + imagesArray.length) % imagesArray.length;
-        img.src = imagesArray[currentIndex].src;
-        img.alt = imagesArray[currentIndex].alt || 'Carousel Image';
+        img.setAttribute("src", imagesArray[currentIndex].src);
+        img.setAttribute("alt", imagesArray[currentIndex].alt || 'Carousel Image');
     }
 
-    prevBtn.addEventListener('click', () => updateImage(currentIndex - 1));
-    nextBtn.addEventListener('click', () => updateImage(currentIndex + 1));
+    if (imagesArray.length > 1) {
+        const prevBtn = document.createElement('button');
+        prevBtn.setAttribute("class", "carousel-btn prev");
+        const prevIcon = createSVG(playSVG);
+        // prevBtn.style.transform = "rotate(180deg)";
+        prevBtn.appendChild(prevIcon);
 
-    carouselContainer.appendChild(prevBtn);
-    carouselContainer.appendChild(nextBtn);
+        const nextBtn = document.createElement('button');
+        nextBtn.setAttribute("class", "carousel-btn next");
+        const nextIcon = createSVG(playSVG);
+        // nextIcon.style.transform = "rotate(180deg)";
+        nextBtn.appendChild(nextIcon);
+
+        prevBtn.addEventListener('click', () => updateImage(currentIndex - 1));
+        nextBtn.addEventListener('click', () => updateImage(currentIndex + 1));
+
+        carouselContainer.appendChild(prevBtn);
+        carouselContainer.appendChild(nextBtn);
+
+        // swipe support
+        imageWrapper.addEventListener("touchstart", (e) => {
+            startX = e.touches[0].clientX;
+        });
+
+        imageWrapper.addEventListener("touchend", (e) => {
+            endX = e.changedTouches[0].clientX;
+            const diff = endX - startX;
+            if (Math.abs(diff) > 50) { 
+                if (diff > 0) {
+                    updateImage(currentIndex - 1); // swipe right -> prev
+                } else {
+                    updateImage(currentIndex + 1); // swipe left -> next
+                }
+            }
+        });
+    }
 
     return carouselContainer;
 };
 
 export default Carousel;
+
+// import Imagex from "../base/Imagex";
+// import "../../../css/ui/Carousel.css";
+// import {playSVG} from "../svgs";
+
+// const Carousel = (imagesArray) => {
+//     let currentIndex = 0;
+//     let startX = 0;
+//     let endX = 0;
+
+//     const carouselContainer = document.createElement('div');
+//     carouselContainer.setAttribute("class", "carousel");
+
+//     const imageWrapper = document.createElement('div');
+//     imageWrapper.setAttribute("class", "carousel-image-wrapper");
+
+//     const img = Imagex({
+//         src : imagesArray[0].src,
+//         alt : imagesArray[0].alt || 'Carousel Image',
+//         class : 'carousel-image',
+//     });
+
+//     imageWrapper.appendChild(img);
+//     carouselContainer.appendChild(imageWrapper);
+
+//     function updateImage(index) {
+//         currentIndex = (index + imagesArray.length) % imagesArray.length;
+//         img.setAttribute("src", imagesArray[currentIndex].src);
+//         img.setAttribute("alt", imagesArray[currentIndex].alt || 'Carousel Image');
+//     }
+
+//     if (imagesArray.length > 1) {
+//         const prevBtn = document.createElement('button');
+//         prevBtn.setAttribute("class", "carousel-btn prev");
+//         // prevBtn.appendChild(document.createTextNode("‹"));
+//         prevBtn.appendChild(playSVG);
+
+//         const nextBtn = document.createElement('button');
+//         nextBtn.setAttribute("class", "carousel-btn next");
+//         // nextBtn.appendChild(document.createTextNode("›"));
+//         prevBtn.appendChild(playSVG);
+
+//         prevBtn.addEventListener('click', () => updateImage(currentIndex - 1));
+//         nextBtn.addEventListener('click', () => updateImage(currentIndex + 1));
+
+//         carouselContainer.appendChild(prevBtn);
+//         carouselContainer.appendChild(nextBtn);
+
+//         // swipe support
+//         imageWrapper.addEventListener("touchstart", (e) => {
+//             startX = e.touches[0].clientX;
+//         });
+
+//         imageWrapper.addEventListener("touchend", (e) => {
+//             endX = e.changedTouches[0].clientX;
+//             const diff = endX - startX;
+//             if (Math.abs(diff) > 50) { 
+//                 if (diff > 0) {
+//                     updateImage(currentIndex - 1); // swipe right -> prev
+//                 } else {
+//                     updateImage(currentIndex + 1); // swipe left -> next
+//                 }
+//             }
+//         });
+//     }
+
+//     return carouselContainer;
+// };
+
+// export default Carousel;
+
+// // import "../../../css/ui/Carousel.css";
+// // import Imagex from "../base/Imagex";
+
+// // const Carousel = (imagesArray) => {
+// //     let currentIndex = 0;
+
+// //     const carouselContainer = document.createElement('div');
+// //     carouselContainer.setAttribute("class", "carousel");
+
+// //     const imageWrapper = document.createElement('div');
+// //     imageWrapper.setAttribute("class", "carousel-image-wrapper");
+   
+// //     const img = Imagex({
+// //         src : imagesArray[0].src,
+// //         alt : imagesArray[0].alt || 'Carousel Image',
+// //         class : 'carousel-image',
+// //     });
+
+// //     imageWrapper.appendChild(img);
+// //     carouselContainer.appendChild(imageWrapper);
+
+// //     function updateImage(index) {
+// //         currentIndex = (index + imagesArray.length) % imagesArray.length;
+// //         img.setAttribute("src", imagesArray[currentIndex].src);
+// //         img.setAttribute("alt", imagesArray[currentIndex].alt || 'Carousel Image');
+// //     }
+
+// //     if (imagesArray.length > 1) {
+// //         const prevBtn = document.createElement('button');
+// //         prevBtn.setAttribute("class", "carousel-btn prev");
+// //         prevBtn.appendChild(document.createTextNode("‹"));
+
+// //         const nextBtn = document.createElement('button');
+// //         nextBtn.setAttribute("class", "carousel-btn next");
+// //         nextBtn.appendChild(document.createTextNode("›"));
+
+// //         prevBtn.addEventListener('click', () => updateImage(currentIndex - 1));
+// //         nextBtn.addEventListener('click', () => updateImage(currentIndex + 1));
+
+// //         carouselContainer.appendChild(prevBtn);
+// //         carouselContainer.appendChild(nextBtn);
+// //     }
+
+// //     return carouselContainer;
+// // };
+
+// // export default Carousel;

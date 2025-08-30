@@ -1,61 +1,62 @@
 import { createElement } from "../../components/createElement.js";
 import { navigate } from "../../routes/index.js";
 import { createPlace } from "./placeService.js";
-import { createFormGroup } from "./editPlace.js";
 import Notify from "../../components/ui/Notify.mjs";
+import { createFormGroup } from "../../components/createFormGroup.js";
+
+const categoryMap = {
+    "Food & Beverage": ["Restaurant", "Cafe", "Bakery"],
+    "Health & Wellness": ["Hospital", "Clinic", "Gym", "Yoga Center"],
+    "Entertainment": ["Theater", "Stadium", "Museum", "Arena"],
+    "Services": ["Saloon", "Studio", "Petrol Pump", "Shop"],
+    "Public Facilities": ["Toilet", "Park"],
+    "Business": ["Business", "Hotel", "Other"]
+};
 
 async function createPlaceForm(isLoggedIn, createSection) {
     createSection.innerHTML = "";
 
     if (!isLoggedIn) {
-        Notify("You must be logged in to create a place.", {type: "warning", duration: 3000, dismissible: true});
+        Notify("You must be logged in to create a place.", { type: "warning", duration: 3000, dismissible: true });
         navigate('/login');
         return;
     }
 
-    const categoryMap = {
-        Food: ["Restaurant", "Cafe", "Bakery", "Hotel"],
-        Health: ["Hospital", "Clinic", "Gym", "Yoga Center"],
-        Entertainment: ["Theater", "Stadium", "Arena", "Park", "Museum"],
-        Services: ["Business", "Shop", "Toilet", "Petrol Pump", "Other"]
-    };
-
-    const form = document.createElement('form');
+    const form = createElement("form", { id: "create-place-form", enctype: "multipart/form-data" });
 
     // Main category
     form.appendChild(createFormGroup({
-        label: "Main Category",
-        inputType: "select",
-        inputId: "category-main",
-        isRequired: true,
+        label: "Place Type",
+        type: "select",
+        id: "main-category",
+        required: true,
         options: [{ value: "", label: "Select main category" }, ...Object.keys(categoryMap).map(key => ({ value: key, label: key }))]
     }));
 
     // Sub category
     form.appendChild(createFormGroup({
-        label: "Sub Category",
-        inputType: "select",
-        inputId: "category-sub",
-        isRequired: true,
+        label: "Category",
+        type: "select",
+        id: "category",
+        required: true,
         options: [{ value: "", label: "Select sub category" }]
     }));
 
-    // Remaining fields
+    // Form fields
     const fields = [
-        { label: "Place Name", inputType: "text", inputId: "place-name", placeholder: "Place Name", isRequired: true },
-        { label: "Address", inputType: "text", inputId: "place-address", placeholder: "Address", isRequired: true },
-        { label: "City", inputType: "text", inputId: "place-city", placeholder: "City", isRequired: true },
-        { label: "Country", inputType: "text", inputId: "place-country", placeholder: "Country", isRequired: true },
-        { label: "Zip Code", inputType: "text", inputId: "place-zipcode", placeholder: "Zip Code", isRequired: true },
-        { label: "Description", inputType: "textarea", inputId: "place-description", placeholder: "Description", isRequired: true },
-        { label: "Capacity", inputType: "number", inputId: "capacity", placeholder: "Capacity", isRequired: true, additionalProps: { min: 1 } },
-        { label: "Phone Number", inputType: "text", inputId: "phone", placeholder: "Phone Number" },
-        { label: "Place Banner", inputType: "file", inputId: "place-banner-add", additionalProps: { accept: 'image/*' } },
+        { label: "Place Name", type: "text", id: "place-name", placeholder: "Place Name", required: true },
+        { label: "Description", type: "textarea", id: "place-description", placeholder: "Description", required: true },
+        { label: "Address", type: "text", id: "place-address", placeholder: "Address", required: true },
+        { label: "City", type: "text", id: "place-city", placeholder: "City", required: true },
+        { label: "Country", type: "text", id: "place-country", placeholder: "Country", required: true },
+        { label: "Zip Code", type: "text", id: "place-zipcode", placeholder: "Zip Code", required: true },
+        { label: "Capacity", type: "number", id: "capacity", placeholder: "Capacity", required: true, additionalProps: { min: 1 } },
+        { label: "Phone Number", type: "text", id: "phone", placeholder: "Phone Number" },
+        { label: "Place Banner", type: "file", id: "place-banner", additionalProps: { accept: "image/*" } }
     ];
-
     fields.forEach(field => form.appendChild(createFormGroup(field)));
 
-    // TAGS FIELD
+    // Tags
     const tagWrapper = createElement("div", { class: "form-group" }, [
         createElement("label", {}, ["Tags"]),
         createElement("div", { style: "display:flex; gap:8px;" }, [
@@ -90,15 +91,13 @@ async function createPlaceForm(isLoggedIn, createSection) {
         }
     });
 
-    // Handle subcategory options
-    form.querySelector("#category-main").addEventListener('change', (e) => {
-        const sub = form.querySelector("#category-sub");
+    // Subcategory dynamic
+    form.querySelector("#main-category").addEventListener('change', (e) => {
+        const sub = form.querySelector("#category");
         sub.innerHTML = '<option value="">Select sub category</option>';
         const selected = categoryMap[e.target.value] || [];
         selected.forEach(subcat => {
-            const option = document.createElement("option");
-            option.value = subcat;
-            option.textContent = subcat;
+            const option = createElement("option", { value: subcat }, [subcat]);
             sub.appendChild(option);
         });
     });
@@ -106,26 +105,47 @@ async function createPlaceForm(isLoggedIn, createSection) {
     // Submit handler
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const formData = new FormData(form);
+
+        const formData = new FormData();
+
+        // Map frontend IDs to backend keys
+        const fieldMap = {
+            "place-name": "name",
+            "place-address": "address",
+            "place-description": "description",
+            "place-city": "city",
+            "place-country": "country",
+            "place-zipcode": "zipCode",
+            "capacity": "capacity",
+            "phone": "phone",
+            "category": "category",
+            "place-banner": "banner"
+        };
+
+        for (const [id, key] of Object.entries(fieldMap)) {
+            const input = form.querySelector(`#${id}`);
+            if (!input) continue;
+            if (input.type === "file") {
+                if (input.files[0]) formData.append(key, input.files[0]);
+            } else {
+                formData.append(key, input.value.trim());
+            }
+        }
+
+        // Append tags
         formData.append("tags", JSON.stringify(tags));
 
         try {
             await createPlace(formData);
-            Notify("Place created successfully!", {duration:3000});
         } catch (err) {
-            Notify("Failed to create place. Try again.", {duration:3000});
+            Notify("Failed to create place. Try again.", { duration: 3000, type: "error" });
             console.error("Error creating place:", err);
         }
     });
 
-    // Submit button
-    const submitButton = document.createElement('button');
-    submitButton.type = 'submit';
-    submitButton.textContent = 'Create Place';
-    submitButton.classList.add('btn', 'btn-primary');
-    
+    const submitButton = createElement("button", { type: "submit", class: "btn btn-primary" }, ["Create Place"]);
     form.appendChild(submitButton);
-    
+
     createSection.appendChild(createElement('h2', {}, ["Create Place"]));
     createSection.appendChild(form);
 }

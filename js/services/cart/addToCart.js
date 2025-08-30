@@ -1,6 +1,6 @@
 // src/ui/cart/addToCart.js
 import { apiFetch } from "../../api/api.js";
-import Toast from "../../components/ui/Toast.mjs"; // Adjust path if needed
+import Notify from "../../components/ui/Notify.mjs"; // Adjust path if needed
 
 /**
  * Adds an item to the cart after validating login and input.
@@ -16,15 +16,15 @@ import Toast from "../../components/ui/Toast.mjs"; // Adjust path if needed
  * @param {boolean} params.isLoggedIn
  */
 export async function addToCart({ category, item, unit = "unit", farm = "", farmid, quantity, price, isLoggedIn }) {
-  console.log("category", "item", "unit", "farm" , "farmid", "quantity", "price", "isLoggedIn");
-  console.log(category, item, unit, farm , farmid, quantity, price, isLoggedIn);
+  console.log("category", "item", "unit", "farm", "farmid", "quantity", "price", "isLoggedIn");
+  console.log(category, item, unit, farm, farmid, quantity, price, isLoggedIn);
   if (!isLoggedIn) {
-    Toast("Please log in to add items to your cart", "error");
+    Notify("Please log in to add items to your cart", { type: "warning", duration: 3000 });
     return;
   }
 
   if (!item || quantity <= 0 || price <= 0) {
-    Toast("Invalid item data", "error");
+    Notify("Invalid item data", { type: "warning", duration: 3000 });
     return;
   }
 
@@ -41,9 +41,9 @@ export async function addToCart({ category, item, unit = "unit", farm = "", farm
   try {
     await apiFetch("/cart", "POST", JSON.stringify(payload));
     const label = `${quantity} ${unit} of ${item}`;
-    Toast(`${label}${farm ? ` from ${farm}` : ""} added to cart`, "success");
+    Notify(`${label}${farm ? ` from ${farm}` : ""} added to cart`, { type: "success", duration: 3000 });
   } catch (err) {
     console.error("Add to cart failed:", err);
-    Toast("Failed to add item to cart", "error");
+    Notify("Failed to add item to cart", { type: "error", duration: 3000 });
   }
 }

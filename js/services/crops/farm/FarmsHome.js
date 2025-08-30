@@ -1,6 +1,6 @@
 import Button from "../../../components/base/Button.js";
 import { createElement } from "../../../components/createElement.js";
-import { apiFetch } from "../../../api/api.js";
+import { apigFetch } from "../../../api/api.js";
 import {
   renderFarmCards,
   renderFeaturedFarm,
@@ -34,7 +34,7 @@ const state = {
 let currentSidebar, isLoggedIn;
 
 async function fetchFarms(page) {
-  const res = await apiFetch(`/farms?page=${page}&limit=${PAGE_SIZE}`);
+  const res = await apigFetch(`/farms?page=${page}&limit=${PAGE_SIZE}`);
   return res?.farms || [];
 }
 
@@ -69,38 +69,6 @@ function Sidebar() {
     }
   };
 }
-
-// function Grid() {
-//   const container = createElement("div", { class: "farm__grid" });
-//   return {
-//     container,
-//     render(farms) {
-//       container.innerHTML = "";
-//       if (!farms.length) {
-//         container.appendChild(createElement("p", {}, ["No farms found."]));
-//       } else {
-//         renderFarmCards(farms, container, isLoggedIn, toggleFavorite);
-//       }
-//     }
-//   };
-// }
-
-// function Sidebar() {
-//   const container = createElement("div", { class: "farm__sidebar" });
-//   return {
-//     container,
-//     render(allFarms) {
-//       container.innerHTML = "";
-//       renderCTAFarm(container);
-//       renderWeatherWidget(container);
-//       renderFeaturedFarm(container, allFarms[0]);
-//       renderFarmStats(container, allFarms);
-//       renderFavorites(container);
-//       renderMap(container);
-//       renderRatings(container, allFarms);
-//     }
-//   };
-// }
 
 function renderFavorites(container) {
   if (!isLoggedIn) return;

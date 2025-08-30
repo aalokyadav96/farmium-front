@@ -1,4 +1,4 @@
-import { displayChat } from "../../services/mechat/chatUI.js";
+import { displayChat } from "../../services/mechat/merechat.js";
 
 async function Mechat(isLoggedIn, contentContainer) {
     contentContainer.innerHTML = '';

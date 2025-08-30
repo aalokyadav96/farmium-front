@@ -2,10 +2,6 @@
     padding: 20px;
   } */
   
-  .orders-page h2 {
-    margin-bottom: 20px;
-  }
-  
   /* 🔍 Filters */
   .orders-page .filters {
     display: flex;
@@ -130,11 +126,6 @@
 /* .orders-page {
     padding: 1rem;
     font-family: sans-serif;
-  }
-  
-  .orders-page h2 {
-    margin-bottom: 1rem;
-    font-size: 1.5rem;
   }
    */
   /* 🔍 Filters Section */

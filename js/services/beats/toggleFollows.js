@@ -1,6 +1,5 @@
 import { state, setState } from "../../state/state.js";
 import { apiFetch } from "../../api/api.js";
-import Snackbar from "../../components/ui/Snackbar.mjs";
 import Notify from "../../components/ui/Notify.mjs";
 
 /**
@@ -25,17 +24,17 @@ export async function toggleAction({
     actionName = "follow",
 }) {
     if (!state.token) {
-        Snackbar("Please log in to continue.", 3000);
+        Notify("Please log in to continue.", {type:"warning",duration:3000, dismissible:true});
         return;
     }
 
     if (!button) {
-        Snackbar("Action button not found.", 3000);
+        Notify("Action button not found.", {type:"error",duration:3000, dismissible:true});
         return;
     }
 
     if (!targetObject) {
-        Snackbar("Target data is unavailable.", 3000);
+        Notify("Target data is unavailable.", {type:"error",duration:3000, dismissible:true});
         return;
     }
 
@@ -60,9 +59,9 @@ export async function toggleAction({
         // Optional: refresh profile after success
         // setState({ userProfile: fetchProfile() }, true);
 
-        Snackbar(
+        Notify(
             `You have ${newState ? actionName : `un${actionName}`} ${targetObject.username || "the entity"}.`,
-            3000
+            {type:"success",duration:3000, dismissible:true}
         );
     } catch (err) {
         // Revert UI on failure
@@ -72,7 +71,7 @@ export async function toggleAction({
         button.disabled = false;
 
         console.error("Toggle action failed:", err);
-        Snackbar(`Failed to ${newState ? "" : "un"}${actionName}: ${err.message}`, 3000);
+        Notify(`Failed to ${newState ? "" : "un"}${actionName}: ${err.message}`, {type:"error",duration:3000, dismissible:true});
     } finally {
         button.disabled = false;
     }

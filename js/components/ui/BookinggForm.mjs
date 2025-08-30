@@ -1,5 +1,5 @@
 import "../../../css/ui/BookingForm.css";
-import SnackBar from "./Snackbar.mjs";
+import Notify from "./Notify.mjs";
 
 function getTempSlots() {
     let res = [
@@ -170,7 +170,7 @@ const BookingForm = (onSubmit) => {
       slotSelect.selectedIndex = 0;
       messageBox.textContent = "Booking confirmed!";
       messageBox.style.color = "green";
-      SnackBar("Booking confirmed",3000);
+      Notify("Booking confirmed",{type:"success",duration:3000, dismissible:true});
     } catch {
       messageBox.textContent = "Booking failed. Try again.";
       messageBox.style.color = "crimson";
