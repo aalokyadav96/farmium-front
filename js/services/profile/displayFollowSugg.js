@@ -5,7 +5,7 @@ import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePath
 import Notify from "../../components/ui/Notify.mjs";
 
 async function displayFollowSuggestions(userid, suggestionsSection) {
-    suggestionsSection.innerHTML = ""; // Clear previous content
+    suggestionsSection.replaceChildren(); // Clear previous content
 
     try {
         const suggestions = await apigFetch(`/suggestions/follow?userid=${userid}`);

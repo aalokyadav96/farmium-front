@@ -3,12 +3,13 @@ import { Button } from "../../../components/base/Button.js";
 import { apiFetch, apigFetch } from "../../../api/api.js";
 import { renderWorkerList } from "./WorkerList.js";
 import { navigate } from "../../../routes/index.js";
+import {debounce} from "../../../utils/deutils.js";
 
 export function displayHireWorkers(isLoggedIn, contentContainer) {
   const PER_PAGE = 3;
   let currentPage = 1;
-  let searchQuery = "";
-  let selectedSkill = "";
+  let searchQuery = localStorage.getItem("workerSearch") || "";
+  let selectedSkill = localStorage.getItem("workerSkill") || "";
   let totalPages = 1;
   let isGridView = localStorage.getItem("workerView") !== "list";
   let lastWorkerData = [];
@@ -20,62 +21,78 @@ export function displayHireWorkers(isLoggedIn, contentContainer) {
   const aside = createElement("aside", { id: "worker-aside", class: "worker-aside" });
 
   // Controls
-  const controls = createElement("div", { id: "controls" });
-  const searchInput = createElement("input", {
-    placeholder: "Search by name or location",
-    type: "text"
-  });
-  const skillFilter = createElement("select", {});
-  const viewToggle = Button(
-    "Toggle View",
-    "toggle-view",
-    { click: toggleView },
-    ""
-  );
-
-  // List & Pagination
+  const controls = renderControls();
   const list = createElement("div", { id: "worker-list" });
   const pagination = createElement("div", { id: "pagination" });
 
   // Build UI
   main.appendChild(createElement("h2", {}, ["Find Skilled Workers"]));
-  controls.append(searchInput, skillFilter, viewToggle);
-  main.append(controls, list, pagination);
-
-  aside.append(
-    createElement("h3", {}, ["Actions"]),
-    createElement("ul", {}, [
-      Button("Create Worker Profile", "", { click: () => navigate("/baitos/create-profile") }, "buttonx"),
-    ])
-  );
+  main.append(controls.container, list, pagination);
+  aside.appendChild(renderAside());
 
   layout.append(main, aside);
   container.appendChild(layout);
-  contentContainer.appendChild(container);
+  contentContainer.replaceChildren(container);
 
-  // Event handlers
-  let debounceTimer = null;
-  searchInput.addEventListener("input", (e) => {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
+  // Fetch skills and workers
+  fetchSkills();
+  fetchWorkers();
+
+  // ---------------- FUNCTIONS ---------------- //
+
+  function renderControls() {
+    const controls = createElement("div", { id: "controls" });
+
+    const searchInput = createElement("input", {
+      placeholder: "Search by name or location",
+      type: "text",
+      value: searchQuery,
+      "aria-label": "Search workers"
+    });
+
+    const skillFilter = createElement("select", {
+      "aria-label": "Filter by skill"
+    });
+
+    const viewToggle = Button(
+      "Toggle View",
+      "toggle-view",
+      { click: toggleView },
+      ""
+    );
+
+    // Debounced search
+    searchInput.addEventListener("input", debounce((e) => {
       searchQuery = e.target.value.trim().toLowerCase();
+      localStorage.setItem("workerSearch", searchQuery);
       currentPage = 1;
       fetchWorkers();
-    }, 300);
-  });
+    }, 300));
 
-  skillFilter.addEventListener("change", (e) => {
-    selectedSkill = e.target.value;
-    currentPage = 1;
-    fetchWorkers();
-  });
+    skillFilter.addEventListener("change", (e) => {
+      selectedSkill = e.target.value;
+      localStorage.setItem("workerSkill", selectedSkill);
+      currentPage = 1;
+      fetchWorkers();
+    });
 
-  // Functions
+    controls.append(searchInput, skillFilter, viewToggle);
 
-  function setLoading(state) {
-    searchInput.disabled = state;
-    skillFilter.disabled = state;
-    viewToggle.disabled = state;
+    return { container: controls, searchInput, skillFilter, viewToggle };
+  }
+
+  function renderAside() {
+    return createElement("div", {}, [
+      createElement("h3", {}, ["Actions"]),
+      createElement("ul", {}, [
+        Button(
+          "Create Worker Profile",
+          "",
+          { click: () => navigate("/baitos/create-profile") },
+          "buttonx"
+        ),
+      ])
+    ]);
   }
 
   function toggleView() {
@@ -85,12 +102,13 @@ export function displayHireWorkers(isLoggedIn, contentContainer) {
   }
 
   function renderPagination() {
-    pagination.innerHTML = "";
+    pagination.replaceChildren();
     if (totalPages <= 1) return;
 
     const maxButtons = 5;
     let start = Math.max(1, currentPage - 2);
     let end = Math.min(totalPages, start + maxButtons - 1);
+
     if (end - start < maxButtons - 1 && start > 1) {
       start = Math.max(1, end - maxButtons + 1);
     }
@@ -108,22 +126,38 @@ export function displayHireWorkers(isLoggedIn, contentContainer) {
         },
         i === currentPage ? "active-page" : ""
       );
+      pageBtn.setAttribute("aria-label", `Go to page ${i}`);
       pagination.appendChild(pageBtn);
     }
   }
 
   async function fetchSkills() {
     try {
+      // Cache in localStorage (24h)
+      const cached = JSON.parse(localStorage.getItem("workerSkills") || "{}");
+      const now = Date.now();
+
+      if (cached.timestamp && now - cached.timestamp < 24 * 60 * 60 * 1000) {
+        buildSkills(cached.data);
+        return;
+      }
+
       const roles = await apiFetch("/baitos/workers/skills");
-      skillFilter.innerHTML = "";
-      skillFilter.appendChild(createElement("option", { value: "" }, ["All Roles"]));
-      roles.forEach(role => {
-        skillFilter.appendChild(createElement("option", { value: role }, [role]));
-      });
-      skillFilter.value = selectedSkill;
+      buildSkills(roles);
+      localStorage.setItem("workerSkills", JSON.stringify({ data: roles, timestamp: now }));
     } catch (e) {
       console.error("Failed to fetch skills", e);
     }
+  }
+
+  function buildSkills(roles) {
+    const skillFilter = controls.skillFilter;
+    skillFilter.replaceChildren();
+    skillFilter.appendChild(createElement("option", { value: "" }, ["All Roles"]));
+    roles.forEach(role => {
+      skillFilter.appendChild(createElement("option", { value: role }, [role]));
+    });
+    skillFilter.value = selectedSkill;
   }
 
   async function fetchWorkers() {
@@ -142,16 +176,38 @@ export function displayHireWorkers(isLoggedIn, contentContainer) {
       lastWorkerData = res.data;
       totalPages = Math.ceil(res.total / PER_PAGE);
 
-      renderWorkerList(list, lastWorkerData, isGridView, isLoggedIn);
-      renderPagination();
+      if (!lastWorkerData.length) {
+        list.replaceChildren(createElement("p", { class: "empty-msg" }, ["No workers found. Try adjusting your filters."]));
+      } else {
+        renderWorkerList(list, lastWorkerData, isGridView, isLoggedIn);
+        renderPagination();
+      }
     } catch (e) {
       console.error("Failed to fetch workers", e);
-      list.innerHTML = createElement("p", { class: "error-msg" }, ["⚠️ Failed to load workers. Please try again later."]).outerHTML;
+      list.replaceChildren(
+        createElement("p", { class: "error-msg" }, ["⚠️ Failed to load workers. Please try again later."])
+      );
     } finally {
       setLoading(false);
     }
   }
 
-  fetchSkills();
-  fetchWorkers();
+  function setLoading(state) {
+    controls.searchInput.disabled = state;
+    controls.skillFilter.disabled = state;
+    controls.viewToggle.disabled = state;
+
+    if (state) {
+      list.replaceChildren(createElement("p", { class: "loading-msg" }, ["⏳ Loading workers..."]));
+    }
+  }
+
+  // // Debounce helper
+  // function debounce(fn, delay) {
+  //   let timer = null;
+  //   return (...args) => {
+  //     clearTimeout(timer);
+  //     timer = setTimeout(() => fn.apply(this, args), delay);
+  //   };
+  // }
 }

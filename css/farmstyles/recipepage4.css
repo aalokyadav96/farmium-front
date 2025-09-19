@@ -156,7 +156,7 @@ ol li {
 }
 
 /* Comments */
-.comment-section {
+/* .comment-section {
   margin-top: 2rem;
 }
 
@@ -214,10 +214,10 @@ ol li {
   display: flex;
   gap: 0.5rem;
 }
-
+*/
 
 /* Comment form */
-.comment-form {
+/* .comment-form {
   margin-top: 1rem;
   display: flex;
   flex-direction: column;
@@ -231,14 +231,14 @@ ol li {
   border-radius: 6px;
   border: 1px solid #ccc;
   resize: vertical;
-}
+}  */
 
 /* Responsive */
 @media (max-width: 600px) {
   .recipe-actions {
     flex-direction: column;
   }
-
+/* 
   .comment {
     flex-direction: column;
   }
@@ -246,5 +246,5 @@ ol li {
   .comment-header {
     flex-direction: column;
     gap: 0.3rem;
-  }
+  } */
 }

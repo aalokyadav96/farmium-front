@@ -1,9 +1,15 @@
+// src/ui/cart/cartPage.js
 import { createElement } from "../../components/createElement.js";
 import { renderCartCategory } from "./cartUtils.js";
 import { apiFetch } from "../../api/api.js";
 import { displayCheckout } from "./checkout.js";
 import Button from "../../components/base/Button.js";
 
+/**
+ * Display the user's cart.
+ * @param {HTMLElement} content Container to render cart into
+ * @param {boolean} isLoggedIn Whether user is logged in
+ */
 export async function displayCart(content, isLoggedIn) {
   const container = createElement("div", { class: "cartpage" }, []);
   content.textContent = "";
@@ -50,9 +56,7 @@ export async function displayCart(content, isLoggedIn) {
 
   const checkoutAllBtn = Button("Checkout All", "ckout-button", {
     click: () =>
-      apiFetch("/cart/checkout", "POST", JSON.stringify(grouped))
-        .then(() => displayCheckout(container))
-        .catch(e => console.error(e))
+      displayCheckout(container, Object.values(grouped).flat())
   });
 
   const grandBox = createElement("div", { class: "grand-box" }, [grandTotalText, checkoutAllBtn]);
@@ -66,10 +70,18 @@ export async function displayCart(content, isLoggedIn) {
   updateGrandTotal();
 }
 
-function groupCartByCategory(items) {
+/**
+ * Group cart items by category and merge duplicates (same itemId & entityId)
+ * @param {Object} cartData Backend cart response (object keyed by category)
+ * @returns {Object} grouped cart
+ */
+function groupCartByCategory(cartData) {
+  // Flatten object values into array
+  const items = Object.values(cartData).flat();
+
   const raw = {};
   items.forEach(it => {
-    const cat = it.category || "crops";
+    const cat = it.category || "unknown";
     (raw[cat] = raw[cat] || []).push(it);
   });
 
@@ -77,7 +89,7 @@ function groupCartByCategory(items) {
   for (const cat in raw) {
     const map = {};
     raw[cat].forEach(it => {
-      const key = cat === "crops" ? `${it.item}__${it.farm}` : it.item;
+      const key = `${it.itemId}__${it.entityId || ""}`;
       if (!map[key]) map[key] = { ...it };
       else map[key].quantity += it.quantity;
     });

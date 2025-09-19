@@ -1,155 +1,164 @@
+
+/* Container */
+.farmpage {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
 /* Header */
 .farm-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
 }
-.farm-header .breadcrumbs {
-  font-size: 14px;
+
+.breadcrumbs {
+  font-size: 0.9rem;
+  color: #666;
 }
+
+.breadcrumbs .span {
+  cursor: pointer;
+  color: #0078d4;
+}
+
+.breadcrumbs .span:hover {
+  text-decoration: underline;
+}
+
 
 /* Layout */
 .farm-layout {
   display: flex;
-  gap: 20px;
   flex-wrap: wrap;
+  gap: 2rem;
 }
 
 /* Main Section */
 .farm-main {
   flex: 2;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
+/* Banner */
 .farm-banner {
   position: relative;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
-/* Farm Banner */
 .farm-banner img {
   width: 100%;
-  border-radius: 12px;
+  height: auto;
   object-fit: cover;
   display: block;
-  margin-bottom: 16px;
 }
 
 /* Farm Details */
+.farm-detail h2 {
+  font-size: 1.8rem;
+  margin: 1rem 0 0.5rem;
+}
+
 .farm-detail p {
-  font-size: 14px;
-  margin-bottom: 6px;
+  margin: 0.3rem 0;
+  font-size: 1rem;
+}
+
+.farm-actions {
+  margin-top: 1rem;
+}
+
+/* Add Crop */
+#add-crop-btn {
+  margin: 1.5rem 0;
+  background-color: #107c10;
+}
+
+#add-crop-btn:hover {
+  background-color: #0b6a0b;
 }
 
 /* Crop List */
 .crop-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
-  margin-top: 16px;
-}
-.crop-list.grid-view .crop-card {
-  flex: 1 1 calc(50% - 8px);
-}
-.crop-list.list-view .crop-card {
-  flex: 1 1 100%;
+  gap: 1rem;
 }
 
-/* Crop Card */
 .crop-card {
+  background-color: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  padding: 12px;
-  transition: transform 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  padding: 1rem;
+  width: 260px;
+  transition: transform 0.2s ease;
 }
+
 .crop-card:hover {
   transform: translateY(-4px);
 }
+
 .crop-card img {
   width: 100%;
   border-radius: 8px;
-  aspect-ratio: 16/9;
-  object-fit: cover;
-  margin-bottom: 8px;
+  margin-bottom: 0.5rem;
 }
+
 .crop-card h4 {
-  margin: 6px 0;
-  font-size: 18px;
+  margin: 0.5rem 0;
+  font-size: 1.2rem;
 }
+
 .crop-card p {
-  font-size: 14px;
-  margin-bottom: 4px;
+  margin: 0.3rem 0;
+  font-size: 0.95rem;
 }
 
-/* Quantity Control */
-.quantity-control {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-.quantity-control button {
-  padding: 4px 10px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-/* Crop Actions */
-.a2c-crop {
-  width: 100%;
-  background: #00796b;
-  color: white;
-  padding: 8px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-}
-.a2c-crop:hover {
-  opacity: 0.9;
-}
-
-/* Layout Toggle Buttons */
-.layout-toggle {
-  margin: 12px 0;
-  display: flex;
-  gap: 8px;
-}
-
-/* Aside Section */
+/* Aside Panel */
 .farm-aside {
   flex: 1;
-  padding: 20px;
+  background-color: #f9f9f9;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-}
-.farm-aside h3, .farm-aside h4 {
-  margin-bottom: 12px;
-}
-.farm-aside p {
-  font-size: 14px;
-  margin-bottom: 8px;
-}
-.farm-aside button {
-  display: block;
-  width: 100%;
-  margin-bottom: 12px;
-  background: #00796b;
-  color: white;
-  border-radius: 8px;
-  padding: 10px;
-}
-.farm-aside button:hover {
-  opacity: 0.9;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
-/* Responsive Layout */
+.cta-block button {
+  display: block;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.crop-summary, .crop-distribution, .review-block {
+  margin-top: 1rem;
+}
+
+.review-block p {
+  margin-bottom: 0.5rem;
+}
+
+
+/* Chat Container */
+.onechatcon {
+  margin-top: 2rem;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
   .farm-layout {
     flex-direction: column;
   }
-  .crop-list.grid-view .crop-card {
-    flex: 1 1 100%;
+
+  .crop-card {
+    width: 100%;
+  }
+
+  .gallery-image {
+    width: 100%;
   }
 }

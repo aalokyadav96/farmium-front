@@ -1,8 +1,8 @@
 import { apigFetch } from "../../api/api.js";
 import Button from "../../components/base/Button.js";
+import Imagex from "../../components/base/Imagex.js";
 import { createElement } from "../../components/createElement.js";
 import { navigate } from "../../routes/index.js";
-import { SRC_URL } from "../../state/state.js";
 import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
 
 export function displayEvents(isLoggedIn, container) {
@@ -117,7 +117,7 @@ async function renderEventsPage(layout) {
           return 0;
         });
 
-      content.innerHTML = "";
+      content.replaceChildren();
 
       if (filtered.length === 0) {
         content.appendChild(createElement("p", {}, ["No matching events found."]));
@@ -134,7 +134,6 @@ async function renderEventsPage(layout) {
     content.appendChild(createElement("p", { class: "error-text" }, ["Failed to load events."]));
   }
 }
-
 function createEventCard(ev) {
   const minPrice = Array.isArray(ev.prices) ? Math.min(...ev.prices) : 0;
   const currency = ev.currency || "USD";
@@ -145,9 +144,6 @@ function createEventCard(ev) {
 
   const savedEvents = getSavedEvents();
   let isSaved = savedEvents.includes(ev.eventid);
-
-  // const bannerFilename = ev.banner || "placeholder.png";
-  const bannerUrl = resolveImagePath(EntityType.EVENT, PictureType.THUMB, ev.banner);
 
   const saveToggle = createElement("span", {
     title: "Save Event",
@@ -178,52 +174,53 @@ function createEventCard(ev) {
     style: `font-size:0.75rem;padding:2px 6px;border-radius:4px;background:${isPast ? "#888" : "#28a745"};color:white;margin-left:8px;`
   }, [isPast ? "Past" : "Upcoming"]);
 
-  const bannerImg = createElement("img", {
+  const bannerUrl = resolveImagePath(EntityType.EVENT, PictureType.THUMB, ev.banner);
+
+  const bannerImg = Imagex({
     src: bannerUrl,
     alt: `${ev.title || "Event"} Banner`,
     loading: "lazy",
     style: "width:100%;aspect-ratio:16/9;object-fit:cover;"
   });
 
-  bannerImg.onerror = () => {
-    bannerImg.src = resolveImagePath(EntityType.DEFAULT, PictureType.THUMB, "placeholder.png");
-  };
-
-  const eventLink = createElement("a", {
+  const bannerLink = createElement("a", {
     href: `/event/${ev.eventid}`,
     class: "event-link"
-  }, [
-    bannerImg,
-    createElement("div", { class: "event-info" }, [
-      createElement("div", {
-        style: "display:flex;align-items:center;gap:8px;"
-      }, [
-        createElement("h2", {}, [ev.title || "Untitled"]),
-        statusLabel,
-        saveToggle
-      ]),
-      createElement("p", {}, [
-        createElement("strong", {}, ["Date: "]),
-        new Date(ev.date).toLocaleString()
-      ]),
-      createElement("p", {}, [
-        createElement("strong", {}, ["Place: "]),
-        ev.placename || "-"
-      ]),
-      createElement("p", {}, [
-        createElement("strong", {}, ["Category: "]),
-        ev.category || "-"
-      ]),
-      createElement("p", {}, [
-        createElement("strong", {}, ["Price: "]),
-        priceDisplay
-      ]),
-      shareBtn
-    ])
+  }, [bannerImg]);
+
+  const eventInfo = createElement("div", { class: "event-info" }, [
+    createElement("div", {
+      style: "display:flex;align-items:center;gap:8px;"
+    }, [
+      createElement("h2", {}, [ev.title || "Untitled"]),
+      statusLabel,
+      saveToggle
+    ]),
+    createElement("p", {}, [
+      createElement("strong", {}, ["Date: "]),
+      new Date(ev.date).toLocaleString()
+    ]),
+    createElement("p", {}, [
+      createElement("strong", {}, ["Place: "]),
+      ev.placename || "-"
+    ]),
+    createElement("p", {}, [
+      createElement("strong", {}, ["Category: "]),
+      ev.category || "-"
+    ]),
+    createElement("p", {}, [
+      createElement("strong", {}, ["Price: "]),
+      priceDisplay
+    ]),
+    shareBtn
   ]);
 
-  return createElement("div", { class: "event-card" }, [eventLink]);
+  return createElement("div", { class: "event-card" }, [
+    bannerLink,
+    eventInfo
+  ]);
 }
+
 
 function getSavedEvents() {
   try {

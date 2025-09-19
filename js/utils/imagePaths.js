@@ -7,6 +7,7 @@ export const EntityType = {
   ARTIST: "artist",
   USER: "user",
   BAITO: "baito",
+  WORKER: "worker",
   SONG: "song",
   POST: "post",
   CHAT: "chat",

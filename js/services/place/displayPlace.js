@@ -1,5 +1,5 @@
-import { state } from "../../state/state.js";
-import { SRC_URL, apiFetch } from "../../api/api.js";
+import { getState } from "../../state/state.js";
+import { apiFetch } from "../../api/api.js";
 import { createElement } from "../../components/createElement.js";
 import { renderPlaceDetails } from "./renderPlaceDetails.js";
 import { displayMedia } from "../media/mediaService.js";
@@ -21,6 +21,8 @@ import {
   displayPlaceDetailsFallback,
 } from "./customTabs.js";
 import Notify from "../../components/ui/Notify.mjs";
+import { displayBooking } from "../booking/booking.js";
+import Button from "../../components/base/Button.js";
 
 export default async function displayPlace(isLoggedIn, placeId, contentContainer) {
   if (!placeId || !contentContainer || !(contentContainer instanceof HTMLElement)) {
@@ -34,34 +36,22 @@ export default async function displayPlace(isLoggedIn, placeId, contentContainer
       throw new Error("Invalid place data received.");
     }
 
-    const isCreator = isLoggedIn && state.user === placeData.createdBy;
-    contentContainer.innerHTML = "";
+    const isCreator = isLoggedIn && getState("user") === placeData.createdBy;
+    contentContainer.replaceChildren();
 
-    // ─── Place Header Section with Meta Actions ────────────────────────────────
-    const headerSection = createElement("div", {
-      class: "place-header"
-    });
-
-    const titleRow = createElement("div", {
-      style: "display:flex;align-items:center;justify-content:space-between;"
-    });
-
+    // ─── Place Header Section ───────────────────────────────
+    const headerSection = createElement("div", { class: "place-header" });
+    const titleRow = createElement("div", { style: "display:flex;align-items:center;justify-content:space-between;" });
     const heading = createElement("h1", {}, [placeData.name || "Unnamed"]);
     titleRow.appendChild(heading);
 
-    // Verified Badge
     if (isCreator) {
       titleRow.appendChild(createElement("span", {
         style: "margin-left:8px;padding:2px 6px;background:#28a745;color:#fff;font-size:0.8rem;border-radius:4px;"
       }, ["Verified Owner"]));
     }
 
-    // Actions (Bookmark, Share, Map)
-    const actions = createElement("div", {
-      style: "display:flex;gap:8px;align-items:center;"
-    });
-
-    // Bookmark
+    const actions = createElement("div", { style: "display:flex;gap:8px;align-items:center;" });
     const bookmarked = getBookmarks().includes(placeId);
     const bookmarkBtn = createElement("button", {
       title: "Bookmark this place",
@@ -72,17 +62,15 @@ export default async function displayPlace(isLoggedIn, placeId, contentContainer
       style: "font-size:20px;cursor:pointer;border:none;background:none;"
     }, [bookmarked ? "★" : "☆"]);
 
-    // Share
     const shareBtn = createElement("button", {
       title: "Share",
       onclick: () => {
         navigator.clipboard.writeText(location.href);
-        Notify("Link copied to clipboard", {type: "success", duration: 3000, dismissible: true});
+        Notify("Link copied to clipboard", { type: "success", duration: 3000, dismissible: true });
       },
       style: "cursor:pointer;font-size:16px;border:none;background:none;"
     }, ["🔗"]);
 
-    // Open in Map
     const { lat, lng } = placeData.coordinates || {};
     if (lat && lng) {
       const mapBtn = createElement("a", {
@@ -101,7 +89,7 @@ export default async function displayPlace(isLoggedIn, placeId, contentContainer
     headerSection.appendChild(titleRow);
     contentContainer.appendChild(headerSection);
 
-    // ─── Editable Details ───────────────────────────────────────────────────────
+    // ─── Editable Details ─────────────────────────────────
     const editSection = createElement("div", { class: "detail-section vflex" });
     try {
       renderPlaceDetails(isLoggedIn, editSection, placeData, isCreator);
@@ -110,24 +98,58 @@ export default async function displayPlace(isLoggedIn, placeId, contentContainer
       console.warn("Failed to render edit section:", err);
     }
 
-    // ─── Tabs Setup ─────────────────────────────────────────────────────────────
+    // ─── Booking Section (uses existing component) ─────────
+    const bookingContainer = createElement("div", { id: "place-booking" });
+    editSection.appendChild(bookingContainer);
+
+
+    const bookButton = Button("View Bookings","booking-btn", {
+      click: () => {
+        displayBooking(
+          {
+            entityType: "place",
+            entityId: placeId,
+            entityCategory: placeData.category,
+            userId: getState("user") || "guest",
+            isAdmin: isCreator
+          },
+          bookingContainer
+        );
+      }
+    },"buttonx primary",{"margin-top":"16px","padding":"8px 16px","cursor":"pointer"});
+    bookingContainer.appendChild(bookButton);
+
+
+    // const bookButton = createElement("button", {
+    //   style: "margin-top:16px;padding:8px 16px;cursor:pointer;",
+    //   onclick: () => {
+    //     displayBooking(
+    //       {
+    //         entityType: "place",
+    //         entityId: placeId,
+    //         entityCategory: placeData.category,
+    //         userId: getState("user") || "guest",
+    //         isAdmin: isCreator
+    //       },
+    //       bookingContainer
+    //     );
+    //   }
+    // }, ["Book Slot"]);
+    // bookingContainer.appendChild(bookButton);
+
+
+    // ─── Tabs Setup ─────────────────────────────────
     const tabs = [];
 
-    // Always include Info tab
     tabs.push({
       title: "Info",
       id: "info-tab",
       render: (container) => {
-        try {
-          displayPlaceInfo(container, placeData, isCreator);
-        } catch (err) {
-          container.textContent = "Failed to load info.";
-          console.warn("Info tab failed:", err);
-        }
+        try { displayPlaceInfo(container, placeData, isCreator); }
+        catch (err) { container.textContent = "Failed to load info."; console.warn(err); }
       },
     });
 
-    // ─── Category-Specific Tabs ─────────────────────────────────────────────────
     const categoryRaw = placeData.category || "";
     const category = categoryRaw.trim().toLowerCase();
 
@@ -161,72 +183,43 @@ export default async function displayPlace(isLoggedIn, placeId, contentContainer
       });
     }
 
-    // ─── Common Tabs ────────────────────────────────────────────────────────────
     tabs.push(
       {
         title: "Nearby",
         id: "nearby-tab",
-        render: (container) => {
-          try {
-            displayPlaceNearby(container, placeId);
-          } catch (err) {
-            container.textContent = "Nearby places unavailable.";
-          }
-        },
+        render: (container) => { try { displayPlaceNearby(container, placeId); } catch { container.textContent = "Nearby places unavailable."; } },
       },
       {
         title: "Gallery",
         id: "gallery-tab",
-        render: (container) => {
-          try {
-            displayMedia(container, "place", placeId, isLoggedIn);
-          } catch (err) {
-            container.textContent = "Gallery could not load.";
-          }
-        },
+        render: (container) => { try { displayMedia(container, "place", placeId, isLoggedIn); } catch { container.textContent = "Gallery could not load."; } },
       },
       {
         title: "Reviews",
         id: "reviews-tab",
-        render: (container) => {
-          try {
-            displayReviews(container, isCreator, isLoggedIn, "place", placeId);
-          } catch (err) {
-            container.textContent = "Reviews unavailable.";
-          }
-        },
+        render: (container) => { try { displayReviews(container, isCreator, isLoggedIn, "place", placeId); } catch { container.textContent = "Reviews unavailable."; } },
       }
     );
 
-    // ─── Final Tab Rendering ────────────────────────────────────────────────────
     persistTabs(contentContainer, tabs, `place-tabs:${placeId}`);
 
   } catch (err) {
     console.error("displayPlace error:", err);
-    contentContainer.innerHTML = "";
-    contentContainer.appendChild(
-      createElement("h1", {}, [`Error loading place: ${err.message}`])
-    );
-    Notify("Failed to load place details. Please try again later.", {type: "error", duration: 3000, dismissible: true});
+    contentContainer.replaceChildren();
+    contentContainer.appendChild(createElement("h1", {}, [`Error loading place: ${err.message}`]));
+    Notify("Failed to load place details. Please try again later.", { type: "error", duration: 3000, dismissible: true });
   }
 }
 
-// ─── Bookmark Utility Functions ─────────────────────────────────────────────────
-
+// ─── Bookmark Utility Functions ─────────────────────────────────────────
 function getBookmarks() {
-  try {
-    return JSON.parse(localStorage.getItem("bookmarked_places") || "[]");
-  } catch {
-    return [];
-  }
+  try { return JSON.parse(localStorage.getItem("bookmarked_places") || "[]"); } catch { return []; }
 }
 
 function toggleBookmark(placeId) {
   let bookmarks = getBookmarks();
-  if (bookmarks.includes(placeId)) {
-    bookmarks = bookmarks.filter(id => id !== placeId);
-  } else {
-    bookmarks.push(placeId);
-  }
+  if (bookmarks.includes(placeId)) bookmarks = bookmarks.filter(id => id !== placeId);
+  else bookmarks.push(placeId);
   localStorage.setItem("bookmarked_places", JSON.stringify(bookmarks));
 }
+

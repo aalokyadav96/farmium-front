@@ -16,7 +16,7 @@ export async function displayItems(
   { limit = 10, offset = 0, search = "", category = "", sort = "" } = {}
 ) {
   const container = createElement("div", { class: "protoolspage" }, []);
-  content.innerHTML = "";
+  content.replaceChildren();
   content.appendChild(container);
 
   const refresh = () =>

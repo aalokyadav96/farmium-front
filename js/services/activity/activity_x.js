@@ -1,5 +1,5 @@
 // src/utils/activityLogger.js
-import {state} from "../../state/state.js";
+import {getState, state} from "../../state/state.js";
 import Notify from "../../components/ui/Notify.mjs";
 
 const DEFAULT_API_BASE = "/api/activity";
@@ -69,7 +69,7 @@ function configure({
 //    Returns true/false on success, shows a Snackbar on failure.
 // ───────────────────────────────────────────────────────────────────────────────
 async function logActivity(action, metadata = {}) {
-  if (!state.token) {
+  if (!getState("token")) {
     Notify("Please log in to log activities.", {type:"warning",duration:3000, dismissible:true});
     return false;
   }
@@ -83,7 +83,7 @@ async function logActivity(action, metadata = {}) {
   const url = `${API_BASE_URL}${SYNC_PATH}`;
   const headers = {
     "Content-Type": "application/json",
-    "Authorization": `Bearer ${state.token}`,
+    "Authorization": `Bearer ${getState("token")}`,
   };
 
   try {
@@ -125,7 +125,7 @@ function getUserMetadata() {
 
 // 5.2) Add one activity to the in‐memory queue (and persist)
 function queueActivity(action, additionalData = {}) {
-  if (!state.token) {
+  if (!getState("token")) {
     Notify("Please log in to log activities.", {type:"warning",duration:3000, dismissible:true});
     return;
   }
@@ -146,7 +146,7 @@ function queueActivity(action, additionalData = {}) {
 //     Implements exponential‐backoff on network errors (max delay = MAX_RETRY_DELAY)
 async function syncActivities() {
   if (
-    !state.token ||
+    !getState("token") ||
     activityQueue.length === 0 ||
     isSyncing
   ) {
@@ -163,7 +163,7 @@ async function syncActivities() {
   const url = `${API_BASE_URL}${SYNC_PATH}`;
   const headers = {
     "Content-Type": "application/json",
-    "Authorization": `Bearer ${state.token}`,
+    "Authorization": `Bearer ${getState("token")}`,
   };
 
   const payload = JSON.stringify(activityQueue);
@@ -237,10 +237,10 @@ function restartSyncInterval() {
 
 // 5.7) Flush queue once (useful on page unload)
 async function flushOnUnload() {
-  if (activityQueue.length === 0 || !state.token) return;
+  if (activityQueue.length === 0 || !getState("token")) return;
   // Use navigator.sendBeacon if available for a best‐effort, non‐blocking send
   const url = `${API_BASE_URL}${SYNC_PATH}`;
-  const headers = { type: "application/json", Authorization: `Bearer ${state.token}` };
+  const headers = { type: "application/json", Authorization: `Bearer ${getState("token")}` };
   const data = JSON.stringify(activityQueue);
 
   if (navigator.sendBeacon) {
@@ -253,7 +253,7 @@ async function flushOnUnload() {
     const xhr = new XMLHttpRequest();
     xhr.open("POST", url, false); // false = synchronous
     xhr.setRequestHeader("Content-Type", "application/json");
-    xhr.setRequestHeader("Authorization", `Bearer ${state.token}`);
+    xhr.setRequestHeader("Authorization", `Bearer ${getState("token")}`);
     try {
       xhr.send(data);
     } catch (e) {
@@ -292,13 +292,13 @@ startActivitySync();
 // 7) Fetch wrappers: activity feed and trending
 // ───────────────────────────────────────────────────────────────────────────────
 async function getActivityFeed() {
-  if (!state.token) return [];
+  if (!getState("token")) return [];
 
   const url = `${API_BASE_URL}${DEFAULT_FEED_PATH}`;
   try {
     const resp = await fetch(url, {
       headers: {
-        "Authorization": `Bearer ${state.token}`,
+        "Authorization": `Bearer ${getState("token")}`,
       },
     });
     if (!resp.ok) throw new Error("Failed to fetch activities");
@@ -310,13 +310,13 @@ async function getActivityFeed() {
 }
 
 async function getTrendingActivities() {
-  if (!state.token) return [];
+  if (!getState("token")) return [];
 
   const url = `${API_BASE_URL}${DEFAULT_TRENDING_PATH}`;
   try {
     const resp = await fetch(url, {
       headers: {
-        "Authorization": `Bearer ${state.token}`,
+        "Authorization": `Bearer ${getState("token")}`,
       },
     });
     if (!resp.ok) throw new Error("Failed to fetch trending activities");

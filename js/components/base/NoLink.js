@@ -12,7 +12,7 @@ const NoLink = (
   }
 
   // Create the span element
-  const span = document.createElement("h2");
+  const span = document.createElement("span");
   span.textContent = title;
   span.id = id;
 

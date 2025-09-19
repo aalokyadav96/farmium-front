@@ -1,4 +1,4 @@
-import { createUserControls } from "../farm/displayFarm.helpers";
+import { createUserControls } from "../farm/displayFarmHelpers.js";
 import NoLink from "../../../components/base/NoLink";
 import { createElement } from "../../../components/createElement";
 import { apigFetch } from "../../../api/api";
@@ -16,7 +16,7 @@ import Notify from "../../../components/ui/Notify.mjs";
  */
 export async function displayCrop(content, cropID, isLoggedIn) {
   const contentContainer = createElement('div', { class: "croppage" }, []);
-  while (content.firstChild) content.removeChild(content.firstChild);
+  content.replaceChildren();
   content.appendChild(contentContainer);
 
   const qs = new URLSearchParams({ page: 1, limit: 5 });
@@ -29,6 +29,7 @@ export async function displayCrop(content, cropID, isLoggedIn) {
       return;
     }
 
+    // Crop title with category
     const title = NoLink(`${resp.name} (${resp.category})`, "", {
       click: () => navigate(`/aboutcrop/${cropID}`)
     });
@@ -37,13 +38,11 @@ export async function displayCrop(content, cropID, isLoggedIn) {
     const listingsContainer = createElement('div', { id: 'listings-container' });
 
     resp.listings.forEach(listing => {
-      const croppic = resolveImagePath(EntityType.CROP, PictureType.THUMB, listing.imageUrl) ;
+      const croppic = resolveImagePath(EntityType.CROP, PictureType.THUMB, listing.imageUrl);
 
       const cardChildren = [
         createElement('h3', {}, [
-          createElement('a', {
-            events: { click: () => navigate(`/farm/${listing.farmId}`) }
-          }, [listing.farmName || 'Unnamed Farm'])
+          createElement('a', { events: { click: () => navigate(`/farm/${listing.farmId}`) } }, [listing.farmName || 'Unnamed Farm'])
         ]),
         Imagex({ src: croppic, alt: listing.breed || listing.farmName, loading: "lazy" }),
         createElement('p', {}, [`Location: ${listing.location || 'Unknown'}`]),
@@ -56,19 +55,19 @@ export async function displayCrop(content, cropID, isLoggedIn) {
       // Controls for quantity and add to cart
       const cropData = {
         name: resp.name,
+        cropid: listing.cropid,
+        pricePerKg: listing.pricePerKg,
         unit: "kg",
-        price: listing.pricePerKg
+        breed: listing.breed,
       };
-      const controls = createUserControls(cropData, listing.farmName || "Unnamed Farm", listing.farmId, isLoggedIn, listing.availableQtyKg);
+      const controls = createUserControls(cropData, listing.farmName || "Unnamed Farm", listing.farmId, isLoggedIn, listing.availableQtyKg, listing.cropid);
       cardChildren.push(...controls);
 
-      const card = createElement('div', { id: `farm-${listing.farmId}`, class: 'crop-card' }, cardChildren);
+      const card = createElement('div', { id: `farm-${listing.farmId}-${listing.cropid}`, class: 'crop-card' }, cardChildren);
       listingsContainer.appendChild(card);
     });
 
-    contentContainer.appendChild(title);
-    contentContainer.appendChild(meta);
-    contentContainer.appendChild(listingsContainer);
+    contentContainer.append(title, meta, listingsContainer);
 
   } catch (err) {
     Notify(err.message, { type: 'error', dismissible: true });

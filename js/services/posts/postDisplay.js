@@ -10,111 +10,70 @@ import { userProfileCard } from "./userProfileCard.js";
 import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
 import Notify from "../../components/ui/Notify.mjs";
 import Imagex from "../../components/base/Imagex.js";
-import Sightbox from "../../components/ui/SightBox.mjs"; // ✅ Import lightbox
+import Sightbox from "../../components/ui/Sightbox_zoom.mjs";
 
+// --- Shared constants ---
+const PLACEHOLDER = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
+const lazyObserver = ('loading' in HTMLImageElement.prototype || typeof IntersectionObserver === 'undefined')
+  ? null
+  : new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const img = entry.target;
+        const real = img.dataset.src;
+        if (real) {
+          img.src = real;
+          img.removeAttribute("data-src");
+          img.addEventListener("load", () => img.style.opacity = "1", { once: true });
+        }
+        lazyObserver.unobserve(img);
+      });
+    }, { rootMargin: "200px 0px" });
+
+const avatarCache = new Map();
+function getAvatar(userId) {
+  if (!avatarCache.has(userId)) {
+    avatarCache.set(userId, resolveImagePath(EntityType.USER, PictureType.THUMB, userId));
+  }
+  return avatarCache.get(userId);
+}
+
+// --- Main Export ---
 export async function displayPost(isLoggedIn, postId, container) {
-  container.innerHTML = "";
-  const contentContainer = createElement("div", { class: "postpage" });
-  container.appendChild(contentContainer);
+  container.replaceChildren();
+  const page = createElement("div", { class: "postpage" });
 
-  let resp;
+  let post;
   try {
-    resp = await apiFetch(`/posts/${encodeURIComponent(postId)}`);
+    const resp = await apiFetch(`/posts/post/${encodeURIComponent(postId)}`);
+    post = resp?.post;
   } catch (err) {
-    contentContainer.appendChild(createElement("p", {}, ["⚠️ Failed to load post."]));
-    console.error(err);
+    page.appendChild(renderError("⚠️ Failed to load post."));
+    container.appendChild(page);
     return;
   }
 
-  const post = resp?.post;
   if (!post) {
-    contentContainer.appendChild(createElement("p", {}, ["⚠️ Post not found."]));
+    page.appendChild(renderError("⚠️ Post not found."));
+    container.appendChild(page);
     return;
   }
 
-  const postContainer = createElement("div", { class: "post-detail" });
-  postContainer.appendChild(renderHeader(post));
+  const frag = document.createDocumentFragment();
+  frag.append(renderHeader(post));
+  frag.append(renderBody(post));
+  if (post.tags?.length) frag.append(renderTags(post.tags));
+  frag.append(renderProfile(post));
+  if (isLoggedIn && post.createdBy) frag.append(renderPostActions(post.postid, isLoggedIn, page));
+  frag.append(renderComments(post));
 
-  const content = createElement("div", { class: "post-body" });
+  page.appendChild(frag);
+  container.appendChild(page);
+}
 
-  let imageGroup = [];
-  (post.blocks || []).forEach((block, index) => {
-    if (block.type === "text" && block.content?.trim()) {
-      if (imageGroup.length) {
-        content.appendChild(renderImageGroup(imageGroup));
-        imageGroup = [];
-      }
-      content.appendChild(createElement("p", {}, [block.content.trim()]));
-    } else if (block.type === "image" && block.url) {
-      imageGroup.push(block);
-      const nextBlock = post.blocks[index + 1];
-      if (!nextBlock || nextBlock.type !== "image") {
-        content.appendChild(renderImageGroup(imageGroup));
-        imageGroup = [];
-      }
-    }
-  });
-
-  if (imageGroup.length) {
-    content.appendChild(renderImageGroup(imageGroup));
-  }
-
-  if (!content.children.length) {
-    content.appendChild(createElement("p", {}, ["No content"]));
-  }
-
-  postContainer.appendChild(content);
-
-  if (Array.isArray(post.tags) && post.tags.length) {
-    postContainer.appendChild(renderTags(post.tags));
-  }
-
-  const avatarUrl = resolveImagePath(EntityType.USER, PictureType.THUMB, post.createdBy);
-  postContainer.appendChild(
-    userProfileCard({
-      username: post.createdBy || "anonymous",
-      bio: "",
-      avatarUrl,
-      postCount: 0,
-      isFollowing: false
-    })
-  );
-
-  if (isLoggedIn && post.createdBy) {
-    postContainer.appendChild(renderPostActions(post.postid, isLoggedIn, contentContainer));
-  }
-
-  const commentToggle = createElement("button", {
-    class: "toggle-comments btn btn-link"
-  }, ["💬 Show Comments"]);
-
-  let commentsEl = null;
-  let commentsVisible = false;
-
-  commentToggle.addEventListener("click", () => {
-    if (!commentsVisible) {
-      commentsEl = createCommentsSection(
-        post.postid,
-        post.comments || [],
-        "blogpost",
-        getState("user")
-      );
-      postContainer.appendChild(commentsEl);
-      commentToggle.textContent = "💬 Hide Comments";
-      commentsVisible = true;
-    } else {
-      if (commentsEl) commentsEl.remove();
-      commentToggle.textContent = "💬 Show Comments";
-      commentsVisible = false;
-    }
-  });
-
-  const commentWrapper = createElement("div", { class: "post-comments" }, [
-    createElement("h4", {}, ["Comments"]),
-    commentToggle
-  ]);
-
-  contentContainer.append(postContainer, commentWrapper);
+// --- Renderers ---
+function renderError(msg) {
+  return createElement("p", {}, [msg]);
 }
 
 function renderHeader(post) {
@@ -128,49 +87,366 @@ function renderHeader(post) {
   ]);
 }
 
-function renderTags(tags) {
-  return createElement("div", { class: "post-tags" }, tags.map(tag =>
-    createElement("span", { class: "tag" }, [`#${tag}`])
-  ));
+function renderBody(post) {
+  const content = createElement("div", { class: "post-body" });
+  const blocks = post.blocks || [];
+  const fragment = document.createDocumentFragment();
+  let imageBuffer = [];
+
+  const flushImages = () => {
+    if (imageBuffer.length) {
+      fragment.append(renderImageGroup(imageBuffer));
+      imageBuffer = [];
+    }
+  };
+
+  blocks.forEach(block => {
+    if (block.type === "image" && block.url) {
+      imageBuffer.push(block);
+    } else {
+      flushImages();
+      if (block.type === "text" && block.content?.trim()) {
+        fragment.append(createElement("p", {}, [block.content.trim()]));
+      }
+    }
+  });
+  flushImages();
+
+  if (!fragment.childElementCount) fragment.append(createElement("p", {}, ["No content"]));
+  content.append(fragment);
+  return content;
 }
 
-function renderPostActions(postId, isLoggedIn, contentContainer) {
-  return createElement("div", { class: "post-actions" }, [
-    Button("✏️ Edit", "", {
-      click: () => {
-        contentContainer.innerHTML = "";
-        editPost(isLoggedIn, postId, contentContainer);
-      }
-    }, "buttonx btn-warning"),
-    Button("🗑️ Delete", "delete-post", {
-      click: async () => {
-        if (confirm("Are you sure you want to delete this post?")) {
-          try {
-            await apiFetch(`/posts/post/${encodeURIComponent(postId)}`, "DELETE");
-            Notify("✅ Post deleted.", { type: "success", duration: 3000, dismissible: true });
-            navigate("/posts");
-          } catch (err) {
-            Notify("❌ Failed to delete post.", { type: "error", duration: 3000, dismissible: true });
-            console.error(err);
-          }
-        }
-      }
-    }, "buttonx btn-danger")
-  ]);
-}
-
-// ✅ Image group renderer with Zoombox integration
 function renderImageGroup(images) {
   const group = createElement("div", { class: "image-group" });
+
   images.forEach(img => {
-    const src = resolveImagePath(EntityType.POST, PictureType.PHOTO, img.url);
+    const realSrc = resolveImagePath(EntityType.POST, PictureType.PHOTO, img.url);
     const imgEl = Imagex({
-      src,
+      src: PLACEHOLDER,
       alt: img.alt || "Post Image",
-      // style: "width: 100%; border-radius: 6px; cursor: zoom-in;"
+      classes: "post-image"
     });
-    imgEl.addEventListener("click", () => Sightbox(src, "image"));
+
+    imgEl.decoding = "async";
+    imgEl.style.opacity = "0";
+    imgEl.style.transition = "opacity 220ms ease";
+
+    if (lazyObserver) {
+      imgEl.dataset.src = realSrc;
+      lazyObserver.observe(imgEl);
+    } else {
+      imgEl.src = realSrc;
+      imgEl.addEventListener("load", () => imgEl.style.opacity = "1", { once: true });
+    }
+
+    // Delegate click later
     group.appendChild(imgEl);
   });
+
+  // Delegate Sightbox click to the group
+  group.addEventListener("click", e => {
+    const img = e.target.closest(".post-image");
+    if (!img) return;
+    const src = img.dataset.src || img.src;
+    Sightbox(src, "image");
+  });
+
   return group;
 }
+
+function renderTags(tags) {
+  return createElement("div", { class: "post-tags" },
+    tags.map(tag => createElement("span", { class: "tag" }, [`#${tag}`]))
+  );
+}
+
+function renderProfile(post) {
+  const avatarUrl = getAvatar(post.createdBy);
+  return userProfileCard({
+    username: post.createdBy || "anonymous",
+    bio: "",
+    avatarUrl,
+    postCount: 0,
+    isFollowing: false,
+    userid: post.createdBy,
+  });
+}
+
+function renderPostActions(postId, isLoggedIn, page) {
+  const editBtn = Button("✏️ Edit", "", {
+    click: () => editPost(isLoggedIn, postId, page)
+  }, "buttonx btn-warning");
+
+  const deleteBtn = Button("🗑️ Delete", "delete-post", {
+    click: async () => {
+      if (!confirm("Are you sure you want to delete this post?")) return;
+      try {
+        await apiFetch(`/posts/post/${encodeURIComponent(postId)}`, "DELETE");
+        Notify("✅ Post deleted.", { type: "success", duration: 3000, dismissible: true });
+        navigate("/posts");
+      } catch (err) {
+        Notify("❌ Failed to delete post.", { type: "error", duration: 3000, dismissible: true });
+        console.error(err);
+      }
+    }
+  }, "buttonx btn-danger");
+
+  return createElement("div", { class: "post-actions" }, [editBtn, deleteBtn]);
+}
+
+function renderComments(post) {
+  const wrapper = createElement("div", { class: "post-comments" });
+  const toggle = createElement("button", { class: "toggle-comments btn btn-link" }, ["💬 Show Comments"]);
+
+  let commentsEl = null;
+  let visible = false;
+
+  toggle.addEventListener("click", () => {
+    if (!visible) {
+      commentsEl = createCommentsSection(post.postid, post.comments || [], "blogpost", getState("user"));
+      wrapper.appendChild(commentsEl);
+      toggle.textContent = "💬 Hide Comments";
+    } else {
+      commentsEl?.remove();
+      toggle.textContent = "💬 Show Comments";
+    }
+    visible = !visible;
+  });
+
+  wrapper.append(createElement("h4", {}, ["Comments"]), toggle);
+  return wrapper;
+}
+
+// import { createElement } from "../../components/createElement.js";
+// import { apiFetch } from "../../api/api.js";
+// import Button from "../../components/base/Button.js";
+// import { navigate } from "../../routes/index.js";
+// import { formatRelativeTime } from "../../utils/dateUtils.js";
+// import { editPost } from "./createOrEditPost.js";
+// import { createCommentsSection } from "../comments/comments.js";
+// import { getState } from "../../state/state.js";
+// import { userProfileCard } from "./userProfileCard.js";
+// import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
+// import Notify from "../../components/ui/Notify.mjs";
+// import Imagex from "../../components/base/Imagex.js";
+// import Sightbox from "../../components/ui/Sightbox_zoom.mjs";
+
+// // --- Main Export ---
+// export async function displayPost(isLoggedIn, postId, container) {
+//   container.replaceChildren();
+//   const page = createElement("div", { class: "postpage" });
+//   container.appendChild(page);
+
+//   let post;
+//   try {
+//     const resp = await apiFetch(`/posts/post/${encodeURIComponent(postId)}`);
+//     post = resp?.post;
+//   } catch (err) {
+//     return page.appendChild(renderError("⚠️ Failed to load post."));
+//   }
+
+//   if (!post) {
+//     return page.appendChild(renderError("⚠️ Post not found."));
+//   }
+
+//   const body = renderBody(post);
+//   const tags = post.tags?.length ? renderTags(post.tags) : null;
+//   const profile = renderProfile(post);
+//   const actions = isLoggedIn && post.createdBy
+//     ? renderPostActions(post.postid, isLoggedIn, page)
+//     : null;
+//   const comments = renderComments(post);
+
+//   page.replaceChildren(
+//     renderHeader(post),
+//     body,
+//     ...(tags ? [tags] : []),
+//     profile,
+//     ...(actions ? [actions] : []),
+//     comments
+//   );
+// }
+
+// // --- Renderers ---
+// function renderError(msg) {
+//   return createElement("p", {}, [msg]);
+// }
+
+// function renderHeader(post) {
+//   return createElement("div", { class: "post-data" }, [
+//     createElement("h2", {}, [post.title || "Untitled"]),
+//     createElement("p", { class: "post-meta" }, [
+//       `📁 ${post.category || "Uncategorized"} › ${post.subcategory || "General"} • `,
+//       `👤 ${post.createdBy || "Anonymous"} • `,
+//       post.createdAt ? `🕒 ${formatRelativeTime(post.createdAt)}` : ""
+//     ])
+//   ]);
+// }
+
+// function renderBody(post) {
+//   const content = createElement("div", { class: "post-body" });
+
+//   // Group consecutive images
+//   const blocks = post.blocks || [];
+//   let imageBuffer = [];
+//   const flushImages = () => {
+//     if (imageBuffer.length) {
+//       content.appendChild(renderImageGroup(imageBuffer));
+//       imageBuffer = [];
+//     }
+//   };
+
+//   blocks.forEach((block, i) => {
+//     if (block.type === "text" && block.content?.trim()) {
+//       flushImages();
+//       content.appendChild(createElement("p", {}, [block.content.trim()]));
+//     } else if (block.type === "image" && block.url) {
+//       imageBuffer.push(block);
+//       const next = blocks[i + 1];
+//       if (!next || next.type !== "image") flushImages();
+//     }
+//   });
+//   flushImages();
+
+//   if (!content.childElementCount) {
+//     content.appendChild(createElement("p", {}, ["No content"]));
+//   }
+
+//   return content;
+// }
+
+// // put near top of file
+// const PLACEHOLDER = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
+
+// function renderImageGroup(images) {
+//   const group = createElement("div", { class: "image-group" });
+
+//   const supportsNativeLazy = 'loading' in HTMLImageElement.prototype;
+//   let observer = null;
+//   if (!supportsNativeLazy && typeof IntersectionObserver !== 'undefined') {
+//     observer = new IntersectionObserver((entries, obs) => {
+//       entries.forEach(entry => {
+//         if (!entry.isIntersecting) return;
+//         const img = entry.target;
+//         const real = img.getAttribute("data-src");
+//         if (real) {
+//           img.src = real;
+//           img.removeAttribute("data-src");
+//         }
+//         obs.unobserve(img);
+//       });
+//     }, { rootMargin: "200px 0px" });
+//   }
+
+//   images.forEach(img => {
+//     const realSrc = resolveImagePath(EntityType.POST, PictureType.PHOTO, img.url);
+
+//     // Ensure Imagex always receives a non-empty src
+//     const imgEl = Imagex({
+//       src: supportsNativeLazy ? realSrc : PLACEHOLDER,
+//       alt: img.alt || "Post Image",
+//       classes: "post-image"
+//     });
+
+//     // accessibility / perf hints
+//     imgEl.setAttribute("loading", "lazy");
+//     imgEl.decoding = "async";
+
+//     // fade-in
+//     imgEl.style.opacity = "0";
+//     imgEl.style.transition = "opacity 220ms ease";
+
+//     if (supportsNativeLazy) {
+//       // native lazy: we already set the real src, wait for load to fade in
+//       imgEl.addEventListener("load", () => { imgEl.style.opacity = "1"; }, { once: true });
+//     } else {
+//       // fallback: leave placeholder and set data-src so observer can swap it in
+//       imgEl.setAttribute("data-src", realSrc);
+
+//       if (observer) {
+//         observer.observe(imgEl);
+//         // when swapped in by observer, fade-in on load
+//         imgEl.addEventListener("load", () => { imgEl.style.opacity = "1"; }, { once: true });
+//       } else {
+//         // no IntersectionObserver: load immediately as last resort
+//         imgEl.src = realSrc;
+//         imgEl.addEventListener("load", () => { imgEl.style.opacity = "1"; }, { once: true });
+//       }
+//     }
+
+//     // Sightbox should open the real image
+//     imgEl.addEventListener("click", () => Sightbox(realSrc, "image"));
+
+//     group.appendChild(imgEl);
+//   });
+
+//   return group;
+// }
+
+
+// function renderTags(tags) {
+//   return createElement("div", { class: "post-tags" },
+//     tags.map(tag => createElement("span", { class: "tag" }, [`#${tag}`]))
+//   );
+// }
+
+// function renderProfile(post) {
+//   const avatarUrl = resolveImagePath(EntityType.USER, PictureType.THUMB, post.createdBy);
+//   return userProfileCard({
+//     username: post.createdBy || "anonymous",
+//     bio: "",
+//     avatarUrl,
+//     postCount: 0,
+//     isFollowing: false,
+//     userid: post.createdBy,
+//   });
+// }
+
+// function renderPostActions(postId, isLoggedIn, page) {
+//   const editBtn = Button("✏️ Edit", "", {
+//     click: () => {
+//       page.replaceChildren();
+//       editPost(isLoggedIn, postId, page);
+//     }
+//   }, "buttonx btn-warning");
+
+//   const deleteBtn = Button("🗑️ Delete", "delete-post", {
+//     click: async () => {
+//       if (!confirm("Are you sure you want to delete this post?")) return;
+//       try {
+//         await apiFetch(`/posts/post/${encodeURIComponent(postId)}`, "DELETE");
+//         Notify("✅ Post deleted.", { type: "success", duration: 3000, dismissible: true });
+//         navigate("/posts");
+//       } catch (err) {
+//         Notify("❌ Failed to delete post.", { type: "error", duration: 3000, dismissible: true });
+//         console.error(err);
+//       }
+//     }
+//   }, "buttonx btn-danger");
+
+//   return createElement("div", { class: "post-actions" }, [editBtn, deleteBtn]);
+// }
+
+// function renderComments(post) {
+//   const wrapper = createElement("div", { class: "post-comments" });
+//   const toggle = createElement("button", { class: "toggle-comments btn btn-link" }, ["💬 Show Comments"]);
+
+//   let commentsEl = null;
+//   let visible = false;
+
+//   toggle.addEventListener("click", () => {
+//     if (!visible) {
+//       commentsEl = createCommentsSection(post.postid, post.comments || [], "blogpost", getState("user"));
+//       wrapper.appendChild(commentsEl);
+//       toggle.textContent = "💬 Hide Comments";
+//     } else {
+//       commentsEl?.remove();
+//       toggle.textContent = "💬 Show Comments";
+//     }
+//     visible = !visible;
+//   });
+
+//   wrapper.append(createElement("h4", {}, ["Comments"]), toggle);
+//   return wrapper;
+// }

@@ -39,7 +39,7 @@ async function displaySettings(isLoggedIn, settingsSec) {
     }
 
     const settingsContainer = createContainer();
-    settingsSec.innerHTML = "";
+    settingsSec.replaceChildren();
     settingsSec.appendChild(settingsContainer);
 
     const loadingIndicator = createLoadingIndicator();
@@ -50,7 +50,7 @@ async function displaySettings(isLoggedIn, settingsSec) {
 
     try {
         const settings = await loadSettings();
-        settingsContainer.innerHTML = "";
+        settingsContainer.replaceChildren();
 
         settings.forEach((setting) => {
             settingsContainer.appendChild(createSettingForm(setting));

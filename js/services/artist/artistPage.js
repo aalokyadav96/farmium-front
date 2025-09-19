@@ -31,7 +31,7 @@ function createArtistBannerSection(artist, isCreator) {
 
   bannerSection.appendChild(bannerImage);
 
-    if (isCreator) {
+  if (isCreator) {
     const bannerEditButton = createElement("button", { class: "edit-banner-pic" }, ["Edit Banner"]);
     bannerEditButton.addEventListener("click", () => {
       updateImageWithCrop({
@@ -46,22 +46,20 @@ function createArtistBannerSection(artist, isCreator) {
     });
     bannerSection.appendChild(bannerEditButton);
   }
-  
+
   return bannerSection;
 }
 
 // --- CREATOR-ONLY PHOTO SECTION ---
 function createArtistPhotoSection(artist, isCreator) {
-  // if (!artist.photo) return null;
-
   const photoSection = createElement("div", { class: "artist-photo" });
   const photoSrc = resolveImagePath(EntityType.ARTIST, PictureType.THUMB, artist.photo);
 
-  const photoImg = createElement("img", {
+  const photoImg = Imagex({
     id: "artist-avatar-img",
     src: photoSrc,
     alt: `${artist.name || "Artist"}'s photo`,
-    class: "artist-photo"
+    classes: "artist-photo"
   });
 
   photoSection.appendChild(photoImg);
@@ -82,13 +80,12 @@ function createArtistPhotoSection(artist, isCreator) {
     photoSection.appendChild(photoEditButton);
   }
 
-
   return photoSection;
 }
 
 // --- MAIN DISPLAY ---
 export async function displayArtist(content, artistID, isLoggedIn) {
-  content.innerHTML = "";
+  content.replaceChildren();
   const contentContainer = createElement("div", { class: "artistpage" });
   content.appendChild(contentContainer);
 
@@ -114,7 +111,7 @@ export async function displayArtist(content, artistID, isLoggedIn) {
     const buttonRow = createElement("div", { class: "hflex hcen" });
 
     const subscribeButton = Button(isSubscribed ? "Unsubscribe" : "Subscribe", "", {
-      click: () => SubscribeToArtist(subscribeButton, user, artistID)
+      click: () => SubscribeToArtist(subscribeButton, artist.artistid)
     }, "buttonx");
     buttonRow.appendChild(subscribeButton);
 
@@ -146,7 +143,7 @@ export async function displayArtist(content, artistID, isLoggedIn) {
     persistTabs(contentContainer, tabs, `artist-tabs:${artistID}`);
 
   } catch (error) {
-    contentContainer.innerHTML = "";
+    contentContainer.replaceChildren();
     contentContainer.appendChild(
       createElement("p", {}, [`Error loading artist profile: ${error.message}`])
     );
@@ -173,102 +170,63 @@ function getSocialIcon(platform) {
   return icons.link;
 }
 
-function SubscribeToArtist(followBtn, userid, artist) {
+
+/**
+ * Subscribe to an artist
+ */
+function SubscribeToArtist(followBtn, artistId) {
   toggleAction({
-    entityId: userid,
-    button: followBtn,
-    targetObject: artist,
-    apiPath: "/subscribe/",
-    property: "isSubscribed",
-    labels: { on: "Unsubscribe", off: "Subscribe" },
-    actionName: "followed"
+      entityId: artistId,
+      entityType: "artist",
+      button: followBtn,
+      apiPath: "/subscribes/",
+      labels: { on: "Unsubscribe", off: "Subscribe" },
+      actionName: "subscribed"
   });
 }
+
 
 // --- OVERVIEW TAB ---
 function renderOverviewTab(container, artist, isCreator, isLoggedIn) {
   const artistDiv = createElement("div", { class: "artist-container" });
-  artistDiv.appendChild(createElement("h2", { class: "artist-name" }, [artist.name]));
+  artistDiv.appendChild(createElement("h2", { class: "artist-name" }, [artist.name || "Unknown Artist"]));
 
   const detailsDiv = createElement("div", { class: "artist-details" });
   [
-    { label: "🎨 Artist Type", value: artist.category },
-    { label: "📖 Biography", value: artist.bio },
-    { label: "🎂 Date of Birth", value: artist.dob },
-    { label: "📍 Place", value: `${artist.place}, ${artist.country}` },
-    { label: "🎶 Genres", value: artist.genres.join(", ") }
+    { label: "🎨 Artist Type", value: artist.category || "Unknown" },
+    { label: "📖 Biography", value: artist.bio || "No biography available" },
+    { label: "🎂 Date of Birth", value: artist.dob || "" },
+    { label: "📍 Place", value: [artist.place, artist.country].filter(Boolean).join(", ") },
+    { label: "🎶 Genres", value: Array.isArray(artist.genres) && artist.genres.length > 0 ? artist.genres.join(", ") : "None" }
   ].forEach(({ label, value }) =>
     detailsDiv.appendChild(createElement("p", {}, [createElement("strong", {}, [`${label}:`]), ` ${value}`]))
   );
   artistDiv.appendChild(detailsDiv);
 
-  // // Band Members
-  // if (artist.members?.length > 0) {
-  //   const memberItems = artist.members.map(member => {
-  //     const photoSrc = resolveImagePath(EntityType.ARTIST, PictureType.THUMB, member.image);
-  //     const img = createElement("img", { src: photoSrc, alt: member.name, class: "member-photo" });
-  //     const text = createElement("div", { class: "member-text" }, [
-  //       createElement("span", {}, [
-  //         `${member.name}${member.role ? " - " + member.role : ""}${member.dob ? " (DOB: " + member.dob + ")" : ""}`
-  //       ])
-  //     ]);
-  //     return createElement("li", { class: "member-item" }, [img, text]);
-  //   });
-  //   artistDiv.appendChild(
-  //     createElement("div", { class: "band-members" }, [
-  //       createElement("p", {}, [createElement("strong", {}, ["👥 Band Members:"])]),
-  //       createElement("ul", {}, memberItems)
-  //     ])
-  //   );
-  // }
-
   // Band Members
-if (artist.members?.length > 0) {
-  const memberItems = artist.members.map(member => {
-    const photoSrc = resolveImagePath(EntityType.ARTIST, PictureType.THUMB, member.image);
-    const img = createElement("img", { src: photoSrc, alt: member.name, class: "member-photo" });
+  if (artist.members?.length > 0) {
+    const memberItems = artist.members.map(member => {
+      const photoSrc = resolveImagePath(EntityType.ARTIST, PictureType.THUMB, member.image);
+      const img = createElement("img", { src: photoSrc, alt: member.name, class: "member-photo" });
 
-    // // Add creator-only edit button per member
-    // if (isCreator) {
-    //   const editBtn = createElement("button", { class: "edit-member-pic" }, ["Edit Photo"]);
-    //   editBtn.addEventListener("click", () => {
-    //     updateImageWithCrop({
-    //       entityType: EntityType.ARTIST,
-    //       imageType: "member",
-    //       stateKey: "image",
-    //       stateEntityKey: "member",
-    //       previewElementId: img.id || null,
-    //       pictureType: PictureType.MEMBER,
-    //       entityId: member.memberid // must exist in member object
-    //     });
-    //   });
-    //   const wrapper = createElement("div", { class: "member-photo-wrapper" }, [img, editBtn]);
-    //   const text = createElement("div", { class: "member-text" }, [
-    //     createElement("span", {}, [
-    //       `${member.name}${member.role ? " - " + member.role : ""}${member.dob ? " (DOB: " + member.dob + ")" : ""}`
-    //     ])
-    //   ]);
-    //   return createElement("li", { class: "member-item" }, [wrapper, text]);
-    // }
+      const text = createElement("div", { class: "member-text" }, [
+        createElement("span", {}, [
+          `${member.name}${member.role ? " - " + member.role : ""}${member.dob ? " (DOB: " + member.dob + ")" : ""}`
+        ])
+      ]);
+      return createElement("li", { class: "member-item" }, [img, text]);
+    });
 
-    const text = createElement("div", { class: "member-text" }, [
-      createElement("span", {}, [
-        `${member.name}${member.role ? " - " + member.role : ""}${member.dob ? " (DOB: " + member.dob + ")" : ""}`
+    artistDiv.appendChild(
+      createElement("div", { class: "band-members" }, [
+        createElement("p", {}, [createElement("strong", {}, ["👥 Band Members:"])]),
+        createElement("ul", {}, memberItems)
       ])
-    ]);
-    return createElement("li", { class: "member-item" }, [img, text]);
-  });
-
-  artistDiv.appendChild(
-    createElement("div", { class: "band-members" }, [
-      createElement("p", {}, [createElement("strong", {}, ["👥 Band Members:"])]),
-      createElement("ul", {}, memberItems)
-    ])
-  );
-}
+    );
+  }
 
   // Social Links
-  if (artist.socials) {
+  if (artist.socials && typeof artist.socials === "object") {
     const socialLinks = Object.entries(artist.socials).map(([platform, url]) =>
       createElement("a", { href: url, target: "_blank", class: "social-link", rel: "noopener noreferrer" }, [`${getSocialIcon(platform)} ${platform}`])
     );
@@ -280,32 +238,31 @@ if (artist.members?.length > 0) {
     );
   }
 
-// Creator-only actions
-if (isCreator) {
-  artistDiv.appendChild(Button("✏️ Edit Artist", "", {
+  // Creator-only actions
+  if (isCreator) {
+    artistDiv.appendChild(Button("✏️ Edit Artist", "", {
       click: async () => {
-          const existingArtist = await apiFetch(`/artists/${artist.artistid}`);
-          const editContainer = document.getElementById("editartist") || container;
-          createOrEditArtist({
-              isLoggedIn,
-              content: editContainer,
-              mode: "edit",
-              artistID: artist.artistid,
-              existingArtist,
-              isCreator
-          });
+        const existingArtist = await apiFetch(`/artists/${artist.artistid}`);
+        const editContainer = document.getElementById("editartist") || container;
+        createOrEditArtist({
+          isLoggedIn,
+          content: editContainer,
+          mode: "edit",
+          artistID: artist.artistid,
+          existingArtist,
+          isCreator
+        });
       }
-  }, "edit-artist-btn buttonx"));
+    }, "edit-artist-btn buttonx"));
 
-  artistDiv.appendChild(Button("🗑️ Request Deletion", "", {
+    artistDiv.appendChild(Button("🗑️ Request Deletion", "", {
       click: () => deleteArtistForm(isLoggedIn, artist.artistid, isCreator)
-  }, "del-artist-btn buttonx"));
+    }, "del-artist-btn buttonx"));
 
-  // Ensure edit form container exists
-  if (!document.getElementById("editartist")) {
+    if (!document.getElementById("editartist")) {
       container.appendChild(createElement("div", { class: "editform", id: "editartist" }));
+    }
   }
-}
 
   container.appendChild(artistDiv);
 }

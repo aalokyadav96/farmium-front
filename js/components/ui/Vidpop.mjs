@@ -1,8 +1,9 @@
 import "../../../css/ui/Vidpop.css";
-import {generateVideoPlayer} from "./vidpopHelpers";
+import { createIconButton } from "../../utils/svgIconButton";
+import { xSVG } from "../svgs";
+import { generateVideoPlayer } from "./vidpopHelpers";
 
 const Vidpop = (mediaSrc, type, videoid, options = {}) => {
-
   const { poster = null, theme = "light", qualities = [], subtitles = [] } = options;
 
   const sightbox = document.createElement("div");
@@ -17,7 +18,8 @@ const Vidpop = (mediaSrc, type, videoid, options = {}) => {
 
   const closeButton = document.createElement("button");
   closeButton.className = "sightbox-close";
-  closeButton.textContent = "×";
+  // closeButton.textContent = "×";
+  closeButton.appendChild(createIconButton({svgMarkup:xSVG}));
   closeButton.setAttribute("aria-label", "Close Theater Mode");
   closeButton.addEventListener("click", () => removePopup(sightbox));
 

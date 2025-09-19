@@ -13,7 +13,7 @@ async function editTicket(ticketId, eventId) {
         }
 
         const editEventDiv = document.getElementById('edittabs');
-        editEventDiv.innerHTML = ""; // Clear previous form
+        editEventDiv.replaceChildren(); // Clear previous form
 
         const form = createElement("form", { id: "edit-ticket-form" });
 
@@ -118,7 +118,7 @@ async function updateTicket(ticketId, eventId) {
 // Clear ticket form
 function clearTicketForm() {
     const editEventDiv = document.getElementById('edittabs');
-    editEventDiv.innerHTML = "";
+    editEventDiv.replaceChildren();
 }
 
 // Refresh ticket list

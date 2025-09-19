@@ -25,6 +25,17 @@ export const createImageElement = (src) => {
     return img;
   };
   
+  export function createVideoElement(src) {
+    const video = document.createElement("video");
+    video.src = src;
+    video.controls = true;
+    video.autoplay = true;
+    video.style.maxWidth = "90%";
+    video.style.maxHeight = "90%";
+    video.style.borderRadius = "6px";
+    return video;
+}
+
 // export const createImageElement = (src) => {
 //     const img = document.createElement("img");
 //     img.src = src;

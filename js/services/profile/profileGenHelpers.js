@@ -4,7 +4,9 @@ import { logout } from "../auth/authService.js";
 import { reportPost } from "../reporting/reporting.js";
 import Button from "../../components/base/Button.js";
 
-import { toggleFollow } from "./toggleFollow.js";
+import { toggleAction } from "../beats/toggleFollows.js";
+import { meChat } from "../mechat/plugnplay.js";
+// import {userChatInit} from "../chats/chatPage.js";
 
 // Reuse appendChildren from profileImages.js or redefine here if needed
 function appendChildren(parent, ...children) {
@@ -40,6 +42,35 @@ function createProfileDetails(profile, isLoggedIn) {
     return profileDetails;
 }
 
+
+
+/**
+ * Follow a user
+ */
+function FollowUser(followBtn, userId) {
+    toggleAction({
+        entityId: userId,
+        entityType: "user",
+        button: followBtn,
+        apiPath: "/subscribes/",
+        labels: { on: "Unfollow", off: "Follow" },
+        actionName: "followed"
+    });
+}
+
+
+// function FollowUser(followBtn, userid) {
+//     toggleAction({
+//         entityId: userid,
+//         entityType: "user",
+//         button: followBtn,
+//         apiPath: "/follows/",
+//         property: "isFollowing",
+//         labels: { on: "Unfollow", off: "Follow" },
+//         actionName: "followed"
+//     });
+// }
+
 function createProfileActions(profile, isLoggedIn) {
     const profileActions = document.createElement("div");
     profileActions.className = "profile-actions";
@@ -58,23 +89,65 @@ function createProfileActions(profile, isLoggedIn) {
         profileActions.appendChild(editButton);
     }
 
-    if (isLoggedIn && profile.userid !== getState("user")) {
-        const followButton = Button("Follow", "follow-btn", {
-            click: () => toggleFollow(profile.userid, followButton, profile)
-        }, "btn follow-button", { backgroundColor: "lightgreen" });
+    // if (isLoggedIn && profile.userid !== getState("user")) {
+    //     const followButton = Button("Follow", "follow-btn", {
+    //         click: () => toggleFollow(profile.userid, followButton, profile)
+    //     }, "btn follow-button", { backgroundColor: "lightgreen" });
+    //     followButton.dataset.action = "toggle-follow";
+    //     followButton.dataset.userid = profile.userid;
+    //     followButton.textContent = profile.is_following ? "Unfollow" : "Follow";
+    //     profileActions.appendChild(followButton);
+
+    //     const sendMessagebtn = Button("Send Message", 'send-msg', {
+    //         // click: () => userChatInit(profile.userid),
+    //         click: () => meChat(profile.userid, "user", getState("user")),
+    //     }, "buttonx");
+    //     profileActions.appendChild(sendMessagebtn);
+
+    //     const reportButton = Button("Report", "report-btn", {
+    //         click: () => { reportPost(profile.userid, "user") }
+    //     }, "report-btn", { backgroundColor: "#ee9090" });
+    //     profileActions.appendChild(reportButton);
+    // }
+
+    const currentUser = getState("user");
+
+    // Profile Actions (Follow, Message, Report)
+    if (isLoggedIn && profile.userid !== currentUser) {
+        const followButton = Button(
+            profile.is_following ? "Unfollow" : "Follow",
+            "follow-btn",
+            {
+                // click: () => toggleFollow(profile.userid, followButton, profile)
+                click: () => FollowUser(followButton, profile.userid)
+            },
+            "btn follow-button",
+            { backgroundColor: "lightgreen" }
+        );
+
         followButton.dataset.action = "toggle-follow";
         followButton.dataset.userid = profile.userid;
-        followButton.textContent = profile.is_following ? "Unfollow" : "Follow";
         profileActions.appendChild(followButton);
 
-        const sendMessagebtn = Button("Send Message", 'send-msg', {
-            // click: () => userChatInit(profile.userid),
-        }, "buttonx");
+        const sendMessagebtn = Button(
+            "Send Message",
+            "send-msg",
+            {
+                click: () => meChat(profile.userid, "user", currentUser)
+            },
+            "buttonx"
+        );
         profileActions.appendChild(sendMessagebtn);
 
-        const reportButton = Button("Report", "report-btn", {
-            click: () => { reportPost(profile.userid, "user") }
-        }, "report-btn", { backgroundColor: "#ee9090" });
+        const reportButton = Button(
+            "Report",
+            "report-btn",
+            {
+                click: () => { reportPost(profile.userid, "user"); }
+            },
+            "report-btn",
+            { backgroundColor: "#ee9090" }
+        );
         profileActions.appendChild(reportButton);
     }
 

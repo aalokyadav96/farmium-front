@@ -1,0 +1,115 @@
+
+/* Dashboard layout */
+.wallet-dashboard {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+/* Responsive stacking on small screens */
+@media (max-width: 768px) {
+  .wallet-dashboard {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Section styling */
+.wallet-section {
+  margin-bottom: 1.5rem;
+}
+
+.wallet-section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #2b2b2b;
+}
+
+/* Card styling */
+.wallet-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  padding: 1rem;
+}
+
+/* Balance display */
+.balance-display {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #0078d4;
+  margin-bottom: 1rem;
+}
+
+/* Form layout */
+.wallet-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.wallet-form input,
+.wallet-form select {
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background-color: #fff;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.wallet-form input:focus,
+.wallet-form select:focus {
+  border-color: #0078d4;
+  outline: none;
+}
+
+
+.button:hover {
+  background-color: #005a9e;
+}
+
+/* Transactions */
+.txn-item {
+  padding: 1rem;
+  border-left: 4px solid #0078d4;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.txn-info {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.txn-meta {
+  font-size: 0.875rem;
+  color: #6b7280;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.txn-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.badge-success {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.txn-extra {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 0.5rem;
+  word-break: break-word;
+}

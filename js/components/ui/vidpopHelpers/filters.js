@@ -1,5 +1,5 @@
 const filters = {
-  "None": "none",
+  "Filters": "none",
   "Grayscale": "grayscale(100%)",
   "Sepia": "sepia(100%)",
   "Invert": "invert(100%)",

@@ -30,6 +30,7 @@
   width: 100%;
   height: auto;
   object-fit: cover;
+  aspect-ratio: 7/3;
 }
 
 /* Event Info */

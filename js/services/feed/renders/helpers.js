@@ -1,6 +1,5 @@
-import { SRC_URL, getState } from "../../../state/state.js";
+import { getState } from "../../../state/state.js";
 import { apiFetch } from "../../../api/api.js";
-import { fetchFeed } from "../fetchFeed.js";
 import { reportPost } from "../../reporting/reporting.js";
 import { toggleLike } from "../../beats/likes.js";
 import { createCommentsSection } from "../../comments/comments.js";
@@ -8,9 +7,11 @@ import { createElement } from "../../../components/createElement.js";
 import { resolveImagePath, EntityType, PictureType } from "../../../utils/imagePaths.js";
 import Notify from "../../../components/ui/Notify.mjs";
 import Imagex from "../../../components/base/Imagex.js";
-import { heartSVG, commentSVG } from "../../../components/svgs.js";
+import { heartSVG, commentSVG, morevSVG } from "../../../components/svgs.js";
 import Button from "../../../components/base/Button.js";
-import { openEditForm } from "./postEditor.js";
+import { openEditModal } from "./postEditor.js";
+import { toggleAction } from "../../beats/toggleFollows.js";
+import {debounce} from "../../../utils/deutils.js";
 
 // Helper to turn an SVG string into a Node
 const svgToNode = (svgString) => {
@@ -47,7 +48,7 @@ export function createPostHeader(post) {
                 minute: "2-digit"
             });
         } catch {
-            formattedTime = post.timestamp; // fallback if parsing fails
+            formattedTime = post.timestamp;
         }
     }
 
@@ -59,11 +60,62 @@ export function createPostHeader(post) {
         timestampDiv
     ]);
 
-    return createElement("div", { class: "post-header hflex" }, [
+    // // Post Header (Subscribe)
+    // const isLoggedIn = Boolean(getState("token"));
+    // const currentUser = getState("user");
+    // let subscribeBtn = null;
+    // if (isLoggedIn && post.username !== currentUser) {
+    //     subscribeBtn = Button(
+    //         post.isSubscribed ? "Unsubscribe" : "Subscribe",
+    //         "subscribe-btn",
+    //         {
+    //             click: () => SubscribeToFeedPost(subscribeBtn, post.userid)
+    //         },
+    //         "btn buttonx"
+    //     );
+    
+    //     subscribeBtn.dataset.action = "toggle-subscribe";
+    //     subscribeBtn.dataset.userid = post.userid;
+    // }
+    
+    const headerRow = createElement("div", { class: "post-header hflex" }, [
         userIconLink,
         userTimeDiv
     ]);
+    
+    // if (subscribeBtn) {
+    //     headerRow.appendChild(subscribeBtn);
+    // }
+
+    return headerRow;
 }
+
+/**
+ * Subscribe to a feed post
+ */
+function SubscribeToFeedPost(followBtn, postId) {
+    toggleAction({
+        entityId: postId,
+        entityType: "feedpost",
+        button: followBtn,
+        apiPath: "/subscribes/",
+        labels: { on: "Unsubscribe", off: "Subscribe" },
+        actionName: "subscribed"
+    });
+}
+
+
+// function SubscribeToFeedPost(followBtn, userid) {
+//     toggleAction({
+//         entityId: userid,
+//         entityType: "feedpost",
+//         button: followBtn,
+//         apiPath: "/subscribe/",
+//         property: "isSubscribed",
+//         labels: { on: "Unsubscribe", off: "Subscribe" },
+//         actionName: "subscribed"
+//     });
+// }
 
 // Batch fetch: POST /likes/:entitytype/batch/users
 export async function fetchUserMetaLikesBatch(entityType, entityIds = []) {
@@ -98,7 +150,8 @@ export function createActions(post, isLoggedIn, isCreator, userLikes = {}, posts
         const liked = Boolean(userLikes[entityId]);
         const likeIcon = svgToNode(heartSVG);
         const likeLabel = document.createElement("span");
-        likeLabel.textContent = `Like (${post.likes})`;
+        // likeLabel.textContent = `Like (${post.likes})`;
+        likeLabel.textContent = post.likes;
 
         const likeButton = createElement("button", {
             class: liked ? "like liked" : "like"
@@ -108,7 +161,8 @@ export function createActions(post, isLoggedIn, isCreator, userLikes = {}, posts
             try {
                 const result = await toggleLike("post", post.postid);
                 if (result && typeof result.count === "number") {
-                    likeLabel.textContent = `Like (${result.count})`;
+                    // likeLabel.textContent = `Like (${result.count})`;
+                    likeLabel.textContent = result.count;
 
                     if (result.liked) likeButton.classList.add("liked");
                     else likeButton.classList.remove("liked");
@@ -126,11 +180,11 @@ export function createActions(post, isLoggedIn, isCreator, userLikes = {}, posts
 
     // Comment Button
     const commentIcon = svgToNode(commentSVG);
-    const commentLabel = document.createElement("span");
-    commentLabel.textContent = "Comment";
+    // const commentLabel = document.createElement("span");
+    // commentLabel.textContent = "Comment";
     const commentButton = createElement("button", { class: "comment" }, [
         commentIcon,
-        commentLabel
+        // commentLabel
     ]);
 
     commentButton.addEventListener("click", () => {
@@ -149,7 +203,7 @@ export function createActions(post, isLoggedIn, isCreator, userLikes = {}, posts
     actionsContainer.appendChild(commentButton);
 
     // More Menu (Report/Delete/Edit)
-    const moreButton = createElement("button", { class: "more-btn" }, ["⋮"]);
+    const moreButton = createElement("button", { class: "more-btn" }, [svgToNode(morevSVG)]);
     const dropdown = createElement("div", { class: "dropdown hidden" });
     const reportButton = createElement("button", { class: "report-btn" }, ["Report"]);
     reportButton.addEventListener("click", () => {
@@ -166,7 +220,10 @@ export function createActions(post, isLoggedIn, isCreator, userLikes = {}, posts
         });
         dropdown.appendChild(deleteButton);
 
-        const editBtn = Button("Edit", "", { click: () => openEditForm(post, postElement, postsContainer, i) }, "edit-btn");
+        const editBtn = Button("Edit", "", { click: () => openEditModal(post, postsContainer, i) }, "edit-btn");
+
+        // const editBtn = Button("Edit", "", { click: () => openEditForm(post, postElement, postsContainer, i) }, "edit-btn");
+
         dropdown.appendChild(editBtn);
     }
 
@@ -230,15 +287,4 @@ async function deletePost(postId, postElement, posts) {
             Notify(`Error deleting post: ${err.message}`, { type: "error", duration: 3000, dismissible: true });
         }
     }
-}
-
-/**
- * Debounce helper
- */
-function debounce(func, delay) {
-    let timeout;
-    return function (...args) {
-        if (timeout) clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), delay);
-    };
 }

@@ -1,4 +1,4 @@
-import { state, API_URL, APIG_URL, SRC_URL, setState } from "../state/state.js";
+import {  API_URL, APIG_URL, APIP_URL, SRC_URL, setState, getState } from "../state/state.js";
 import { logout } from "../services/auth/authService.js";
 import Notify from "../components/ui/Notify.mjs";
 
@@ -34,7 +34,7 @@ let refreshInProgress = null;
 async function refreshToken() {
     if (refreshInProgress) return refreshInProgress;
 
-    const storedRefreshToken = state.refreshToken || localStorage.getItem("refreshToken");
+    const storedRefreshToken = getState("refreshToken") || localStorage.getItem("refreshToken");
     if (!storedRefreshToken) {
         logout(true);
         return false;
@@ -92,7 +92,7 @@ function isTokenNearExpiry(token, bufferMs = 30 * 1000) {
 }
 
 async function apixFetch(endpoint, method = "GET", body = null, options = {}, isRetry = false) {
-    if (state.token && isTokenNearExpiry(state.token) && !isRetry) {
+    if (getState("token") && isTokenNearExpiry(getState("token")) && !isRetry) {
         const refreshed = await refreshToken();
         if (!refreshed) throw new Error("Session expired. Please log in again.");
     }
@@ -100,7 +100,7 @@ async function apixFetch(endpoint, method = "GET", body = null, options = {}, is
     const fetchOptions = {
         method,
         headers: {
-            ...(state.token && { Authorization: `Bearer ${state.token}` }),
+            ...(getState("token") && { Authorization: `Bearer ${getState("token")}` }),
         },
         signal: options.signal,
     };
@@ -121,7 +121,7 @@ async function apixFetch(endpoint, method = "GET", body = null, options = {}, is
 
     const isGet = method.toUpperCase() === "GET";
     const useCache = options.useCache !== false && isGet && !shouldSkipCache(endpoint);
-    const cacheKey = getCacheKey(endpoint, state.token);
+    const cacheKey = getCacheKey(endpoint, getState("token"));
 
     if (useCache && apiCache.has(cacheKey)) {
         const { data, timestamp } = apiCache.get(cacheKey);
@@ -141,14 +141,16 @@ async function apixFetch(endpoint, method = "GET", body = null, options = {}, is
             return;
         }
 
-        if (response.status === 401 && !isRetry && state.refreshToken) {
-            const refreshed = await refreshToken();
-            if (refreshed) {
-                return apixFetch(endpoint, method, body, options, true);
-            } else {
-                throw new Error("Session expired. Please log in again.");
-            }
-        }
+// // uncomment when fixed RBAC
+
+        // if (response.status === 401 && !isRetry && getState("refreshToken")) {
+        //     const refreshed = await refreshToken();
+        //     if (refreshed) {
+        //         return apixFetch(endpoint, method, body, options, true);
+        //     } else {
+        //         throw new Error("Session expired. Please log in again.");
+        //     }
+        // }
 
         if (!response.ok) {
             const errorText = await response.text();
@@ -190,6 +192,13 @@ export async function apigFetch(endpoint, method = "GET", body = null, options =
     const controller = options.controller || new AbortController();
     const signal = controller.signal;
     const fullUrl = `${APIG_URL}${endpoint}`;
+    return apixFetch(fullUrl, method, body, { ...options, signal });
+}
+
+export async function apipFetch(endpoint, method = "GET", body = null, options = {}) {
+    const controller = options.controller || new AbortController();
+    const signal = controller.signal;
+    const fullUrl = `${APIP_URL}${endpoint}`;
     return apixFetch(fullUrl, method, body, { ...options, signal });
 }
 

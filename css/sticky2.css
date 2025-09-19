@@ -5,6 +5,12 @@
     justify-content: center;
     display: flex;
 }
+
+.logoicon span {
+    align-items: center;
+    display: flex;
+}
+
 .play, .pause, .stop, .dld, .edit {
     border: none;
     cursor: pointer;

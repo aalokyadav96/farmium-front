@@ -1,3 +1,5 @@
+import {debounce} from "../../utils/deutils";
+
 function setupVideoUtilityFunctions(video, videoid) {
     const container = video.parentElement || document.body;
 
@@ -183,14 +185,14 @@ function setupVideoUtilityFunctions(video, videoid) {
     video.addEventListener("touchend", onTouchEnd);
 }
 
-// Debounce function to limit how often a function runs
-function debounce(func, wait) {
-    let timeout;
-    return function (...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), wait);
-    };
-}
+// // Debounce function to limit how often a function runs
+// function debounce(func, wait) {
+//     let timeout;
+//     return function (...args) {
+//         clearTimeout(timeout);
+//         timeout = setTimeout(() => func.apply(this, args), wait);
+//     };
+// }
 
 
 function setVolume(video, value) {

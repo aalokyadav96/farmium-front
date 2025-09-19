@@ -1,0 +1,128 @@
+ 
+  /* Layout container */
+  .places-layout {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+  
+  /* Main content */
+  .places-main {
+    flex: 3;
+  }
+  
+  /* Sidebar */
+  .places-aside {
+    flex: 1;
+    background: #fff;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+  
+  .places-aside h3 {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+  
+  .primary {
+    background-color: #0078D4;
+    color: white;
+  }
+  
+  .secondary {
+    background-color: #e0e0e0;
+    color: #333;
+  }
+  
+  /* Controls */
+  .place-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  
+  .place-search {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+  
+  .place-sort {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+  
+  /* Category chips */
+  .category-chips {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .category-chip {
+    padding: 6px 12px;
+    background: #0078D4;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  /* Grid layout for place list */
+.placelist-wrapper {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 24px;
+  padding: 20px 0;
+}
+
+/* Place card styling */
+.place-card {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease;
+}
+
+.place-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Image styling */
+.place-card img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  display: block;
+}
+
+/* Place info styling */
+.place-info {
+  padding: 16px;
+}
+
+.place-info h2 {
+  font-size: 18px;
+  margin: 0 0 8px;
+}
+
+.place-info p {
+  font-size: 14px;
+  margin: 4px 0;
+}
+
+/* Badge styling */
+.badge {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background-color: #0078D4;
+  color: white;
+  font-weight: 500;
+}
+
+  

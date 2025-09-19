@@ -77,7 +77,7 @@ async function editPlaceForm(isLoggedIn, placeId, content) {
         const tagList = tagWrapper.querySelector("#tag-list");
 
         function renderTags() {
-            tagList.innerHTML = "";
+            tagList.replaceChildren();
             tags.forEach((tag, index) => {
                 const chip = createElement("span", {
                     style: "padding:4px 8px;background:var(--color-space);border-radius:var(--radius-sm);display:inline-flex;align-items:center;gap:4px;"

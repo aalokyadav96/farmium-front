@@ -66,12 +66,12 @@ function createInlineForm(fields, onSubmit, onCancel) {
 // ─── Exhibits (Museum) ─────────────────────────────────────────────────────────
 
 async function displayPlaceExhibits(container, placeId, isCreator) {
-  container.innerHTML = "";
+  container.replaceChildren();
   showLoading(container);
 
   try {
     const exhibits = await apiFetch(`/place/${placeId}/exhibits`);
-    container.innerHTML = "";
+    container.replaceChildren();
 
     container.appendChild(createElement("h3", {}, ["Exhibits"]));
     const exhibitSection = createElement("div", { class: "exhibit-section" }, []);
@@ -159,7 +159,7 @@ async function displayPlaceExhibits(container, placeId, isCreator) {
       container.appendChild(addBtn);
     }
   } catch (err) {
-    container.innerHTML = "";
+    container.replaceChildren();
     showError(container, "Exhibits unavailable.");
   }
 }
@@ -167,12 +167,12 @@ async function displayPlaceExhibits(container, placeId, isCreator) {
 // ─── Membership (Gym) ─────────────────────────────────────────────────────────
 
 async function displayPlaceMembership(container, placeId, isCreator, isLoggedIn) {
-  container.innerHTML = "";
+  container.replaceChildren();
   showLoading(container);
 
   try {
     const plans = await apiFetch(`/place/${placeId}/membership`);
-    container.innerHTML = "";
+    container.replaceChildren();
 
     container.appendChild(createElement("h3", {}, ["Membership Plans"]));
     const planSection = createElement("div", { class: "membership-section" }, []);
@@ -273,7 +273,7 @@ async function displayPlaceMembership(container, placeId, isCreator, isLoggedIn)
       container.appendChild(addBtn);
     }
   } catch (err) {
-    container.innerHTML = "";
+    container.replaceChildren();
     showError(container, "Membership data unavailable.");
   }
 }
@@ -281,12 +281,12 @@ async function displayPlaceMembership(container, placeId, isCreator, isLoggedIn)
 // ─── Shows (Theater) ───────────────────────────────────────────────────────────
 
 async function displayPlaceShows(container, placeId, isCreator, isLoggedIn) {
-  container.innerHTML = "";
+  container.replaceChildren();
   showLoading(container);
 
   try {
     const shows = await apiFetch(`/place/${placeId}/shows`);
-    container.innerHTML = "";
+    container.replaceChildren();
 
     container.appendChild(createElement("h3", {}, ["Upcoming Shows"]));
     const showSection = createElement("div", { class: "show-section" }, []);
@@ -390,7 +390,7 @@ async function displayPlaceShows(container, placeId, isCreator, isLoggedIn) {
       container.appendChild(addBtn);
     }
   } catch (err) {
-    container.innerHTML = "";
+    container.replaceChildren();
     showError(container, "Shows unavailable.");
   }
 }
@@ -399,7 +399,7 @@ async function displayPlaceShows(container, placeId, isCreator, isLoggedIn) {
 // ─── Fallback (Unknown Category) ───────────────────────────────────────────────
 
 async function displayPlaceDetailsFallback(container, categoryRaw, placeId) {
-  container.innerHTML = "";
+  container.replaceChildren();
 
   container.appendChild(
     createElement("div", { class: "fallback-message" }, [

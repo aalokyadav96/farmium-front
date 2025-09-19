@@ -1,5 +1,5 @@
 import { createElement } from "../../components/createElement.js";
-import BookingForm from "../../components/ui/BookinggForm.mjs";
+import BookingForm from "../../components/ui/BookingForm.mjs";
 import Button from "../../components/base/Button.js";
 import { apiFetch } from "../../api/api.js";
 import { displayMenu } from "../menu/menuService.js";
@@ -72,7 +72,7 @@ function createInlineForm(fields, onSubmit, onCancel) {
 
 // 🍽️ Restaurant / Café → Menu
 async function displayPlaceMenu(container, placeId, isCreator, isLoggedIn) {
-  container.innerHTML = "";
+  container.replaceChildren();
   try {
     let containerx = createElement('div', {}, []);
     container.appendChild(containerx);
@@ -90,7 +90,7 @@ async function displayPlaceMenu(container, placeId, isCreator, isLoggedIn) {
 
 // 🍽️ Saloon
 async function displaySaloonSlots(container, placeId, isCreator, isLoggedIn) {
-  container.innerHTML = "";
+  container.replaceChildren();
   try {
     container.appendChild(
       BookingForm(alert("hi")));
@@ -107,12 +107,12 @@ async function displaySaloonSlots(container, placeId, isCreator, isLoggedIn) {
 // ─── Rooms (Hotel) ──────────────────────────────────────────────────────────────
 
 async function displayPlaceRooms(container, placeId, isCreator) {
-  container.innerHTML = "";
+  container.replaceChildren();
   showLoading(container);
 
   try {
     const rooms = await apiFetch(`/place/${placeId}/rooms`);
-    container.innerHTML = "";
+    container.replaceChildren();
 
     container.appendChild(createElement("h3", {}, ["Available Rooms"]));
     const roomSection = createElement("div", { class: "room-section vflex" }, []);
@@ -234,7 +234,7 @@ async function displayPlaceRooms(container, placeId, isCreator) {
       container.appendChild(addBtn);
     }
   } catch (err) {
-    container.innerHTML = "";
+    container.replaceChildren();
     showError(container, "Rooms unavailable.");
   }
 }
@@ -242,13 +242,13 @@ async function displayPlaceRooms(container, placeId, isCreator) {
 // ─── Facilities (Park) ─────────────────────────────────────────────────────────
 
 async function displayPlaceFacilities(container, placeId, isCreator) {
-  container.innerHTML = "";
+  container.replaceChildren();
   showLoading(container);
 
   try {
     // Assume backend returns array of facility strings or objects
     const facilities = await apiFetch(`/place/${placeId}/facilities`);
-    container.innerHTML = "";
+    container.replaceChildren();
 
     container.appendChild(createElement("h3", {}, ["Park Facilities"]));
     const ul = createElement("ul", { class: "facility-list" }, []);
@@ -310,7 +310,7 @@ async function displayPlaceFacilities(container, placeId, isCreator) {
       container.appendChild(addBtn);
     }
   } catch (err) {
-    container.innerHTML = "";
+    container.replaceChildren();
     showError(container, "Facilities unavailable.");
   }
 }
@@ -318,12 +318,12 @@ async function displayPlaceFacilities(container, placeId, isCreator) {
 // ─── Services (Business) ───────────────────────────────────────────────────────
 
 async function displayPlaceServices(container, placeId, isCreator) {
-  container.innerHTML = "";
+  container.replaceChildren();
   showLoading(container);
 
   try {
     const services = await apiFetch(`/place/${placeId}/services`);
-    container.innerHTML = "";
+    container.replaceChildren();
 
     container.appendChild(createElement("h3", {}, ["Business Services"]));
     const ul = createElement("ul", { class: "service-list" }, []);
@@ -405,7 +405,7 @@ async function displayPlaceServices(container, placeId, isCreator) {
       container.appendChild(addBtn);
     }
   } catch (err) {
-    container.innerHTML = "";
+    container.replaceChildren();
     showError(container, "Services unavailable.");
   }
 }

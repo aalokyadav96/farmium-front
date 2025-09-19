@@ -1,153 +1,374 @@
+import { createElement } from "../../components/createElement.js";
 import { apiFetch } from "../../api/api.js";
 import { displayPayment } from "./payment.js";
 
-const previousAddresses = [
-  "12A Palm Street, Jaipur, Rajasthan, 302001",
-  "Flat 201, Green Residency, Mumbai, Maharashtra, 400062",
-  "15 Sector 10, Hisar, Haryana, 125001"
-];
-
 function renderAddressForm(container, onSubmit) {
-  const form = document.createElement("form");
-  form.className = "address-form";
-  form.innerHTML = `
-    <h2>Delivery Details</h2>
-    <label>
-      <span>Enter Address:</span>
-      <textarea required placeholder="Flat No, Street, City, State, ZIP" rows="3" class="address-input"></textarea>
-      <div class="autocomplete-box"></div>
-    </label>
-    <label>
-      <span>Coupon Code (optional):</span>
-      <input type="text" class="coupon-input" placeholder="Enter coupon code" />
-    </label>
-    <button type="submit" class="primary-button">Proceed to Checkout</button>
-  `;
+  const form = createElement("form", { class: "address-form" });
+
+  form.append(
+    createElement("h2", {}, ["Delivery Details"]),
+    createElement("label", {}, [
+      createElement("span", {}, ["Enter Address:"]),
+      createElement("textarea", {
+        required: true,
+        placeholder: "Flat No, Street, City, State, ZIP",
+        rows: 3,
+        class: "address-input"
+      })
+    ]),
+    createElement("label", {}, [
+      createElement("span", {}, ["Coupon Code (optional):"]),
+      createElement("input", {
+        type: "text",
+        class: "coupon-input",
+        placeholder: "Enter coupon code"
+      })
+    ]),
+    createElement("button", { type: "submit", class: "primary-button" }, ["Proceed to Checkout"])
+  );
 
   const addressInput = form.querySelector(".address-input");
-  const autocompleteBox = form.querySelector(".autocomplete-box");
-
-  addressInput.addEventListener("input", () => {
-    const value = addressInput.value.trim().toLowerCase();
-    autocompleteBox.innerHTML = "";
-    if (!value) return;
-
-    const matches = previousAddresses.filter(addr => addr.toLowerCase().includes(value));
-    matches.forEach(match => {
-      const item = document.createElement("div");
-      item.className = "autocomplete-item";
-      item.textContent = match;
-      item.onclick = () => {
-        addressInput.value = match;
-        autocompleteBox.innerHTML = "";
-      };
-      autocompleteBox.appendChild(item);
-    });
-  });
+  const couponInput = form.querySelector(".coupon-input");
 
   form.onsubmit = (e) => {
     e.preventDefault();
-    const address = addressInput.value.trim();
-    const couponCode = form.querySelector(".coupon-input").value.trim();
-    if (address) onSubmit(address, couponCode);
+    onSubmit(addressInput.value.trim(), couponInput.value.trim());
   };
 
-  container.innerHTML = "";
-  container.appendChild(form);
+  container.replaceChildren(form);
 }
 
-function calculateTotals(items, couponCode = "") {
-  let subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  let discount = 0;
-
-  if (couponCode.toLowerCase() === "save10") {
-    discount = +(subtotal * 0.1).toFixed(2);
-  }
-
+function calculateTotals(items, discount = 0) {
+  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const tax = +((subtotal - discount) * 0.05).toFixed(2);
   const delivery = 20;
-  const total = +(subtotal - discount + tax + delivery).toFixed(2);
-
-  return { subtotal, discount, tax, delivery, total };
+  return { subtotal, discount, tax, delivery, total: +(subtotal - discount + tax + delivery).toFixed(2) };
 }
 
-function buildSessionPayload(items, address, userId, total) {
+function buildSessionPayload(items, address, userId, total, couponCode = "", discount = 0) {
   const grouped = {};
   items.forEach(item => {
     grouped[item.category] = grouped[item.category] || [];
     grouped[item.category].push(item);
   });
-
-  return {
-    userId,
-    address,
-    items: grouped,
-    total
-  };
+  return { userId, address, items: grouped, total, couponCode, discount };
 }
 
-function renderCartSummary(container, items, totals, onProceed) {
-  const list = items.map(i => `
-    <li>
-      ${i.item} – ${i.quantity} ${i.unit || ""} ${i.farm ? `from ${i.farm}` : ""}
-      <span class="price">₹${i.price * i.quantity}</span>
-    </li>`).join("");
+async function validateCoupon(couponCode, subtotal) {
+  if (!couponCode) return { valid: false, discount: 0, message: "No coupon provided" };
 
-  container.innerHTML = `
-    <section class="checkout-summary">
-      <h2>Checkout Summary</h2>
-      <ul>${list}</ul>
-      <div class="summary-line">Subtotal: ₹${totals.subtotal}</div>
-      ${totals.discount ? `<div class="summary-line">Discount: −₹${totals.discount}</div>` : ""}
-      <div class="summary-line">Tax (5%): ₹${totals.tax}</div>
-      <div class="summary-line">Delivery: ₹${totals.delivery}</div>
-      <div class="summary-line total">Total: ₹${totals.total}</div>
-      <button id="proceedPayment" class="primary-button">Proceed to Payment</button>
-    </section>
-  `;
+  try {
+    const res = await apiFetch("/coupon/validate", "POST", JSON.stringify({
+      code: couponCode,
+      cart: subtotal
+    }));
 
-  document.getElementById("proceedPayment").onclick = onProceed;
-}
-
-function renderError(container, error) {
-  let message = "Something went wrong.";
-  if (error.message?.includes("Network")) {
-    message = "Network error. Check your connection.";
-  } else if (error.response?.status === 500) {
-    message = "Server error. Try again later.";
+    return {
+      valid: res.valid,
+      discount: Number(res.discount) || 0,
+      message: res.message || (res.valid ? "Coupon applied" : "Coupon invalid")
+    };
+  } catch (err) {
+    console.error("Coupon validation failed", err);
+    return { valid: false, discount: 0, message: "Validation failed" };
   }
-  container.innerHTML = `<div class="error" role="alert">${message}</div>`;
 }
+
+// async function validateCoupon(couponCode, subtotal) {
+//   if (!couponCode) return { valid: false, discount: 0 };
+//   try {
+//     const res = await apiFetch(`/coupon/validate?code=${encodeURIComponent(couponCode)}&subtotal=${subtotal}`, "GET");
+//     if (res.valid) {
+//       return { valid: true, discount: +res.discount || 0 };
+//     }
+//   } catch (err) {
+//     console.error("Coupon validation failed", err);
+//   }
+//   return { valid: false, discount: 0 };
+// }
 
 export async function displayCheckout(container, passedItems = null) {
-  container.innerHTML = "<p class='loading'>Loading your cart...</p>";
+  container.replaceChildren(createElement("p", { class: "loading" }, ["Loading your cart..."]));
 
   try {
     const items = passedItems || await apiFetch("/cart", "GET");
-
     if (!items.length) {
-      container.innerHTML = "<p class='empty'>Nothing to checkout</p>";
+      container.replaceChildren(createElement("p", { class: "empty" }, ["Nothing to checkout"]));
       return;
     }
 
     renderAddressForm(container, async (address, couponCode) => {
-      const totals = calculateTotals(items, couponCode);
+      const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      const { valid, discount } = await validateCoupon(couponCode, subtotal);
 
-      renderCartSummary(container, items, totals, async () => {
-        container.innerHTML = "<p class='loading'>Creating payment session...</p>";
+      const totals = calculateTotals(items, discount);
 
+      const summarySection = createElement("section", { class: "checkout-summary" });
+      summarySection.append(
+        createElement("h2", {}, ["Checkout Summary"]),
+        createElement("ul", {}, items.map(i =>
+          createElement("li", {}, [
+            `${i.itemName} (${i.itemType || "N/A"}) – ${i.quantity} ${i.unit || ""} ${i.entityName ? `from ${i.entityName}` : ""} `,
+            createElement("span", {}, [`₹${i.price * i.quantity}`])
+          ])
+        )),
+        createElement("div", {}, [`Subtotal: ₹${totals.subtotal}`]),
+        couponCode
+          ? createElement("div", { class: valid ? "coupon-valid" : "coupon-invalid" }, [
+              valid ? `Discount: −₹${totals.discount}` : `Invalid coupon: ${couponCode}`
+            ])
+          : null,
+        createElement("div", {}, [`Tax (5%): ₹${totals.tax}`]),
+        createElement("div", {}, [`Delivery: ₹${totals.delivery}`]),
+        createElement("div", { class: "total" }, [`Total: ₹${totals.total}`]),
+        createElement("button", { id: "proceedPayment", class: "primary-button" }, ["Proceed to Payment"])
+      );
+
+      container.replaceChildren(summarySection);
+
+      const proceedBtn = summarySection.querySelector("#proceedPayment");
+      proceedBtn.onclick = async () => {
+        proceedBtn.disabled = true;
+        proceedBtn.textContent = "Creating payment session...";
         try {
-          const userId = items[0]?.userId || "anonymous";
-          const payload = buildSessionPayload(items, address, userId, totals.total);
+          const payload = buildSessionPayload(items, address, items[0].userId || "anonymous", totals.total, couponCode, discount);
           const session = await apiFetch("/checkout/session", "POST", JSON.stringify(payload));
           displayPayment(container, session);
         } catch (err) {
-          renderError(container, err);
+          proceedBtn.disabled = false;
+          proceedBtn.textContent = "Proceed to Payment";
+          container.appendChild(createElement("div", { class: "error" }, ["Failed to create payment session."]));
+          console.error(err);
         }
-      });
+      };
     });
 
   } catch (err) {
-    renderError(container, err);
+    container.replaceChildren(createElement("div", { class: "error" }, ["Failed to load cart for checkout."]));
+    console.error(err);
   }
 }
+
+// import { createElement } from "../../components/createElement.js";
+// import { apiFetch } from "../../api/api.js";
+// import { displayPayment } from "./payment.js";
+
+// function renderAddressForm(container, onSubmit) {
+//   const form = createElement("form", { class: "address-form" });
+
+//   form.append(
+//     createElement("h2", {}, ["Delivery Details"]),
+//     createElement("label", {}, [
+//       createElement("span", {}, ["Enter Address:"]),
+//       createElement("textarea", {
+//         required: true,
+//         placeholder: "Flat No, Street, City, State, ZIP",
+//         rows: 3,
+//         class: "address-input"
+//       })
+//     ]),
+//     createElement("label", {}, [
+//       createElement("span", {}, ["Coupon Code (optional):"]),
+//       createElement("input", {
+//         type: "text",
+//         class: "coupon-input",
+//         placeholder: "Enter coupon code"
+//       })
+//     ]),
+//     createElement("button", { type: "submit", class: "primary-button" }, ["Proceed to Checkout"])
+//   );
+
+//   const addressInput = form.querySelector(".address-input");
+//   const couponInput = form.querySelector(".coupon-input");
+
+//   form.onsubmit = (e) => {
+//     e.preventDefault();
+//     onSubmit(addressInput.value.trim(), couponInput.value.trim());
+//   };
+
+//   container.replaceChildren(form);
+// }
+
+// function calculateTotals(items, couponCode = "") {
+//   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+//   const discount = couponCode.toLowerCase() === "save10" ? +(subtotal * 0.1).toFixed(2) : 0;
+//   const tax = +((subtotal - discount) * 0.05).toFixed(2);
+//   const delivery = 20;
+//   return { subtotal, discount, tax, delivery, total: +(subtotal - discount + tax + delivery).toFixed(2) };
+// }
+
+// function buildSessionPayload(items, address, userId, total, couponCode = "") {
+//   const grouped = {};
+//   items.forEach(item => {
+//     grouped[item.category] = grouped[item.category] || [];
+//     grouped[item.category].push(item);
+//   });
+//   return { userId, address, items: grouped, total, couponCode };
+// }
+
+// export async function displayCheckout(container, passedItems = null) {
+//   container.replaceChildren(createElement("p", { class: "loading" }, ["Loading your cart..."]));
+
+//   try {
+//     const items = passedItems || await apiFetch("/cart", "GET");
+//     if (!items.length) {
+//       container.replaceChildren(createElement("p", { class: "empty" }, ["Nothing to checkout"]));
+//       return;
+//     }
+
+//     renderAddressForm(container, async (address, couponCode) => {
+//       const totals = calculateTotals(items, couponCode);
+
+//       const summarySection = createElement("section", { class: "checkout-summary" });
+//       summarySection.append(
+//         createElement("h2", {}, ["Checkout Summary"]),
+//         createElement("ul", {}, items.map(i =>
+//           createElement("li", {}, [
+//             `${i.itemName} (${i.itemType || "N/A"}) – ${i.quantity} ${i.unit || ""} ${i.entityName ? `from ${i.entityName}` : ""} `,
+//             createElement("span", {}, [`₹${i.price * i.quantity}`])
+//           ])
+//         )),
+//         createElement("div", {}, [`Subtotal: ₹${totals.subtotal}`]),
+//         couponCode ? createElement("div", {}, [`Discount: −₹${totals.discount}`]) : null,
+//         createElement("div", {}, [`Tax (5%): ₹${totals.tax}`]),
+//         createElement("div", {}, [`Delivery: ₹${totals.delivery}`]),
+//         createElement("div", { class: "total" }, [`Total: ₹${totals.total}`]),
+//         createElement("button", { id: "proceedPayment", class: "primary-button" }, ["Proceed to Payment"])
+//       );
+
+//       container.replaceChildren(summarySection);
+
+//       const proceedBtn = summarySection.querySelector("#proceedPayment");
+//       proceedBtn.onclick = async () => {
+//         proceedBtn.disabled = true;
+//         proceedBtn.textContent = "Creating payment session...";
+//         try {
+//           const payload = buildSessionPayload(items, address, items[0].userId || "anonymous", totals.total, couponCode);
+//           const session = await apiFetch("/checkout/session", "POST", JSON.stringify(payload));
+//           displayPayment(container, session);
+//         } catch (err) {
+//           proceedBtn.disabled = false;
+//           proceedBtn.textContent = "Proceed to Payment";
+//           container.appendChild(createElement("div", { class: "error" }, ["Failed to create payment session."]));
+//           console.error(err);
+//         }
+//       };
+//     });
+
+//   } catch (err) {
+//     container.replaceChildren(createElement("div", { class: "error" }, ["Failed to load cart for checkout."]));
+//     console.error(err);
+//   }
+// }
+
+// // import { createElement } from "../../components/createElement.js";
+// // import { apiFetch } from "../../api/api.js";
+// // import { displayPayment } from "./payment.js";
+
+// // function renderAddressForm(container, onSubmit) {
+// //   const form = createElement("form", { class: "address-form" });
+
+// //   form.append(
+// //     createElement("h2", {}, ["Delivery Details"]),
+// //     createElement("label", {}, [
+// //       createElement("span", {}, ["Enter Address:"]),
+// //       createElement("textarea", {
+// //         required: true,
+// //         placeholder: "Flat No, Street, City, State, ZIP",
+// //         rows: 3,
+// //         class: "address-input"
+// //       })
+// //     ]),
+// //     createElement("label", {}, [
+// //       createElement("span", {}, ["Coupon Code (optional):"]),
+// //       createElement("input", {
+// //         type: "text",
+// //         class: "coupon-input",
+// //         placeholder: "Enter coupon code"
+// //       })
+// //     ]),
+// //     createElement("button", { type: "submit", class: "primary-button" }, ["Proceed to Checkout"])
+// //   );
+
+// //   const addressInput = form.querySelector(".address-input");
+// //   const couponInput = form.querySelector(".coupon-input");
+
+// //   form.onsubmit = (e) => {
+// //     e.preventDefault();
+// //     onSubmit(addressInput.value.trim(), couponInput.value.trim());
+// //   };
+
+// //   container.replaceChildren(form);
+// // }
+
+// // function calculateTotals(items, couponCode = "") {
+// //   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+// //   const discount = couponCode.toLowerCase() === "save10" ? +(subtotal * 0.1).toFixed(2) : 0;
+// //   const tax = +((subtotal - discount) * 0.05).toFixed(2);
+// //   const delivery = 20;
+// //   return { subtotal, discount, tax, delivery, total: +(subtotal - discount + tax + delivery).toFixed(2) };
+// // }
+
+// // function buildSessionPayload(items, address, userId, total, couponCode = "") {
+// //   const grouped = {};
+// //   items.forEach(item => {
+// //     grouped[item.category] = grouped[item.category] || [];
+// //     grouped[item.category].push(item);
+// //   });
+// //   return { userId, address, items: grouped, total, couponCode };
+// // }
+
+// // export async function displayCheckout(container, passedItems = null) {
+// //   container.replaceChildren(createElement("p", { class: "loading" }, ["Loading your cart..."]));
+
+// //   try {
+// //     const items = passedItems || await apiFetch("/cart", "GET");
+// //     if (!items.length) {
+// //       container.replaceChildren(createElement("p", { class: "empty" }, ["Nothing to checkout"]));
+// //       return;
+// //     }
+
+// //     renderAddressForm(container, async (address, couponCode) => {
+// //       const totals = calculateTotals(items, couponCode);
+
+// //       const summarySection = createElement("section", { class: "checkout-summary" });
+// //       summarySection.append(
+// //         createElement("h2", {}, ["Checkout Summary"]),
+// //         createElement("ul", {}, items.map(i =>
+// //           createElement("li", {}, [
+// //             `${i.itemName} – ${i.quantity} ${i.unit || ""} ${i.entityName ? `from ${i.entityName}` : ""} `,
+// //             createElement("span", {}, [`₹${i.price * i.quantity}`])
+// //           ])
+// //         )),
+// //         createElement("div", {}, [`Subtotal: ₹${totals.subtotal}`]),
+// //         couponCode ? createElement("div", {}, [`Discount: −₹${totals.discount}`]) : null,
+// //         createElement("div", {}, [`Tax (5%): ₹${totals.tax}`]),
+// //         createElement("div", {}, [`Delivery: ₹${totals.delivery}`]),
+// //         createElement("div", { class: "total" }, [`Total: ₹${totals.total}`]),
+// //         createElement("button", { id: "proceedPayment", class: "primary-button" }, ["Proceed to Payment"])
+// //       );
+
+// //       container.replaceChildren(summarySection);
+
+// //       const proceedBtn = summarySection.querySelector("#proceedPayment");
+// //       proceedBtn.onclick = async () => {
+// //         proceedBtn.disabled = true;
+// //         proceedBtn.textContent = "Creating payment session...";
+// //         try {
+// //           const payload = buildSessionPayload(items, address, items[0].userId || "anonymous", totals.total, couponCode);
+// //           const session = await apiFetch("/checkout/session", "POST", JSON.stringify(payload));
+// //           displayPayment(container, session);
+// //         } catch (err) {
+// //           proceedBtn.disabled = false;
+// //           proceedBtn.textContent = "Proceed to Payment";
+// //           container.appendChild(createElement("div", { class: "error" }, ["Failed to create payment session."]));
+// //           console.error(err);
+// //         }
+// //       };
+// //     });
+
+// //   } catch (err) {
+// //     container.replaceChildren(createElement("div", { class: "error" }, ["Failed to load cart for checkout."]));
+// //     console.error(err);
+// //   }
+// // }

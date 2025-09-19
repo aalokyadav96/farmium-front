@@ -7,7 +7,7 @@ import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePath
 import { updateImageWithCrop } from "../../utils/bannerEditor.js"; // adjust path
 
 function renderPlaceDetails(isLoggedIn, content, place, isCreator) {
-  content.innerHTML = "";
+  content.replaceChildren();
 console.log(place);
   const createdDate = new Date(place.created_at).toLocaleString();
   const updatedDate = new Date(place.updated_at).toLocaleString();
@@ -69,7 +69,7 @@ console.log(place);
     actionsWrapper.appendChild(
       Button("Edit Place", "edit-place-btn", {
         click: () => editPlaceForm(isLoggedIn, place.placeid, editContainer),
-      }, "buttonx")
+      }, "buttonx secondary")
     );
 
     actionsWrapper.appendChild(
@@ -81,7 +81,7 @@ console.log(place);
     actionsWrapper.appendChild(
       Button("View Analytics", "analytics-place-btn", {
         click: () => analyticsPlace(isLoggedIn, place.placeid),
-      }, "buttonx")
+      }, "buttonx secondary")
     );
 
     detailsSection.appendChild(actionsWrapper);

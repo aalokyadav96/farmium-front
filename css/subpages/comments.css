@@ -41,8 +41,8 @@
 
 /* Avatar */
 .comments-section .comment-avatar {
-  width: 48px;
-  height: 48px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   object-fit: cover;
   box-shadow: 0 0 0 2px #0078d4;
@@ -102,7 +102,7 @@
 
 /* Comment form */
 .comments-section .comment-form {
-  margin-top: 24px;
+  margin-bottom: 24px;
   display: flex;
   flex-direction: column;
   gap: 12px;

@@ -1,5 +1,5 @@
 // --- Imports ---
-import { state } from "../../state/state.js";
+import { getState } from "../../state/state.js";
 import { apiFetch } from "../../api/api.js";
 import { navigate } from "../../routes/index.js";
 import { createElement } from "../../components/createElement.js";
@@ -11,7 +11,7 @@ import { editEvent } from "./creadit.js";
 import { displayTickets } from "../tickets/ticketService.js";
 import { displayMerchandise } from "../merch/merchService.js";
 import { displayMedia } from "../media/mediaService.js";
-import { persistTabs } from "../../utils/persistTabs.js";
+// import { persistTabs } from "../../utils/persistTabs.js";
 import { createTabs } from "../../components/ui/createTabs.js";
 
 
@@ -84,14 +84,14 @@ const setupTabs = (eventData, eventId, isCreator, isLoggedIn) => {
     if (status === "active") {
         tabs.push(
             { title: "FAQ", id: "faq-tab", render: (c) => displayEventFAQ(c, isCreator, eventId, eventData.faqs) },
-            { title: "Tickets", id: "tickets-tab", render: (c) => displayTickets(c, eventData.tickets, eventId, isCreator, isLoggedIn) },
+            { title: "Tickets", id: "tickets-tab", render: (c) => displayTickets(c, eventData.tickets, eventId, eventData.title, isCreator, isLoggedIn) },
             { title: "Merchandise", id: "merch-tab", render: (c) => displayMerchandise(c, eventData.merch, "event", eventId, isCreator, isLoggedIn) },
         );
     } else {
         tabs.push(
             { title: "Reviews", id: "reviews-tab", render: (c) => displayEventReviews(c, eventId, isCreator, isLoggedIn) },
             { title: "Media", id: "media-tab", render: (c) => displayMedia(c, "event", eventId, isLoggedIn) },
-            { title: "Lost & Found", id: "lnf-tab", render: (c) => displayLostAndFound(c, eventData.lostandfound) },
+            { title: "Lost & Found", id: "lnf-tab", render: (c) => displayLostAndFound(c, isCreator, eventId) },
             { title: "Contact", id: "contact-tab", render: (c) => displayContactDetails(c, eventData.contactInfo) }
         );
     }
@@ -100,13 +100,13 @@ const setupTabs = (eventData, eventId, isCreator, isLoggedIn) => {
 };
 
 async function displayEvent(isLoggedIn, eventId, content) {
-    content.innerHTML = "";
+    content.replaceChildren();
     const container = createElement('div', { class: "eventpage" }, []);
     content.appendChild(container);
 
     try {
         const eventData = await fetchEventData(eventId);
-        const isCreator = isLoggedIn && state.user === eventData.creatorid;
+        const isCreator = isLoggedIn && getState("user") === eventData.creatorid;
 
         await displayEventDetails(container, eventData, isCreator, isLoggedIn);
 
@@ -126,7 +126,7 @@ async function displayEvent(isLoggedIn, eventId, content) {
         }
 
     } catch (error) {
-        container.innerHTML = "";
+        container.replaceChildren();
         container.appendChild(
             createElement("h1", { textContent: `Error loading event details: ${error.message}` })
         );
@@ -137,7 +137,7 @@ async function displayEvent(isLoggedIn, eventId, content) {
 
 // Display Sections (direct sections instead of tabs)
 async function displayEventSections(wrapper, eventData, isCreator, isLoggedIn) {
-    wrapper.innerHTML = "";
+    wrapper.replaceChildren();
 
     await displayEventDetails(wrapper, eventData, isCreator, isLoggedIn);
 
@@ -145,7 +145,7 @@ async function displayEventSections(wrapper, eventData, isCreator, isLoggedIn) {
     wrapper.appendChild(tabsContainer);
 
     const sections = [
-        { check: eventData.tickets?.length, render: () => displayTickets(createSection(tabsContainer), eventData.tickets, eventData.eventid, isCreator, isLoggedIn) },
+        { check: eventData.tickets?.length, render: () => displayTickets(createSection(tabsContainer), eventData.tickets, eventData.eventid, eventData.title, isCreator, isLoggedIn) },
         { check: eventData.faqs?.length, render: () => displayEventFAQ(createSection(tabsContainer), isCreator, eventData.eventid, eventData.faqs) },
         { check: eventData.merch?.length, render: () => displayMerchandise(createSection(tabsContainer), eventData.merch, eventData.eventid, isCreator, isLoggedIn) },
         { check: eventData.reviews?.length, render: () => displayEventReviews(createSection(tabsContainer), eventData.eventid, isCreator, isLoggedIn) },

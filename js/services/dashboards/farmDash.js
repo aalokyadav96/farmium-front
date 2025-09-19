@@ -5,7 +5,7 @@ import { createTabs } from "../../components/ui/createTabs.js";
 import { displayOrders } from "../crops/orders/orders.js";
 
 export function displayDash(content, isLoggedIn) {
-  content.innerHTML = "";
+  content.replaceChildren();
 
   if (!isLoggedIn) {
     const notLoggedInUI = createElement("div", { class: "dash-guest" }, [

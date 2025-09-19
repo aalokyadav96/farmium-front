@@ -42,20 +42,22 @@ const createNavItem = (href, label) => {
 /** Navigation Bar */
 const createNav = () => {
     const navItems = [
-        { href: "/places", label: "Places" },
         { href: "/grocery", label: "Grocery" },
+        { href: "/places", label: "Places" },
+        // { href: "/map", label: "Map" },
         { href: "/events", label: "Events" },
         { href: "/baitos", label: "Baito" },
         { href: "/baitos/hire", label: "Hire" },
         // { href: "/crops", label: "Crops" },
         // { href: "/farms", label: "Farms" },
-        // { href: "/social", label: "Social" },
+        { href: "/social", label: "Social" },
+        // { href: "/forums", label: "Forums" },
         { href: "/posts", label: "Posts" },
+        { href: "/itinerary", label: "Itinerary" },
         // { href: "/shop", label: "Shop" },
         { href: "/recipes", label: "Recipes" },
         // { href: "/tools", label: "Tools" },
         // { href: "/search", label: "Search" },
-        { href: "/itinerary", label: "Itinerary" },
         { href: "/artists", label: "Artists" },
         // { href: "/dash", label: "Dash" },
     ];

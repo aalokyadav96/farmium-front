@@ -19,7 +19,7 @@ let hasMore = true;
 
 export async function displayRecipes(content, isLoggedIn) {
   let contentContainer = createElement("div", { class: "recipespage" });
-  content.innerHTML = "";
+  content.replaceChildren();
   content.appendChild(contentContainer);
 
   offset = 0;
@@ -258,7 +258,7 @@ function delay(ms) {
 
 // export async function displayRecipes(content, isLoggedIn) {
 //   let contentContainer = createElement("div", { class: "recipespage" });
-//   content.innerHTML = "";
+//   content.replaceChildren();
 //   content.appendChild(contentContainer);
 
 //   offset = 0;

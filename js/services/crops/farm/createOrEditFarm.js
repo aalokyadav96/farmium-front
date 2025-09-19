@@ -38,31 +38,21 @@ export function createForm(fields, onSubmit, submitText = "Submit") {
 export function createFarmForm({ isEdit = false, farm = {}, onSubmit }) {
   const nameField = createInputField("text", "Farm Name", farm.name || "", true);
   const locationField = createInputField("text", "Location", farm.location || "", true);
-  const descriptionField = createInputField("text", "Description", farm.description || "");
+  const descriptionField = createElement("textarea", { placeholder: "Description", rows: 3 }, [farm.description || ""]);
   const ownerField = createInputField("text", "Owner", farm.owner || "", true);
   const contactField = createInputField("text", "Contact", farm.contact || "", true);
-  const availabilityField = createInputField("text", "Availability", farm.availabilityTiming || "");
 
-  // const imageInput = createElement("input", { type: "file", accept: "image/*" });
-  // const imagePreview = createElement("img", {
-  //   class: "preview",
-  //   style: "max-height:100px; margin-top:8px; display:none;"
-  // });
+  const practiceField = createElement("select", {}, [
+    createElement("option", { value: "organic", selected: farm.practice === "organic" }, ["Organic"]),
+    createElement("option", { value: "conventional", selected: farm.practice === "conventional" }, ["Conventional"]),
+    createElement("option", { value: "hydroponic", selected: farm.practice === "hydroponic" }, ["Hydroponic"]),
+    createElement("option", { value: "regenerative", selected: farm.practice === "regenerative" }, ["Regenerative"])
+  ]);
 
-  // if (farm.image) {
-  //   imagePreview.src = farm.image;
-  //   imagePreview.style.display = "block";
-  // }
+  const socialField = createInputField("url", "Website / Social Link", farm.social || "");
+  const availabilityField = createInputField("text", "Availability (e.g. Mon-Fri, 9am-5pm)", farm.availabilityTiming || "");
 
-  // imageInput.addEventListener("change", () => {
-  //   const file = imageInput.files[0];
-  //   if (file) {
-  //     imagePreview.src = URL.createObjectURL(file);
-  //     imagePreview.style.display = "block";
-  //   } else {
-  //     imagePreview.style.display = "none";
-  //   }
-  // });
+  const galleryField = createElement("input", { type: "file", accept: "image/*", multiple: true });
 
   const fields = [
     createLabeledField("Name", nameField),
@@ -70,8 +60,10 @@ export function createFarmForm({ isEdit = false, farm = {}, onSubmit }) {
     createLabeledField("Description", descriptionField),
     createLabeledField("Owner", ownerField),
     createLabeledField("Contact", contactField),
+    createLabeledField("Farming Practice", practiceField),
     createLabeledField("Availability", availabilityField),
-    // createLabeledField("Photo", imageInput)
+    createLabeledField("Social Link", socialField),
+    createLabeledField("Gallery", galleryField),
   ];
 
   const form = createForm(fields, async () => {
@@ -81,19 +73,21 @@ export function createFarmForm({ isEdit = false, farm = {}, onSubmit }) {
     formData.append("description", descriptionField.value.trim());
     formData.append("owner", ownerField.value.trim());
     formData.append("contact", contactField.value.trim());
+    formData.append("practice", practiceField.value);
     formData.append("availabilityTiming", availabilityField.value.trim());
+    formData.append("social", socialField.value.trim());
 
-    // if (imageInput.files.length > 0) {
-    //   formData.append("photo", imageInput.files[0]);
-    // }
-
-    if (!isEdit) {
-      formData.append("crops", JSON.stringify([])); // required by create API
+    if (galleryField.files.length > 0) {
+      Array.from(galleryField.files).forEach(file => formData.append("gallery", file));
     }
 
-    return await onSubmit(formData); // must return true or { success: true }
+    if (!isEdit) {
+      formData.append("crops", JSON.stringify([]));
+    }
+
+    return await onSubmit(formData);
   }, isEdit ? "Update Farm" : "Create Farm");
 
-  // form.appendChild(imagePreview);
   return form;
 }
+

@@ -1,345 +1,90 @@
 import { login, signup } from "../../services/auth/authService.js";
+import { getState, subscribeDeep } from "../../state/state.js";
+import { createElement } from "../../components/createElement.js";
 
-// Main entry
-async function Auth(isLoggedIn, contentContainer) {
-    displayAuthSection(isLoggedIn, contentContainer);
+// --- Main entry
+export function Auth(isL, contentContainer) {
+  contentContainer.innerHTML = '';
+  renderAuthSection(isL, contentContainer);
+
+  // Reactive update when login/logout
+  subscribeDeep("token", () => renderAuthSection(isL, contentContainer));
 }
 
-// Core UI Renderer
-function displayAuthSection(isLoggedIn, contentContainer) {
-    contentContainer.textContent = '';
+// --- Core UI Renderer
+function renderAuthSection(isL, contentContainer) {
+  contentContainer.innerHTML = '';
 
-    const wrapper = document.createElement('div');
-    wrapper.className = 'auth-wrapper';
+  // If user is already logged in, redirect them
+  if (getState("token")) {
+    window.location.href = "/home";
+    return;
+  }
 
-    const authBox = document.createElement('div');
-    authBox.className = 'auth-box';
+  const wrapper = createElement("div", { class: "auth-wrapper" });
+  const authBox = createElement("div", { class: "auth-box" });
 
-    if (isLoggedIn) {
-        const welcomeMessage = document.createElement("h2");
-        welcomeMessage.textContent = "Welcome back!";
-        welcomeMessage.className = 'auth-title';
-        authBox.appendChild(welcomeMessage);
-    } else {
-        // LOGIN
-        const loginSection = createLoginForm();
-        authBox.appendChild(loginSection);
+  authBox.appendChild(createLoginForm());
+  authBox.appendChild(createElement("div", { class: "auth-divider" }, ["or"]));
+  authBox.appendChild(createSignupForm());
 
-        // Divider
-        const divider = document.createElement('div');
-        divider.className = 'auth-divider';
-        divider.innerText = "or";
-        authBox.appendChild(divider);
-
-        // SIGNUP
-        const signupSection = createSignupForm();
-        authBox.appendChild(signupSection);
-    }
-
-    wrapper.appendChild(authBox);
-    contentContainer.appendChild(wrapper);
+  wrapper.appendChild(authBox);
+  contentContainer.appendChild(wrapper);
 }
 
-// Login form
-export function createLoginForm() {
-    const section = document.createElement('section');
-    section.className = 'auth-section';
+// --- Login form
+function createLoginForm() {
+  const section = createElement("section", { class: "auth-section" });
+  const title = createElement("h2", { class: "auth-title" }, ["Log In"]);
 
-    const title = document.createElement('h2');
-    title.textContent = "Log In";
-    title.className = 'auth-title';
+  const form = createElement("form", { class: "auth-form" });
+  form.append(
+    inputField("text", "Username", "login-username", "username"),
+    inputField("password", "Password", "login-password", "current-password"),
+    submitButton("Login")
+  );
 
-    const form = document.createElement("form");
-    form.className = 'auth-form';
-
-    const username = inputField("text", "Username", "login-username", "username");
-    const password = inputField("password", "Password", "login-password", "current-password");
-
-    const button = submitButton("Login");
-
-    form.append(username, password, button);
-    form.addEventListener("submit", login);
-
-    section.append(title, form);
-    return section;
+  form.addEventListener("submit", login);
+  section.append(title, form);
+  return section;
 }
 
-// Signup form
+// --- Signup form
 function createSignupForm() {
-    const section = document.createElement('section');
-    section.className = 'auth-section';
+  const section = createElement("section", { class: "auth-section" });
+  const title = createElement("h2", { class: "auth-title" }, ["Sign Up"]);
 
-    const title = document.createElement('h2');
-    title.textContent = "Sign Up";
-    title.className = 'auth-title';
+  const form = createElement("form", { class: "auth-form" });
+  const usernameInput = inputField("text", "Username", "signup-username", "username");
+  const emailInput = inputField("email", "Email", "signup-email", "email");
+  const passwordInput = inputField("password", "Password", "signup-password", "new-password");
 
-    const form = document.createElement("form");
-    form.className = 'auth-form';
+  const checkbox = createElement("input", { type: "checkbox", id: "signup-terms", required: true });
+  const termsLabel = createElement("label", { class: "auth-terms" }, [" I agree to the Terms & Conditions"]);
+  termsLabel.insertBefore(checkbox, termsLabel.firstChild);
 
-    const username = inputField("text", "Username", "signup-username", "username");
-    const email = inputField("email", "Email", "signup-email", "email");
-    const password = inputField("password", "Password", "signup-password", "new-password");
+  form.append(usernameInput, emailInput, passwordInput, termsLabel, submitButton("Signup"));
+  form.addEventListener("submit", (e) => {
+    if (!checkbox.checked) {
+      e.preventDefault();
+      alert("You must agree to the Terms & Conditions.");
+      return;
+    }
+    signup(e);
+  });
 
-    const termsLabel = document.createElement("label");
-    termsLabel.className = 'auth-terms';
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.id = "signup-terms";
-    checkbox.required = true;
-    termsLabel.appendChild(checkbox);
-    termsLabel.appendChild(document.createTextNode(" I agree to the Terms & Conditions"));
-
-    const button = submitButton("Signup");
-
-    form.append(username, password, email, termsLabel, button);
-    form.addEventListener("submit", (e) => {
-        if (!checkbox.checked) {
-            e.preventDefault();
-            alert("You must agree to the Terms & Conditions.");
-            return;
-        }
-        signup(e);
-    });
-
-    section.append(title, form);
-    return section;
+  section.append(title, form);
+  return section;
 }
 
-// Helper: Input
+// --- Helper: Input
 function inputField(type, placeholder, id, autocomplete = "") {
-    const input = document.createElement("input");
-    input.type = type;
-    input.id = id;
-    input.placeholder = placeholder;
-    input.required = true;
-    if (autocomplete) input.autocomplete = autocomplete;
-    return input;
+  const attrs = { type, id, placeholder, required: true };
+  if (autocomplete) attrs.autocomplete = autocomplete;
+  return createElement("input", attrs);
 }
 
-// Helper: Button
+// --- Helper: Button
 function submitButton(label) {
-    const btn = document.createElement("button");
-    btn.type = "submit";
-    btn.textContent = label;
-    return btn;
+  return createElement("button", { type: "submit" }, [label]);
 }
-
-export { Auth };
-
-// import { login, signup } from "../../services/auth/authService.js";
-
-// async function Auth(isLoggedIn, contentContainer) {
-//     displayAuthSection(isLoggedIn, contentContainer);
-// }
-
-// function displayAuthSection(isLoggedIn, contentContainer) {
-//     // Clear container
-//     contentContainer.textContent = '';
-
-//     const wrapper = document.createElement('div');
-//     wrapper.style.display = 'flex';
-//     wrapper.style.flexDirection = 'column';
-//     wrapper.style.alignItems = 'center';
-//     wrapper.style.justifyContent = 'center';
-//     wrapper.style.minHeight = '100vh';
-//     wrapper.style.backgroundColor = '#f9f9f9';
-//     wrapper.style.padding = '2rem';
-
-//     const authBox = document.createElement('div');
-//     authBox.style.backgroundColor = '#fff';
-//     authBox.style.padding = '2rem';
-//     authBox.style.borderRadius = '8px';
-//     authBox.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
-//     authBox.style.width = '100%';
-//     authBox.style.maxWidth = '360px';
-//     authBox.style.boxSizing = 'border-box';
-
-//     if (isLoggedIn) {
-//         const welcomeMessage = document.createElement("h2");
-//         welcomeMessage.textContent = "Welcome back!";
-//         welcomeMessage.style.textAlign = 'center';
-//         authBox.appendChild(welcomeMessage);
-//     } else {
-//         // LOGIN FORM
-//         const loginTitle = document.createElement("h2");
-//         loginTitle.textContent = "Login";
-//         loginTitle.style.marginBottom = '1rem';
-//         authBox.appendChild(loginTitle);
-
-//         const loginForm = document.createElement("form");
-//         loginForm.style.display = 'flex';
-//         loginForm.style.flexDirection = 'column';
-//         loginForm.style.gap = '0.75rem';
-
-//         const loginUsername = document.createElement("input");
-//         loginUsername.type = "text";
-//         loginUsername.id = "login-username";
-//         loginUsername.placeholder = "Username";
-//         loginUsername.autocomplete = "username";
-
-//         const loginPassword = document.createElement("input");
-//         loginPassword.type = "password";
-//         loginPassword.id = "login-password";
-//         loginPassword.placeholder = "Password";
-//         loginPassword.autocomplete = "current-password";
-
-//         const loginButton = document.createElement("button");
-//         loginButton.type = "submit";
-//         loginButton.textContent = "Login";
-//         loginButton.style.marginTop = '0.5rem';
-
-//         loginForm.appendChild(loginUsername);
-//         loginForm.appendChild(loginPassword);
-//         loginForm.appendChild(loginButton);
-//         authBox.appendChild(loginForm);
-
-//         // SEPARATOR
-//         const separator = document.createElement("hr");
-//         separator.style.margin = '2rem 0';
-//         authBox.appendChild(separator);
-
-//         // SIGNUP FORM
-//         const signupTitle = document.createElement("h2");
-//         signupTitle.textContent = "Signup";
-//         signupTitle.style.marginBottom = '1rem';
-//         authBox.appendChild(signupTitle);
-
-//         const signupForm = document.createElement("form");
-//         signupForm.style.display = 'flex';
-//         signupForm.style.flexDirection = 'column';
-//         signupForm.style.gap = '0.75rem';
-
-//         const signupUsername = document.createElement("input");
-//         signupUsername.type = "text";
-//         signupUsername.id = "signup-username";
-//         signupUsername.placeholder = "Username";
-
-//         const signupEmail = document.createElement("input");
-//         signupEmail.type = "email";
-//         signupEmail.id = "signup-email";
-//         signupEmail.placeholder = "Email";
-
-//         const signupPassword = document.createElement("input");
-//         signupPassword.type = "password";
-//         signupPassword.id = "signup-password";
-//         signupPassword.placeholder = "Password";
-//         signupPassword.autocomplete = "new-password";
-
-//         const signupButton = document.createElement("button");
-//         signupButton.type = "submit";
-//         signupButton.textContent = "Signup";
-//         signupButton.style.marginTop = '0.5rem';
-
-//         signupForm.appendChild(signupUsername);
-//         signupForm.appendChild(signupEmail);
-//         signupForm.appendChild(signupPassword);
-//         signupForm.appendChild(signupButton);
-//         authBox.appendChild(signupForm);
-
-//         // Attach handlers
-//         loginForm.addEventListener("submit", login);
-//         signupForm.addEventListener("submit", signup);
-//     }
-
-//     wrapper.appendChild(authBox);
-//     contentContainer.appendChild(wrapper);
-// }
-
-// export { Auth };
-
-// // import { login, signup } from "../../services/auth/authService.js"; // Import login/signup functions
-
-
-// // async function Auth(isLoggedIn, contentContainer) {
-// //     displayAuthSection(isLoggedIn, contentContainer)
-// // }
-
-// // function displayAuthSection(isLoggedIn, contentContainer) {
-// //     const authSection = document.createElement('div');
-// //     authSection.className = "onepadd";
-// //     contentContainer.appendChild(authSection);
-
-// //     // Clear previous content
-// //     authSection.innerHTML = '';
-
-// //     if (isLoggedIn) {
-// //         // Create a welcome message
-// //         const welcomeMessage = document.createElement("h2");
-// //         welcomeMessage.textContent = "Welcome back!";
-// //         authSection.appendChild(welcomeMessage);
-// //     } else {
-// //         // Create the login section
-// //         const loginTitle = document.createElement("h2");
-// //         loginTitle.textContent = "Login";
-// //         authSection.appendChild(loginTitle);
-
-// //         const loginForm = document.createElement("form");
-// //         loginForm.id = "login-form";
-// //         loginForm.classList = "auth-form";
-
-// //         const loginUsername = document.createElement("input");
-// //         loginUsername.type = "text";
-// //         loginUsername.id = "login-username";
-// //         loginUsername.placeholder = "Username";
-// //         loginUsername.autocomplete="login-username"
-// //         loginForm.appendChild(loginUsername);
-
-// //         const loginPassword = document.createElement("input");
-// //         loginPassword.type = "password";
-// //         loginPassword.id = "login-password";
-// //         loginPassword.placeholder = "Password";
-// //         loginPassword.autocomplete="current-password"
-// //         loginForm.appendChild(loginPassword);
-
-// //         const loginButton = document.createElement("button");
-// //         loginButton.type = "submit";
-// //         loginButton.className = "auth-btn centered-txt";
-// //         loginButton.textContent = "Login";
-// //         loginForm.appendChild(loginButton);
-
-// //         authSection.appendChild(loginForm);
-
-// //         // Create the signup section
-// //         const signupTitle = document.createElement("h2");
-// //         signupTitle.textContent = "Signup";
-// //         authSection.appendChild(signupTitle);
-
-// //         const signupForm = document.createElement("form");
-// //         signupForm.id = "signup-form";
-// //         signupForm.classList = "auth-form";
-
-// //         const signupUsername = document.createElement("input");
-// //         signupUsername.type = "text";
-// //         signupUsername.id = "signup-username";
-// //         signupUsername.placeholder = "Username";
-// //         signupForm.appendChild(signupUsername);
-
-// //         const signupEmail = document.createElement("input");
-// //         signupEmail.type = "email";
-// //         signupEmail.id = "signup-email";
-// //         signupEmail.placeholder = "Email";
-// //         signupForm.appendChild(signupEmail);
-
-// //         const signupPassword = document.createElement("input");
-// //         signupPassword.type = "password";
-// //         signupPassword.id = "signup-password";
-// //         signupPassword.placeholder = "Password";
-// //         signupPassword.autocomplete="signup-password"
-// //         signupForm.appendChild(signupPassword);
-
-// //         const signupButton = document.createElement("button");
-// //         signupButton.type = "submit";
-// //         signupButton.className = "auth-btn centered-txt";
-// //         signupButton.textContent = "Signup";
-// //         signupForm.appendChild(signupButton);
-
-// //         authSection.appendChild(signupForm);
-
-// //         // Attach event listeners for the forms
-// //         loginForm.addEventListener("submit", login);
-// //         signupForm.addEventListener("submit", signup);
-// //     }
-// // }
-
-
-// // export { Auth };

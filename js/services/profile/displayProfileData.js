@@ -8,7 +8,7 @@ import { createTabStructure, activateChildTab } from "./subTabs.js";
  * @param {string} username - The username for fetching data.
  */
 async function displayUserProfileData(isLoggedIn, content, username) {
-  content.innerHTML = ""; // Clear any existing content
+  content.replaceChildren(); // Clear any existing content
 
   console.log("Loading profile tabs...");
 

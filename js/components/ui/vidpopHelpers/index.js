@@ -9,7 +9,6 @@ import { setupFullscreenOrientation } from "./setupOrientation.js";
 async function generateVideoPlayer(mediaSrc, poster, qualities, subtitles, videoid) {
   const videoPlayer = document.createElement("div");
   videoPlayer.id = "video-player";
-
   // Create the main <video> element
   const video = createVideoElement({ mediaSrc, poster, qualities });
 

@@ -8,7 +8,7 @@ import Button from "../../../components/base/Button.js";
 
 // ---------------- Applicant Dashboard ----------------
 export async function baitoApplicantDash(container) {
-  container.innerHTML = "";
+  container.replaceChildren();
 
   const wrapper = createElement("div", { class: "baitosdashpage" });
   container.appendChild(wrapper);
@@ -45,7 +45,7 @@ export async function baitoApplicantDash(container) {
   wrapper.appendChild(list);
 
   function render(filteredApps) {
-    list.innerHTML = "";
+    list.replaceChildren();
     if (!filteredApps.length) {
       list.appendChild(createElement("p", { class: "empty" }, ["No applications match your filter."]));
       return;
@@ -120,7 +120,7 @@ function buildAdminCard(job) {
 }
 
 export async function baitoEmployerDash(container) {
-  container.innerHTML = "";
+  container.replaceChildren();
 
   container.appendChild(createElement("h2", {}, ["🏢 Your Posted Baitos"]));
 
@@ -180,7 +180,7 @@ export async function showApplicantsModal(job) {
 
 // ---------------- Main Dashboard Navigation ----------------
 export function displayBaitoDash(isLoggedIn, container) {
-  container.innerHTML = "";
+  container.replaceChildren();
   container.appendChild(createElement("h2", {}, ["🏢 Baito Dashboard"]));
 
   if (!isLoggedIn) {

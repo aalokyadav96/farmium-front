@@ -3,7 +3,7 @@ import { createElement } from "../../components/createElement";
 import { apiFetch } from "../../api/api";
 
 export async function displayProduct(isLoggedIn, productType, productId, contentContainer) {
-  contentContainer.innerHTML = "";
+  contentContainer.replaceChildren();
 
   const product = await apiFetch(`/products/${productType}/${productId}`);
   if (!product) {

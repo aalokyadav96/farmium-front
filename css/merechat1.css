@@ -130,10 +130,10 @@
   display: none;
   flex-direction: column;
   z-index: 10;
+  background-color: var(--color-bg);
 }
 
-.menu-btn:focus + .dropdown,
-.menu-btn:hover + .dropdown {
+.menu-btn:focus + .dropdown {
   display: flex;
 }
 
@@ -142,6 +142,7 @@
   border: none;
   background: none;
   cursor: pointer;
+  width: 100%;
   text-align: left;
 }
 

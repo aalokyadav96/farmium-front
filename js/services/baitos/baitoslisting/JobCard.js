@@ -41,7 +41,10 @@ export function buildCard(job) {
     createElement("h3", { class: "baito-title" }, [job.title || "Untitled"]),
     createElement("p", { class: "baito-company" }, [job.company ? `🏢 ${job.company}` : "🏢 Unknown"]),
     createElement("p", { class: "baito-meta" }, [
-      `📁 ${job.category || "?"} › ${job.subcategory || "?"} | ${wageText}`
+      `${wageText}`
+    ]),
+    createElement("p", { class: "baito-meta" }, [
+      `📁 ${job.category || "?"} › ${job.subcategory || "?"}`
     ]),
     createElement("p", { class: "baito-type-shift" }, [typeInfo, " ", shift]),
     createElement("p", { class: "baito-loc-time" }, [

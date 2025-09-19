@@ -1,0 +1,167 @@
+  /* Container layout */
+  .event-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+
+  /* Main content */
+  .events-main {
+    flex: 3;
+  }
+
+  /* Sidebar */
+  .events-sidebar {
+    flex: 1;
+    background: #fff;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+
+  .events-sidebar h3 {
+    margin-bottom: 12px;
+    font-size: 18px;
+  }
+
+  .primary {
+    background-color: #0078D4;
+    color: white;
+  }
+
+  .secondary {
+    background-color: #e0e0e0;
+    color: #333;
+  }
+
+  /* Controls */
+  .event-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .event-search {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+
+  .event-sort {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+
+  /* Category chips */
+  .category-chips {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .category-chip {
+    padding: 6px 12px;
+    background: #0078D4;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+/* Grid layout for event list */
+.event-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  padding: 20px 0;
+}
+
+/* Event card styling */
+.event-card {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease;
+}
+
+.event-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Image styling */
+.event-card img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  display: block;
+}
+
+/* Event info */
+.event-info {
+  padding: 16px;
+}
+
+.event-info h2 {
+  font-size: 18px;
+  margin: 0;
+}
+
+.event-info p {
+  font-size: 14px;
+  margin: 6px 0;
+}
+
+.event-info button {
+  background: #0078D4;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/* Responsive badge and save icon */
+.event-info > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.event-info span {
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgb(40, 167, 69);
+  color: white;
+}
+
+.event-info span[title="Save Event"] {
+  margin-left: auto;
+  font-size: 18px;
+  color: white;
+  cursor: pointer;
+}
+
+  /* Responsive tweaks */
+  @media (max-width: 768px) {
+    .event-details {
+      flex-direction: column;
+    }
+
+    .event-controls {
+      flex-direction: column;
+    }
+
+    .event-search,
+    .event-sort {
+      width: 100%;
+    }
+
+    .events-sidebar {
+      order: 2;
+    }
+  }

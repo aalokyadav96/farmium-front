@@ -1,5 +1,5 @@
 import { createElement } from "../../components/createElement.js";
-import { renderPost } from "./renderNewPost.js";
+import { renderPost } from "./renders/postRender.js";
 import { apiFetch } from "../../api/api.js";
 import Notify from "../../components/ui/Notify.mjs";
 import { getState } from "../../state/state.js";

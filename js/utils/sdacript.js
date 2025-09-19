@@ -6,23 +6,38 @@
         return;
     }
 
-    const adCache = {}; // In-memory cache for ads per category
-    const adIntervals = new Map(); // To store rotation intervals
+    const adCache = {}; 
+    const adIntervals = new Map();
 
     function renderAd(container, ads, index) {
         const ad = ads[index % ads.length];
-        container.innerHTML = `
-            <div class="ad">
-                <img src="${ad.image}" alt="${ad.title}" style="width: 100%; height: auto;" loading="lazy" />
-                <h3>${ad.title}</h3>
-                <p>${ad.description}</p>
-                <a href="${ad.link}" target="_blank" style="color: blue;">Learn More</a>
-            </div>
-        `;
+
+        // Fade transition
+        container.classList.add("fade-out");
+        setTimeout(() => {
+            container.innerHTML = `
+                <div class="ad-card">
+                    <img src="${ad.image}" alt="${ad.title}" loading="lazy" />
+                    <div class="ad-content">
+                        <h3>${ad.title}</h3>
+                        <p>${ad.description}</p>
+                        <a href="${ad.link}" target="_blank" rel="noopener">Learn More</a>
+                    </div>
+                    <div class="ad-progress"></div>
+                </div>
+            `;
+            container.classList.remove("fade-out");
+            container.classList.add("fade-in");
+
+            // Animate progress bar
+            const progress = container.querySelector(".ad-progress");
+            if (progress) {
+                progress.style.animation = "progressAnim 10s linear forwards";
+            }
+        }, 300);
     }
 
     function loadAndDisplayAds(container, category = "default") {
-        // If ads already cached, use them
         if (adCache[category]) {
             startRotation(container, adCache[category]);
             return;
@@ -35,7 +50,6 @@
                     container.innerHTML = "<p>No ads available</p>";
                     return;
                 }
-
                 adCache[category] = ads;
                 startRotation(container, ads);
             })
@@ -49,7 +63,6 @@
         let index = 0;
         renderAd(container, ads, index);
 
-        // Clear previous interval if any
         if (adIntervals.has(container)) {
             clearInterval(adIntervals.get(container));
         }
@@ -57,18 +70,22 @@
         const intervalId = setInterval(() => {
             index = (index + 1) % ads.length;
             renderAd(container, ads, index);
-        }, 10000); // 10 seconds
+        }, 10000);
 
         adIntervals.set(container, intervalId);
+
+        // Pause on hover
+        container.addEventListener("mouseenter", () => clearInterval(intervalId));
+        container.addEventListener("mouseleave", () => {
+            startRotation(container, ads); // restart rotation
+        });
     }
 
-    // Use IntersectionObserver for lazy loading
     const observer = new IntersectionObserver((entries, obs) => {
         entries.forEach((entry) => {
             if (entry.isIntersecting) {
                 const container = entry.target;
                 obs.unobserve(container);
-
                 const category = container.getAttribute("data-category") || "default";
                 loadAndDisplayAds(container, category);
             }
@@ -80,3 +97,4 @@
 
     adElements.forEach((el) => observer.observe(el));
 })();
+

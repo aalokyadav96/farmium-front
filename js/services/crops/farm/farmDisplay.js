@@ -1,4 +1,3 @@
-
 import { SRC_URL, apiFetch } from "../../../api/api.js";
 import { createElement } from "../../../components/createElement.js";
 import Button from "../../../components/base/Button.js";
@@ -12,16 +11,16 @@ import {
   renderFarmDetails,
   renderCropSummary,
   renderCropEmojiMap,
-  renderCrops,
-} from "./displayFarm.helpers.js";
+  renderCrops,createSortDropdown,
+} from "./displayFarmHelpers.js";
 import { displayReviews } from "../../reviews/displayReviews.js";
 import { farmChat } from "./farmchat.js";
 import Imagex from "../../../components/base/Imagex.js";
+import NoLink from "../../../components/base/NoLink.js";
 
 export async function displayFarm(isLoggedIn, farmId, content) {
   const container = createElement("div", { class: "farmpage" }, []);
-  content.innerHTML = "";
-  content.appendChild(container);
+  content.replaceChildren(container);
 
   const res = await apiFetch(`/farms/${farmId}`);
   const farm = res?.farm;
@@ -34,9 +33,12 @@ export async function displayFarm(isLoggedIn, farmId, content) {
 
   // ——— Header ———
   const header = createElement("div", { class: "farm-header" }, [
-    Button("← Back", "back-btn", { click: () => navigate("/farms") }, "buttonx"),
     createElement("div", { class: "breadcrumbs" }, [
-      "🏠 Home / 🌾 Farms / ", farm.name
+      NoLink("🏠 Home", "", { click: () => navigate("/") }),
+      " / ",
+      NoLink("🌾 Farms", "", { click: () => navigate("/farms") }),
+      " / ",
+      createElement("span", {}, [farm.name])
     ])
   ]);
 
@@ -44,12 +46,12 @@ export async function displayFarm(isLoggedIn, farmId, content) {
   const banner = createElement("div", { class: "farm-banner" }, [
     Imagex({
       src: resolveImagePath(EntityType.FARM, PictureType.BANNER, farm.photo),
-      alt: farm.name
+      alt: farm.name,
+      id: "farm-banner-img"
     })
   ]);
 
-  if (isCreator){
-    // Add Banner Edit Button here
+  if (isCreator) {
     const bannerEditButton = createElement("button", { class: "edit-banner-pic" }, ["Edit Banner"]);
     bannerEditButton.addEventListener("click", () => {
       updateImageWithCrop({
@@ -59,48 +61,30 @@ export async function displayFarm(isLoggedIn, farmId, content) {
         stateEntityKey: "farm",
         previewElementId: "farm-banner-img",
         pictureType: PictureType.BANNER,
-        entityId: farmId  // <-- pass placeid here
+        entityId: farmId
       });
     });
-    
     banner.appendChild(bannerEditButton);
   }
+
   // ——— Farm Info ———
   const farmDetails = renderFarmDetails(farm, isCreator);
-  const editFarm = createElement("div", {}, []); // Preserved editFarm div
 
-  // ——— Crop Section Setup ———
-  const cropsContainer = createElement("div", {
-    class: "crop-list grid-view"
-  });
-
-  const layoutToggle = createElement("div", { class: "layout-toggle" }, [
-    Button("🔲 Grid View", "grid-btn", {
-      click: () => {
-        cropsContainer.classList.remove("list-view");
-        cropsContainer.classList.add("grid-view");
-      }
-    }, "buttonx"),
-    Button("📃 List View", "list-btn", {
-      click: () => {
-        cropsContainer.classList.remove("grid-view");
-        cropsContainer.classList.add("list-view");
-      }
-    }, "buttonx")
+  // ——— Crop Section ———
+  const cropsContainer = createElement("div", { class: "crop-list grid-view" });
+  const cropHeader = createElement("div", { class: "crop-header" }, [
+    createElement("h3", {}, ["🌾 Available Crops"]),
+    createSortDropdown(sortBy => renderCrops(farm, cropsContainer, farmId, mainColumn, editcon, isLoggedIn, sortBy, isCreator))
   ]);
 
-  const cropHeader = createElement("h3", {}, ["🌾 Available Crops"]);
-
   const addCropButton = isCreator
-    ? createElement("button", { class: "add-crop-btn" }, ["➕ Add Crop"])
+    ? Button("Add Crop", "add-crop-btn", {
+        click: () => {
+          container.textContent = "";
+          import("../crop/createCrop.js").then(m => m.createCrop(farmId, container));
+        }
+      }, "buttonx")
     : null;
-
-  if (addCropButton) {
-    addCropButton.addEventListener("click", () => {
-      container.textContent = "";
-      import("../crop/createCrop.js").then(m => m.createCrop(farmId, container));
-    });
-  }
 
   // ——— Aside Column ———
   const summaryStats = renderCropSummary(farm.crops || []);
@@ -115,23 +99,19 @@ export async function displayFarm(isLoggedIn, farmId, content) {
       Button("📨 Contact Farm", "contact-btn", {
         click: () => alert(`You can reach ${farm.owner} at ${farm.contact || "N/A"}`)
       }, "buttonx")
-    ] : [])
+    ] : [
+      Button("🔒 Log in to interact", "", { click: () => navigate("/login") }, "buttonx")
+    ])
   ]);
 
   const farmCTA = createElement("div", { class: "cta-block" }, [
     ...(isLoggedIn ? [
-      Button("Schedule a visit", "cta-visit-btn", {
-        click: () => alert("Scheduled"),
-      }, "buttonx"),
-      Button("Pre-order", "cta-pre-btn", {
-        click: () => alert("Pre-ordered"),
-      }, "buttonx"),
-      Button("Chat", "cta-chat-btn", {
-        click: () => farmChat(farm.createdBy, farm.farmId)
-      }, "buttonx")
-    ] : [
-      createElement("p", {}, ["🔒 Log in to schedule a visit, pre-order, or chat with this farm."])
-    ])
+      Button("Schedule a visit", "cta-visit-btn", { click: () => alert("Scheduled") }, "buttonx"),
+      Button("Pre-order", "cta-pre-btn", { click: () => alert("Pre-ordered") }, "buttonx"),
+      ...(isCreator ? [] : [
+        Button("Chat", "cta-chat-btn", { click: () => farmChat(farm.createdBy, farm.farmId) }, "buttonx")
+      ])
+    ] : [])
   ]);
 
   const asideColumn = createElement("aside", { class: "farm-aside" }, [
@@ -142,34 +122,34 @@ export async function displayFarm(isLoggedIn, farmId, content) {
   ]);
 
   // ——— Main Column ———
-  const mainColumnChildren = [
+  const mainColumn = createElement("div", { class: "farm-main" }, [
     banner,
     farmDetails,
-    editFarm,
     ...(addCropButton ? [addCropButton] : []),
     cropHeader,
-    layoutToggle,
     cropsContainer
-  ];
+  ]);
 
-  const mainColumn = createElement("div", { class: "farm-main" }, mainColumnChildren);
   const layoutWrapper = createElement("div", { class: "farm-layout" }, [mainColumn, asideColumn]);
 
   // ——— Gallery ———
-  const imgarray = (farm.crops || []).map(crop => ({
-    src: resolveImagePath(EntityType.CROP, PictureType.THUMB, crop.imageUrl),
-    alt: crop.name || "Crop Image"
-  }));
-
-  const gallery = createElement("div", { class: "gallery-block" }, [
-    Gallery(imgarray)
-  ]);
-
-  const chatcon = createElement("div", { class: "onechatcon" }, []);
+  const gallery = createElement("div", { class: "gallery-block" }, []);
+  if (farm.gallery?.length) {
+    const imgs = farm.gallery.map(img => ({
+      src: resolveImagePath(EntityType.FARM, PictureType.GALLERY, img),
+      alt: farm.name
+    }));
+    gallery.appendChild(Gallery(imgs));
+  }
 
   // ——— Final Assembly ———
-  container.append(header, layoutWrapper, gallery, chatcon);
+  container.append(header, layoutWrapper, gallery, createElement("div", { class: "onechatcon" }));
 
-  // ——— Render Crops ———
-  await renderCrops(farm, cropsContainer, farmId, container, isLoggedIn, null, isCreator);
+  const editcon = createElement("div", {}, []);
+  mainColumn.appendChild(editcon);
+
+  // Render Crops
+  await renderCrops(farm, cropsContainer, farmId, mainColumn, editcon, isLoggedIn, "name", isCreator);
 }
+
+

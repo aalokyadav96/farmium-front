@@ -1,9 +1,10 @@
 .main-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 6px 10px;
-  }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  border-bottom: 1px solid rgb(199, 225, 248);
+}
   
   .logo {
     flex-shrink: 0;
@@ -19,7 +20,7 @@
   .header-content {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 12px;
   }
   
   .iconic-button {
@@ -98,8 +99,8 @@
   }
   
   .profile-pic {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     object-fit: cover;
     border-radius: 50%;
     cursor: pointer;

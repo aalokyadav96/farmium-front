@@ -1,6 +1,7 @@
 import { createTabs } from "../../../components/ui/createTabs.js";
 import { createFilterPanel } from "./createFilterPanel.js";
 import { renderCategoryItems } from "./renderCategoryItems.js";
+import {debounce} from "../../../utils/deutils.js";
 
 export function showCategoryBrowser(container) {
     container.textContent = "";
@@ -40,11 +41,11 @@ export function showCategoryBrowser(container) {
     container.append(tabComponent);
 }
 
-function debounce(fn, delay) {
-    let timeout;
-    return function (...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => fn.apply(this, args), delay);
-    };
-}
+// function debounce(fn, delay) {
+//     let timeout;
+//     return function (...args) {
+//         clearTimeout(timeout);
+//         timeout = setTimeout(() => fn.apply(this, args), delay);
+//     };
+// }
 

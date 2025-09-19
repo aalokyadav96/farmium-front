@@ -2,7 +2,7 @@ import { createElement } from "../../../components/createElement.js";
 import { HireWorkerCard } from "./WorkerCard.js";
 
 export function renderWorkerList(listEl, workers, isGridView, isLoggedIn) {
-  listEl.innerHTML = "";
+  listEl.replaceChildren();
   listEl.className = isGridView ? "grid-view" : "list-view";
 
   if (!workers.length) {

@@ -28,10 +28,11 @@ async function loadContent(url) {
   // hydrate persisted state only once
   const hydratedToken = localStorage.getItem("token");
   const hydratedUser = localStorage.getItem("user");
+  const hydratedUsername = localStorage.getItem("username");
 
   if (hydratedToken && hydratedUser) {
     // setState({ token: hydratedToken, user: JSON.parse(hydratedUser) }, true);
-    setState({ token: hydratedToken, user: hydratedUser }, true);
+    setState({ token: hydratedToken, user: hydratedUser, username: hydratedUsername }, true);
   }
 
   // Clear dynamic DOM sections
@@ -44,7 +45,8 @@ async function loadContent(url) {
   if (headerContent) header.appendChild(headerContent);
 
   const navContent = createNav();
-  if (navContent && url != "/home") {
+  // if (navContent && url != "/home" && !url.startsWith("/feedpost/")) {
+  if (navContent && url != "/home" && url != "/map") {
     nav.appendChild(navContent);
     highlightActiveNav(url); // 🔥 This makes sure the active link reflects current URL
   }

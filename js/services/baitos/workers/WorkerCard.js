@@ -1,32 +1,29 @@
 import { createElement } from "../../../components/createElement.js";
 import { Button } from "../../../components/base/Button.js";
 import { resolveImagePath, EntityType, PictureType } from "../../../utils/imagePaths.js";
-import { navigate } from "../../../routes/index.js"; // <-- use navigation
+import { navigate } from "../../../routes/index.js";
 import { getState } from "../../../state/state.js";
-
 
 export function HireWorkerCard(worker, isLoggedIn) {
   const isSelf = getState("user") === worker.userid;
 
   const card = createElement("div", { class: "worker-card" });
 
-  const photo = createElement("div", { class: "worker-photo", alt: "worker-photo" });
+  // Worker photo
+  const photo = createElement("div", { class: "worker-photo" });
 
   const profileImg = createElement("img", {
-    src: resolveImagePath(EntityType.BAITO, PictureType.THUMB, worker.profile_picture),
+    src: resolveImagePath(EntityType.WORKER, PictureType.THUMB, worker.photo),
     class: "profile-thumbnail",
     loading: "lazy",
-    alt: `${worker.name}'s profile photo`
+    alt: `${worker.name || "Worker"}'s profile photo`
   });
-
-  profileImg.onerror = () => {
-    profileImg.src = resolveImagePath(EntityType.DEFAULT, PictureType.STATIC, "placeholder.png");
-  };
 
   photo.appendChild(profileImg);
 
+  // Render details
   function renderDetail(icon, text) {
-    return text ? createElement("p", {}, [`${icon} ${text}`]) : null;
+    return text ? createElement("p", {}, [icon + " ", text]) : null;
   }
 
   const details = createElement("div", { class: "worker-details" }, [
@@ -36,10 +33,10 @@ export function HireWorkerCard(worker, isLoggedIn) {
     renderDetail("📍", worker.address),
     renderDetail("📝", worker.bio),
     !isSelf && isLoggedIn
-      ? Button("Hire", `hire-${worker.baito_user_id}`, {
+      ? Button("View Profile", `hire-${worker.baito_user_id}`, {
           click: (e) => {
             e.stopPropagation();
-            navigate(`/baitos/worker/${worker.userid}`);
+            navigate(`/baitos/worker/${worker.baito_user_id}`);
           }
         }, "btn btn-primary")
       : !isSelf
@@ -51,7 +48,7 @@ export function HireWorkerCard(worker, isLoggedIn) {
   card.appendChild(details);
 
   // Click anywhere on card to view profile
-  card.addEventListener("click", () => navigate(`/baitos/worker/${worker.userid}`));
+  card.addEventListener("click", () => navigate(`/baitos/worker/${worker.baito_user_id}`));
 
   return card;
 }

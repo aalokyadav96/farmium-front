@@ -1,338 +1,844 @@
-import { createElement } from "../../components/createElement.js";
-import { navigate } from "../../routes/index.js";
-import { apiFetch } from "../../api/api.js";
-import Notify from "../../components/ui/Notify.mjs";
+import { apiFetch } from "../../api/api";
+import { createElement } from "../../components/createElement";
+import { createFormGroup } from "../../components/createFormGroup.js";
+import Button from "../../components/base/Button.js";
+import { capitalize } from "../profile/profileHelpers.js";
 
-// --- Create Post ---
-export async function createPost(isLoggedIn, contentContainer) {
-    contentContainer.innerHTML = '';
-    if (!isLoggedIn) {
-        Notify("Login required to post.", { type:"warning", duration:3000, dismissible:true });
-        navigate('/login');
-        return;
-    }
+import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
 
-    const section = createElement('div', { class: "create-section" });
-    section.appendChild(createElement('h2', {}, ['Create Post']));
+async function renderPostEditor({ isLoggedIn, postId, contentContainer, mode }) {
+  if (!isLoggedIn) {
+    contentContainer.replaceChildren(
+      createElement("div", {}, ["You must be logged in to " + mode + " a post."])
+    );
+    return;
+  }
 
-    const draft = JSON.parse(localStorage.getItem("draftPost") || "{}");
-    const form = renderPostForm(draft);
-
-    section.appendChild(form);
-    contentContainer.appendChild(section);
-}
-
-// --- Edit Post ---
-export async function editPost(isLoggedIn, postId, contentContainer) {
-    contentContainer.innerHTML = '';
-    if (!isLoggedIn) {
-        Notify("Login required to edit post.", { type:"warning", duration:3000, dismissible:true });
-        navigate('/login');
-        return;
-    }
-
-    let post;
+  let existingPost = null;
+  if (mode === "edit" && postId) {
     try {
-        post = await apiFetch(`/posts/${encodeURIComponent(postId)}`);
-    } catch (err) {
-        Notify("Failed to load post for editing.", { type:"error", duration:3000, dismissible:true });
-        console.error(err);
-        return;
+      const data = await apiFetch(`/posts/post/${postId}`);
+      existingPost = data.post;
+    } catch {
+      contentContainer.replaceChildren(
+        createElement("div", {}, ["Failed to load post."])
+      );
+      return;
     }
+  }
 
-    const section = createElement('div', { class: "edit-section" });
-    section.appendChild(createElement('h2', {}, ['Edit Post']));
+  // --- Form groups ---
+  const titleGroup = createFormGroup({
+    type: "text",
+    id: "title",
+    name: "title",
+    label: "Title",
+    value: existingPost ? existingPost.title : "",
+    placeholder: "Enter post title",
+    required: true
+  });
 
-    const localDraft = JSON.parse(localStorage.getItem("draftPost") || "{}");
-    const initialData = Object.keys(localDraft).length ? localDraft : post.post;
+  const categoryGroup = createFormGroup({
+    type: "select",
+    id: "category",
+    name: "category",
+    label: "Category",
+    value: existingPost ? existingPost.category : "",
+    placeholder: "Choose category",
+    options: ["General", "Review", "Announcement", "Story"],
+    required: true
+  });
 
-    const form = renderPostForm(initialData);
+  const subcategoryGroup = createFormGroup({
+    type: "select",
+    id: "subcategory",
+    name: "subcategory",
+    label: "Subcategory",
+    value: existingPost ? existingPost.subcategory : "",
+    placeholder: "Choose subcategory",
+    options: ["General", "Product", "Place", "Event"],
+    required: true
+  });
 
-    section.appendChild(form);
-    contentContainer.appendChild(section);
-}
+  const referenceIdGroup = createFormGroup({
+    type: "text",
+    id: "referenceId",
+    name: "referenceId",
+    label: "Reference ID",
+    value: existingPost ? (existingPost.referenceId || "") : "",
+    placeholder: "Enter reference ID"
+  });
+  referenceIdGroup.style.display = "none";
 
-const categoryMap = {
-    News: ["Politics", "Sports", "Economy", "Technology", "World"],
-    Blog: ["Travel", "Food", "Lifestyle", "Personal", "Health"],
-    Review: ["Event", "Place", "Product", "Movie", "Book"],
-    Tutorial: ["Coding", "Cooking", "DIY", "Design"],
-    Opinion: ["Editorial", "Analysis", "Satire"],
-    Interview: ["Expert", "Celebrity", "Case Study"]
-};
+  function toggleReferenceId() {
+    const categoryVal = categoryGroup.querySelector("select").value;
+    const subVal = subcategoryGroup.querySelector("select").value;
+    const needsReference =
+      categoryVal === "Review" && ["Product", "Place", "Event"].includes(subVal);
+    referenceIdGroup.style.display = needsReference ? "block" : "none";
+  }
+  categoryGroup.querySelector("select").addEventListener("change", toggleReferenceId);
+  subcategoryGroup.querySelector("select").addEventListener("change", toggleReferenceId);
 
-function createSelect(id, name, options, selectedValue = '') {
-    const select = createElement('select', { id, name, required: true });
-    select.appendChild(createElement('option', { value: '' }, [`Select ${name}`]));
-    options.forEach(opt =>
-        select.appendChild(
-            createElement('option', {
-                value: opt,
-                selected: opt === selectedValue
-            }, [opt])
-        )
-    );
-    return select;
-}
+  // --- Blocks handling ---
+  let blocks = existingPost ? existingPost.blocks : [];
 
-function createInputGroup(labelText, inputElement, extraNode = null) {
-    const wrapper = createElement('div', { class: 'form-group' });
-    const label = createElement('label', { for: inputElement.id }, [labelText]);
-    wrapper.appendChild(label);
-    wrapper.appendChild(inputElement);
-    if (extraNode) wrapper.appendChild(extraNode);
-    return wrapper;
-}
+  const blocksContainer = createElement("div", { class: "blocks-container" });
+  const blocksTextarea = createFormGroup({
+    type: "textarea",
+    id: "blocks",
+    name: "blocks",
+    label: "Blocks (JSON)",
+    value: JSON.stringify(blocks, null, 2),
+    placeholder: "Blocks JSON",
+    required: true
+  });
+  blocksTextarea.style.display = "none";
 
-function populateSubCategories(selectEl, mainCategory, selected = '') {
-    selectEl.innerHTML = '';
-    selectEl.appendChild(createElement('option', { value: '' }, ['Select sub category']));
-    const subs = categoryMap[mainCategory];
-    if (!subs) {
-        Notify("No subcategories found for selected category.", {type:"error",duration:3000, dismissible:true});
-        return;
-    }
-    subs.forEach(sub =>
-        selectEl.appendChild(
-            createElement('option', {
-                value: sub,
-                selected: sub === selected
-            }, [sub])
-        )
-    );
-}
+  function syncBlocks() {
+    blocksTextarea.querySelector("textarea").value = JSON.stringify(blocks, null, 2);
+  }
 
-// --- Block editor helpers ---
-function createTextBlock(value = "", onRemove) {
-    const textarea = createElement("textarea", { rows: 4, placeholder: "Write text..." });
-    textarea.value = value;
-    const removeBtn = createElement("button", { type: "button", class: "btn btn-danger", style: "margin-left:6px;" }, ["Remove"]);
-    removeBtn.addEventListener("click", () => onRemove());
-    const wrapper = createElement("div", { class: "block-wrapper" }, [textarea, removeBtn]);
-    return { type: "text", el: wrapper, input: textarea };
-}
+  function renderBlocks() {
+    blocksContainer.replaceChildren();
 
-function createImageBlock(url = "", onRemove) {
-    const input = createElement("input", { type: "file", accept: "image/jpeg,image/png,image/webp" });
-    const preview = createElement("div", { style: "margin-top:6px;" });
-    let currentURL = null;
+    blocks.forEach((block, i) => {
+      let blockNode;
 
-    if (url) {
-        const img = createElement("img", { src: url, style: "max-width:150px; border-radius:6px;" });
-        preview.appendChild(img);
-        currentURL = url;
-    }
+      if (block.type === "text") {
+        const input = createElement("textarea", { rows: 3 }, [block.content || ""]);
+        input.addEventListener("input", () => {
+          blocks[i].content = input.value;
+          syncBlocks();
+        });
+        blockNode = createElement("div", { class: "block block-text", draggable: "true", "data-index": i }, [
+          createElement("span", { class: "block-label" }, ["Text Block"]),
+          input
+        ]);
+      } else if (block.type === "image") {
+        const fileInput = createElement("input", { type: "file", accept: "image/*" });
+        const preview = createElement("img", { class: "image-preview" });
 
-    input.addEventListener("change", e => {
-        preview.innerHTML = "";
-        if (currentURL && currentURL.startsWith("blob:")) URL.revokeObjectURL(currentURL);
-        const f = e.target.files[0];
-        if (f) {
-            currentURL = URL.createObjectURL(f);
-            preview.appendChild(createElement("img", { src: currentURL, style: "max-width:150px; border-radius:6px;" }));
+        if (block.url) {
+          const realSrc = resolveImagePath(EntityType.POST, PictureType.PHOTO, block.url);
+          preview.setAttribute("src", realSrc);
         }
-    });
 
-    const removeBtn = createElement("button", { type: "button", class: "btn btn-danger", style: "margin-left:6px;" }, ["Remove"]);
-    removeBtn.addEventListener("click", () => {
-        if (currentURL && currentURL.startsWith("blob:")) URL.revokeObjectURL(currentURL);
-        onRemove();
-    });
-
-    const wrapper = createElement("div", {}, [input, preview, removeBtn]);
-    return { type: "image", el: wrapper, input, getUrl: () => currentURL || preview.querySelector("img")?.src };
-}
-
-function renderBlockEditor(initialBlocks = []) {
-    const container = createElement("div", { id: "block-editor" });
-    const blocks = [];
-
-    function addBlock(type, data = {}, index = blocks.length) {
-        let block;
-        const onRemove = () => {
-            container.removeChild(block.el);
-            const idx = blocks.indexOf(block);
-            if (idx > -1) blocks.splice(idx, 1);
-        };
-        if (type === "text") block = createTextBlock(data.content || "", onRemove);
-        else if (type === "image") block = createImageBlock(data.url || "", onRemove);
-
-        block.el.setAttribute("draggable", "true");
-        block.el.style.cursor = "grab";
-
-        // drag & drop
-        block.el.addEventListener("dragstart", e => {
-            e.dataTransfer.setData("text/plain", blocks.indexOf(block));
-            block.el.style.opacity = "0.5";
-        });
-        block.el.addEventListener("dragend", () => block.el.style.opacity = "1");
-        block.el.addEventListener("dragover", e => { e.preventDefault(); block.el.style.borderTop = "2px solid #007bff"; });
-        block.el.addEventListener("dragleave", () => { block.el.style.borderTop = ""; });
-        block.el.addEventListener("drop", e => {
-            e.preventDefault(); block.el.style.borderTop = "";
-            const fromIndex = parseInt(e.dataTransfer.getData("text/plain"));
-            const toIndex = blocks.indexOf(block);
-            if (fromIndex === toIndex) return;
-            if (fromIndex < toIndex) container.insertBefore(blocks[fromIndex].el, blocks[toIndex].el.nextSibling);
-            else container.insertBefore(blocks[fromIndex].el, blocks[toIndex].el);
-            const moved = blocks.splice(fromIndex, 1)[0];
-            blocks.splice(toIndex, 0, moved);
+        fileInput.addEventListener("change", async () => {
+          if (!fileInput.files.length) return;
+          const formData = new FormData();
+          formData.append("image", fileInput.files[0]);
+          try {
+            // upload immediately to backend, get URL
+            const res = await apiFetch("/posts/upload", "POST", formData, { isForm: true });
+            block.url = res.url;
+            preview.setAttribute("src", resolveImagePath(EntityType.POST, PictureType.PHOTO, block.url));
+            syncBlocks();
+          } catch (err) {
+            console.error("Upload failed", err);
+          }
         });
 
-        if (index >= container.children.length - 1) container.appendChild(block.el);
-        else container.insertBefore(block.el, container.children[index]);
-        blocks.push(block);
-    }
+        blockNode = createElement("div", { class: "block block-image", draggable: "true", "data-index": i }, [
+          createElement("span", { class: "block-label" }, ["Image Block"]),
+          fileInput,
+          preview
+        ]);
+      }
 
-    const controls = createElement("div", { style: "margin:10px 0;" }, [
-        createElement("button", { type: "button" }, ["Add Text"]),
-        createElement("button", { type: "button", style: "margin-left:6px;" }, ["Add Image"])
-    ]);
+      const removeBtn = Button("Remove", `remove-block-${i}`, {
+        click: () => {
+          blocks.splice(i, 1);
+          renderBlocks();
+          syncBlocks();
+        }
+      },"buttonx");
+      blockNode.appendChild(removeBtn);
 
-    controls.children[0].addEventListener("click", () => addBlock("text"));
-    controls.children[1].addEventListener("click", () => addBlock("image"));
-
-    container.appendChild(controls);
-    initialBlocks.forEach(b => addBlock(b.type, b));
-
-    return { container, getBlocks: () => blocks };
-}
-
-// --- Form ---
-function renderPostForm(postData = {}) {
-    const form = createElement('form');
-
-    const mainCategorySelect = createSelect('category-main', 'category-main', Object.keys(categoryMap), postData.category);
-    const subCategorySelect = createSelect('category-sub', 'category-sub', categoryMap[postData.category] || [], postData.subcategory);
-
-    const titleInput = createElement('input', { type: 'text', id: 'title', name: 'title', placeholder: 'Post title', required: true, value: postData.title || '' });
-
-    const blockEditor = renderBlockEditor(postData.blocks || []);
-    const referenceInput = createElement('input', { type: 'text', id: 'reference-id', name: 'reference-id', placeholder: 'Enter related entity ID (Product / Place / Event)', style: 'display:none;' });
-    const referenceGroup = createInputGroup('Reference ID (in case of place, event or product)', referenceInput);
-
-    function updateReferenceVisibility(main, sub) {
-        const shouldShow = main === 'Review' && ['Product', 'Place', 'Event'].includes(sub);
-        referenceInput.style.display = shouldShow ? '' : 'none';
-        referenceInput.required = shouldShow;
-    }
-    updateReferenceVisibility(postData.category, postData.subcategory);
-
-    mainCategorySelect.addEventListener('change', e => {
-        const newMain = e.target.value;
-        populateSubCategories(subCategorySelect, newMain);
-        updateReferenceVisibility(newMain, '');
-    });
-    subCategorySelect.addEventListener('change', () => updateReferenceVisibility(mainCategorySelect.value, subCategorySelect.value));
-
-    const submitBtn = createElement('button', { type: 'submit', class: 'btn btn-primary' }, [postData.postid ? 'Update Post' : 'Create Post']);
-    const cancelBtn = createElement('button', { type: 'button', class: 'btn btn-secondary', style: 'margin-left:10px;' }, ['Cancel']);
-
-    form.addEventListener('input', () => {
-        const draft = {
-            title: titleInput.value || "",
-            category: mainCategorySelect.value || "",
-            subcategory: subCategorySelect.value || "",
-            blocks: blockEditor.getBlocks().map(b => b.type === 'text' ? { type: 'text', content: b.input.value } : { type: 'image', url: b.getUrl() || "" })
-        };
-        localStorage.setItem("draftPost", JSON.stringify(draft));
-    });
-
-    cancelBtn.addEventListener('click', () => {
-        if (confirm("You have unsaved changes. Are you sure you want to leave?")) navigate('/posts');
-    });
-
-    form.append(
-        createInputGroup('Main Category', mainCategorySelect),
-        createInputGroup('Sub Category', subCategorySelect),
-        referenceGroup,
-        createInputGroup('Title', titleInput),
-        createElement("div", {}, [createElement("label", {}, ["Content"]), blockEditor.container]),
-        submitBtn,
-        cancelBtn
-    );
-
-    form.addEventListener('submit', async e => {
+      // drag & drop
+      blockNode.addEventListener("dragstart", (e) => {
+        e.dataTransfer.setData("text/plain", i);
+      });
+      blockNode.addEventListener("dragover", (e) => {
         e.preventDefault();
-        submitBtn.disabled = true;
-        await handlePostSubmit(form, blockEditor.getBlocks(), !!postData.postid, postData.postid);
-        submitBtn.disabled = false;
-        localStorage.removeItem("draftPost");
-    });
-
-    return form;
-}
-
-// --- Submit handler ---
-async function handlePostSubmit(form, blocks, isEdit = false, existingId = null) {
-    const title = form.querySelector("#title")?.value.trim() || "";
-    const category = form.querySelector("#category-main").value;
-    const subcategory = form.querySelector("#category-sub").value;
-    const referenceId = form.querySelector("#reference-id")?.value.trim();
-
-    if (!title || !category || !subcategory) {
-        Notify("Please fill in all required fields.", { type: "warning", duration: 3000, dismissible: true });
-        return;
-    }
-
-    if (category === "Review" && ["Product", "Place", "Event"].includes(subcategory) && !referenceId) {
-        Notify("Reference ID is required for this review type.", { type: "warning", duration: 3000, dismissible: true });
-        return;
-    }
-
-    const payload = new FormData();
-    payload.append("title", title);
-    payload.append("category", category);
-    payload.append("subcategory", subcategory);
-    if (referenceId) payload.append("referenceId", referenceId);
-
-    const blockData = [];
-    let fileIndex = 0;
-
-    for (const block of blocks) {
-        if (block.type === "text") {
-            const val = block.input.value.trim();
-            if (val) blockData.push({ type: "text", content: val });
-        } else if (block.type === "image") {
-            const file = block.input?.files?.[0];
-            if (file) {
-                const error = validateImage(file);
-                if (error) {
-                    Notify(error, { type: "error", duration: 3000, dismissible: true });
-                    return;
-                }
-                const placeholder = `__file_${fileIndex}__`;
-                payload.append("images[]", file);
-                blockData.push({ type: "image", placeholder });
-                fileIndex++;
-            } else {
-                const url = block.getUrl();
-                if (url) blockData.push({ type: "image", url });
-            }
+        blockNode.classList.add("drag-over");
+      });
+      blockNode.addEventListener("dragleave", () => {
+        blockNode.classList.remove("drag-over");
+      });
+      blockNode.addEventListener("drop", (e) => {
+        e.preventDefault();
+        blockNode.classList.remove("drag-over");
+        const fromIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
+        const toIndex = i;
+        if (fromIndex !== toIndex) {
+          const [moved] = blocks.splice(fromIndex, 1);
+          blocks.splice(toIndex, 0, moved);
+          renderBlocks();
+          syncBlocks();
         }
+      });
+
+      blocksContainer.appendChild(blockNode);
+    });
+  }
+
+  const addTextBtn = Button("Add Text Block", "add-text", {
+    click: () => {
+      blocks.push({ type: "text", content: "" });
+      renderBlocks();
+      syncBlocks();
+    }
+  },"buttonx");
+
+  const addImageBtn = Button("Add Image Block", "add-image", {
+    click: () => {
+      blocks.push({ type: "image", url: "" });
+      renderBlocks();
+      syncBlocks();
+    }
+  },"buttonx");
+
+  renderBlocks();
+  syncBlocks();
+
+  const messageBox = createElement("div", { id: "message-box" });
+
+  async function handleSubmit() {
+    const formData = new FormData();
+    formData.append("title", titleGroup.querySelector("input").value);
+    formData.append("category", categoryGroup.querySelector("select").value);
+    formData.append("subcategory", subcategoryGroup.querySelector("select").value);
+
+    const needsReference =
+      categoryGroup.querySelector("select").value === "Review" &&
+      ["Product", "Place", "Event"].includes(subcategoryGroup.querySelector("select").value);
+    if (needsReference) {
+      const refVal = referenceIdGroup.querySelector("input").value;
+      if (refVal.trim()) {
+        formData.append("referenceId", refVal.trim());
+      }
     }
 
-    payload.append("blocks", JSON.stringify(blockData));
+    formData.append("blocks", blocksTextarea.querySelector("textarea").value);
+
+    const endpoint = mode === "create" ? "/posts/post" : `/posts/post/${postId}`;
+    const method = mode === "create" ? "POST" : "PUT";
 
     try {
-        Notify(isEdit ? "Updating post..." : "Creating post...", { type: "info", duration: 3000, dismissible: true });
-        const endpoint = isEdit ? `/posts/post/${encodeURIComponent(existingId)}` : '/posts/post';
-        const method = isEdit ? 'PUT' : 'POST';
-        const result = await apiFetch(endpoint, method, payload);
-        Notify(isEdit ? "Post updated!" : "Post created!", { type: "success", duration: 3000, dismissible: true });
-        localStorage.removeItem("draftPost");
-        navigate(`/post/${isEdit ? existingId : result.postid}`);
+      const res = await apiFetch(endpoint, method, formData, { isForm: true });
+      messageBox.replaceChildren(
+        createElement("span", {}, [
+          mode === "create"
+            ? "Post created with ID " + res.postid
+            : "Post updated successfully"
+        ])
+      );
     } catch (err) {
-        Notify(`Error: ${err.message || err}`, { type: "error", duration: 3000, dismissible: true });
+      messageBox.replaceChildren(
+        createElement("span", {}, ["Error: " + (err.message || "Unknown error")])
+      );
     }
+  }
+
+  const submitBtn = Button(
+    mode === "create" ? "Create Post" : "Update Post",
+    "submit-post",
+    { click: handleSubmit },"buttonx"
+  );
+
+  const editorForm = createElement("div", { class: "post-editor" }, [
+    titleGroup,
+    categoryGroup,
+    subcategoryGroup,
+    referenceIdGroup,
+    blocksContainer,
+    addTextBtn,
+    addImageBtn,
+    blocksTextarea,
+    submitBtn,
+    messageBox
+  ]);
+
+  let hdng = createElement("h2", {}, [`${capitalize(mode)} Post`]);
+  let container = createElement("div", { class: "create-section" }, [hdng, editorForm]);
+  contentContainer.replaceChildren(container);
 }
 
-function validateImage(file) {
-    const maxSize = 5 * 1024 * 1024;
-    const validTypes = ["image/jpeg", "image/png", "image/webp"];
-    if (!validTypes.includes(file.type)) return "Only JPG, PNG or WebP images allowed.";
-    if (file.size > maxSize) return "Image too large (max 5 MB).";
-    return null;
+// --- Public API ---
+export async function createPost(isLoggedIn, contentContainer) {
+  return renderPostEditor({ isLoggedIn, contentContainer, mode: "create" });
 }
 
-export { renderPostForm, handlePostSubmit };
+export async function editPost(isLoggedIn, postId, contentContainer) {
+  return renderPostEditor({ isLoggedIn, postId, contentContainer, mode: "edit" });
+}
+
+// import { apiFetch } from "../../api/api";
+// import { createElement } from "../../components/createElement";
+// import { createFormGroup } from "../../components/createFormGroup.js";
+// import Button from "../../components/base/Button.js";
+// import { capitalize } from "../profile/profileHelpers.js";
+
+// import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
+
+// // helper: generate a stable tempId
+// function genTempId() {
+//   return "block-" + Math.random().toString(36).slice(2, 10);
+// }
+
+// async function renderPostEditor({ isLoggedIn, postId, contentContainer, mode }) {
+//   if (!isLoggedIn) {
+//     contentContainer.replaceChildren(
+//       createElement("div", {}, ["You must be logged in to " + mode + " a post."])
+//     );
+//     return;
+//   }
+
+//   let existingPost = null;
+//   if (mode === "edit" && postId) {
+//     try {
+//       const data = await apiFetch(`/posts/${postId}`);
+//       existingPost = data.post;
+//     } catch {
+//       contentContainer.replaceChildren(
+//         createElement("div", {}, ["Failed to load post."])
+//       );
+//       return;
+//     }
+//   }
+
+//   // --- Form groups ---
+//   const titleGroup = createFormGroup({
+//     type: "text",
+//     id: "title",
+//     name: "title",
+//     label: "Title",
+//     value: existingPost ? existingPost.title : "",
+//     placeholder: "Enter post title",
+//     required: true
+//   });
+
+//   const categoryGroup = createFormGroup({
+//     type: "select",
+//     id: "category",
+//     name: "category",
+//     label: "Category",
+//     value: existingPost ? existingPost.category : "",
+//     placeholder: "Choose category",
+//     options: ["General", "Review", "Announcement", "Story"],
+//     required: true
+//   });
+
+//   const subcategoryGroup = createFormGroup({
+//     type: "select",
+//     id: "subcategory",
+//     name: "subcategory",
+//     label: "Subcategory",
+//     value: existingPost ? existingPost.subcategory : "",
+//     placeholder: "Choose subcategory",
+//     options: ["General", "Product", "Place", "Event"],
+//     required: true
+//   });
+
+//   const referenceIdGroup = createFormGroup({
+//     type: "text",
+//     id: "referenceId",
+//     name: "referenceId",
+//     label: "Reference ID",
+//     value: existingPost ? (existingPost.referenceId || "") : "",
+//     placeholder: "Enter reference ID"
+//   });
+//   referenceIdGroup.style.display = "none";
+
+//   function toggleReferenceId() {
+//     const categoryVal = categoryGroup.querySelector("select").value;
+//     const subVal = subcategoryGroup.querySelector("select").value;
+//     const needsReference =
+//       categoryVal === "Review" && ["Product", "Place", "Event"].includes(subVal);
+//     referenceIdGroup.style.display = needsReference ? "block" : "none";
+//   }
+//   categoryGroup.querySelector("select").addEventListener("change", toggleReferenceId);
+//   subcategoryGroup.querySelector("select").addEventListener("change", toggleReferenceId);
+
+//   // --- Blocks handling ---
+//   let blocks = existingPost
+//     ? existingPost.blocks.map(b => ({ ...b, tempId: b.tempId || genTempId() }))
+//     : [];
+
+//   const blocksContainer = createElement("div", { class: "blocks-container" });
+//   const blocksTextarea = createFormGroup({
+//     type: "textarea",
+//     id: "blocks",
+//     name: "blocks",
+//     label: "Blocks (JSON)",
+//     value: JSON.stringify(blocks, null, 2),
+//     placeholder: "Blocks JSON",
+//     required: true
+//   });
+//   blocksTextarea.style.display = "none";
+
+//   function syncBlocks() {
+//     blocksTextarea.querySelector("textarea").value = JSON.stringify(blocks, null, 2);
+//   }
+
+//   function renderBlocks() {
+//     blocksContainer.replaceChildren();
+
+//     blocks.forEach((block, i) => {
+//       let blockNode;
+
+//       if (block.type === "text") {
+//         const input = createElement("textarea", { rows: 3 }, [block.content || ""]);
+//         input.addEventListener("input", () => {
+//           blocks[i].content = input.value;
+//           syncBlocks();
+//         });
+//         blockNode = createElement("div", { class: "block block-text", draggable: "true", "data-index": i }, [
+//           createElement("span", { class: "block-label" }, ["Text Block"]),
+//           input
+//         ]);
+//       } else if (block.type === "image") {
+//         const fileInput = createElement("input", { type: "file", accept: "image/*", "data-tempid": block.tempId });
+//         const preview = createElement("img", { class: "image-preview" });
+
+//         if (block.url || block.placeholder) {
+//           const realSrc = resolveImagePath(EntityType.POST, PictureType.PHOTO, block.url || block.placeholder);
+//           preview.setAttribute("src", realSrc);
+//         }
+
+//         fileInput.addEventListener("change", () => {
+//           if (fileInput.files.length) {
+//             const file = fileInput.files[0];
+//             const reader = new FileReader();
+//             reader.onload = (e) => {
+//               preview.setAttribute("src", e.target.result);
+//             };
+//             reader.readAsDataURL(file);
+//             blocks[i].placeholder = file.name;
+//           } else {
+//             preview.removeAttribute("src");
+//             blocks[i].placeholder = "";
+//           }
+//           syncBlocks();
+//         });
+
+//         blockNode = createElement("div", { class: "block block-image", draggable: "true", "data-index": i }, [
+//           createElement("span", { class: "block-label" }, ["Image Block"]),
+//           fileInput,
+//           preview
+//         ]);
+//       }
+
+//       const removeBtn = Button("Remove", `remove-block-${i}`, {
+//         click: () => {
+//           blocks.splice(i, 1);
+//           renderBlocks();
+//           syncBlocks();
+//         }
+//       });
+//       blockNode.appendChild(removeBtn);
+
+//       // Drag & drop
+//       blockNode.addEventListener("dragstart", (e) => {
+//         e.dataTransfer.setData("text/plain", i);
+//       });
+//       blockNode.addEventListener("dragover", (e) => {
+//         e.preventDefault();
+//         blockNode.classList.add("drag-over");
+//       });
+//       blockNode.addEventListener("dragleave", () => {
+//         blockNode.classList.remove("drag-over");
+//       });
+//       blockNode.addEventListener("drop", (e) => {
+//         e.preventDefault();
+//         blockNode.classList.remove("drag-over");
+//         const fromIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
+//         const toIndex = i;
+//         if (fromIndex !== toIndex) {
+//           const [moved] = blocks.splice(fromIndex, 1);
+//           blocks.splice(toIndex, 0, moved);
+//           renderBlocks();
+//           syncBlocks();
+//         }
+//       });
+
+//       blocksContainer.appendChild(blockNode);
+//     });
+//   }
+
+//   const addTextBtn = Button("Add Text Block", "add-text", {
+//     click: () => {
+//       blocks.push({ type: "text", content: "", tempId: genTempId() });
+//       renderBlocks();
+//       syncBlocks();
+//     }
+//   });
+
+//   const addImageBtn = Button("Add Image Block", "add-image", {
+//     click: () => {
+//       blocks.push({ type: "image", url: "", placeholder: "", tempId: genTempId() });
+//       renderBlocks();
+//       syncBlocks();
+//     }
+//   });
+
+//   renderBlocks();
+//   syncBlocks();
+
+//   const messageBox = createElement("div", { id: "message-box" });
+
+//   async function handleSubmit() {
+//     const formData = new FormData();
+//     formData.append("title", titleGroup.querySelector("input").value);
+//     formData.append("category", categoryGroup.querySelector("select").value);
+//     formData.append("subcategory", subcategoryGroup.querySelector("select").value);
+
+//     const needsReference =
+//       categoryGroup.querySelector("select").value === "Review" &&
+//       ["Product", "Place", "Event"].includes(subcategoryGroup.querySelector("select").value);
+//     if (needsReference) {
+//       const refVal = referenceIdGroup.querySelector("input").value;
+//       if (refVal.trim()) {
+//         formData.append("referenceId", refVal.trim());
+//       }
+//     }
+
+//     formData.append("blocks", blocksTextarea.querySelector("textarea").value);
+
+//     // attach files with their tempId as key
+//     const imageInputs = blocksContainer.querySelectorAll('input[type="file"][data-tempid]');
+//     imageInputs.forEach(input => {
+//       if (input.files.length) {
+//         const tid = input.getAttribute("data-tempid");
+//         formData.append("images["+tid+"]", input.files[0]);
+//       }
+//     });
+
+//     const endpoint = mode === "create" ? "/posts/post" : `/posts/post/${postId}`;
+//     const method = mode === "create" ? "POST" : "PUT";
+
+//     try {
+//       const res = await apiFetch(endpoint, method, formData, { isForm: true });
+//       messageBox.replaceChildren(
+//         createElement("span", {}, [
+//           mode === "create"
+//             ? "Post created with ID " + res.postid
+//             : "Post updated successfully"
+//         ])
+//       );
+//     } catch (err) {
+//       messageBox.replaceChildren(
+//         createElement("span", {}, ["Error: " + (err.message || "Unknown error")])
+//       );
+//     }
+//   }
+
+//   const submitBtn = Button(
+//     mode === "create" ? "Create Post" : "Update Post",
+//     "submit-post",
+//     { click: handleSubmit }
+//   );
+
+//   const editorForm = createElement("div", { class: "post-editor" }, [
+//     titleGroup,
+//     categoryGroup,
+//     subcategoryGroup,
+//     referenceIdGroup,
+//     blocksContainer,
+//     addTextBtn,
+//     addImageBtn,
+//     blocksTextarea,
+//     submitBtn,
+//     messageBox
+//   ]);
+
+//   let hdng = createElement("h2", {}, [`${capitalize(mode)} Post`]);
+//   let container = createElement("div", { class: "create-section" }, [hdng, editorForm]);
+//   contentContainer.replaceChildren(container);
+// }
+
+// // --- Public API ---
+// export async function createPost(isLoggedIn, contentContainer) {
+//   return renderPostEditor({ isLoggedIn, contentContainer, mode: "create" });
+// }
+
+// export async function editPost(isLoggedIn, postId, contentContainer) {
+//   return renderPostEditor({ isLoggedIn, postId, contentContainer, mode: "edit" });
+// }
+
+// // import { apiFetch } from "../../api/api";
+// // import { createElement } from "../../components/createElement";
+// // import { createFormGroup } from "../../components/createFormGroup.js";
+// // import Button from "../../components/base/Button.js";
+// // import { capitalize } from "../profile/profileHelpers.js";
+
+// // import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
+
+// // async function renderPostEditor({ isLoggedIn, postId, contentContainer, mode }) {
+// //   if (!isLoggedIn) {
+// //     contentContainer.replaceChildren(
+// //       createElement("div", {}, ["You must be logged in to " + mode + " a post."])
+// //     );
+// //     return;
+// //   }
+
+// //   let existingPost = null;
+// //   if (mode === "edit" && postId) {
+// //     try {
+// //       const data = await apiFetch(`/posts/${postId}`);
+// //       existingPost = data.post;
+// //     } catch {
+// //       contentContainer.replaceChildren(
+// //         createElement("div", {}, ["Failed to load post."])
+// //       );
+// //       return;
+// //     }
+// //   }
+
+// //   // --- Form groups ---
+// //   const titleGroup = createFormGroup({
+// //     type: "text",
+// //     id: "title",
+// //     name: "title",
+// //     label: "Title",
+// //     value: existingPost ? existingPost.title : "",
+// //     placeholder: "Enter post title",
+// //     required: true
+// //   });
+
+// //   const categoryGroup = createFormGroup({
+// //     type: "select",
+// //     id: "category",
+// //     name: "category",
+// //     label: "Category",
+// //     value: existingPost ? existingPost.category : "",
+// //     placeholder: "Choose category",
+// //     options: ["General", "Review", "Announcement", "Story"],
+// //     required: true
+// //   });
+
+// //   const subcategoryGroup = createFormGroup({
+// //     type: "select",
+// //     id: "subcategory",
+// //     name: "subcategory",
+// //     label: "Subcategory",
+// //     value: existingPost ? existingPost.subcategory : "",
+// //     placeholder: "Choose subcategory",
+// //     options: ["General", "Product", "Place", "Event"],
+// //     required: true
+// //   });
+
+// //   const referenceIdGroup = createFormGroup({
+// //     type: "text",
+// //     id: "referenceId",
+// //     name: "referenceId",
+// //     label: "Reference ID",
+// //     value: existingPost ? (existingPost.referenceId || "") : "",
+// //     placeholder: "Enter reference ID"
+// //   });
+// //   referenceIdGroup.style.display = "none";
+
+// //   function toggleReferenceId() {
+// //     const categoryVal = categoryGroup.querySelector("select").value;
+// //     const subVal = subcategoryGroup.querySelector("select").value;
+// //     const needsReference =
+// //       categoryVal === "Review" && ["Product", "Place", "Event"].includes(subVal);
+// //     referenceIdGroup.style.display = needsReference ? "block" : "none";
+// //   }
+// //   categoryGroup.querySelector("select").addEventListener("change", toggleReferenceId);
+// //   subcategoryGroup.querySelector("select").addEventListener("change", toggleReferenceId);
+
+// //   // --- Blocks handling ---
+// //   let blocks = existingPost ? existingPost.blocks : [];
+
+// //   const blocksContainer = createElement("div", { class: "blocks-container" });
+// //   const blocksTextarea = createFormGroup({
+// //     type: "textarea",
+// //     id: "blocks",
+// //     name: "blocks",
+// //     label: "Blocks (JSON)",
+// //     value: JSON.stringify(blocks, null, 2),
+// //     placeholder: "Blocks JSON",
+// //     required: true
+// //   });
+// //   blocksTextarea.style.display = "none"; // hidden
+
+// //   function renderBlocks() {
+// //     blocksContainer.replaceChildren();
+
+// //     blocks.forEach((block, i) => {
+// //       let blockNode;
+
+// //       if (block.type === "text") {
+// //         const input = createElement("textarea", { rows: 3 }, [block.content || ""]);
+// //         input.addEventListener("input", () => {
+// //           blocks[i].content = input.value;
+// //           syncBlocks();
+// //         });
+// //         blockNode = createElement("div", { class: "block block-text", draggable: "true", "data-index": i }, [
+// //           createElement("span", { class: "block-label" }, ["Text Block"]),
+// //           input
+// //         ]);
+// //       } else if (block.type === "image") {
+// //         const fileInput = createElement("input", { type: "file", accept: "image/*" });
+// //         const preview = createElement("img", { class: "image-preview" });
+
+// //         // Show preview if URL already exists
+// //         if (block.url || block.placeholder) {
+// //           const realSrc = resolveImagePath(EntityType.POST, PictureType.PHOTO, block.url || block.placeholder);
+// //           preview.setAttribute("src", realSrc);
+// //         }
+
+// //         fileInput.addEventListener("change", () => {
+// //           if (fileInput.files.length) {
+// //             const file = fileInput.files[0];
+// //             const reader = new FileReader();
+// //             reader.onload = (e) => {
+// //               preview.setAttribute("src", e.target.result);
+// //             };
+// //             reader.readAsDataURL(file);
+// //             blocks[i].placeholder = file.name;
+// //           } else {
+// //             preview.removeAttribute("src");
+// //             blocks[i].placeholder = "";
+// //           }
+// //           syncBlocks();
+// //         });
+
+// //         blockNode = createElement("div", { class: "block block-image", draggable: "true", "data-index": i }, [
+// //           createElement("span", { class: "block-label" }, ["Image Block"]),
+// //           fileInput,
+// //           preview
+// //         ]);
+// //       }
+
+// //       // Remove button for block
+// //       const removeBtn = Button("Remove", `remove-block-${i}`, {
+// //         click: () => {
+// //           blocks.splice(i, 1);
+// //           renderBlocks();
+// //           syncBlocks();
+// //         }
+// //       });
+// //       blockNode.appendChild(removeBtn);
+
+// //       // --- Drag & drop ---
+// //       blockNode.addEventListener("dragstart", (e) => {
+// //         e.dataTransfer.setData("text/plain", i);
+// //       });
+// //       blockNode.addEventListener("dragover", (e) => {
+// //         e.preventDefault();
+// //         blockNode.classList.add("drag-over");
+// //       });
+// //       blockNode.addEventListener("dragleave", () => {
+// //         blockNode.classList.remove("drag-over");
+// //       });
+// //       blockNode.addEventListener("drop", (e) => {
+// //         e.preventDefault();
+// //         blockNode.classList.remove("drag-over");
+// //         const fromIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
+// //         const toIndex = i;
+// //         if (fromIndex !== toIndex) {
+// //           const [moved] = blocks.splice(fromIndex, 1);
+// //           blocks.splice(toIndex, 0, moved);
+// //           renderBlocks();
+// //           syncBlocks();
+// //         }
+// //       });
+
+// //       blocksContainer.appendChild(blockNode);
+// //     });
+// //   }
+
+// //   function syncBlocks() {
+// //     blocksTextarea.querySelector("textarea").value = JSON.stringify(blocks, null, 2);
+// //   }
+
+// //   const addTextBtn = Button("Add Text Block", "add-text", {
+// //     click: () => {
+// //       blocks.push({ type: "text", content: "" });
+// //       renderBlocks();
+// //       syncBlocks();
+// //     }
+// //   });
+
+// //   const addImageBtn = Button("Add Image Block", "add-image", {
+// //     click: () => {
+// //       blocks.push({ type: "image", url: "", placeholder: "" });
+// //       renderBlocks();
+// //       syncBlocks();
+// //     }
+// //   });
+
+// //   renderBlocks();
+// //   syncBlocks();
+
+// //   const messageBox = createElement("div", { id: "message-box" });
+
+// //   async function handleSubmit() {
+// //     const formData = new FormData();
+// //     formData.append("title", titleGroup.querySelector("input").value);
+// //     formData.append("category", categoryGroup.querySelector("select").value);
+// //     formData.append("subcategory", subcategoryGroup.querySelector("select").value);
+// //     formData.append("referenceId", referenceIdGroup.querySelector("input").value);
+// //     formData.append("blocks", blocksTextarea.querySelector("textarea").value);
+
+// //     const imageInputs = blocksContainer.querySelectorAll('input[type="file"]');
+// //     imageInputs.forEach(input => {
+// //       if (input.files.length) {
+// //         formData.append("images[]", input.files[0]);
+// //       }
+// //     });
+
+// //     const endpoint = mode === "create" ? "/posts/post" : `/posts/post/${postId}`;
+// //     const method = mode === "create" ? "POST" : "PUT";
+
+// //     try {
+// //       const res = await apiFetch(endpoint, method, formData, { isForm: true });
+// //       messageBox.replaceChildren(
+// //         createElement("span", {}, [
+// //           mode === "create"
+// //             ? "Post created with ID " + res.postid
+// //             : "Post updated successfully"
+// //         ])
+// //       );
+// //     } catch (err) {
+// //       messageBox.replaceChildren(
+// //         createElement("span", {}, ["Error: " + (err.message || "Unknown error")])
+// //       );
+// //     }
+// //   }
+
+// //   const submitBtn = Button(
+// //     mode === "create" ? "Create Post" : "Update Post",
+// //     "submit-post",
+// //     { click: handleSubmit }
+// //   );
+
+// //   const editorForm = createElement("div", { class: "post-editor" }, [
+// //     titleGroup,
+// //     categoryGroup,
+// //     subcategoryGroup,
+// //     referenceIdGroup,
+// //     blocksContainer,
+// //     addTextBtn,
+// //     addImageBtn,
+// //     blocksTextarea,
+// //     submitBtn,
+// //     messageBox
+// //   ]);
+
+// //   let hdng = createElement("h2", {}, [`${capitalize(mode)} Post`]);
+// //   let container = createElement("div", { class: "create-section" }, [hdng, editorForm]);
+// //   contentContainer.replaceChildren(container);
+// // }
+
+// // // --- Public API ---
+// // export async function createPost(isLoggedIn, contentContainer) {
+// //   return renderPostEditor({ isLoggedIn, contentContainer, mode: "create" });
+// // }
+
+// // export async function editPost(isLoggedIn, postId, contentContainer) {
+// //   return renderPostEditor({ isLoggedIn, postId, contentContainer, mode: "edit" });
+// // }

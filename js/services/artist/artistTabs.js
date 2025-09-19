@@ -1,9 +1,9 @@
 import { SRC_URL, apiFetch } from "../../api/api.js";
 import { displayMerchandise } from "../merch/merchService.js";
-import { displayMedia } from "../media/mediaService.js";
+// import { displayMedia } from "../media/mediaService.js";
 import { createElement } from "../../components/createElement.js";
 import Modal from "../../components/ui/Modal.mjs";
-
+import { displayMediaFeed } from "../media/dispMediFeed.js";
 
 async function renderAlbumsTab(container, artistID, isCreator) {
     try {
@@ -31,8 +31,14 @@ async function renderAlbumsTab(container, artistID, isCreator) {
 }
 
 async function renderPostsTab(container, artistID, isLoggedIn) {
+    // try {
+    //     displayMedia(container, "artist", artistID, isLoggedIn);
+    // } catch (err) {
+    //     container.innerHTML = "<p>Error loading posts.</p>";
+    // }
+
     try {
-        displayMedia(container, "artist", artistID, isLoggedIn);
+        displayMediaFeed(container, "artist", artistID, isLoggedIn);
     } catch (err) {
         container.innerHTML = "<p>Error loading posts.</p>";
     }
@@ -53,7 +59,7 @@ async function renderEventsTab(container, artistID, isCreator) {
         const events = await apiFetch(`/artists/${artistID}/events`);
 
         // Clear container
-        container.innerHTML = "";
+        container.replaceChildren();
 
         // Creator-specific actions
         if (isCreator) {

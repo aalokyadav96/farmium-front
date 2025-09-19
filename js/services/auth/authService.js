@@ -1,27 +1,22 @@
-import { state, API_URL, setState, clearState, getState } from "../../state/state.js";
-import {
-  escapeHTML,
-  validateInputs,
-  isValidUsername,
-  isValidEmail,
-  isValidPassword,
-} from "../../utils/utils.js";
-import { loadContent, navigate } from "../../routes/index.js";
+import { setState, clearState, subscribeDeep } from "../../state/state.js";
+import { escapeHTML, validateInputs, isValidUsername, isValidEmail, isValidPassword } from "../../utils/utils.js";
+import { navigate } from "../../routes/index.js";
 import { fetchProfile } from "../profile/fetchProfile.js";
 import Notify from "../../components/ui/Notify.mjs";
 import { apiFetch } from "../../api/api.js";
 
-
-function decodeJWT(token) {
+// --- JWT decoding ---
+export function decodeJWT(token) {
   try {
     const payload = token.split(".")[1];
     const decoded = atob(payload.replace(/-/g, "+").replace(/_/g, "/"));
     return JSON.parse(decoded);
-  } catch (err) {
+  } catch {
     return null;
   }
 }
 
+// --- Signup ---
 async function signup(event) {
   event.preventDefault();
 
@@ -36,134 +31,225 @@ async function signup(event) {
   ]);
 
   if (errors) {
-    Notify(errors, {type:"error",duration:3000, dismissible:true});
+    Notify(errors, { type: "error", duration: 3000, dismissible: true });
     return;
   }
 
   try {
-    const response = await fetch(`${API_URL}/auth/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, email, password }),
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      Notify("Signup successful! You can now log in.", {type:"success",duration:3000, dismissible:true});
+    const res = await apiFetch("/auth/register", "POST", { username, email, password });
+    if (res?.status === 200) {
+      Notify("Signup successful! You can now log in.", { type: "success", duration: 3000, dismissible: true });
+      // After signup, redirect user to login page
+      localStorage.setItem("redirectAfterLogin", "/home");
       navigate("/login");
     } else {
-      Notify(data.message || "Error signing up.", {type:"error",duration:3000, dismissible:true});
+      Notify(res?.message || "Error signing up.", { type: "error", duration: 3000, dismissible: true });
     }
-  } catch (error) {
-    Notify("Error signing up. Please try again.", {type:"error",duration:3000, dismissible:true});
+  } catch {
+    Notify("Error signing up. Please try again.", { type: "error", duration: 3000, dismissible: true });
   }
 }
 
+// --- Login ---
 async function login(event) {
   event.preventDefault();
+
+  const currentPath = window.location.pathname;
+  if (currentPath !== "/logout" && currentPath !== "/login") {
+    localStorage.setItem("redirectAfterLogin", currentPath);
+  }
 
   const username = escapeHTML(document.getElementById("login-username").value.trim());
   const password = escapeHTML(document.getElementById("login-password").value);
 
   try {
-    const response = await fetch(`${API_URL}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    });
+    const res = await apiFetch("/auth/login", "POST", { username, password });
 
-    const res = await response.json();
+    if (res?.status === 200) {
+      const { token, refreshToken, userid } = res.data;
 
+      // Persist token and user
+      setState({ token, refreshToken, user: userid }, true);
 
-    if (res.status == 200) {
-      setState(
-        {
-          token: res.data.token,
-          refreshToken: res.data.refreshToken,
-          user: res.data.userid,
-        },
-        true
-      );
-    
-      // localStorage.setItem("token", res.data.token);
-      // localStorage.setItem("user", res.data.userid);
-      // localStorage.setItem("refreshToken", res.data.refreshToken);
+      const decoded = decodeJWT(token);
+      if (decoded?.username) setState({ username: decoded.username }, true);
 
-      const decoded = decodeJWT(res.data.token);
-      if (decoded && decoded.username) {
-        setState({ username: decoded.username }, true);
-      }
-    
       try {
         const profile = await fetchProfile();
-        console.log(profile);
         setState({ userProfile: profile }, true);
-      } catch (err) {
-        Notify("Login succeeded but failed to load profile.", {type:"info",duration:3000, dismissible:true});
+      } catch {
+        Notify("Login succeeded but failed to load profile.", { type: "info", duration: 3000, dismissible: true });
       }
-    
-      const redirectUrl = sessionStorage.getItem("redirectAfterLogin") || "/";
-      sessionStorage.removeItem("redirectAfterLogin");
-      
-      // Make sure it's a same-origin path, not full URL
-      if (!redirectUrl.startsWith("/") || redirectUrl === "/login") {
-        window.location.href = "/";
+
+      // Redirect after login
+      const redirectUrl = localStorage.getItem("redirectAfterLogin") || "/home";
+      localStorage.removeItem("redirectAfterLogin");
+
+      if (!redirectUrl.startsWith("/home") || redirectUrl === "/login") {
+        navigate("/home");
       } else {
-        window.location.href = redirectUrl;
+        navigate(redirectUrl);
       }
-      
+
+    } else {
+      Notify(res?.message || "Invalid credentials.", { type: "warning", duration: 3000, dismissible: true });
     }
-     else {
-      Notify(res.message || "Invalid credentials.", {type:"warning",duration:3000, dismissible:true});
-    }
-  } catch (error) {
-    Notify("Error. Please try again.", {type:"error",duration:3000, dismissible:true});
+  } catch {
+    Notify("Error. Please try again.", { type: "error", duration: 3000, dismissible: true });
   }
 }
 
-async function logout(skip = false) {
-    if (!skip) {
-        const confirmLogout = confirm("Page will reload. Are you sure you want to log out?");
-        if (!confirmLogout) return;
-    }
+// --- Logout ---
+async function logout() {
+  const confirmLogout = confirm("Are you sure you want to log out? The page will reload.");
+  if (!confirmLogout) return;
 
-    const currentPath = window.location.pathname;
+  const currentPath = window.location.pathname;
+  if (currentPath !== "/logout" && currentPath !== "/login") {
+    localStorage.setItem("redirectAfterLogin", currentPath);
+  }
 
-    // Avoid storing redirect to login or logout page
-    if (currentPath !== "/login" && currentPath !== "/logout") {
-        sessionStorage.setItem("redirectAfterLogin", currentPath);
-    }
+  try {
+    await apiFetch("/auth/logout", "POST");
+  } catch (err) {
+    console.error("Backend logout failed:", err);
+  }
 
-    try {
-        // Notify backend about logout
-        await apiFetch("/auth/logout", "POST");
-    } catch (err) {
-        console.error("Backend logout failed:", err);
-        // Even if the request fails, we proceed to clear local state
-    }
-
-    // Clear client-side state and redirect
-    clearState();
-    navigate("/");
+  clearState();
+  window.location.reload();
 }
 
-// function logout(skip = false) {
-//   if (!skip) {
+// --- Example reactive subscriptions ---
+subscribeDeep("token", (t) => {
+  if (t) console.log("User logged in:", t);
+  else console.log("User logged out");
+});
+
+subscribeDeep("userProfile.role", (role) => {
+  document.body.dataset.isAdmin = Array.isArray(role) && role.includes("admin") ? "true" : "false";
+});
+
+export { signup, login, logout };
+
+// import { setState, clearState, subscribeDeep } from "../../state/state.js";
+// import { escapeHTML, validateInputs, isValidUsername, isValidEmail, isValidPassword } from "../../utils/utils.js";
+// import { navigate } from "../../routes/index.js";
+// import { fetchProfile } from "../profile/fetchProfile.js";
+// import Notify from "../../components/ui/Notify.mjs";
+// import { apiFetch } from "../../api/api.js";
+
+// // --- JWT decoding ---
+// function decodeJWT(token) {
+//   try {
+//     const payload = token.split(".")[1];
+//     const decoded = atob(payload.replace(/-/g, "+").replace(/_/g, "/"));
+//     return JSON.parse(decoded);
+//   } catch {
+//     return null;
+//   }
+// }
+
+// // --- Signup ---
+// async function signup(event) {
+//   event.preventDefault();
+
+//   const username = escapeHTML(document.getElementById("signup-username").value.trim());
+//   const email = escapeHTML(document.getElementById("signup-email").value.trim());
+//   const password = escapeHTML(document.getElementById("signup-password").value);
+
+//   const errors = validateInputs([
+//     { value: username, validator: isValidUsername, message: "Username must be between 3 and 20 characters." },
+//     { value: email, validator: isValidEmail, message: "Please enter a valid email." },
+//     { value: password, validator: isValidPassword, message: "Password must be at least 6 characters long." },
+//   ]);
+
+//   if (errors) {
+//     Notify(errors, { type: "error", duration: 3000, dismissible: true });
+//     return;
+//   }
+
+//   try {
+//     const res = await apiFetch("/auth/register", "POST", { username, email, password });
+//     if (res?.status === 200) {
+//       Notify("Signup successful! You can now log in.", { type: "success", duration: 3000, dismissible: true });
+//       navigate("/login");
+//     } else {
+//       Notify(res?.message || "Error signing up.", { type: "error", duration: 3000, dismissible: true });
+//     }
+//   } catch {
+//     Notify("Error signing up. Please try again.", { type: "error", duration: 3000, dismissible: true });
+//   }
+// }
+
+// // --- Login ---
+// async function login(event) {
+//   const currentPath = window.location.pathname;
+//   if (currentPath !== "/logout") localStorage.setItem("redirectAfterLogin", currentPath);
+
+//   event.preventDefault();
+
+//   const username = escapeHTML(document.getElementById("login-username").value.trim());
+//   const password = escapeHTML(document.getElementById("login-password").value);
+
+//   try {
+//     const res = await apiFetch("/auth/login", "POST", { username, password });
+
+//     if (res?.status === 200) {
+//       const { token, refreshToken, userid } = res.data;
+
+//       // Persist token and user
+//       setState({ token, refreshToken, user: userid }, true);
+
+//       const decoded = decodeJWT(token);
+//       if (decoded?.username) setState({ username: decoded.username }, true);
+
+//       try {
+//         const profile = await fetchProfile();
+//         setState({ userProfile: profile }, true);
+//       } catch {
+//         Notify("Login succeeded but failed to load profile.", { type: "info", duration: 3000, dismissible: true });
+//       }
+
+//       // Redirect after login
+//       const redirectUrl = localStorage.getItem("redirectAfterLogin") || "/";
+//       localStorage.removeItem("redirectAfterLogin");
+//       if (!redirectUrl.startsWith("/home") || redirectUrl === "/login") navigate("/home");
+//       else navigate(redirectUrl);
+
+//     } else {
+//       Notify(res?.message || "Invalid credentials.", { type: "warning", duration: 3000, dismissible: true });
+//     }
+//   } catch {
+//     Notify("Error. Please try again.", { type: "error", duration: 3000, dismissible: true });
+//   }
+// }
+
+// // --- Logout ---
+// async function logout(skipConfirm = false) {
+//   if (!skipConfirm) {
 //     const confirmLogout = confirm("Page will reload. Are you sure you want to log out?");
 //     if (!confirmLogout) return;
 //   }
 
 //   const currentPath = window.location.pathname;
+//   if (currentPath !== "/logout") localStorage.setItem("redirectAfterLogin", currentPath);
 
-//   // Avoid storing redirect to login or logout page
-//   if (currentPath !== "/login" && currentPath !== "/logout") {
-//     sessionStorage.setItem("redirectAfterLogin", currentPath);
-//   }
+//   try { await apiFetch("/auth/logout", "POST"); } catch (err) { console.error("Backend logout failed:", err); }
 
 //   clearState();
-//   navigate("/");
+
+//   // navigate("/home");
+//   window.location.reload();
 // }
 
+// // --- Example reactive subscriptions ---
+// subscribeDeep("token", (t) => {
+//   if (t) console.log("User logged in:", t);
+//   else console.log("User logged out");
+// });
 
-export { login, signup, logout };
+// subscribeDeep("userProfile.role", (role) => {
+//   document.body.dataset.isAdmin = Array.isArray(role) && role.includes("admin") ? "true" : "false";
+// });
+
+// export { signup, login, logout };

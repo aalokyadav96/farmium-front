@@ -1,8 +1,8 @@
-import { displayAdmin } from "../../services/admin/adminPage.js";
+import { displayModerator } from "../../services/admin/modPage.js";
 
 async function Admin(isLoggedIn, contentContainer) {
     contentContainer.innerHTML = '';
-    displayAdmin(contentContainer, isLoggedIn);
+    displayModerator(contentContainer, isLoggedIn);
 }
 
 export { Admin };

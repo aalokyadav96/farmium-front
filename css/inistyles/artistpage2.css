@@ -17,6 +17,14 @@
   gap: 12px;
 }
 
+.hvflex-sb {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .hcen {
   justify-content: center;
   margin: 16px 0;

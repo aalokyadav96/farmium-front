@@ -3,7 +3,7 @@ function safeArgBuilder(match) {
 }
 
 export const staticRoutes = {
-  "/": { moduleImport: () => import("../pages/entry/entry.js"), functionName: "Entry" },
+  "/": { moduleImport: () => import("../pages/home.js"), functionName: "Home" },
   "/home": { moduleImport: () => import("../pages/home.js"), functionName: "Home" },
   "/login": { moduleImport: () => import("../pages/auth/auth.js"), functionName: "Auth" },
 
@@ -20,6 +20,7 @@ export const staticRoutes = {
   "/events": { moduleImport: () => import("../pages/events/events.js"), functionName: "Events" },
   "/artists": { moduleImport: () => import("../pages/artist/artists.js"), functionName: "Artists" },
 
+  "/map": { moduleImport: () => import("../pages/gtamap/mapgta.js"), functionName: "MapGTA" },
   "/places": { moduleImport: () => import("../pages/places/places.js"), functionName: "Places" },
   "/create-place": { moduleImport: () => import("../pages/places/createPlace.js"), functionName: "CreatePlace", protected: true },
 
@@ -37,9 +38,11 @@ export const staticRoutes = {
   "/edit-itinerary": { moduleImport: () => import("../pages/itinerary/editItinerary.js"), functionName: "EditItinerary", protected: true },
 
   "/booking": { moduleImport: () => import("../pages/booking/booking.js"), functionName: "Booking" },
-  // "/search": { moduleImport: () => import("../pages/search/search.js"), functionName: "Search" },
-  // "/feed": { moduleImport: () => import("../pages/feed/feed.js"), functionName: "Feed", protected: true },
-  // "/social": { moduleImport: () => import("../pages/tumblr/tumblr.js"), functionName: "Tumblr", protected: true },
+  "/wallet": { moduleImport: () => import("../pages/wallet/wallet.js"), functionName: "Wallet" },
+
+  "/search": { moduleImport: () => import("../pages/search/search.js"), functionName: "Search" },
+  "/feed": { moduleImport: () => import("../pages/feed/feed.js"), functionName: "Feed", protected: true },
+  "/social": { moduleImport: () => import("../pages/tumblr/tumblr.js"), functionName: "Tumblr", protected: true },
 
   "/farms": { moduleImport: () => import("../pages/farm/farms.js"), functionName: "Farms" },
   "/create-farm": { moduleImport: () => import("../pages/farm/createNewFarm.js"), functionName: "CreateFarm", protected: true },
@@ -51,6 +54,7 @@ export const staticRoutes = {
   "/recipes": { moduleImport: () => import("../pages/recipe/recipes.js"), functionName: "Recipes" },
   
   "/merechats": { moduleImport: () => import("../pages/merechats/merechats.js"), functionName: "Mechat", protected: true },
+  "/discord": { moduleImport: () => import("../pages/discord/discord.js"), functionName: "Discord", protected: true },
 };
 
 export const dynamicRoutes = [

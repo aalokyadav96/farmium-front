@@ -14,7 +14,7 @@ export function editRecipe(container, recipe) {
 }
 
 function renderRecipeForm(container, mode = "create", recipe = null) {
-  container.innerHTML = "";
+  container.replaceChildren();
 
   const form = createElement("form", {
     class: "create-section",
@@ -118,7 +118,7 @@ function renderRecipeForm(container, mode = "create", recipe = null) {
 
   function addIngredientRow(name = "", quantity = "", unit = "", alternatives = []) {
     const altStr = alternatives.map(a => [a.name, a.itemId, a.type].join("|")).join(",");
-    const row = createElement("div", { class: "ingredient-row hflex" }, [
+    const row = createElement("div", { class: "ingredient-row hvflex" }, [
       createElement("input", {
         type: "text",
         name: "ingredientName[]",
@@ -217,7 +217,7 @@ function renderRecipeForm(container, mode = "create", recipe = null) {
 
   const imageInput = imageGroup.querySelector("input");
   imageInput.addEventListener("change", e => {
-    previewContainer.innerHTML = "";
+    previewContainer.replaceChildren();
     Array.from(e.target.files).forEach(file => {
       const img = createElement("img", {
         src: URL.createObjectURL(file),
@@ -244,7 +244,7 @@ function renderRecipeForm(container, mode = "create", recipe = null) {
       console.log("Recipe saved:", result);
       if (mode === "create") {
         form.reset();
-        previewContainer.innerHTML = "";
+        previewContainer.replaceChildren();
       }
       alert("Recipe saved successfully!");
       navigate(`/recipe/${result.recipeid}`);

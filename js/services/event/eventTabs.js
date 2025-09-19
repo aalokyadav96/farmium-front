@@ -1,6 +1,6 @@
-// import { Button } from "../../components/base/Button.js";
+import { Button } from "../../components/base/Button.js";
 import { Imagex } from "../../components/base/Imagex.js";
-import { API_URL, SRC_URL } from "../../api/api.js";
+import { API_URL, apiFetch } from "../../api/api.js";
 import { createElement } from "../../components/createElement.js";
 import { displayReviews } from "../reviews/displayReviews.js";
 import { displayEventFAQs } from "./eventFAQHelper.js";
@@ -25,10 +25,86 @@ async function displayEventFAQ(faqContainer, isCreator, eventId, faqs) {
     displayEventFAQs(isCreator, faqContainer, eventId, faqs);
 }
 
-async function displayLostAndFound(lnfContainer, isCreator, eventId, lnfs) {
-    lnfContainer.appendChild(createElement('h2', "", ["LostAndFound"]));
-    lnfContainer.appendChild(createElement('p', "", ["Did anyone lost anything?"]));
+async function displayLostAndFound(lnfContainer, isCreator, eventId) {
+    lnfContainer.appendChild(createElement("h2", {}, ["Lost And Found"]));
+    lnfContainer.appendChild(createElement("p", {}, ["Did anyone lose or find something?"]));
+
+    // Container for buttons + form
+    const actionsContainer = createElement("div", { id: "lostFoundActions" }, []);
+    lnfContainer.appendChild(actionsContainer);
+
+    // Form section (initially empty, shows when a button is clicked)
+    const formSection = createElement("div", { id: "lostFoundForm" }, []);
+
+    // Helper: show form
+    function showForm(type) {
+        formSection.innerHTML = "";
+        formSection.appendChild(createElement("h3", {}, [`Report ${type === "lost" ? "Lost" : "Found"} Item`]));
+
+        const nameInput = createElement("input", { type: "text", placeholder: "Item name" });
+        const descInput = createElement("textarea", { placeholder: "Description" });
+
+        const submitBtn = Button("Submit", "", {
+            click: async () => {
+                const name = nameInput.value.trim();
+                const description = descInput.value.trim();
+                if (!name) return alert("Name is required");
+
+                const newItem = { type, name, description };
+                try {
+                    await apiFetch(`/events/${eventId}/lostfound`, "POST", newItem);
+                    lnfContainer.innerHTML = "";
+                    await displayLostAndFound(lnfContainer, isCreator, eventId);
+                } catch (err) {
+                    alert("Failed to add item.");
+                }
+            }
+        }, "buttonx primary");
+
+        formSection.appendChild(nameInput);
+        formSection.appendChild(descInput);
+        formSection.appendChild(submitBtn);
+    }
+
+    // Two buttons (available to everyone)
+    const btnLost = Button("I lost something", "btnLost", {
+        click: () => showForm("lost")
+    }, "buttonx primary");
+    const btnFound = Button("I found something", "btnFound", {
+        click: () => showForm("found")
+    }, "buttonx primary");
+
+    actionsContainer.appendChild(btnLost);
+    actionsContainer.appendChild(btnFound);
+    actionsContainer.appendChild(formSection);
+
+    // Fetch items (after rendering buttons + form placeholder)
+    let items = [];
+    try {
+        items = await apiFetch(`/events/${eventId}/lostfound`);
+    } catch (err) {
+        lnfContainer.appendChild(createElement("p", {}, ["Failed to load items."]));
+        return;
+    }
+
+    // Items list
+    const itemsList = createElement("div", { id: "lostFoundItems" }, []);
+    if (items.length === 0) {
+        itemsList.appendChild(createElement("p", {}, ["No items reported yet."]));
+    } else {
+        items.forEach(item => {
+            const itemEl = createElement("div", { "data-id": item.id }, [
+                createElement("p", {}, [`[${item.type.toUpperCase()}] ${item.name}`]),
+                createElement("p", {}, [`Description: ${item.description}`]),
+                createElement("p", {}, [`Reported by: ${item.reportedBy}`])
+            ]);
+            itemsList.appendChild(itemEl);
+        });
+    }
+    lnfContainer.appendChild(itemsList);
 }
+
+
 
 async function displayContactDetails(container, isCreator, contacts) {
     container.appendChild(createElement('h2', "", ["ContactDetails"]));

@@ -1,5 +1,5 @@
 import { constrainPan, updateTransform } from "./transformController.js";
-import { debounce } from "./utils.js";
+// import { debounce } from "./utils.js";
 
 let isDragging = false, startX = 0, startY = 0;
 
@@ -10,17 +10,17 @@ export function setupGestures(video, changeZoom) {
   };
 
   const onMouseDown = (e) => {
-    if (video.style.transform.includes("scale(1)")) return;
+    if (zoomLevel === 1) return; // nothing to drag at scale 1
     e.preventDefault();
     isDragging = true;
-    startX = e.clientX - panX;
-    startY = e.clientY - panY;
+    startX = e.clientX - panX;  // use global panX
+    startY = e.clientY - panY;  // use global panY
   };
 
   const onMouseMove = (e) => {
     if (!isDragging) return;
-    panX = e.clientX - startX;
-    panY = e.clientY - startY;
+    panX = e.clientX - startX;  // update global panX
+    panY = e.clientY - startY;  // update global panY
     constrainPan(video);
     updateTransform(video);
   };
@@ -37,23 +37,22 @@ export function setupGestures(video, changeZoom) {
 }
 
 function setupTouch(video) {
-  video.addEventListener("touchstart", onTouchStart, { passive: false });
-  video.addEventListener("touchmove", onTouchMove, { passive: false });
-  video.addEventListener("touchend", () => isDragging = false);
-
-  function onTouchStart(event) {
+  video.addEventListener("touchstart", (event) => {
     if (event.touches.length === 1) {
       isDragging = true;
-      startX = event.touches[0].clientX - panX;
+      startX = event.touches[0].clientX - panX; // use global
       startY = event.touches[0].clientY - panY;
     }
-  }
+  }, { passive: false });
 
-  function onTouchMove(event) {
+  video.addEventListener("touchmove", (event) => {
     if (!isDragging || event.touches.length !== 1) return;
     panX = event.touches[0].clientX - startX;
     panY = event.touches[0].clientY - startY;
     constrainPan(video);
     updateTransform(video);
-  }
+  }, { passive: false });
+
+  video.addEventListener("touchend", () => isDragging = false);
 }
+

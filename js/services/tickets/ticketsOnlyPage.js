@@ -1,7 +1,7 @@
 import { displayTickets } from "../tickets/ticketService.js";
 import { createElement } from "../../components/createElement.js";
 import { apiFetch } from "../../api/api.js";
-import { state } from "../../state/state.js";
+import { getState } from "../../state/state.js";
 import Notify from "../../components/ui/Notify.mjs";
 
 // Fetch Event Data
@@ -17,10 +17,10 @@ async function fetchEventData(eventId) {
 // Display Full Event
 async function renderTicksPage(isLoggedIn, eventId, container) {
     try {
-        container.innerHTML = "";
+        container.replaceChildren();
         const eventData = await fetchEventData(eventId);
         console.log(eventData);
-        const isCreator = isLoggedIn && state.user === eventData.creatorid;
+        const isCreator = isLoggedIn && getState("user") === eventData.creatorid;
 
         const tickcon = createElement("div", { class: "tickcon" }, []);
 
@@ -30,7 +30,7 @@ async function renderTicksPage(isLoggedIn, eventId, container) {
         await displayTickets(tickcon, eventData.tickets, eventId, isCreator, isLoggedIn);
 
     } catch (error) {
-        container.innerHTML = "";
+        container.replaceChildren();
         container.appendChild(
             createElement("h1", { textContent: `Error loading event details: ${error.message}` })
         );

@@ -1,0 +1,81 @@
+/* Root container */
+.itinerary-container {
+  font-family: 'Segoe UI', sans-serif;
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+
+/* Meta section */
+.itinerary-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 12px;
+}
+
+.status {
+  color: #0078D4;
+  font-weight: 600;
+}
+
+.dates {
+  color: #333;
+}
+
+/* Description */
+.itinerary-desc {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 24px;
+  color: #444;
+}
+
+/* Day block */
+.day-block {
+  margin-bottom: 32px;
+}
+
+.day-header {
+  font-size: 20px;
+  font-weight: 700;
+  color: #2b2b2b;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 6px;
+  margin-bottom: 16px;
+}
+
+/* Visit card */
+.visit-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  margin-bottom: 16px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.visit-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+}
+
+.visit-details {
+  padding: 16px 20px;
+}
+
+.visit-location {
+  font-size: 18px;
+  font-weight: 600;
+  color: #0078D4;
+  margin-bottom: 6px;
+}
+
+.visit-time {
+  font-size: 14px;
+  color: #666;
+}

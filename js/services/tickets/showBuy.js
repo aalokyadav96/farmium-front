@@ -25,7 +25,7 @@ export function showBuyTicketModal(ticketId, eventId, maxQuantity, isLoggedIn, i
                     alert(`Please enter a valid quantity (1 - ${maxQuantity})`);
                     return;
                 }
-                bookTicket(ticketId, eventId, quantity);
+                bookTicket(ticketId, eventId, maxQuantity, quantity);
             },
         }),
         Button("Cancel", "cancel-btn", {

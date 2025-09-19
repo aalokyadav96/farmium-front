@@ -8,7 +8,7 @@ import Modal from "../../components/ui/Modal.mjs";
 // import { renderPlaceDetails } from "./renderPlaceDetails.js";
 
 function displayPlaceHome(container, placeData, isCreator, isLoggedIn) {
-    container.innerHTML = "";
+    container.replaceChildren();
     // renderPlaceDetails(isLoggedIn, container, placeData, isCreator);
     container.appendChild(createElement("h2", {}, [placeData.name]));
     container.appendChild(
@@ -18,7 +18,7 @@ function displayPlaceHome(container, placeData, isCreator, isLoggedIn) {
 
 
 function displayPlaceInfo(container, placeData, isCreator) {
-    container.innerHTML = "";
+    container.replaceChildren();
 
     const info = {
         category: placeData.category || "N/A",
@@ -31,7 +31,7 @@ function displayPlaceInfo(container, placeData, isCreator) {
     };
 
     const renderInfo = () => {
-        container.innerHTML = "";
+        container.replaceChildren();
 
         if (isCreator) {
             const addInfoButton = Button("Add Info", "add-info-btn", {

@@ -1,11 +1,17 @@
-import { createActions, createPostHeader, updateTimelineStyles, fetchUserMetaLikesBatch } from "./helpers.js";
+import { createActions, createPostHeader, fetchUserMetaLikesBatch } from "./helpers.js";
 import { createElement } from "../../../components/createElement.js";
 import { RenderImagePost } from "../renderImagePost.js";
 import { RenderVideoPost } from "../renderVideoPost.js";
 import { resolveImagePath, EntityType, PictureType } from "../../../utils/imagePaths.js";
 import { getState } from "../../../state/state.js";
+import { navigate } from "../../../routes/index.js";
 
 export async function renderPost(posts, postsContainer) {
+    // Ensure posts is always an array
+    if (!Array.isArray(posts)) {
+        posts = [posts];
+    }
+
     const isLoggedIn = Boolean(getState("token"));
     const user = getState("user");
 
@@ -43,22 +49,61 @@ export async function renderPost(posts, postsContainer) {
         // Meta
         if (post.title || post.description || (post.tags?.length)) {
             const metaSection = createElement("div", { class: ["post-meta"] }, []);
-            if (post.title) metaSection.appendChild(createElement("h3", { class: ["post-title"] }, [post.title]));
-            if (post.description) metaSection.appendChild(createElement("p", { class: ["post-description"] }, [post.description]));
-            if (post.tags?.length) metaSection.appendChild(createElement("div", { class: "tags" }, post.tags.map(tag => createElement("span", { class: "tag" }, [tag]))));
+
+            if (post.title) {
+                metaSection.appendChild(
+                    createElement("h3", { class: ["post-title"] }, [post.title])
+                );
+            }
+
+            // if (post.description) {
+            //     metaSection.appendChild(
+            //         createElement("p", { class: ["post-description"] }, [post.description])
+            //     );
+            // }
+
+            if (post.tags?.length) {
+                const tagsContainer = createElement("div", { class: "tags" },
+                    post.tags.map(tag => {
+                        const link = createElement("a", { href: `/hashtag/${tag}` }, [
+                            createElement("span", { class: "tag" }, [tag])
+                        ]);
+                        // prevent metaSection click handler when clicking on tag
+                        link.addEventListener("click", e => e.stopPropagation());
+                        return link;
+                    })
+                );
+                metaSection.appendChild(tagsContainer);
+            }
+
             postElement.appendChild(metaSection);
+
+            // Navigate when meta area is clicked
+            metaSection.addEventListener("click", () => {
+                navigate(`/feedpost/${post.postid}`);
+            });
         }
 
-        // Actions — pass userLikes so "liked" state is correct
-        // --- inside renderPost ---
+        // // Meta
+        // if (post.title || post.description || (post.tags?.length)) {
+        //     const metaSection = createElement("div", { class: ["post-meta"] }, []);
+        //     if (post.title) metaSection.appendChild(createElement("h3", { class: ["post-title"] }, [post.title]));
+        //     if (post.description) metaSection.appendChild(createElement("p", { class: ["post-description"] }, [post.description]));
+        //     if (post.tags?.length) metaSection.appendChild(
+        //         createElement("div", { class: "tags" }, post.tags.map(tag => createElement("span", { class: "tag" }, [tag])))
+        //     );
+        //     postElement.appendChild(metaSection);
+
+        //     metaSection.addEventListener("onclick", () => navigate(`/feedpost/${post.postid}`));
+        // }
+
+        // Actions
         const actionsContainer = createActions(post, isLoggedIn, isCreator, userLikes, posts, postElement);
         postElement.appendChild(actionsContainer);
-
 
         i ? postsContainer.appendChild(postElement) : postsContainer.prepend(postElement);
 
         return { post, postElement, actionsContainer };
     });
 
-    updateTimelineStyles();
 }

@@ -5,6 +5,8 @@
     padding: 0.6rem;
     max-width: 1200px;
     margin: auto;
+    display: flex;
+    flex-wrap: wrap;
     box-sizing: border-box;
   }
   

@@ -4,6 +4,8 @@ import { createElement } from "../../components/createElement";
 import { fetchUserMeta } from "../../utils/usersMeta";
 import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
 import Imagex from "../../components/base/Imagex.js";
+import { navigate } from "../../routes/index.js";
+import { debounce } from "../../utils/deutils.js";
 
 /**
  * Internal store for per-post comment state
@@ -38,28 +40,53 @@ async function fetchComments(entityType, postId, page = 1, sort = "newest") {
  */
 function renderComment(comment) {
     const { user = {} } = comment;
-    // let cmtavatar = resolveImagePath(EntityType.USER, PictureType.PHOTO, user.profile_picture)
     let cmtavatar = resolveImagePath(EntityType.USER, PictureType.THUMB, `${comment.createdBy}.jpg`)
-    // avatar
-    // const avatar = createElement("img", {
-    //     // src: user.profile_picture || "/default.png",
-    //     src: cmtavatar,
-    //     alt: `${user.username || "Unknown"}'s avatar`,
-    //     class: "comment-avatar"
-    // });
-    const avatar = Imagex( {
+
+
+    // Avatar (clickable)
+    const avatar = Imagex({
         src: cmtavatar,
         alt: `${user.username || "Unknown"}'s avatar`,
-        classes: "comment-avatar"
+        classes: "comment-avatar",
+        style: "cursor:pointer;"
+    });
+    avatar.addEventListener("click", () => {
+        if (user.username) navigate(`/user/${user.username}`);
     });
 
-    // username + timestamp
+    // Username (clickable)
+    const usernameEl = createElement("span", {
+        class: "comment-username",
+        style: "cursor:pointer;",
+        title: `Go to ${user.username || "Unknown"}'s profile`
+    }, [user.username || "Unknown"]);
+
+    usernameEl.addEventListener("click", () => {
+        if (user.username) navigate(`/user/${user.username}`);
+    });
+
+    // Header
     const header = createElement("div", { class: "comment-header" }, [
-        createElement("span", { class: "comment-username" }, [user.username || "Unknown"]),
+        avatar,
+        usernameEl,
         createElement("span", { class: "comment-timestamp" }, [
             comment.createdAt ? new Date(comment.createdAt).toLocaleString() : ""
         ])
     ]);
+    // // avatar
+    // const avatar = Imagex( {
+    //     src: cmtavatar,
+    //     alt: `${user.username || "Unknown"}'s avatar`,
+    //     classes: "comment-avatar"
+    // });
+
+    // // username + timestamp
+    // const header = createElement("div", { class: "comment-header" }, [
+    //     createElement("span", { class: "comment-username" }, [user.username || "Unknown"]),
+    //     createElement("span", { class: "comment-timestamp" }, [
+    //         comment.createdAt ? new Date(comment.createdAt).toLocaleString() : ""
+    //     ])
+    // ]);
 
     // text content
     const body = createElement("div", { class: "comment-body" }, [
@@ -86,7 +113,7 @@ async function renderComments(postId) {
     const state = commentState.get(postId);
     if (!state) return;
 
-    state.list.innerHTML = "";
+    state.list.replaceChildren();
 
     const userIds = [...new Set(state.comments.map(c => c.createdBy))];
     const usersMeta = await fetchUserMeta(userIds);
@@ -184,16 +211,16 @@ async function handleSubmit(e, postId, entityType) {
     }
 }
 
-/**
- * Debounce utility
- */
-function debounce(fn, delay) {
-    let t;
-    return (...args) => {
-        clearTimeout(t);
-        t = setTimeout(() => fn.apply(null, args), delay);
-    };
-}
+// /**
+//  * Debounce utility
+//  */
+// function debounce(fn, delay) {
+//     let t;
+//     return (...args) => {
+//         clearTimeout(t);
+//         t = setTimeout(() => fn.apply(null, args), delay);
+//     };
+// }
 
 /**
  * Create a comments section for a specific post
@@ -220,8 +247,8 @@ export function createCommentsSection(postId, initialComments = [], entityType, 
     ]);
 
     container.appendChild(sort);
-    container.appendChild(list);
     container.appendChild(form);
+    container.appendChild(list);
 
     // Setup state
     commentState.set(postId, {

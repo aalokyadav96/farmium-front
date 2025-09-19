@@ -1,4 +1,4 @@
-import { APIG_URL, state } from "../../state/state.js";
+import { APIG_URL, getState } from "../../state/state.js";
 import { apiFetch } from "../../api/api.js";
 import { navigate } from "../../routes/index.js";
 import { createElement } from "../../components/createElement.js";
@@ -6,14 +6,16 @@ import { createFormGroup } from "../../components/createFormGroup.js";
 import Button from "../../components/base/Button.js";
 import Notify from "../../components/ui/Notify.mjs";
 
-/** Debounce helper */
-function debounce(func, delay) {
-    let timeout;
-    return function (...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), delay);
-    };
-}
+import {debounce} from "../../utils/deutils.js";
+
+// /** Debounce helper */
+// function debounce(func, delay) {
+//     let timeout;
+//     return function (...args) {
+//         clearTimeout(timeout);
+//         timeout = setTimeout(() => func.apply(this, args), delay);
+//     };
+// }
 
 /** Add autocomplete listeners for the place input */
 function addAutoConListeners(eventPlaceInput) {
@@ -22,7 +24,7 @@ function addAutoConListeners(eventPlaceInput) {
         const autocompleteList = document.getElementById("ac-list");
 
         if (!query) {
-            autocompleteList.innerHTML = "";
+            autocompleteList.replaceChildren();
             return;
         }
 
@@ -30,13 +32,13 @@ function addAutoConListeners(eventPlaceInput) {
             const response = await fetch(`${APIG_URL}/suggestions/places?query=${query}`);
             const suggestions = await response.json();
 
-            autocompleteList.innerHTML = "";
+            autocompleteList.replaceChildren();
             suggestions.forEach(suggestion => {
                 const item = createElement("li", { class: "ac-item" }, [suggestion.name]);
                 item.addEventListener("click", () => {
                     eventPlaceInput.value = suggestion.name;
                     eventPlaceInput.dataset.id = suggestion.id;
-                    autocompleteList.innerHTML = "";
+                    autocompleteList.replaceChildren();
                 });
                 autocompleteList.appendChild(item);
             });
@@ -58,7 +60,7 @@ function addAutoConListeners(eventPlaceInput) {
         let index = items.findIndex(i => i.classList.contains("selected"));
         if (e.key === "ArrowDown") { e.preventDefault(); index = index < items.length - 1 ? index + 1 : 0; }
         else if (e.key === "ArrowUp") { e.preventDefault(); index = index > 0 ? index - 1 : items.length - 1; }
-        else if (e.key === "Enter") { e.preventDefault(); if (index >= 0) { eventPlaceInput.value = items[index].textContent; autocompleteList.innerHTML = ""; } return; }
+        else if (e.key === "Enter") { e.preventDefault(); if (index >= 0) { eventPlaceInput.value = items[index].textContent; autocompleteList.replaceChildren(); } return; }
 
         items.forEach(i => i.classList.remove("selected"));
         items[index].classList.add("selected");
@@ -67,7 +69,7 @@ function addAutoConListeners(eventPlaceInput) {
 
 /** Shared function for creating or updating an event */
 async function submitEvent(form, isLoggedIn, eventId = null) {
-    if (!isLoggedIn || !state.user) { navigate('/login'); return; }
+    if (!isLoggedIn || !getState("user")) { navigate('/login'); return; }
 
     if (!form.checkValidity()) { form.reportValidity(); return; }
 
@@ -111,7 +113,7 @@ async function submitEvent(form, isLoggedIn, eventId = null) {
 // function generateEventForm(isLoggedIn, container, eventData = null) {
 //     if (!isLoggedIn) { Notify("Please log in.", { type: "warning", duration: 3000, dismissible: true }); navigate("/login"); return; }
 
-//     container.innerHTML = "";
+//     container.replaceChildren();
 //     const section = createElement("div", { class: "create-section" });
 //     const header = createElement("h2", {}, [eventData ? "Edit Event" : "Create Event"]);
 //     section.appendChild(header);
@@ -177,7 +179,7 @@ function generateEventForm(isLoggedIn, container, eventData = {}) {
         return;
     }
 
-    container.innerHTML = "";
+    container.replaceChildren();
     const section = createElement("div", { class: "create-section" });
     const header = createElement("h2", {}, [eventData.eventid ? "Edit Event" : "Create Event"]);
     section.appendChild(header);

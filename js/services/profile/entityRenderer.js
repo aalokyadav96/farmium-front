@@ -1,6 +1,6 @@
 /** Render fetched data inside the tab container. */
 function renderEntityData(container, data, entityType) {
-    container.innerHTML = ""; // Clear previous content
+    container.replaceChildren(); // Clear previous content
     if (!data || data.length === 0) {
         container.textContent = `No ${entityType} data found.`;
         return;

@@ -1,4 +1,4 @@
-import { SRC_URL, state } from "../../state/state.js";
+import { getState } from "../../state/state.js";
 import { apiFetch } from "../../api/api.js";
 // import Lightbox from '../../components/ui/Lightbox.mjs';
 import VidPlay from '../../components/ui/VidPlay.mjs';
@@ -42,7 +42,7 @@ async function uploadMedia(isLoggedIn, entityType, entityId, mediaList, modal) {
         );
 
         if (uploadResponse && uploadResponse.mediaid) {
-            Notify("Media uploaded successfully!", {type:"success",duration:3000, dismissible:true});
+            Notify("Media uploaded successfully!", { type: "success", duration: 3000, dismissible: true });
             modal.remove();
             document.body.style.overflow = "";
             displayNewMedia(isLoggedIn, uploadResponse, mediaList);
@@ -100,7 +100,7 @@ function addMediaEventListeners(isLoggedIn, entityType) {
 
 // Display newly uploaded media in the list
 function displayNewMedia(isLoggedIn, mediaData, mediaList) {
-    const isCreator = isLoggedIn && state.user === mediaData.creatorid;
+    const isCreator = isLoggedIn && getState("user") === mediaData.creatorid;
     const mediaItem = createElement("div", { class: "imgcon" });
 
     let mediaElement;
@@ -216,9 +216,11 @@ function renderMediaItem(media, index, isLoggedIn, entityType, entityId) {
     }
 
     mediaItem.appendChild(createElement("figure", {}, figureContent));
+    let actionCon = createElement("div", { class: "hflex-sb pad10" }, []);
+    mediaItem.appendChild(actionCon);
 
     // Creator-only delete
-    if (isLoggedIn && state.user === media.creatorid) {
+    if (isLoggedIn && getState("user") === media.creatorid) {
         const deleteBtn = createActionButton("delete-media-btn", "Delete", async () => {
             try {
                 await deleteMedia(media.mediaid, entityType, entityId);
@@ -227,14 +229,14 @@ function renderMediaItem(media, index, isLoggedIn, entityType, entityId) {
                 console.error("Failed to delete media:", err);
             }
         });
-        mediaItem.appendChild(deleteBtn);
+        actionCon.appendChild(deleteBtn);
     }
 
     // Report button
     const reportBtn = createActionButton("report-btn", "Report", () => {
         reportPost(media.meidaid, "media");
     });
-    mediaItem.appendChild(reportBtn);
+    actionCon.appendChild(reportBtn);
 
     return mediaItem;
 }
@@ -250,7 +252,7 @@ export async function displayMedia(content, entityType, entityId, isLoggedIn) {
     content.appendChild(createElement("h2", {}, ["Media Gallery"]));
 
     const mediaData = await apiFetch(`/media/${entityType}/${entityId}`);
-    const mediaList = createElement("div", { class: "hvflex" });
+    const mediaList = createElement("div", { class: "hvflex medialist" });
 
     if (isLoggedIn) {
         const addMediaBtn = Button("Add Media", "add-media-btn", {
@@ -366,7 +368,7 @@ function showMediaUploadForm(isLoggedIn, entityType, entityId, mediaList) {
     // Show preview on file selection
     fileGroup.querySelector("input").addEventListener("change", (e) => {
         const file = e.target.files[0];
-        previewDiv.innerHTML = "";
+        previewDiv.replaceChildren();
         if (file) {
             const url = URL.createObjectURL(file);
             if (file.type.startsWith("image/")) {

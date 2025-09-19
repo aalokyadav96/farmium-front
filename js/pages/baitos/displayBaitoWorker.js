@@ -1,7 +1,7 @@
 import { displayWorkerPage } from '../../services/baitos/workers/displayWorkerPage.js';
 
-async function Worker(isLoggedIn, baitoid, contentContainer) {
-    displayWorkerPage(contentContainer, isLoggedIn, baitoid)
+async function Worker(isLoggedIn, workerid, contentContainer) {
+    displayWorkerPage(contentContainer, isLoggedIn, workerid)
 }
 
 export { Worker };

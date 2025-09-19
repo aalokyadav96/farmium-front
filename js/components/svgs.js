@@ -59,6 +59,44 @@ let arrowLeftSVG = '<svg class="clrful" viewBox="0 0 24 24" width="24" height="2
 
 let homeSVG = '<svg class="clrful" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>';
 
-let commentSVG = coffeeSVG;
+let cardSVG = '<svg class="clrful" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>';
 
-export { profileSVG, searchSVG, liveStreamSVG, chatSVG, heartSVG, moonSVG, settingsSVG, downloadSVG, playSVG, PauseSVG, playCropSVG, headphonesSVG, imageSVG, filterSVG, placesSVG, coffeeSVG, calendarSVG, locaSVG, evaSVG, plusCircleSVG, plusSquareSVG, moreSVG, notifSVG, shopBagSVG, xSVG, logoutSVG, cartSVG, arrowLeftSVG, homeSVG, commentSVG };
+
+let maximizeSVG = '<svg class="clrful" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>';
+
+
+
+let vol0SVG = '<svg class="clrful" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon></svg>';
+
+
+let vol1SVG = '<svg class="clrful" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>';
+
+
+let vol2SVG = '<svg class="clrful" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>';
+
+
+let muteSVG = '<svg class="clrful" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>';
+
+
+let zoomInSVG = '<svg class="clrful" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>';
+
+
+let zoomOutSVG = '<svg class="clrful" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>';
+
+
+let dragBoxSVG = '<svg class="clrful" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1"><circle cx="5" cy="5" r="2"/><circle cx="5" cy="12" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="12" cy="5" r="2"/> <circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="19" cy="12" r="2"/><circle cx="19" cy="19" r="2"/></svg>';
+
+
+let pipSVG = '<svg class="clrful" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1"><rect x="3" y="3" width="18" height="14" rx="2"/><rect x="13" y="9" width="8" height="6" rx="1" fill="white"/></svg>';
+
+
+let warningSVG = '<svg class="clrful" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>';
+
+
+let morevSVG = '<svg class="clrful" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>';
+
+
+
+let commentSVG = `<svg aria-label="Comment" class="clrful" fill="none" height="24" role="img" viewBox="0 0 24 24" width="24"><title>Comment</title><path d="M20.656 17.008a9.993 9.993 0 1 0-3.59 3.615L22 22Z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="2"></path></svg>`;
+
+export { profileSVG, searchSVG, liveStreamSVG, chatSVG, heartSVG, moonSVG, settingsSVG, downloadSVG, playSVG, PauseSVG, playCropSVG, headphonesSVG, imageSVG, filterSVG, placesSVG, coffeeSVG, calendarSVG, locaSVG, evaSVG, plusCircleSVG, plusSquareSVG, moreSVG, notifSVG, shopBagSVG, xSVG, dragBoxSVG, logoutSVG, cartSVG, arrowLeftSVG, homeSVG, commentSVG, cardSVG, pipSVG, maximizeSVG, vol0SVG, vol1SVG, vol2SVG, muteSVG, zoomInSVG, zoomOutSVG, warningSVG, morevSVG };

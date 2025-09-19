@@ -81,6 +81,7 @@
   transition: stroke 0.2s ease;
 }
 
+
 .vert_a:hover .clrful {
   stroke: var(--hvrstrk);
 }

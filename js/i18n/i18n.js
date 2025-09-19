@@ -1,5 +1,3 @@
-
-
 import { setState, getState } from "../state/state.js";
 
 let translations = {};
