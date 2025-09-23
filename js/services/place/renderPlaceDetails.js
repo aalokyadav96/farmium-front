@@ -1,7 +1,7 @@
 import { createElement } from "../../components/createElement.js";
-import { editPlaceForm, deletePlace, analyticsPlace } from "./placeService.js";
+import { editPlaceForm, deletePlace } from "./placeService.js";
+import { analyticsPlace } from "./placeAnanlytics.js";
 import Button from "../../components/base/Button.js";
-import { SRC_URL } from "../../api/api.js";
 import { reportPost } from "../reporting/reporting.js";
 import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
 import { updateImageWithCrop } from "../../utils/bannerEditor.js"; // adjust path
@@ -66,6 +66,8 @@ console.log(place);
     const actionsWrapper = createElement("div", { class: "hvflex" }, []);
     const editContainer = createElement("div", { id: "editplace" }, []);
 
+    let placeanacon = createElement("div",{},[]);
+    
     actionsWrapper.appendChild(
       Button("Edit Place", "edit-place-btn", {
         click: () => editPlaceForm(isLoggedIn, place.placeid, editContainer),
@@ -80,12 +82,13 @@ console.log(place);
 
     actionsWrapper.appendChild(
       Button("View Analytics", "analytics-place-btn", {
-        click: () => analyticsPlace(isLoggedIn, place.placeid),
+        click: () => analyticsPlace(placeanacon, isLoggedIn, place.placeid),
       }, "buttonx secondary")
     );
 
     detailsSection.appendChild(actionsWrapper);
     detailsSection.appendChild(editContainer);
+    detailsSection.appendChild(placeanacon);
   } else {
     const reportBtn = createElement("button", { class: "report-comment", type: "button" }, ["Report"]);
     reportBtn.addEventListener("click", () => reportPost(place.placeid, "place", "", ""));

@@ -43,7 +43,7 @@ async function editProfile(content) {
         click: () => {
             updateProfile(new FormData(form));
         }
-    });
+    }, "buttonx primary");
 
     const cancelBtn = Button("Cancel", "cancel-profile-btn", {
         click: () => {
@@ -51,7 +51,7 @@ async function editProfile(content) {
             navigate("/profile");
             window.location.pathname = window.location.pathname;
         }
-    });
+    }, "buttonx secondary");
 
     form.appendChild(updateBtn);
     form.appendChild(cancelBtn);
@@ -103,7 +103,7 @@ async function updateProfile(formData) {
         setState({ userProfile: mergedProfile }, true);
 
         Notify("Profile updated successfully.", {type:"success",duration:3000, dismissible:true});
-        renderPage();
+        // renderPage();
     } catch (error) {
         console.error("Error updating profile:", error);
         handleError("Error updating profile. Please try again.");

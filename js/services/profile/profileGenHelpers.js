@@ -59,17 +59,6 @@ function FollowUser(followBtn, userId) {
 }
 
 
-// function FollowUser(followBtn, userid) {
-//     toggleAction({
-//         entityId: userid,
-//         entityType: "user",
-//         button: followBtn,
-//         apiPath: "/follows/",
-//         property: "isFollowing",
-//         labels: { on: "Unfollow", off: "Follow" },
-//         actionName: "followed"
-//     });
-// }
 
 function createProfileActions(profile, isLoggedIn) {
     const profileActions = document.createElement("div");
@@ -89,26 +78,6 @@ function createProfileActions(profile, isLoggedIn) {
         profileActions.appendChild(editButton);
     }
 
-    // if (isLoggedIn && profile.userid !== getState("user")) {
-    //     const followButton = Button("Follow", "follow-btn", {
-    //         click: () => toggleFollow(profile.userid, followButton, profile)
-    //     }, "btn follow-button", { backgroundColor: "lightgreen" });
-    //     followButton.dataset.action = "toggle-follow";
-    //     followButton.dataset.userid = profile.userid;
-    //     followButton.textContent = profile.is_following ? "Unfollow" : "Follow";
-    //     profileActions.appendChild(followButton);
-
-    //     const sendMessagebtn = Button("Send Message", 'send-msg', {
-    //         // click: () => userChatInit(profile.userid),
-    //         click: () => meChat(profile.userid, "user", getState("user")),
-    //     }, "buttonx");
-    //     profileActions.appendChild(sendMessagebtn);
-
-    //     const reportButton = Button("Report", "report-btn", {
-    //         click: () => { reportPost(profile.userid, "user") }
-    //     }, "report-btn", { backgroundColor: "#ee9090" });
-    //     profileActions.appendChild(reportButton);
-    // }
 
     const currentUser = getState("user");
 
@@ -160,7 +129,7 @@ function createProfileInfo(profile) {
 
     const infoItems = [
         { label: "Last Login", value: formatDate(profile.last_login) || "Never logged in" },
-        { label: "Status", value: profile.online ? "Active" : "Inactive" },
+        // { label: "Status", value: profile.online ? "Active" : "Inactive" },
         { label: "Verification Status", value: profile.is_verified ? "Verified" : "Not Verified" },
     ];
 

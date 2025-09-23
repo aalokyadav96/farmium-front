@@ -71,7 +71,7 @@ export function WalletManager() {
 
     return {
         element: createElement("div", { id: "wallet-manager", class: "wallet-card" }, [
-            createElement("h3", { class: "wallet-section-title" }, ["Wallet Balance"]),
+            createElement("h3", { class: "wallet-section-title" }, ["Balance"]),
             balanceEl,
             createElement("div", { class: "wallet-form" }, [
                 amountInput,

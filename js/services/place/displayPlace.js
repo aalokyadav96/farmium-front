@@ -120,23 +120,6 @@ export default async function displayPlace(isLoggedIn, placeId, contentContainer
     bookingContainer.appendChild(bookButton);
 
 
-    // const bookButton = createElement("button", {
-    //   style: "margin-top:16px;padding:8px 16px;cursor:pointer;",
-    //   onclick: () => {
-    //     displayBooking(
-    //       {
-    //         entityType: "place",
-    //         entityId: placeId,
-    //         entityCategory: placeData.category,
-    //         userId: getState("user") || "guest",
-    //         isAdmin: isCreator
-    //       },
-    //       bookingContainer
-    //     );
-    //   }
-    // }, ["Book Slot"]);
-    // bookingContainer.appendChild(bookButton);
-
 
     // ─── Tabs Setup ─────────────────────────────────
     const tabs = [];

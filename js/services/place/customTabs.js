@@ -1,5 +1,4 @@
 import { createElement } from "../../components/createElement.js";
-import BookingForm from "../../components/ui/BookingForm.mjs";
 import Button from "../../components/base/Button.js";
 import { apiFetch } from "../../api/api.js";
 import { displayMenu } from "../menu/menuService.js";
@@ -90,17 +89,16 @@ async function displayPlaceMenu(container, placeId, isCreator, isLoggedIn) {
 // 🍽️ Saloon
 async function displaySaloonSlots(container, placeId, isCreator, isLoggedIn) {
   container.replaceChildren();
-  try {
-    container.appendChild(
-      BookingForm(alert("hi")));
-  } catch (err) {
-    container.appendChild(
-      createElement("div", { class: "tab-section error" }, [
-        createElement("p", {}, ["Slot unavailable."]),
-      ])
-    );
-    console.warn("Menu tab failed:", err);
-  }
+  // try {
+  //   container.appendChild();
+  // } catch (err) {
+  //   container.appendChild(
+  //     createElement("div", { class: "tab-section error" }, [
+  //       createElement("p", {}, ["Slot unavailable."]),
+  //     ])
+  //   );
+  //   console.warn("Menu tab failed:", err);
+  // }
 }
 
 // ─── Rooms (Hotel) ──────────────────────────────────────────────────────────────

@@ -1,4 +1,4 @@
-import { displayBooking } from '../../services/booking/bookingtest.js';
+import { displayBooking } from '../../services/booking/booking';
 
 async function Booking(isLoggedIn, contentContainer) {
     displayBooking(isLoggedIn, contentContainer)

@@ -1,10 +1,14 @@
 import { createElement } from "../../components/createElement.js";
 import { Button } from "../../components/base/Button.js";
 import { editEvent } from "./creadit.js";
-import { deleteEvent, viewEventAnalytics } from "./eventService.js";
+import { deleteEvent } from "./eventService.js";
+import { viewEventAnalytics } from "./eventAnalytics.js";
 import { reportPost } from "../reporting/reporting.js";
 import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
 import { updateImageWithCrop } from "../../utils/bannerEditor.js";
+import { starEmptySVG, starFilledSVG } from "../../components/svgs.js";
+import { createIconButton } from "../../utils/svgIconButton.js";
+
 
 // Config for displaying event details
 const fieldConfig = [
@@ -63,7 +67,7 @@ const createCustomFields = fields => {
 
 // Save/unsave
 const getSavedEvents = () => {
-    try { return JSON.parse(localStorage.getItem("saved_events") || "[]"); } 
+    try { return JSON.parse(localStorage.getItem("saved_events") || "[]"); }
     catch { return []; }
 };
 const toggleSaveEvent = id => {
@@ -72,20 +76,42 @@ const toggleSaveEvent = id => {
     else saved.push(id);
     localStorage.setItem("saved_events", JSON.stringify(saved));
 };
+
 const createSaveButton = eventid => {
+    let fillStar = createIconButton({
+        svgMarkup: starFilledSVG,
+        classSuffix: ""
+    });
+    let emptyStar = createIconButton({
+        svgMarkup: starEmptySVG,
+        classSuffix: ""
+    });
     const icon = createElement("span", {
-        style: `cursor:pointer;font-size:20px;color:${getSavedEvents().includes(eventid) ? "gold" : "gray"}`,
         title: "Save Event"
-    }, [getSavedEvents().includes(eventid) ? "★" : "☆"]);
+    }, [getSavedEvents().includes(eventid) ? fillStar : emptyStar]);
 
     icon.addEventListener("click", () => {
         toggleSaveEvent(eventid);
         const nowSaved = getSavedEvents().includes(eventid);
-        icon.replaceChildren(nowSaved ? "★" : "☆");
-        icon.setAttribute("style", `cursor:pointer;font-size:20px;color:${nowSaved ? "gold" : "gray"}`);
+        icon.replaceChildren(nowSaved ? fillStar : emptyStar);
     });
     return icon;
 };
+
+// const createSaveButton = eventid => {
+//     const icon = createElement("span", {
+//         style: `cursor:pointer;font-size:20px;color:${getSavedEvents().includes(eventid) ? "gold" : "gray"}`,
+//         title: "Save Event"
+//     }, [getSavedEvents().includes(eventid) ? "★" : "☆"]);
+
+//     icon.addEventListener("click", () => {
+//         toggleSaveEvent(eventid);
+//         const nowSaved = getSavedEvents().includes(eventid);
+//         icon.replaceChildren(nowSaved ? "★" : "☆");
+//         icon.setAttribute("style", `cursor:pointer;font-size:20px;color:${nowSaved ? "gold" : "gray"}`);
+//     });
+//     return icon;
+// };
 
 // Share
 const createShareButton = eventid => {
@@ -169,10 +195,12 @@ function createInfoSection(eventData, isCreator, isLoggedIn) {
 
     const actions = [];
 
+    let evanacon = createElement("div", {}, []);
+
     if (isLoggedIn && isCreator) {
         actions.push({ text: '✏ Edit Event', onClick: () => editEvent(isLoggedIn, eventData.eventid, document.getElementById("editevent")), classes: ['edit-btn', "buttonx"] });
         actions.push({ text: '🗑 Delete Event', onClick: () => deleteEvent(isLoggedIn, eventData.eventid), classes: ['delete-btn', 'buttonx'] });
-        actions.push({ text: '📊 View Analytics', onClick: () => viewEventAnalytics(isLoggedIn, eventData.eventid), classes: ['analytics-btn', "buttonx"] });
+        actions.push({ text: '📊 View Analytics', onClick: () => viewEventAnalytics(evanacon, isLoggedIn, eventData.eventid), classes: ['analytics-btn', "buttonx"] });
     } else if (isLoggedIn) {
         actions.push({ text: 'Report Event', onClick: () => reportPost(eventData.eventid, 'event') });
     }
@@ -188,6 +216,7 @@ function createInfoSection(eventData, isCreator, isLoggedIn) {
         createEditPlaceholder()
     );
 
+    eventInfo.appendChild(evanacon);
     return eventInfo;
 }
 
@@ -205,5 +234,5 @@ export async function displayEventDetails(content, eventData, isCreator, isLogge
 
     wrapper.appendChild(card);
     content.appendChild(wrapper);
-    content.appendChild(createElement("div",{id:"edittabs"},[]));
+    content.appendChild(createElement("div", { id: "edittabs" }, []));
 }

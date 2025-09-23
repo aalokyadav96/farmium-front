@@ -1,5 +1,5 @@
 .artistpage {
-  max-width: 860px;
+  max-width: 960px;
   margin: auto;
   border-radius: 8px;
 }
@@ -48,13 +48,12 @@
   aspect-ratio: 7 / 3;
 }
 
-.artist-photo, 
-.artist-banner {
+.artist-photo, .artist-banner {
   display: flex;
   margin: 0 auto;
   object-fit: cover;
-  border: 1px solid #eee;
   position: relative;
+  background-color: #aaaaaaa7;
   height: 100%;
   width: 100%;
 }

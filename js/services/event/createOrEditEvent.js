@@ -5,17 +5,7 @@ import { createElement } from "../../components/createElement.js";
 import { createFormGroup } from "../../components/createFormGroup.js";
 import Button from "../../components/base/Button.js";
 import Notify from "../../components/ui/Notify.mjs";
-
-import {debounce} from "../../utils/deutils.js";
-
-// /** Debounce helper */
-// function debounce(func, delay) {
-//     let timeout;
-//     return function (...args) {
-//         clearTimeout(timeout);
-//         timeout = setTimeout(() => func.apply(this, args), delay);
-//     };
-// }
+import { debounce } from "../../utils/deutils.js";
 
 /** Add autocomplete listeners for the place input */
 function addAutoConListeners(eventPlaceInput) {
@@ -60,16 +50,26 @@ function addAutoConListeners(eventPlaceInput) {
         let index = items.findIndex(i => i.classList.contains("selected"));
         if (e.key === "ArrowDown") { e.preventDefault(); index = index < items.length - 1 ? index + 1 : 0; }
         else if (e.key === "ArrowUp") { e.preventDefault(); index = index > 0 ? index - 1 : items.length - 1; }
-        else if (e.key === "Enter") { e.preventDefault(); if (index >= 0) { eventPlaceInput.value = items[index].textContent; autocompleteList.replaceChildren(); } return; }
+        else if (e.key === "Enter") { 
+            e.preventDefault(); 
+            if (index >= 0) { 
+                eventPlaceInput.value = items[index].textContent; 
+                autocompleteList.replaceChildren(); 
+            } 
+            return; 
+        }
 
         items.forEach(i => i.classList.remove("selected"));
         items[index].classList.add("selected");
     });
 }
 
-/** Shared function for creating or updating an event */
+/** Submit or update event */
 async function submitEvent(form, isLoggedIn, eventId = null) {
-    if (!isLoggedIn || !getState("user")) { navigate('/login'); return; }
+    if (!isLoggedIn || !getState("user")) { 
+        navigate('/login'); 
+        return; 
+    }
 
     if (!form.checkValidity()) { form.reportValidity(); return; }
 
@@ -84,8 +84,8 @@ async function submitEvent(form, isLoggedIn, eventId = null) {
     };
 
     const date = form.querySelector("#event-date")?.value;
-    let time = form.querySelector("#event-time")?.value;
-    if (time?.length === 5) time += ":00";
+    let time = form.querySelector("#event-time")?.value || "00:00:00";
+    if (time.length === 5) time += ":00"; // ensure HH:MM:SS
     payload.date = new Date(`${date}T${time}`).toISOString();
 
     const formData = new FormData();
@@ -109,69 +109,7 @@ async function submitEvent(form, isLoggedIn, eventId = null) {
     }
 }
 
-/** Generate event form (Create or Edit) */
-// function generateEventForm(isLoggedIn, container, eventData = null) {
-//     if (!isLoggedIn) { Notify("Please log in.", { type: "warning", duration: 3000, dismissible: true }); navigate("/login"); return; }
-
-//     container.replaceChildren();
-//     const section = createElement("div", { class: "create-section" });
-//     const header = createElement("h2", {}, [eventData ? "Edit Event" : "Create Event"]);
-//     section.appendChild(header);
-
-//     // actual form wrapper
-//     const form = createElement("form", { class: "event-form" });
-//     const fields = [
-//         { 
-//             type: "select", 
-//             id: "event-category", 
-//             label: "Event Type", 
-//             required: true, 
-//             value: eventData?.category || "",   // ✅ preselect category
-//             options: [
-//                 { value: "", label: "Select a Type" },
-//                 "Conference","Concert","Sports","Festival","Meetup","Workshop","Other"
-//             ].map(v => typeof v === "string" ? { value: v, label: v } : v) 
-//         },
-//         { type: "text", id: "event-title", label: "Event Title", value: eventData?.title || "", required: true },
-//         { type: "textarea", id: "event-description", label: "Description", value: eventData?.description || "", required: true },
-//         { type: "text", id: "event-place", label: "Place", value: eventData?.placename || "", required: true },
-//         { type: "text", id: "event-location", label: "Location", value: eventData?.location || "", required: true },
-//         { type: "date", id: "event-date", label: "Date", value: eventData ? new Date(eventData.date).toISOString().split("T")[0] : "", required: true },
-//         { type: "time", id: "event-time", label: "Time", value: eventData ? new Date(eventData.date).toTimeString().split(" ")[0] : "", required: true },
-//         // { type: "file", id: "event-banner", label: "Event Banner", additionalProps: { accept: "image/*" } },
-//         // { type: "file", id: "event-seating", label: "Seating Plan", additionalProps: { accept: "image/*" } },
-//     ];
-    
-//     fields.forEach(f => {
-//         if (f.id === "event-place") {
-//             const wrapper = createElement("div", { class: "suggestions-container" });
-//             const input = createFormGroup(f);
-//             wrapper.appendChild(input);
-
-//             const acList = createElement("ul", { id: "ac-list", class: "ac-list" });
-//             wrapper.appendChild(acList);
-
-//             form.appendChild(wrapper);
-//         } else form.appendChild(createFormGroup(f));
-//     });
-
-//     const submitBtn = Button(eventData ? "Update Event" : "Create Event", "", {
-//         click: (e) => {
-//             e.preventDefault();
-//             submitEvent(form, isLoggedIn, eventData?.eventid);
-//         }
-//     }, "buttonx");
-//     form.appendChild(submitBtn);
-
-//     section.appendChild(form);
-//     container.appendChild(section);
-
-//     // Attach autocomplete
-//     const placeInput = form.querySelector("#event-place");
-//     if (placeInput) addAutoConListeners(placeInput);
-// }
-
-
+/** Generate event form with optional prefilled data */
 function generateEventForm(isLoggedIn, container, eventData = {}) {
     if (!isLoggedIn) {
         Notify("Please log in.", { type: "warning", duration: 3000, dismissible: true });
@@ -181,17 +119,13 @@ function generateEventForm(isLoggedIn, container, eventData = {}) {
 
     container.replaceChildren();
     const section = createElement("div", { class: "create-section" });
-    const header = createElement("h2", {}, [eventData.eventid ? "Edit Event" : "Create Event"]);
-    section.appendChild(header);
+    section.appendChild(createElement("h2", {}, [eventData.eventid ? "Edit Event" : "Create Event"]));
 
     const form = createElement("form", { class: "event-form" });
     const fields = [
         { 
-            type: "select", 
-            id: "event-category", 
-            label: "Event Type", 
-            required: true, 
-            value: eventData.category || "",   // ✅ preselect category safely
+            type: "select", id: "event-category", label: "Event Type", required: true,
+            value: eventData.category || "",
             placeholder: "Select a Type",
             options: ["Conference","Concert","Sports","Festival","Meetup","Workshop","Other"].map(v => ({ value: v, label: v }))
         },
@@ -206,26 +140,18 @@ function generateEventForm(isLoggedIn, container, eventData = {}) {
     fields.forEach(f => {
         if (f.id === "event-place") {
             const wrapper = createElement("div", { class: "suggestions-container" });
-            const input = createFormGroup(f);
-            wrapper.appendChild(input);
-
-            const acList = createElement("ul", { id: "ac-list", class: "ac-list" });
-            wrapper.appendChild(acList);
-
+            wrapper.appendChild(createFormGroup(f));
+            wrapper.appendChild(createElement("ul", { id: "ac-list", class: "ac-list" }));
             form.appendChild(wrapper);
         } else {
             form.appendChild(createFormGroup(f));
         }
     });
 
-    const submitBtn = Button(eventData.eventid ? "Update Event" : "Create Event", "", {
-        click: (e) => {
-            e.preventDefault();
-            submitEvent(form, isLoggedIn, eventData.eventid);
-        }
-    }, "buttonx");
+    form.appendChild(Button(eventData.eventid ? "Update Event" : "Create Event", "", {
+        click: e => { e.preventDefault(); submitEvent(form, isLoggedIn, eventData.eventid); }
+    }, "buttonx"));
 
-    form.appendChild(submitBtn);
     section.appendChild(form);
     container.appendChild(section);
 

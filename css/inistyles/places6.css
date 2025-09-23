@@ -1,128 +1,127 @@
- 
-  /* Layout container */
-  .places-layout {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 24px;
-  }
-  
-  /* Main content */
-  .places-main {
-    flex: 3;
-  }
-  
-  /* Sidebar */
-  .places-aside {
-    flex: 1;
-    background: #fff;
-    padding: 16px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  }
-  
-  .places-aside h3 {
-    font-size: 18px;
-    margin-bottom: 12px;
-  }
-  
-  .primary {
-    background-color: #0078D4;
-    color: white;
-  }
-  
-  .secondary {
-    background-color: #e0e0e0;
-    color: #333;
-  }
-  
-  /* Controls */
-  .place-controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 16px;
-  }
-  
-  .place-search {
-    padding: 8px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-  }
-  
-  .place-sort {
-    padding: 8px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-  }
-  
-  /* Category chips */
-  .category-chips {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-  
-  .category-chip {
-    padding: 6px 12px;
-    background: #0078D4;
-    color: white;
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
-    font-size: 13px;
-  }
-  /* Grid layout for place list */
-.placelist-wrapper {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 24px;
-  padding: 20px 0;
+.places-page {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-lg);
+  /* padding: var(--container-padding); */
+  max-width: var(--max-width);
+  margin: 0 auto;
+  background-color: var(--color-bg);
+  color: var(--color-fg);
 }
 
-/* Place card styling */
+.places-main {
+  flex: 1 1 70%;
+}
+
+.places-aside {
+  flex: 1 1 25%;
+  background-color: var(--color-surface);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-elev-1);
+}
+
+.places-main h1,
+.places-aside h3 {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--space-md);
+}
+
+.places-filter-toggle {
+  margin-bottom: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-space);
+  padding: var(--space-sm);
+}
+
+.places-filter-summary {
+  cursor: pointer;
+  font-weight: bold;
+  font-size: var(--font-size-base);
+}
+
+.places-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.places-search {
+  flex: 1;
+  padding: var(--space-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+  background-color: var(--color-bg);
+  color: var(--color-fg);
+}
+
+.places-sort {
+  padding: var(--space-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+  background-color: var(--color-bg);
+  color: var(--color-fg);
+}
+
+
+.places-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-md);
+}
+
 .place-card {
-  background: #fff;
-  border-radius: 12px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-elev-1);
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  transition: transform 0.2s ease;
+  transition: box-shadow var(--transition-fast);
 }
 
 .place-card:hover {
-  transform: translateY(-2px);
+  box-shadow: var(--shadow-elev-2);
 }
 
-/* Image styling */
 .place-card img {
+  aspect-ratio: 7/3;
   width: 100%;
-  aspect-ratio: 16 / 9;
+  height: auto;
   object-fit: cover;
   display: block;
 }
 
-/* Place info styling */
 .place-info {
-  padding: 16px;
+  padding: var(--space-md);
 }
 
 .place-info h2 {
-  font-size: 18px;
-  margin: 0 0 8px;
+  font-size: var(--font-size-lg);
+  font-family: var(--font-heading);
+  margin-bottom: var(--space-sm);
 }
 
 .place-info p {
-  font-size: 14px;
-  margin: 4px 0;
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-xs);
 }
 
-/* Badge styling */
 .badge {
-  font-size: 12px;
-  padding: 4px 8px;
-  border-radius: 6px;
-  background-color: #0078D4;
-  color: white;
-  font-weight: 500;
+  font-size: var(--font-size-xs);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-muted);
+  color: var(--color-bg);
 }
 
-  
+.pagination-wrapper {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
+}

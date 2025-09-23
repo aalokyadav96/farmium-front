@@ -4,6 +4,7 @@ import { SRC_URL, apiFetch } from "../../../api/api.js";
 import { navigate } from "../../../routes/index.js";
 import Button from "../../../components/base/Button.js";
 import { resolveImagePath, PictureType, EntityType } from "../../../utils/imagePaths.js";
+import Imagex from "../../../components/base/Imagex.js";
 
 function renderFarmCards(farms, grid, isLoggedIn) {
     grid.replaceChildren();
@@ -16,10 +17,10 @@ function renderFarmCards(farms, grid, isLoggedIn) {
 function FarmCard(farm, isLoggedIn) {
     const card = createElement("div", { class: "farm__card" });
 
-    const img = createElement("img", {
+    const img = Imagex( {
         src: resolveImagePath(EntityType.FARM, PictureType.THUMB, farm.photo),
         alt: farm.name,
-        class: "farm__image"
+        classes: "farm__image"
     });
 
     const badgeWrap = createFarmBadges(farm);
@@ -55,10 +56,10 @@ function createCropList(crops) {
     for (const crop of items) {
         const cropCard = createElement("div", { class: "crop__card" });
 
-        const img = createElement("img", {
+        const img = Imagex( {
             src: resolveImagePath(EntityType.CROP, PictureType.THUMB, crop.imageUrl),
             alt: crop.name,
-            class: "crop__image"
+            classes: "crop__image"
         });
 
         const badge = crop.outOfStock ? "Out of Stock" : crop.featured ? "Featured" : "";

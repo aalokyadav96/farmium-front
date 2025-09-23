@@ -1,142 +1,144 @@
-/* Scoped Styles for Baitos Page */
-.baitospage {
+.baitos-page {
   display: flex;
-  gap: 20px;
   flex-wrap: wrap;
+  gap: var(--space-lg);
+  /* padding: var(--container-padding); */
+  max-width: var(--max-width);
+  margin: 0 auto;
+  background-color: var(--color-bg);
+  color: var(--color-fg);
 }
 
-/* Main Section */
-
-
-/* Filter Toggle */
-.baito-filter-toggle {
-  margin-bottom: 20px;
+.baitos-main {
+  flex: 1 1 70%;
 }
 
-.baito-filter-summary {
-  font-size: 16px;
+.baitos-aside {
+  flex: 1 1 25%;
+  background-color: var(--color-surface);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-elev-1);
+}
+
+.baito-header h2,
+.baitos-main h1,
+.baitos-aside h3 {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--space-md);
+}
+
+.baitos-filter-toggle {
+  margin-bottom: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-space);
+  padding: var(--space-sm);
+}
+
+.baitos-filter-summary {
+  cursor: pointer;
   font-weight: bold;
-  cursor: pointer;
-  padding: 10px;
-  border-radius: 8px;
+  font-size: var(--font-size-base);
 }
 
-.baito-filter-bar {
+.baitos-controls {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
-  padding: 10px 0;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
 }
 
-.baito-filter-bar select,
-.baito-filter-bar input {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 14px;
+.baitos-search {
   flex: 1;
+  padding: var(--space-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+  background-color: var(--color-bg);
+  color: var(--color-fg);
 }
 
-.baito-filter-bar .btn {
-  padding: 10px 16px;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  cursor: pointer;
+.baitos-sort {
+  padding: var(--space-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+  background-color: var(--color-bg);
+  color: var(--color-fg);
 }
 
-.btn-secondary {
-  background-color: #e0f2f1;
-  color: #00796b;
+.baitos-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-md);
 }
 
-.btn-secondary:hover {
-  background-color: #b2dfdb;
-}
-
-/* Baito List */
-.baito-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-/* Baito Card */
 .baito-card {
-  width: calc(33% - 10px);
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-elev-1);
   overflow: hidden;
-  transition: transform 0.2s;
+  transition: box-shadow var(--transition-fast);
 }
 
 .baito-card:hover {
-  transform: translateY(-4px);
+  box-shadow: var(--shadow-elev-2);
 }
 
-.baito-card-img img {
+.baito-card-img {
   width: 100%;
   aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+
+.baito-banner-thumb {
+  aspect-ratio: 7/3;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   display: block;
 }
 
 .baito-card-content {
-  padding: 12px 16px;
+  padding: var(--space-md);
 }
 
 .baito-title {
-  font-size: 18px;
-  margin-bottom: 6px;
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--space-sm);
+  font-family: var(--font-heading);
 }
 
 .baito-company,
 .baito-meta,
 .baito-type-shift,
 .baito-loc-time {
-  font-size: 14px;
-  margin-bottom: 4px;
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-xs);
 }
 
-/* Baito Actions */
 .baito-actions {
   display: flex;
-  gap: 10px;
-  margin-top: 10px;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
 }
 
-/* Pagination */
-.baito-pagination {
+.pagination-wrapper {
   display: flex;
   justify-content: center;
-  gap: 10px;
-  margin-top: 20px;
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
 }
-
-.baito-pagination .buttonx {
-  background-color: #e0f2f1;
-  color: #00796b;
-}
-
-/* Aside Section */
-
-
 
 #lang-toggle {
-  padding: 10px;
-  border-radius: 8px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-}
-
-/* Responsive Layout */
-@media (max-width: 768px) {
-  .baitospage {
-    flex-direction: column;
-  }
-
-  .baito-card {
-    width: 100%;
-  }
+  margin-top: var(--space-md);
+  padding: var(--space-sm);
+  font-size: var(--font-size-base);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg);
+  color: var(--color-fg);
 }

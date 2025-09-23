@@ -14,7 +14,6 @@
   /* Sidebar */
   .catalogue-aside {
     flex: 1;
-    background: #fff;
     padding: 10px;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
@@ -31,6 +30,7 @@
   /* Top controls */
   .top-controls {
     display: flex;
+    flex-wrap: wrap;
     gap: 12px;
     margin-bottom: 16px;
   }
@@ -78,7 +78,6 @@
   
   /* Crop card */
   .crop-card {
-    background: #fff;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     padding: 16px;
@@ -155,7 +154,6 @@
   
   /* Promo boxes */
   .promo-box {
-    background-color: #f9f9f9;
     border-radius: 8px;
     padding: 12px;
     margin-top: 8px;

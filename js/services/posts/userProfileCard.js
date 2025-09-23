@@ -1,6 +1,8 @@
 import { createElement } from "../../components/createElement.js";
 import { Button } from "../../components/base/Button.js";
 import { showPaymentModal } from "../pay/pay.js";
+import { getState } from "../../state/state.js";
+import Imagex from "../../components/base/Imagex.js";
 
 export function userProfileCard(profile = {
     username: "Anonymous",
@@ -14,56 +16,61 @@ export function userProfileCard(profile = {
 }) {
     const card = createElement("div", { class: "user-profile-card" });
 
-    const avatar = createElement("img", {
+    const avatar = Imagex({
         src: profile.avatarUrl,
         alt: `${profile.username}'s avatar`,
-        class: "avatar",
+        classes: "avatar",
         loading: "lazy"
     });
 
     const name = createElement("h3", {}, [profile.username]);
     const bio = createElement("p", { class: "bio" }, [profile.bio]);
-    const count = createElement("p", { class: "post-count" }, [`📝 Posts: ${profile.postCount}`]);
 
-    // Funding button (works for both users and posts)
-    const fundButton = Button("Fund", "fund-btn", {
-        click: async () => {
-            if (!profile.entityId) {
-                alert("Funding not available.");
-                return;
+    const elements = [avatar, name, bio];
+
+    const currentUser = getState("user");
+
+    // Funding button (only if not the logged-in user)
+    if (profile.username !== currentUser) {
+        const fundButton = Button("Fund", "fund-btn", {
+            click: async () => {
+                if (!profile.entityId) {
+                    alert("Funding not available.");
+                    return;
+                }
+
+                const result = await showPaymentModal({
+                    entityType: profile.entityType || "user",
+                    entityId: profile.entityId,
+                    entityName: profile.entityName || profile.username
+                });
+
+                if (result?.success) {
+                    const target = profile.entityType === "post" ? "post" : "user";
+                    alert(`You successfully funded this ${target} using ${result.method}`);
+                } else {
+                    console.log("Funding cancelled or failed");
+                }
             }
+        });
 
-            const result = await showPaymentModal({
-                entityType: profile.entityType || "user",
-                entityId: profile.entityId,         // use entityId here
-                entityName: profile.entityName || profile.username
-            });
+        const count = createElement("p", { class: "post-count" }, [`📝 Posts: ${profile.postCount}`]);
+        elements.push(count);
+        elements.push(fundButton);
 
-            if (result?.success) {
-                const target = profile.entityType === "post" ? "post" : "user";
-                alert(`You successfully funded this ${target} using ${result.method}`);
-            } else {
-                console.log("Funding cancelled or failed");
-            }
+        // Follow button (only for users, and not yourself)
+        if (profile.entityType === "user") {
+            const followBtn = createElement("button", {
+                class: "btn btn-outline",
+                onclick: () => {
+                    profile.isFollowing = !profile.isFollowing;
+                    followBtn.textContent = profile.isFollowing ? "Unfollow" : "Follow";
+                    // TODO: sync follow state with backend API
+                }
+            }, [profile.isFollowing ? "Unfollow" : "Follow"]);
+            elements.push(followBtn);
         }
-    });
-
-    // Follow button (only if profile is a user)
-    let followBtn = null;
-    if (profile.entityType === "user") {
-        followBtn = createElement("button", {
-            class: "btn btn-outline",
-            onclick: () => {
-                profile.isFollowing = !profile.isFollowing;
-                followBtn.textContent = profile.isFollowing ? "Unfollow" : "Follow";
-                // TODO: sync follow state with backend API
-            }
-        }, [profile.isFollowing ? "Unfollow" : "Follow"]);
     }
-
-    // Append elements
-    const elements = [avatar, name, bio, count, fundButton];
-    if (followBtn) elements.push(followBtn);
 
     card.append(...elements);
     return card;

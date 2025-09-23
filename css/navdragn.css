@@ -1,0 +1,50 @@
+/* Navigation list items */
+.navigation__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.navigation__item {
+    margin: 4px 0;
+    /* padding: 8px 12px; */
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    cursor: grab;
+    user-select: none;
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+/* While dragging */
+.navigation__item.dragging {
+    opacity: 0.5;
+    background-color: #d0d0d0;
+    cursor: grabbing;
+}
+
+/* Placeholder element */
+.navigation__placeholder {
+    background-color: #e0e0e0;
+    border: 2px dashed #aaa;
+    height: 40px; /* match approx height of nav item */
+    margin: 4px 0;
+    border-radius: 4px;
+}
+
+/* Navigation link style */
+.navigation__link {
+    text-decoration: none;
+    color: #333;
+    display: block;
+}
+
+/* Active nav link */
+.navigation__link.active {
+    font-weight: bold;
+    color: #007bff;
+}
+
+/* Optional hover effect */
+.navigation__item:hover {
+    background-color: #e8e8e8;
+}

@@ -67,28 +67,3 @@ export async function fetchUserMeta(userIds = []) {
 
     return result;
 }
-
-// import { apiFetch } from "../api/api.js";
-
-// // simple cache
-// const userCache = new Map();
-
-// /**
-//  * Fetch minimal user info for given IDs.
-//  * Returns an object { userid: { username, name, profile_picture } }
-//  */
-// export async function fetchUserMeta(userIds = []) {
-//     const missing = userIds.filter(id => !userCache.has(id));
-//     if (missing.length > 0) {
-//         const res = await apiFetch(`/users/meta?ids=${missing.join(",")}`);
-//         Object.entries(res).forEach(([id, data]) => {
-//             userCache.set(id, data);
-//         });
-//     }
-
-//     const result = {};
-//     userIds.forEach(id => {
-//         if (userCache.has(id)) result[id] = userCache.get(id);
-//     });
-//     return result;
-// }

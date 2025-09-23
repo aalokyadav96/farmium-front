@@ -1,6 +1,5 @@
 /* Root container */
 .merechatcon, .onechatcon {
-    font-family: "Segoe UI", sans-serif;
     background: #f3f3f3;
     color: #1f1f1f;
     display: flex;

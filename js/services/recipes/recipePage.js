@@ -7,6 +7,7 @@ import { editRecipe } from "./createOrEditRecipe.js";
 import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
 import Imagex from "../../components/base/Imagex.js";
 import { createCommentsSection } from "../comments/comments.js";
+import Sightbox from "../../components/ui/Sightbox_zoom.mjs";
 
 // --- LocalStorage Helpers ---
 function getStepKey(recipeId) { return `completedSteps:${recipeId}`; }
@@ -45,55 +46,88 @@ function renderAuthor(recipe, currentUser) {
     createElement("a", { href: `/user/${recipe.userId}` }, [recipe.userName || recipe.userId])
   ]);
 }
-
 function renderGallery(images, title) {
   let imgIndex = 0;
-  const imageEl = Imagex({ 
-    src: images.length ? resolveImagePath(EntityType.RECIPE, PictureType.PHOTO, images[0]) : "", 
-    alt: title, 
-    classes: "thumbnail" 
+  const imageEl = Imagex({
+      src: images.length ? resolveImagePath(EntityType.RECIPE, PictureType.PHOTO, images[0]) : "",
+      alt: title,
+      classes: "thumbnail"
   });
 
   const prevBtn = Button("Prev", "prev-img", {}, "small-button");
   const nextBtn = Button("Next", "next-img", {}, "small-button");
 
+  // Update image source
   function updateImg() {
-    if (images.length) imageEl.src = resolveImagePath(EntityType.RECIPE, PictureType.PHOTO, images[imgIndex]);
+      if (!images.length) return;
+      imageEl.src = resolveImagePath(EntityType.RECIPE, PictureType.PHOTO, images[imgIndex]);
   }
-  prevBtn.addEventListener("click", () => { imgIndex = (imgIndex - 1 + images.length) % images.length; updateImg(); });
-  nextBtn.addEventListener("click", () => { imgIndex = (imgIndex + 1) % images.length; updateImg(); });
 
+  // Navigate buttons
+  prevBtn.addEventListener("click", () => {
+      imgIndex = (imgIndex - 1 + images.length) % images.length;
+      updateImg();
+  });
+
+  nextBtn.addEventListener("click", () => {
+      imgIndex = (imgIndex + 1) % images.length;
+      updateImg();
+  });
+
+  // Touch swipe support
   let touchStartX = 0;
   imageEl.addEventListener("touchstart", e => touchStartX = e.changedTouches[0].screenX, { passive: true });
   imageEl.addEventListener("touchend", e => {
-    const dx = e.changedTouches[0].screenX - touchStartX;
-    if (dx > 50) prevBtn.click();
-    if (dx < -50) nextBtn.click();
+      const dx = e.changedTouches[0].screenX - touchStartX;
+      if (dx > 50) prevBtn.click();
+      else if (dx < -50) nextBtn.click();
+  }, { passive: true });
+
+  // Single click listener for Sightbox
+  imageEl.addEventListener("click", () => {
+      if (images.length) Sightbox(
+          images.map(img => resolveImagePath(EntityType.RECIPE, PictureType.PHOTO, img)), 
+          imgIndex
+      );
   }, { passive: true });
 
   return createElement("div", { class: "image-gallery" }, [imageEl, prevBtn, nextBtn]);
 }
-
 function renderInfoBox(recipe) {
-  const children = [
-    createElement("p", {}, [recipe.description || ""]),
-    createElement("p", {}, [`Cook Time: ${recipe.cookTime || "N/A"}`])
-  ];
-  if (recipe.cuisine) children.push(createElement("p", {}, [`Cuisine: ${recipe.cuisine}`]));
-  if (recipe.portionSize) children.push(createElement("p", {}, [`Portion Size: ${recipe.portionSize}`]));
-  if (recipe.season) children.push(createElement("p", {}, [`Season / Occasion: ${recipe.season}`]));
+  const infoRow = (label, value) =>
+    createElement("div", { class: "info-row" }, [
+      createElement("strong", { class: "info-label" }, [label + ": "]),
+      createElement("span", { class: "info-value" }, [value || "N/A"])
+    ]);
+
+  const children = [];
+
+  if (recipe.description) {
+    children.push(
+      createElement("p", { class: "recipe-description" }, [recipe.description])
+    );
+  }
+
+  children.push(infoRow("Cook Time", recipe.cookTime));
+  if (recipe.cuisine) children.push(infoRow("Cuisine", recipe.cuisine));
+  if (recipe.portionSize) children.push(infoRow("Portion Size", recipe.portionSize));
+  if (recipe.season) children.push(infoRow("Season / Occasion", recipe.season));
   if (Array.isArray(recipe.dietary) && recipe.dietary.length) {
-    children.push(createElement("p", {}, [`Dietary: ${recipe.dietary.join(", ")}`]));
+    children.push(infoRow("Dietary", recipe.dietary.join(", ")));
   }
   if (recipe.videoUrl) {
-    children.push(createElement("p", {}, [
-      createElement("a", { href: recipe.videoUrl, target: "_blank" }, ["Watch Video Tutorial"])
-    ]));
+    children.push(
+      createElement("div", { class: "info-row" }, [
+        createElement("span", { class: "info-label" }, ["Video: "]),
+        createElement("a", { href: recipe.videoUrl, target: "_blank", class: "info-link" }, ["Watch Tutorial"])
+      ])
+    );
   }
-  if (recipe.notes) children.push(createElement("p", {}, [`Notes: ${recipe.notes}`]));
+  if (recipe.notes) children.push(infoRow("Notes", recipe.notes));
 
   return createElement("div", { class: "recipe-info-box" }, children);
 }
+
 
 function renderTags(tags) {
   return createElement("div", { class: "tags-section" }, [
@@ -306,31 +340,31 @@ function renderComments(recipe) {
 }
 
 function renderActions(recipe, currentUser, contentContainer, isFavorite, recipeId) {
-  const favBtn = Button(isFavorite ? "Unsave" : "Save Recipe", "", {}, "secondary-button");
+  const favBtn = Button(isFavorite ? "Unsave" : "Save Recipe", "", {}, "buttonx secondary");
   favBtn.addEventListener("click", () => {
     isFavorite = !isFavorite;
     saveFavorite(recipeId, isFavorite);
     favBtn.textContent = isFavorite ? "Unsave" : "Save Recipe";
   });
 
-  const shareBtn = Button("Copy Link", "", {}, "secondary-button");
+  const shareBtn = Button("Copy Link", "", {}, "buttonx secondary");
   shareBtn.addEventListener("click", () => navigator.clipboard.writeText(window.location.href));
 
-  const printBtn = Button("Print", "", {}, "secondary-button");
+  const printBtn = Button("Print", "", {}, "buttonx secondary");
   printBtn.addEventListener("click", () => window.print());
 
   const actions = [favBtn, shareBtn, printBtn];
 
   if (currentUser === recipe.userId) {
-    const editBtn = Button("Edit", "", {}, "secondary-button");
+    const editBtn = Button("Edit", "", {}, "buttonx secondary");
     editBtn.addEventListener("click", () => editRecipe(contentContainer, recipe));
     actions.push(editBtn);
   }
 
-  const reportBtn = Button("Report", "", {}, "secondary-button");
+  const reportBtn = Button("Report", "", {}, "buttonx secondary");
   reportBtn.addEventListener("click", () => alert("Reported for review."));
 
-  const backBtn = Button("Back to Recipes", "", {}, "secondary-button");
+  const backBtn = Button("Back to Recipes", "", {}, "buttonx primary");
   backBtn.addEventListener("click", () => history.back());
 
   actions.push(reportBtn, backBtn);

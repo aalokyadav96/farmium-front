@@ -11,7 +11,6 @@
 .eventpage .eventx-card {
   display: flex;
   flex-direction: column;
-  background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
@@ -73,20 +72,20 @@
 }
 
 /* Status Tag */
-.eventpage .event-header-row span:first-of-type {
+/* .eventpage .event-header-row span:first-of-type {
   background-color: #999;
   color: white;
   border-radius: 4px;
   padding: 2px 6px;
   font-size: 0.75rem;
-}
+} */
 
 /* Save Icon */
-.eventpage .event-header-row span[title="Save Event"] {
+/* .eventpage .event-header-row span[title="Save Event"] {
   font-size: 20px;
   color: gray;
   cursor: pointer;
-}
+} */
 
 /* Place Link */
 .eventpage .event-info a {
@@ -101,26 +100,9 @@
   flex-wrap: wrap;
   margin-top: 1rem;
 }
-/* 
-.eventpage .button,
-.eventpage .buttonx {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  background-color: #0078d4;
-  color: white;
-  font-size: 0.9rem;
-  transition: background 0.3s ease;
-}
-
-.eventpage .button:hover,
-.eventpage .buttonx:hover {
-  background-color: #005a9e;
-} */
 
 /* Tabs */
-.eventpage .tabs-container {
+/* .eventpage .tabs-container {
   margin-top: 2rem;
 }
 
@@ -160,7 +142,7 @@
   padding: 1rem;
   border-radius: 8px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-}
+} */
 
 /* Venue Image */
 .eventpage .venue-container {

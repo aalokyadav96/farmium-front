@@ -15,13 +15,13 @@ import {
 import {
   tposts_text,
   tposts_video,
-  tposts_photo_alt,
+  tposts_photo,
 } from "../../components/tumblrSvgs.js";
 import { createIconButton } from "../../utils/svgIconButton.js";
 
 const TAB_CONFIG = [
   { name: "Text", type: "text", multiple: false, icon: tposts_text },
-  { name: "Images", type: "image", multiple: true, icon: tposts_photo_alt },
+  { name: "Images", type: "image", multiple: true, icon: tposts_photo },
   { name: "Video", type: "video", multiple: false, icon: tposts_video },
 ];
 

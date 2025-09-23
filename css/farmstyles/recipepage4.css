@@ -2,7 +2,6 @@
   max-width: 640px;
   margin: auto;
   padding: 1rem;
-  background: #fff;
   border-radius: 10px;
   box-shadow: 0 0 12px rgba(0,0,0,0.05);
 }
@@ -15,7 +14,6 @@
 
 .author-info {
   font-size: 0.9rem;
-  color: #666;
   margin-bottom: 1rem;
 }
 
@@ -54,7 +52,6 @@
 
 /* Recipe info box */
 .recipe-info-box {
-  background: #f8f8f8;
   padding: 1rem;
   border-radius: 8px;
   margin-bottom: 1.5rem;
@@ -69,13 +66,13 @@
   margin-bottom: 1.5rem;
 }
 
-.tags {
+.tags-section .tags {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
 
-.tag {
+.tags-section .tag {
   background: #e0f7fa;
   padding: 0.4rem 0.8rem;
   border-radius: 20px;
@@ -91,7 +88,6 @@
 
 .ingredients-list li {
   padding: 0.5rem;
-  background: #fff8f8;
   border-left: 4px solid #ff6b6b;
   margin-bottom: 0.5rem;
   border-radius: 5px;
@@ -124,7 +120,6 @@
   top: -25px;
   left: 0;
   font-size: 0.85rem;
-  color: #555;
 }
 
 /* Steps */

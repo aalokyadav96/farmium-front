@@ -216,67 +216,6 @@ function displayItinerary(isLoggedIn, divContainerNode) {
     return container;
   }
   
-  // function renderItineraryDetailsContent(it) {
-  //   const container = createElement('div', { class: 'itinerary-con timeline' }, []);
-  
-  //   // Meta info
-  //   const meta = createElement('div', { class: 'itinerary-meta' }, [
-  //     createElement('span', { class: 'status' }, [`Status: ${it.status}`]),
-  //     createElement('span', { class: 'dates' }, [`Start: ${it.start_date}`, `End: ${it.end_date}`])
-  //   ]);
-  //   container.appendChild(meta);
-  
-  //   const desc = createElement('p', { class: 'itinerary-desc' }, [`Description: ${it.description || 'N/A'}`]);
-  //   container.appendChild(desc);
-  
-  //   if (!Array.isArray(it.days) || !it.days.length) {
-  //     container.appendChild(createElement('p', { class: 'no-schedule' }, ['No schedule available.']));
-  //     return container;
-  //   }
-  
-  //   it.days.forEach((day, di) => {
-  //     const dayDiv = createElement('div', { class: 'itinerary-day timeline-day' }, []);
-  //     const dayHeader = createElement('h3', { class: 'day-header' }, [`Day ${di + 1}: ${day.date}`]);
-  //     dayDiv.appendChild(dayHeader);
-  
-  //     const visitsContainer = createElement('div', { class: 'visits-container' }, []);
-  
-  //     day.visits.forEach((visit, vi) => {
-  //       const visitCard = createElement('div', { class: 'visit-card timeline-node' }, []);
-  
-  //       const time = createElement('span', { class: 'visit-time' }, [`${visit.start_time} – ${visit.end_time}`]);
-  //       const location = createElement('span', { class: 'visit-location' }, [visit.location]);
-  //       const infoRow = createElement('div', { class: 'visit-info' }, [time, location]);
-  //       visitCard.appendChild(infoRow);
-  
-  //       if (visit.transport) {
-  //         const transportBadge = createElement('span', { class: `transport ${visit.transport.toLowerCase()}` }, [visit.transport]);
-  //         visitCard.appendChild(transportBadge);
-  //       }
-  
-  //       visitsContainer.appendChild(visitCard);
-  
-  //       // Add connector with arrow
-  //       if (vi < day.visits.length - 1 && visit.transport) {
-  //         const connector = createElement('div', { class: `transport-connector ${visit.transport.toLowerCase()}` }, []);
-  //         const line = createElement('div', { class: 'line' }, []);
-  //         const arrow = createElement('div', { class: 'arrow' }, []);
-  //         const label = createElement('span', { class: 'connector-label' }, [visit.transport]);
-  
-  //         connector.appendChild(line);
-  //         connector.appendChild(arrow);
-  //         connector.appendChild(label);
-  //         visitsContainer.appendChild(connector);
-  //       }
-  //     });
-  
-  //     dayDiv.appendChild(visitsContainer);
-  //     container.appendChild(dayDiv);
-  //   });
-  
-  //   return container;
-  // }
-  
   function viewItinerary(id) {
     openViewModal(id);
   }

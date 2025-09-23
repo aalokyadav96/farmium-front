@@ -58,14 +58,6 @@ async function deleteEvent(isLoggedIn, eventId) {
     );
 }
 
-// View Analytics (placeholder)
-async function viewEventAnalytics(isLoggedIn) {
-    if (!isLoggedIn) {
-        Notify("Please log in to view your event analytics.", { type: "warning", duration: 3000, dismissible: true });
-        return;
-    }
-    confirm("Do you want to view event analytics?");
-}
 
 // Fetch Event Data
 async function fetchEventData(eventId) {
@@ -164,6 +156,5 @@ export {
     displayEvent,
     displayEventSections,
     deleteEvent,
-    viewEventAnalytics
 };
 

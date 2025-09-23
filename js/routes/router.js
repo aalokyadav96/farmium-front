@@ -3,6 +3,7 @@ import { trackEvent } from "../services/activity/metrics.js";
 import {
   getState,
   subscribe,
+  subscribeDeep,
   setRouteModule,
   getRouteModule,
   hasRouteModule
@@ -12,6 +13,21 @@ import {
   dynamicRoutes
 } from "./routes.js";
 import { navigate } from "./index.js";
+
+/** --- Reactive login state --- */
+let isLoggedIn = false;
+
+function recomputeAuthState() {
+  const token = getState("token");
+  // define what "logged in" means
+  isLoggedIn = Boolean(token);
+}
+
+// initial compute
+recomputeAuthState();
+
+// keep updated
+subscribeDeep("token", recomputeAuthState);
 
 /** Render a simple error message */
 function renderError(container, message = "404 Not Found") {
@@ -31,7 +47,9 @@ async function handleRoute({ path, moduleImport, functionName, args = [], conten
   const mod = await moduleImport();
   const renderFn = mod[functionName];
   if (typeof renderFn !== "function") {
-    throw new Error(`Export '${functionName}' not found in module. Available exports: ${Object.keys(mod).join(", ")}`);
+    throw new Error(
+      `Export '${functionName}' not found in module. Available exports: ${Object.keys(mod).join(", ")}`
+    );
   }
 
   const fullArgs = [...args, contentContainer];
@@ -50,7 +68,6 @@ async function handleRoute({ path, moduleImport, functionName, args = [], conten
  * @param {HTMLElement} contentContainer
  */
 export async function render(rawPath, contentContainer) {
-  const isLoggedIn = !!getState("user");
   trackEvent("page_view");
 
   // Normalize path
@@ -123,7 +140,10 @@ subscribe("user", (user) => {
 
   if (user && redirect) {
     sessionStorage.removeItem("redirectAfterLogin");
-    const target = (redirect.startsWith("/") && redirect !== "/login") ? redirect : "/";
+    const target =
+      redirect.startsWith("/") && redirect !== "/login"
+        ? redirect
+        : "/";
     navigate(target);
   }
 });

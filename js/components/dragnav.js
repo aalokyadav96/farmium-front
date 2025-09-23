@@ -19,7 +19,7 @@ export function makeDraggableScroll(container) {
 
   container.addEventListener("mouseup", () => {
     isDown = false;
-    setTimeout(() => dragged = false, 50); // reset after click check
+    setTimeout(() => (dragged = false), 50);
     container.style.userSelect = "";
   });
 
@@ -32,9 +32,9 @@ export function makeDraggableScroll(container) {
     container.scrollLeft = scrollLeft - walk;
   });
 
-  // prevent clicks when dragging
+  // Only prevent clicks on the container itself, not its children
   container.addEventListener("click", e => {
-    if (dragged) {
+    if (dragged && e.target === container) {
       e.stopImmediatePropagation();
       e.preventDefault();
     }

@@ -104,19 +104,6 @@ function SubscribeToFeedPost(followBtn, postId) {
     });
 }
 
-
-// function SubscribeToFeedPost(followBtn, userid) {
-//     toggleAction({
-//         entityId: userid,
-//         entityType: "feedpost",
-//         button: followBtn,
-//         apiPath: "/subscribe/",
-//         property: "isSubscribed",
-//         labels: { on: "Unsubscribe", off: "Subscribe" },
-//         actionName: "subscribed"
-//     });
-// }
-
 // Batch fetch: POST /likes/:entitytype/batch/users
 export async function fetchUserMetaLikesBatch(entityType, entityIds = []) {
     if (!Array.isArray(entityIds) || entityIds.length === 0) return {};

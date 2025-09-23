@@ -2,12 +2,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 6px 10px;
-  border-bottom: 1px solid rgb(199, 225, 248);
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--color-border);
 }
   
   .logo {
     flex-shrink: 0;
+    display: flex;
+    gap: 0.4rem;
   }
   
   .logo-link {
@@ -50,8 +52,9 @@
   }
   
   .menu-toggle {
-    background-color: var(--color-border);
-    padding: 8px 12px;
+    background-color: var(--color-fg);
+    color: var(--color-bg);
+    padding: 6px 10px;
     border: none;
     border-radius: 4px;
     cursor: pointer;

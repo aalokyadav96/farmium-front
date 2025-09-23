@@ -84,18 +84,6 @@ export async function renderPost(posts, postsContainer) {
             });
         }
 
-        // // Meta
-        // if (post.title || post.description || (post.tags?.length)) {
-        //     const metaSection = createElement("div", { class: ["post-meta"] }, []);
-        //     if (post.title) metaSection.appendChild(createElement("h3", { class: ["post-title"] }, [post.title]));
-        //     if (post.description) metaSection.appendChild(createElement("p", { class: ["post-description"] }, [post.description]));
-        //     if (post.tags?.length) metaSection.appendChild(
-        //         createElement("div", { class: "tags" }, post.tags.map(tag => createElement("span", { class: "tag" }, [tag])))
-        //     );
-        //     postElement.appendChild(metaSection);
-
-        //     metaSection.addEventListener("onclick", () => navigate(`/feedpost/${post.postid}`));
-        // }
 
         // Actions
         const actionsContainer = createActions(post, isLoggedIn, isCreator, userLikes, posts, postElement);

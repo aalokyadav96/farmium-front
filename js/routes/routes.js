@@ -41,7 +41,6 @@ export const staticRoutes = {
   "/wallet": { moduleImport: () => import("../pages/wallet/wallet.js"), functionName: "Wallet" },
 
   "/search": { moduleImport: () => import("../pages/search/search.js"), functionName: "Search" },
-  "/feed": { moduleImport: () => import("../pages/feed/feed.js"), functionName: "Feed", protected: true },
   "/social": { moduleImport: () => import("../pages/tumblr/tumblr.js"), functionName: "Tumblr", protected: true },
 
   "/farms": { moduleImport: () => import("../pages/farm/farms.js"), functionName: "Farms" },

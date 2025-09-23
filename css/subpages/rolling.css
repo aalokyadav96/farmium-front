@@ -1,0 +1,28 @@
+
+.rolling-ad-area {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+    transition: opacity 0.5s ease-in-out;
+  }
+  .rolling-ad-area.fade-in {
+    opacity: 1;
+  }
+  .rolling-ad-area.fade-out {
+    opacity: 0;
+  }
+  .rolling-ad-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+  .rolling-ad-caption {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background: rgba(0,0,0,0.5);
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+  }

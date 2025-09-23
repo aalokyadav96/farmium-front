@@ -1,6 +1,7 @@
 import { resolveImagePath, EntityType, PictureType } from "../../../utils/imagePaths.js";
-import ZoomBox from "../../../components/ui/ZoomBox.mjs";
+// import ZoomBox from "../../../components/ui/ZoomBox.mjs";
 import Imagex from "../../../components/base/Imagex.js";
+import Sightbox from "../../../components/ui/Sightbox_zoom.mjs";
 
 async function RenderImagePost(mediaContainer, media) {
     const mediaClasses = [
@@ -19,22 +20,22 @@ async function RenderImagePost(mediaContainer, media) {
     const imageList = document.createElement('ul');
     imageList.className = `preview_image_wrap__Q29V8 PostPreviewImageView_-artist__WkyUA PostPreviewImageView_-bottom_radius__Mmn-- ${assignedClass}`;
 
-    const fullImagePaths = media.map(img => resolveImagePath(EntityType.CHAT, PictureType.PHOTO, img));
+    const fullImagePaths = media.map(img => resolveImagePath(EntityType.CHAT, PictureType.PHOTO, img.src));
 
     media.forEach((img, index) => {
         const listItem = document.createElement('li');
         listItem.className = 'PostPreviewImageView_image_item__dzD2P';
 
-        const thumbPath = resolveImagePath(EntityType.CHAT, PictureType.THUMB, img);
+        const thumbPath = resolveImagePath(EntityType.CHAT, PictureType.THUMB, img.src);
 
         const image = Imagex({
-            src : thumbPath,
-            loading : "lazy",
-            alt : "Post Image",
-            classes : 'post-image PostPreviewImageView_post_image__zLzXH',
-            events: {click : () => startZoombox(fullImagePaths, index)},    
+            src: thumbPath,
+            loading: "lazy",
+            alt: "Post Image",
+            classes: 'post-image PostPreviewImageView_post_image__zLzXH',
+            events: { click: () => startZoombox(fullImagePaths, index) },
         });
-        
+
         listItem.appendChild(image);
         imageList.appendChild(listItem);
     });
@@ -43,7 +44,8 @@ async function RenderImagePost(mediaContainer, media) {
 }
 
 async function startZoombox(img, index) {
-    ZoomBox(img, index);
+    // ZoomBox(img, index);
+    Sightbox(img, "image");
 }
 
 export { RenderImagePost };

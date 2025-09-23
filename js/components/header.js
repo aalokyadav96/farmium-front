@@ -1,10 +1,12 @@
 import { getState, isAdmin, subscribeDeep } from "../state/state.js";
 import { navigate } from "../routes/index.js";
 import { logout } from "../services/auth/authService.js";
-import { settingsSVG, moonSVG, profileSVG, shopBagSVG, logoutSVG, cardSVG } from "./svgs.js";
+import { settingsSVG, moonSVG, menuSVG, profileSVG, shopBagSVG, logoutSVG, cardSVG } from "./svgs.js";
 import { createElement } from "../components/createElement.js";
 import { sticky } from "./sticky.js";
+import { toggleSidebar } from "./sidebar.js";
 import { resolveImagePath, EntityType, PictureType } from "../utils/imagePaths.js";
+import Imagex from "./base/Imagex.js";
 // import {decodeJWT} from "../services/auth/authService.js";
 
 // Theme logic
@@ -61,16 +63,16 @@ function createDropdownMenu(id, labelText, items) {
 }
 
 // --- Profile Section ---
-function createProfileSection(userId, username) {
-  const img = createElement("img", {
+export function createProfileSection(userId, username) {
+  const img = Imagex({
     src: resolveImagePath(EntityType.USER, PictureType.THUMB, `${userId}.jpg`),
     alt: "Profile",
-    class: "profile-pic"
+    classes: "profile-pic"
   });
 
-  img.onerror = () => {
-    img.src = resolveImagePath(EntityType.DEFAULT, PictureType.STATIC, "placeholder.png");
-  };
+  // img.onerror = () => {
+  //   img.src = resolveImagePath(EntityType.DEFAULT, PictureType.STATIC, "placeholder.png");
+  // };
 
   const toggle = createElement("div", { class: "profile-toggle", tabIndex: 0 }, [img]);
 
@@ -133,7 +135,7 @@ function renderUserSection() {
     // const decoded = decodeJWT(token);
     // const username = decoded.username;
     const username = getState("username");
-    
+
     if (token && userId) {
       container.appendChild(createProfileSection(userId, username));
     } else {
@@ -160,14 +162,23 @@ function createHeader() {
   header.className = "main-header";
 
   const logo = createElement("div", { class: "logo" }, [
+    createIconButton(menuSVG, null, toggleSidebar),
     createElement("a", { href: "/home", class: "logo-link" }, ["Itanium"])
   ]);
 
   const sky = createElement("div", { class: "hflexcen" }, []);
-  sky.appendChild(sticky());
+  sky.appendChild(sticky({
+    imglink: Imagex({
+      src: resolveImagePath(EntityType.USER, PictureType.THUMB, `${getState("user")}.jpg`),
+      alt: "Profile",
+      classes: "profile-pic"
+    })
+  }));
 
   const nav = createElement("div", { class: "header-content" }, []);
-
+  
+  const token = getState("token");
+  if (token) {
   const createLinks = [
     { href: "/create-event", text: "Event" },
     { href: "/create-place", text: "Place" },
@@ -178,6 +189,7 @@ function createHeader() {
     { href: "/create-itinerary", text: "Itinerary" }
   ];
   nav.appendChild(createDropdownMenu("create-menu", "Create", createLinks));
+}
 
   nav.appendChild(createIconButton(moonSVG, null, toggleTheme));
   nav.appendChild(renderUserSection());

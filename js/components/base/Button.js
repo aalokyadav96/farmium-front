@@ -1,6 +1,3 @@
-
-import "../../../css/ui/Button.css";
-
 // Button component with enhanced functionality
 const Button = (
   title = "Click Me", // Default title

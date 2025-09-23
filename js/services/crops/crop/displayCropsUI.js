@@ -3,15 +3,7 @@ import { navigate } from "../../../routes";
 import { cropAside } from "./cropAside.js";
 import { resolveImagePath, PictureType, EntityType } from "../../../utils/imagePaths.js";
 import Imagex from "../../../components/base/Imagex.js";
-
-// --- Utility Functions ---
-function debounce(fn, delay = 300) {
-  let timeout;
-  return function (...args) {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => fn.apply(this, args), delay);
-  };
-}
+import { debounce } from "../../../utils/deutils.js";
 
 function filterAndSortCrops(crops, { term, tags, sortBy }) {
   return crops

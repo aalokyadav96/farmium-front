@@ -9,10 +9,10 @@ export function cropAside(cropData) {
         createElement("div", { class: "cta-list" }, [
             Button("Buy Products","buyprds-crp-btn",{
                 click: () => {navigate('/products')}
-            }, "action-btn", {"margin-right":"4px"}),
+            }, "action-btn buttonx", {"margin-right":"4px"}),
             Button("See Recipes","recipes-crp-btn",{
                 click: () => {navigate('/recipes')}
-            }),
+            }, "buttonx secondary"),
         ]),
 
         createElement("h3", {}, ["🌟 Featured Crops"]),

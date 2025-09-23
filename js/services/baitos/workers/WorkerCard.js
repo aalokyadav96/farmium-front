@@ -3,8 +3,10 @@ import { Button } from "../../../components/base/Button.js";
 import { resolveImagePath, EntityType, PictureType } from "../../../utils/imagePaths.js";
 import { navigate } from "../../../routes/index.js";
 import { getState } from "../../../state/state.js";
+import Imagex from "../../../components/base/Imagex.js";
 
-export function HireWorkerCard(worker, isLoggedIn) {
+export function HireWorkerCard(worker) {
+  const isLoggedIn = Boolean(getState("token"));
   const isSelf = getState("user") === worker.userid;
 
   const card = createElement("div", { class: "worker-card" });
@@ -12,9 +14,9 @@ export function HireWorkerCard(worker, isLoggedIn) {
   // Worker photo
   const photo = createElement("div", { class: "worker-photo" });
 
-  const profileImg = createElement("img", {
+  const profileImg = Imagex( {
     src: resolveImagePath(EntityType.WORKER, PictureType.THUMB, worker.photo),
-    class: "profile-thumbnail",
+    classes: "profile-thumbnail",
     loading: "lazy",
     alt: `${worker.name || "Worker"}'s profile photo`
   });
@@ -23,8 +25,13 @@ export function HireWorkerCard(worker, isLoggedIn) {
 
   // Render details
   function renderDetail(icon, text) {
-    return text ? createElement("p", {}, [icon + " ", text]) : null;
+    if (!text) return null;
+    return createElement("p", {}, [
+      icon + " ",
+      String(text)
+    ]);
   }
+
 
   const details = createElement("div", { class: "worker-details" }, [
     createElement("h3", {}, [worker.name || "Unnamed Worker"]),
@@ -33,16 +40,23 @@ export function HireWorkerCard(worker, isLoggedIn) {
     renderDetail("📍", worker.address),
     renderDetail("📝", worker.bio),
     !isSelf && isLoggedIn
-      ? Button("View Profile", `hire-${worker.baito_user_id}`, {
+      ? Button(
+        "View Profile",
+        `hire-${worker.baito_user_id}`,
+        {
           click: (e) => {
             e.stopPropagation();
             navigate(`/baitos/worker/${worker.baito_user_id}`);
           }
-        }, "btn btn-primary")
+        },
+        "btn btn-primary",
+        {}
+      )
       : !isSelf
         ? createElement("p", { style: "color:gray;" }, ["🔒 Login to hire"])
         : null
   ].filter(Boolean));
+
 
   card.appendChild(photo);
   card.appendChild(details);
@@ -51,4 +65,15 @@ export function HireWorkerCard(worker, isLoggedIn) {
   card.addEventListener("click", () => navigate(`/baitos/worker/${worker.baito_user_id}`));
 
   return card;
+  // return createElement("a", {
+  //   href: `/baitos/worker/${worker.baito_user_id}`,
+  //   events: {
+  //     click: (e) => {
+  //       e.preventDefault();
+  //       e.stopPropagation();
+  //       navigate(`/baitos/worker/${worker.baito_user_id}`);
+  //     }
+  //   }
+  // }, [card]);
+  
 }

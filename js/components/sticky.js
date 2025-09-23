@@ -7,7 +7,7 @@ import { createIconButton } from "../utils/svgIconButton.js";
 // import { openCartModal } from "../services/cart/cartModal.js";
 
 // --- Update container children based on login state
-function updateNav(container) {
+function updateNav(container, divs) {
   const isLoggedIn = !!getState("token"); // use token for reactive auth
 
   container.innerHTML = "";
@@ -42,24 +42,30 @@ function updateNav(container) {
       label: ""
     }));
 
-    // container.appendChild(createIconButton({classSuffix:"edit", svgMarkup: cartSVG,onClick: openCartModal}));
     container.appendChild(createIconButton({
       classSuffix: "edit",
       svgMarkup: cartSVG,
       onClick: () => navigate("/cart"),
       label: ""
     }));
+    
+    // container.appendChild(createIconButton({
+    //   classSuffix: "edit",
+    //   svgMarkup: "",
+    //   onClick: () => navigate("/profile"),
+    //   label: divs.imglink
+    // }));
   }
 }
 
 // --- Sticky container (reactive)
-export function Sticky() {
+export function Sticky(divs) {
   const container = createElement("div", { class: "plypzstp" });
 
-  updateNav(container);
+  updateNav(container, divs);
 
   // Subscribe to token changes instead of user directly
-  const unsub = subscribeDeep("token", () => updateNav(container));
+  const unsub = subscribeDeep("token", () => updateNav(container, divs));
 
   // Optional: cleanup if container is removed
   const observer = new MutationObserver(() => {

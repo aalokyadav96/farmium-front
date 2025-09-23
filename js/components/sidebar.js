@@ -1,63 +1,62 @@
+// sidebar.js
+import "../../css/subpages/sidebar.css";
 import { navigate } from "../routes/index.js";
+import { createElement } from "../components/createElement.js";
+import { createIconButton } from "../utils/svgIconButton.js";
+import { xSVG } from "./svgs.js";
 
-function handleNavigation(event, href) {
-    event.preventDefault();
-    navigate(href);
+let sidebar = null;
+let backdrop = null;
+let isOpen = false;
+
+function buildSidebar() {
+  const closeBtn = createElement("button", { class: "sidebar-close" }, [createIconButton({ svgMarkup: xSVG, classSuffix: "" })]);
+  closeBtn.addEventListener("click", toggleSidebar);
+
+  const links = [
+    { title: "Home", path: "/home" },
+    { title: "Profile", path: "/profile" },
+    { title: "Settings", path: "/settings" }
+  ];
+
+  const linkEls = links.map(link => {
+    const el = createElement("a", { href: link.path, class: "sidebar-link" }, [link.title]);
+    el.addEventListener("click", (e) => {
+      e.preventDefault();
+      navigate(link.path);
+      toggleSidebar(); // close after navigation
+    });
+    return el;
+  });
+
+  sidebar = createElement("div", { class: "sidebar hidden" }, [
+    closeBtn,
+    ...linkEls
+  ]);
+
+  backdrop = createElement("div", { class: "sidebar-backdrop hidden" });
+  backdrop.addEventListener("click", toggleSidebar);
+
+  document.body.appendChild(backdrop);
+  document.body.appendChild(sidebar);
+
+  // Escape key listener
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && isOpen) {
+      toggleSidebar();
+    }
+  });
 }
 
-function createMenuItem(href, label) {
-    const li = document.createElement("li");
-    li.className = "footlincon";
+export function toggleSidebar() {
+  if (!sidebar || !backdrop) buildSidebar();
+  isOpen = !isOpen;
 
-    const anchor = document.createElement("a");
-    anchor.href = href;
-    anchor.textContent = label;
-    anchor.className = "footlink";
-
-    anchor.addEventListener("click", (e) => handleNavigation(e, href));
-
-    li.appendChild(anchor);
-    return li;
+  if (isOpen) {
+    sidebar.classList.remove("hidden");
+    backdrop.classList.remove("hidden");
+  } else {
+    sidebar.classList.add("hidden");
+    backdrop.classList.add("hidden");
+  }
 }
-
-function createNavAndSidebar(container, isLoggedIn) {
-
-    // Sidebar Items
-    const sidebarItems = isLoggedIn
-        ? [
-              { href: '/chat', label: 'Chat' },
-              { href: '/crowdfunding', label: 'Crowdfunding' },
-              { href: '/donations', label: 'Donations' },
-              { href: '/analytics', label: 'Analytics' },
-              { href: '/streaming', label: 'Streaming' },
-              { href: '/forums', label: 'Forums' },
-          ]
-        : [
-              { href: '/gigs', label: 'Gigs' },
-          ];
-
-    // Create Sidebar
-    const sidebarElement = document.createElement("div");
-    sidebarElement.className = "sidebar";
-
-    const sidebarTitle = document.createElement("h2");
-    sidebarTitle.textContent = "Menu";
-    sidebarElement.appendChild(sidebarTitle);
-
-    const sidebarMenuList = document.createElement("ul");
-    sidebarMenuList.className = "menu-list";
-
-    // Add Sidebar Items
-    sidebarItems.forEach((item) =>
-        sidebarMenuList.appendChild(createMenuItem(item.href, item.label))
-    );
-
-    sidebarElement.appendChild(sidebarMenuList);
-
-    // Clear the container and add both components
-    // container.innerHTML = "";
-    // container.appendChild(header);
-    container.appendChild(sidebarElement);
-}
-
-export { createNavAndSidebar as sidebar };

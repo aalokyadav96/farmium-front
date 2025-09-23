@@ -8,10 +8,12 @@ const SEARCH_URL = API_URL;
 const CHAT_URL = "http://localhost:4000";
 
 // const API_URL = "https://gallium.onrender.com/api/v1";
-// const APIG_URL = "https://gallium.onrender.com/api/g1";
+// const APIG_URL = "https://gallium.onrender.com/api/v1";
 // const AGI_URL = "https://gallium.onrender.com/api/v1";
 // const SRC_URL = "https://gallium.onrender.com/static";
 // const SEARCH_URL = "https://gallium.onrender.com/api/v1";
+// const APIP_URL = "https://gallium.onrender.com/api/p1";
+// const CHAT_URL = "https://gallium.onrender.com";
 
 // --- Allowed and persisted keys ---
 const allowedKeys = new Set([

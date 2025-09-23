@@ -11,7 +11,7 @@ export function WalletDashboard() {
 
     // Wallet Balance
     const walletManagerWrapper = createElement("div", { class: "wallet-section wallet-balance" }, [
-        createElement("h2", { class: "wallet-section-title" }, ["Balance"]),
+        // createElement("h2", { class: "wallet-section-title" }, ["Balance"]),
     ]);
     const walletManagerInstance = WalletManager();
     walletManagerWrapper.appendChild(walletManagerInstance.element);
@@ -21,7 +21,7 @@ export function WalletDashboard() {
 
     // Wallet Transfer
     const transferWrapper = createElement("div", { class: "wallet-section wallet-transfer" }, [
-        createElement("h2", { class: "wallet-section-title" }, ["Transfer"]),
+        // createElement("h2", { class: "wallet-section-title" }, ["Transfer"]),
     ]);
     const transferContainer = WalletTransfer({ onBalanceChange: refreshBalance });
     transferWrapper.appendChild(transferContainer);
@@ -32,7 +32,7 @@ export function WalletDashboard() {
     // --- Right column: Transactions ---
     const rightCol = createElement("div", { class: "wallet-right-col" }, []);
     const txnWrapper = createElement("div", { class: "wallet-section wallet-transactions" }, [
-        createElement("h2", { class: "wallet-section-title" }, ["Transactions"]),
+        // createElement("h2", { class: "wallet-section-title" }, ["Transactions"]),
     ]);
     const txnContainer = WalletTransactions({ onBalanceChange: refreshBalance });
     txnWrapper.appendChild(txnContainer);
@@ -42,62 +42,3 @@ export function WalletDashboard() {
 
     return container;
 }
-
-// import { WalletManager } from "./walletManager.js";
-// import { WalletTransactions } from "./walletTransactions.js";
-// import { WalletTransfer } from "./walletTransfer.js";
-// import { createElement } from "../../components/createElement.js";
-
-// export function WalletDashboard() {
-//     const container = createElement("div", { id: "wallet-dashboard", class: "wallet-dashboard" }, []);
-
-//     // --- Wallet Balance / Manager ---
-//     const walletManagerWrapper = createElement("div", { class: "wallet-section wallet-balance" }, [
-//         createElement("h2", { class: "wallet-section-title" }, ["Balance"]),
-//     ]);
-//     const walletManagerInstance = WalletManager();
-//     walletManagerWrapper.appendChild(walletManagerInstance.element);
-//     container.appendChild(walletManagerWrapper);
-
-//     const refreshBalance = async () => walletManagerInstance.loadBalance();
-
-//     // --- Wallet Transfer ---
-//     const transferWrapper = createElement("div", { class: "wallet-section wallet-transfer" }, [
-//         createElement("h2", { class: "wallet-section-title" }, ["Transfer"]),
-//     ]);
-//     const transferContainer = WalletTransfer({ onBalanceChange: refreshBalance });
-//     transferWrapper.appendChild(transferContainer);
-//     container.appendChild(transferWrapper);
-
-//     // --- Wallet Transactions ---
-//     const txnWrapper = createElement("div", { class: "wallet-section wallet-transactions" }, [
-//         createElement("h2", { class: "wallet-section-title" }, ["Transactions"]),
-//     ]);
-//     const txnContainer = WalletTransactions({ onBalanceChange: refreshBalance });
-//     txnWrapper.appendChild(txnContainer);
-//     container.appendChild(txnWrapper);
-
-//     return container;
-// }
-
-// // import { WalletManager } from "./walletManager.js";
-// // import { WalletTransactions } from "./walletTransactions.js";
-// // import { WalletTransfer } from "./walletTransfer.js";
-// // import { createElement } from "../../components/createElement.js";
-
-// // export function WalletDashboard() {
-// //     const container = createElement("div", { id: "wallet-dashboard" }, []);
-
-// //     const walletManagerInstance = WalletManager();
-// //     container.appendChild(walletManagerInstance.element);
-
-// //     const refreshBalance = async () => walletManagerInstance.loadBalance();
-
-// //     const transferContainer = WalletTransfer({ onBalanceChange: refreshBalance });
-// //     container.appendChild(transferContainer);
-
-// //     const txnContainer = WalletTransactions({ onBalanceChange: refreshBalance });
-// //     container.appendChild(txnContainer);
-
-// //     return container;
-// // }

@@ -4,7 +4,7 @@ import {
   rotateVideo,
   resetRotation,
   updateTransform
-} from "./transformController.js";
+} from "./gestureHandlers.js";
 import {
   setVolume,
   toggleMute,

@@ -1,4 +1,5 @@
 import "../../../css/ui/Sightbox.css";
+import Imagex from "../base/Imagex";
 
 const Sightbox = (mediaSrc, mediaType = "image") => {
   // prevent duplicate instance
@@ -19,10 +20,15 @@ const Sightbox = (mediaSrc, mediaType = "image") => {
   // media
   let mediaEl;
   if (mediaType === "image") {
-    mediaEl = document.createElement("img");
-    mediaEl.src = mediaSrc;
-    mediaEl.alt = "Sightbox Image";
-    mediaEl.className = "zoomable-image";
+    mediaEl = Imagex({
+      src: mediaSrc,
+      alt: "Sightbox Image",
+      classes: "zoomable-image",
+    })
+    // mediaEl = document.createElement("img");
+    // mediaEl.src = mediaSrc;
+    // mediaEl.alt = "Sightbox Image";
+    // mediaEl.className = "zoomable-image";
   } else if (mediaType === "video") {
     mediaEl = document.createElement("video");
     mediaEl.src = mediaSrc;

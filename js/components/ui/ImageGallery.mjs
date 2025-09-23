@@ -1,4 +1,5 @@
 import { createElement } from "../../components/createElement.js";
+import Imagex from "../base/Imagex.js";
 import ZoomBox from "./ZoomBox.mjs";
 
 function getMediaType(src) {
@@ -51,7 +52,7 @@ export function ImageGallery(mediaItems = []) {
         }
       }, ["📄 PDF"]);
     } else {
-      thumb = createElement("img", {
+      thumb = Imagex({
         src,
         style: {
           width: "120px",
@@ -68,31 +69,3 @@ export function ImageGallery(mediaItems = []) {
     return thumb;
   }));
 }
-
-// import { createElement } from "../../components/createElement.js";
-// import ZoomBox from "./ZoomBox.mjs";
-
-// export function ImageGallery(images = []) {
-//   return createElement("div", {
-//     class: "image-gallery",
-//     style: {
-//       display: "flex",
-//       flexWrap: "wrap",
-//       gap: "10px",
-//     }
-//   }, images.map((src, index) => {   // ✅ capture index here
-//     const img = createElement("img", {
-//       src,
-//       style: {
-//         width: "120px",
-//         height: "80px",
-//         objectFit: "cover",
-//         borderRadius: "4px",
-//         border: "1px solid #ccc",
-//         cursor: "pointer"
-//       }
-//     });
-//     img.addEventListener("click", () => ZoomBox(images, index));  // ✅ pass index
-//     return img;
-//   }));
-// }

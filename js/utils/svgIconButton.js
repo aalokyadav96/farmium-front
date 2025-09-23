@@ -30,15 +30,3 @@ export function createIconButton({ classSuffix, svgMarkup, onClick, label = "", 
 
   return button;
 }
-
-// import { createElement } from "../components/createElement";
-
-
-// // --- Icon button utility
-// export function createIconButton({classSuffix, svgMarkup, onClick, alttext="", id=""}) {
-//     const button = createElement("div", { class: `logoicon ${classSuffix}` });
-//     button.innerHTML = svgMarkup;
-//     if (onClick) button.addEventListener("click", (e) => { e.preventDefault(); onClick(); });
-//     return button;
-// }
-

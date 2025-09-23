@@ -1,12 +1,28 @@
 .primary-nav {
   z-index: 1;
   background: var(--color-bg);
+  position: fixed;
+  bottom: 0;
+  width: 100%;
 }
+
+/* Mobile (portrait + landscape): fixed at bottom */
+@media (max-width: 767px) {
+  .primary-nav {
+    position: relative;
+    height: 48px;
+    left: 0;
+    top: auto;
+    border-top: 1px solid #ddd;
+  }
+}
+
 
 .navigation {
   width: 100%;
   letter-spacing: 1.2px;
   z-index: 1;
+  background-color: var(--color-bg);
   position: relative;
 }
 
@@ -87,9 +103,7 @@
   font-weight: bold;
 }
 
-@media screen and (max-width: 400px) {
-
-}
+@media screen and (max-width: 400px) {}
 
 .navigation__toggle {
   flex-shrink: 0;

@@ -1,4 +1,5 @@
 import Button from "../../../components/base/Button";
+import Imagex from "../../../components/base/Imagex.js";
 import { createElement } from "../../../components/createElement";
 import Carousel from "../../../components/ui/Carousel.mjs";
 import { navigate } from "../../../routes";
@@ -51,10 +52,10 @@ export function renderItemCard(item, type, isLoggedIn, container, refresh) {
       "div",
       { class: "image-gallery" },
       [
-        createElement("img", {
+        Imagex( {
           src: resolveImagePath(EntityType.PRODUCT, PictureType.THUMB, item.imageUrls[0]),
           alt: item.name,
-          class: "thumbnail"
+          classes: "thumbnail"
         })]):"";
 
 

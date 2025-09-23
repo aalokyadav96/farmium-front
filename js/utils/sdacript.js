@@ -97,4 +97,3 @@
 
     adElements.forEach((el) => observer.observe(el));
 })();
-

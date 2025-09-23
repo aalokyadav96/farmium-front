@@ -81,21 +81,32 @@ async function updatePictureWithCrop(type) {
     });
   }
   
-
-function createBanner(profile) {
+  function createBanner(profile) {
     const bgImg = createElement("span", { class: "bg_img" });
     const banncon = createElement("span", { style: "position: relative;" });
 
     const bannerFilename = profile.banner_picture || "default.webp";
     const bannerPath = resolveImagePath(EntityType.USER, PictureType.BANNER, bannerFilename);
     const sightPath = resolveImagePath(EntityType.USER, PictureType.BANNER, bannerFilename);
+    const fallbackPath = resolveImagePath(EntityType.DEFAULT, PictureType.STATIC, "default-banner.png");
 
-    bgImg.style.backgroundImage = `url(${bannerPath})`;
+    // Function to set background image safely
+    function setBg(url) {
+        const img = new Image();
+        img.onload = () => bgImg.style.backgroundImage = `url(${url})`;
+        img.onerror = () => bgImg.style.backgroundImage = `url(${fallbackPath})`;
+        img.src = url;
+    }
+
+    setBg(bannerPath);
+
     bgImg.addEventListener("click", () => SightBox(sightPath, "image"));
 
     appendChildren(banncon, createBannerEditButton(profile), bgImg);
     return banncon;
 }
+
+
 
 function createBannerEditButton(profile) {
     if (profile.userid !== getState("user")) return document.createDocumentFragment();

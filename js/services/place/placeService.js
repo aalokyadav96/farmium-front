@@ -57,19 +57,5 @@ async function createPlace(formData) {
     }
 }
 
-async function analyticsPlace(isLoggedIn, placeId) {
-    if (!isLoggedIn) {
-        Notify("Please log in to view your place analytics.", { type: "warning", dismissible: true, duration: 3000 });
-        return;
-    }
-    if (confirm("Are you sure you want to view your place analytics?")) {
-        try {
-            // await apiFetch(`/places/place/${placeId}`, 'DELETE');
-            Notify("Hi.", { type: "info", dismissible: true, duration: 3000 });
-            // navigate('/places'); // Redirect to home or another page
-        } catch (error) {
-            Notify("Oops.", { type: "error", dismissible: true, duration: 3000 });
-        }
-    }
-}
-export { createPlace, editPlaceForm, updatePlace, displayPlace, deletePlace, analyticsPlace };
+
+export { createPlace, editPlaceForm, updatePlace, displayPlace, deletePlace, };

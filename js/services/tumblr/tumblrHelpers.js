@@ -1,5 +1,6 @@
 import { apiFetch } from "../../api/api";
 import { createElement } from "../../components/createElement";
+import { v4 as uuidv4 } from "https://jspm.dev/uuid";
 
 export function createEl(tag, attrs = {}, children = []) {
   if (attrs.class && typeof attrs.class === "string") {
@@ -72,6 +73,7 @@ export function renderPreviewList(files, container, type, input, onChange) {
 }
 
 export async function getCSRFToken() {
-  const res = await apiFetch("/csrf");
-  return res?.csrf_token || "";
+  // const res = await apiFetch("/csrf");
+  // return res?.csrf_token || "";
+  return uuidv4();
 }

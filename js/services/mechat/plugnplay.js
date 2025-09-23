@@ -1,7 +1,7 @@
 import { apiFetch } from "../../api/api";
 import { navigate } from "../../routes/index.js";
 import { getState } from "../../state/state";
-import { userNewChatInit } from "../chats/newchat/newchats.js";
+import { userNewChatInit } from "../newchat/newchats.js";
 
 
 export async function meChat(otherUserId, entityType, entityId) {

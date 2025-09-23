@@ -8,7 +8,7 @@ function createElement(tag, attributes = {}, children = []) {
                     element.addEventListener(eventName, handler);
                 }
             }
-        } else if (key === "style" && value && typeof value === "object") {
+        } else if ((key === "style" || key === "styles") && value && typeof value === "object") {
             for (const [prop, val] of Object.entries(value)) {
                 element.style[prop] = val;
             }
