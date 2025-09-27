@@ -21,6 +21,7 @@ export const EntityType = {
   MERCH: "merch",
   MENU: "menu",
   FEED: "feed",
+  LOOP: "loops",
 };
 
 // Picture types

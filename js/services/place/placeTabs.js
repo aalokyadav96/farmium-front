@@ -1,7 +1,7 @@
 import { createElement } from "../../components/createElement.js";
 import Button from "../../components/base/Button.js";
-import { navigate } from "../../routes/index.js";
-import { apiFetch } from "../../api/api.js";
+// import { navigate } from "../../routes/index.js";
+// import { apiFetch } from "../../api/api.js";
 import Modal from "../../components/ui/Modal.mjs";
 // import { Button } from "../../components/base/Button.js";
 // import { createElement } from "../../components/createElement.js";
@@ -36,7 +36,7 @@ function displayPlaceInfo(container, placeData, isCreator) {
         if (isCreator) {
             const addInfoButton = Button("Add Info", "add-info-btn", {
                 click: handleAddInfo,
-            });
+            }, "buttonx");
             container.appendChild(addInfoButton);
         }
 

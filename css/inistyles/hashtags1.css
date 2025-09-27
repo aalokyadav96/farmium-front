@@ -11,7 +11,7 @@
   font-weight: bold;
 }
 
-.report-btn {
+.report-btn, .delete-media-btn {
   background: #e74c3c;
   color: white;
   border: none;

@@ -2,6 +2,7 @@ import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePath
 import VideoPlayer from '../../components/ui/VideoPlayer.mjs';
 
 async function RenderVideoPost(mediaContainer, media, media_url = "", resolution) {
+    let subtits = [];
     media.forEach(videoSrc => {
         const posterPath = resolveImagePath(EntityType.FEED, PictureType.POSTER, `${media_url}.jpg`);
         console.log(media_url);
@@ -11,6 +12,7 @@ async function RenderVideoPost(mediaContainer, media, media_url = "", resolution
             muted: true,
             poster: posterPath,
             controls: false,
+            subtitles: subtits
         }, media_url[0], resolution);
 
         mediaContainer.appendChild(videox);

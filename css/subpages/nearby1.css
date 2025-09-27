@@ -11,6 +11,7 @@
 .filter-bar {
     display: flex;
     gap: 0.5rem;
+    overflow-x: auto;
 }
 
 .filter-bar .filter-button {

@@ -5,6 +5,7 @@ import Button from "../../components/base/Button.js";
 import { reportPost } from "../reporting/reporting.js";
 import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
 import { updateImageWithCrop } from "../../utils/bannerEditor.js"; // adjust path
+// import { jobsHire } from "../jobs/jobs.js"; // adjust path
 
 function renderPlaceDetails(isLoggedIn, content, place, isCreator) {
   content.replaceChildren();
@@ -86,12 +87,21 @@ console.log(place);
       }, "buttonx secondary")
     );
 
+    // actionsWrapper.appendChild(
+    //   Button("Hire", "hire-place-btn", {
+    //     click: () => jobsHire(placeanacon, "place", place.placeid),
+    //   }, "buttonx secondary")
+    // );
+
     detailsSection.appendChild(actionsWrapper);
     detailsSection.appendChild(editContainer);
     detailsSection.appendChild(placeanacon);
   } else {
-    const reportBtn = createElement("button", { class: "report-comment", type: "button" }, ["Report"]);
-    reportBtn.addEventListener("click", () => reportPost(place.placeid, "place", "", ""));
+    // const reportBtn = createElement("button", { class: "report-comment", type: "button" }, ["Report"]);
+    // reportBtn.addEventListener("click", () => reportPost(place.placeid, "place", "", ""));
+    const reportBtn = Button("Report", "button-dfsh4", { 
+      click: () => reportPost(place.placeid, "place", "", "")
+     }, "report-comment buttonx");
     detailsSection.appendChild(reportBtn);
   }
 

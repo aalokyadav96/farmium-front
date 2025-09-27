@@ -28,6 +28,7 @@
     font-weight: 500;
     transition: background-color 0.3s ease;
     border: 1px solid #bbb;
+    white-space: nowrap;
   }
   
   .tab-button:hover {
@@ -62,4 +63,10 @@
       flex-direction: column;
     }
   }
-  
+/*   
+
+  .truncate-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  } */

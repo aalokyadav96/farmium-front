@@ -12,6 +12,7 @@
 @import url(sticky3.css);
 @import url(settings.css);
 @import url(udata.css);
+@import url(misc.css);
 /* @import url(merechat1.css); */
 /* @import url(onechat1.css); */
 @import url(newchat1.css);
@@ -37,6 +38,7 @@
 @import url(inistyles/shop2.css);
 @import url(inistyles/wallet1.css);
 @import url(inistyles/hashtags1.css);
+@import url(inistyles/loops4.css);
 
 @import url(subpages/nearby1.css);
 @import url(subpages/reviews.css);

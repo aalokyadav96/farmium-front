@@ -191,11 +191,17 @@ function displaySearchResults(entityType, data, container) {
 
 function createCard(entityType, item) {
     const card = createElement("div", { class: `result-card ${entityType}` });
-    const header = createElement("div", { class: "result-header" });
 
+    // --- Header ---
+    const header = createElement("div", { class: "result-header" });
     if (item.image) {
         header.appendChild(createElement("img", {
-            src: resolveImagePath(EntityType[entityType.toUpperCase()] || EntityType.EVENT, PictureType.THUMB, `${item.image}.jpg`),
+            src: resolveImagePath(
+                EntityType[entityType.toUpperCase()] || EntityType.POST,
+                PictureType.THUMB,
+                `${item.image}` // keep .png extension from your data
+                // `${item.image}.png` // keep .png extension from your data
+            ),
             alt: item.title || entityType,
             loading: "lazy",
             class: "result-image"
@@ -208,13 +214,23 @@ function createCard(entityType, item) {
     header.appendChild(info);
     card.appendChild(header);
 
+    // --- Details ---
     const details = createElement("div", { class: "result-details" }, [
-        createElement("em", {}, [item.description || "No description available."])
+        createElement("em", {}, [item.description || "No description available."]),
+        createElement("small", {}, [`Created: ${new Date(item.createdAt).toLocaleDateString()}`])
     ]);
     card.appendChild(details);
 
+    // --- Footer ---
     const footer = createElement("div", { class: "result-footer" });
-    if (item.id) footer.appendChild(createElement("a", { href: `/${entityType}/${item.id}`, class: "btn", target: "_blank" }, ["View Details"]));
+    const entityId = item.id || item.entityid; // support both
+    if (entityId) {
+        footer.appendChild(createElement("a", {
+            href: `/${entityType}/${entityId}`,
+            class: "btn",
+            target: "_blank"
+        }, ["View Details"]));
+    }
     if (footer.children.length) card.appendChild(footer);
 
     return card;

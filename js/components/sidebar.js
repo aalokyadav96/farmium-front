@@ -2,21 +2,31 @@
 import "../../css/subpages/sidebar.css";
 import { navigate } from "../routes/index.js";
 import { createElement } from "../components/createElement.js";
-import { createIconButton } from "../utils/svgIconButton.js";
-import { xSVG } from "./svgs.js";
+// import { createIconButton } from "../utils/svgIconButton.js";
+// import { xSVG } from "./svgs.js";
 
 let sidebar = null;
 let backdrop = null;
 let isOpen = false;
 
 function buildSidebar() {
-  const closeBtn = createElement("button", { class: "sidebar-close" }, [createIconButton({ svgMarkup: xSVG, classSuffix: "" })]);
-  closeBtn.addEventListener("click", toggleSidebar);
+  // const closeBtn = createElement("button", { class: "sidebar-close" }, [createIconButton({ svgMarkup: xSVG, classSuffix: "" })]);
+  // closeBtn.addEventListener("click", toggleSidebar);
 
   const links = [
     { title: "Home", path: "/home" },
     { title: "Profile", path: "/profile" },
-    { title: "Settings", path: "/settings" }
+    { title: "Settings", path: "/settings" },
+    { path: "/baitos/hire", title: "Hire" },
+    { path: "/grocery", title: "Grocery" },
+    { path: "/places", title: "Places" },
+    { path: "/events", title: "Events" },
+    { path: "/baitos", title: "Baito" },
+    { path: "/social", title: "Social" },
+    { path: "/posts", title: "Posts" },
+    { path: "/itinerary", title: "Itinerary" },
+    { path: "/recipes", title: "Recipes" },
+    { path: "/artists", title: "Artists" },
   ];
 
   const linkEls = links.map(link => {
@@ -30,7 +40,7 @@ function buildSidebar() {
   });
 
   sidebar = createElement("div", { class: "sidebar hidden" }, [
-    closeBtn,
+    // closeBtn,
     ...linkEls
   ]);
 

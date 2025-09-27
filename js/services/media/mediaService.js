@@ -62,7 +62,7 @@ function createMediaActions(media, entityType, entityId, isLoggedIn) {
     const actionCon = createElement("div", { class: "hflex-sb pad10" });
 
     if (isLoggedIn && getState("user") === media.creatorid) {
-        const deleteBtn = createActionButton("delete-media-btn", "Delete", async () => {
+        const deleteBtn = createActionButton("delete-media-btn buttonx", "Delete", async () => {
             try {
                 await deleteMedia(media.mediaid, entityType, entityId);
                 actionCon.parentElement.remove();
@@ -82,9 +82,15 @@ function createMediaActions(media, entityType, entityId, isLoggedIn) {
 }
 
 function createActionButton(className, label, onClick) {
-    const btn = createElement("button", { class: className }, [label]);
-    btn.addEventListener("click", onClick);
+    // const btn = createElement("button", { class: className }, [label]);
+    // btn.addEventListener("click", onClick);
+    // return btn;
+
+    const btn = Button(label, "button", {
+        click: () => { onClick }
+    }, className);
     return btn;
+
 }
 
 /******************
@@ -116,7 +122,7 @@ export async function displayMedia(content, entityType, entityId, isLoggedIn) {
     if (isLoggedIn) {
         const addMediaBtn = Button("Add Media", "add-media-btn", {
             click: () => showMediaUploadForm(isLoggedIn, entityType, entityId, mediaList)
-        });
+        }, "buttonx");
         content.prepend(addMediaBtn);
     }
 

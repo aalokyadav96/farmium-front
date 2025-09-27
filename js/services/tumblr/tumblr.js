@@ -18,15 +18,79 @@ import {
   tposts_photo,
 } from "../../components/tumblrSvgs.js";
 import { createIconButton } from "../../utils/svgIconButton.js";
+import Button from "../../components/base/Button.js";
 
+// ------------------- Helpers -------------------
+function appendIfValue(fd, key, el) {
+  const val = el?.value.trim();
+  if (val) fd.append(key, val);
+}
+function appendTags(fd, el) {
+  const tags = el?.value.split(",").map(t => t.trim()).filter(Boolean);
+  if (tags?.length) fd.append("tags", tags);
+}
+function clearChildren(el) {
+  while (el.firstChild) el.removeChild(el.firstChild);
+}
+
+// ------------------- Tab Config -------------------
 const TAB_CONFIG = [
-  { name: "Text", type: "text", multiple: false, icon: tposts_text },
-  { name: "Images", type: "image", multiple: true, icon: tposts_photo },
-  { name: "Video", type: "video", multiple: false, icon: tposts_video },
+  {
+    name: "Text", type: "text", multiple: false, icon: tposts_text,
+    fields: [
+      { label: "Text", type: "textarea", id: "text-input", placeholder: "Write something…", rows: 4, classList: ["tumblr-textarea"] }
+    ]
+  },
+  {
+    name: "Images", type: "image", multiple: true, icon: tposts_photo,
+    fields: [
+      { label: "Caption", type: "textarea", id: "Images-caption", placeholder: "Add a caption…", rows: 2, classList: ["caption-textarea"] },
+      { label: "Tags", type: "text", id: "Images-tags", placeholder: "Tags (comma separated)", classList: ["tag-input"] }
+    ]
+  },
+  {
+    name: "Video", type: "video", multiple: false, icon: tposts_video,
+    fields: [
+      { label: "Title", type: "text", id: "Video-title", placeholder: "Title", isRequired: true, classList: ["meta-title"] },
+      { label: "Description", type: "textarea", id: "Video-description", placeholder: "Description", rows: 3, classList: ["meta-description"] },
+      { label: "Tags", type: "text", id: "Video-tags", placeholder: "Tags (comma separated)", classList: ["tag-input"] }
+    ]
+  }
 ];
 
+// ------------------- Validation & FormData -------------------
+const handlers = {
+  text: {
+    isValid: (panels) => panels.Text?.querySelector("textarea")?.value.trim().length > 0,
+    appendFormData: (fd, panels) => appendIfValue(fd, "text", panels.Text.querySelector("textarea"))
+  },
+  image: {
+    isValid: (panels) => panels["Images-input"]?.files.length > 0,
+    appendFormData: (fd, panels) => {
+      Array.from(panels["Images-input"].files).forEach(f => fd.append("images", f));
+      appendIfValue(fd, "caption", panels["Images-caption"]);
+      appendTags(fd, panels["Images-tags"]);
+    }
+  },
+  video: {
+    isValid: (panels) => {
+      const files = panels["Video-input"]?.files;
+      return files?.length === 1 && !!panels["Video-title"]?.value.trim();
+    },
+    appendFormData: (fd, panels) => {
+      const file = panels["Video-input"].files[0];
+      if (file) fd.append("video", file);
+      appendIfValue(fd, "title", panels["Video-title"]);
+      appendIfValue(fd, "description", panels["Video-description"]);
+      appendTags(fd, panels["Video-tags"]);
+    }
+  }
+};
+
+// ------------------- Main -------------------
 export function displayTumblr(isLoggedIn, root) {
   let activeTab = null;
+  let videoThumbnailFile = null;
   const panels = {};
   const tabButtons = {};
 
@@ -36,125 +100,105 @@ export function displayTumblr(isLoggedIn, root) {
   const formCon = createEl("div", { class: ["tumblr-form"] });
   const tabHeader = createEl("div", { class: ["tab-header"], role: "tablist" });
 
-  // ------------------- Validation & Handlers -------------------
-  const handlers = {
-    text: {
-      isValid: () => panels.Text?.querySelector("textarea")?.value.trim().length > 0,
-      appendFormData: (fd) => fd.append("text", panels.Text.querySelector("textarea").value.trim())
-    },
-    image: {
-      isValid: () => panels["Images-input"]?.files.length > 0,
-      appendFormData: (fd) => {
-        Array.from(panels["Images-input"].files).forEach(f => fd.append("images", f));
-        const caption = panels["Images-preview"].parentElement.querySelector("textarea");
-        const tags = panels["Images-preview"].parentElement.querySelector("input[type=text]");
-        if (caption?.value.trim()) fd.append("caption", caption.value.trim());
-        const tagValues = tags?.value.split(",").map(t => t.trim()).filter(Boolean);
-        if (tagValues?.length) fd.append("tags", tagValues);
-      }
-    },
-    video: {
-      isValid: () => {
-        const files = panels["Video-input"]?.files;
-        const title = panels["Video-preview"].parentElement.querySelector("input[type=text]");
-        return files?.length === 1 && !!title?.value.trim();
-      },
-      appendFormData: (fd) => {
-        const file = panels["Video-input"].files[0];
-        if (file) fd.append("video", file);
-        const title = panels["Video-preview"].parentElement.querySelector("input[type=text]");
-        const description = panels["Video-preview"].parentElement.querySelector("textarea");
-        const tags = panels["Video-preview"].parentElement.querySelectorAll("input[type=text]")[1];
-        if (title?.value.trim()) fd.append("title", title.value.trim());
-        if (description?.value.trim()) fd.append("description", description.value.trim());
-        const tagValues = tags?.value.split(",").map(t => t.trim()).filter(Boolean);
-        if (tagValues?.length) fd.append("tags", tagValues);
+  // --- Create tabs + panels ---
+  TAB_CONFIG.forEach(cfg => {
+    const btn = createTabButton(
+      createIconButton({ svgMarkup: cfg.icon, classSuffix: "clrful" }),
+      () => switchTab(cfg.name)
+    );
+    btn.dataset.tab = cfg.name;
+    tabButtons[cfg.name] = btn;
+    tabHeader.appendChild(btn);
+
+    const input = cfg.type !== "text" ? createFileInput(cfg.type, cfg.multiple) : null;
+    const preview = cfg.type !== "text" ? createPreviewContainer(`${cfg.type}-preview`) : null;
+
+    if (input) {
+      if (cfg.type === "video") {
+        // Use <video> element for preview
+        const videoPreview = createEl("video", { controls: true, class: ["preview-video"] });
+        preview.appendChild(videoPreview);
+
+        input.addEventListener("change", () => {
+          const file = input.files[0];
+          if (file) videoPreview.src = URL.createObjectURL(file);
+          checkPublishEnable();
+        });
+
+        // Video playback controls
+        const controls = createEl("div", { class: "video-contra" });
+        const volumeRange = createEl("input", { type: "range", min: 0, max: 1, step: 0.05, value: 1 });
+        volumeRange.addEventListener("input", () => videoPreview.volume = parseFloat(volumeRange.value));
+        const speedRange = createEl("input", { type: "range", min: 0.25, max: 3, step: 0.05, value: 1 });
+        speedRange.addEventListener("input", () => videoPreview.playbackRate = parseFloat(speedRange.value));
+        const muteBtn = Button("Mute", "", { click: e => { videoPreview.muted = !videoPreview.muted; e.target.innerText = videoPreview.muted ? "Unmute" : "Mute"; } });
+        controls.append(
+          createEl("label", {}, ["Volume: ", volumeRange]),
+          createEl("label", {}, ["Speed: ", speedRange]),
+          muteBtn
+        );
+        preview.appendChild(controls);
+
+        // Thumbnail input + preview + capture button
+        const thumbInput = createEl("input", { type: "file", accept: "image/*" });
+        const thumbPreview = createEl("img", { class: "thumbnail-preview", src: "", alt: "Thumbnail preview" });
+        thumbInput.addEventListener("change", () => {
+          const file = thumbInput.files[0];
+          if (file) {
+            videoThumbnailFile = file;
+            thumbPreview.src = URL.createObjectURL(file);
+          }
+        });
+        const captureBtn = Button("Capture Thumbnail", "", {
+          click: () => {
+            if (!videoPreview.src) return alert("Select a video first");
+            const canvas = document.createElement("canvas");
+            canvas.width = videoPreview.videoWidth || 640;
+            canvas.height = videoPreview.videoHeight || 360;
+            canvas.getContext("2d").drawImage(videoPreview, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob(blob => {
+              videoThumbnailFile = new File([blob], "thumbnail.png", { type: "image/png" });
+              thumbPreview.src = URL.createObjectURL(videoThumbnailFile);
+              alert("Thumbnail captured!");
+            }, "image/png");
+          }
+        });
+        preview.appendChild(createEl("div", { class: ["thumbnail-controls"] }, [thumbInput, captureBtn, thumbPreview]));
+
+        panels[`${cfg.name}-input`] = input;
+        panels[`${cfg.name}-preview`] = preview;
+        panels[`${cfg.name}-videoElement`] = videoPreview;
+      } else {
+        // Image input + preview
+        input.addEventListener("change", () => {
+          renderPreviewList(Array.from(input.files), preview, cfg.type, input, checkPublishEnable);
+          checkPublishEnable();
+        });
+        panels[`${cfg.name}-input`] = input;
+        panels[`${cfg.name}-preview`] = preview;
       }
     }
-  };
 
-  // ------------------- Tab Content -------------------
-  function createTabContent(cfg) {
-    if (cfg.type === "text") {
-      const group = createFormGroup({
-        label: "Text",
-        type: "textarea",
-        id: "text-input",
-        placeholder: "Write something…",
-        additionalProps: { rows: 4, classList: ["tumblr-textarea"] }
-      });
-      group.querySelector("textarea").addEventListener("input", checkPublishEnable);
-      return group;
-    }
-
-    const input = createFileInput(cfg.type, cfg.multiple);
-    const preview = createPreviewContainer(`${cfg.type}-preview`);
-
-    input.addEventListener("change", () => {
-      renderPreviewList(Array.from(input.files), preview, cfg.type, input, checkPublishEnable);
-      checkPublishEnable();
-    });
-
-    const extraFields = cfg.type === "image" ? [
-      createFormGroup({ label: "Caption", type: "textarea", id: `${cfg.name}-caption`, placeholder: "Add a caption…", additionalProps: { rows: 2, classList: ["caption-textarea"] } }),
-      createFormGroup({ label: "Tags", type: "text", id: `${cfg.name}-tags`, placeholder: "Tags (comma separated)", additionalProps: { classList: ["tag-input"] } })
-    ] : [
-      createFormGroup({ label: "Title", type: "text", id: `${cfg.name}-title`, placeholder: "Title", isRequired: true, additionalProps: { classList: ["meta-title"] } }),
-      createFormGroup({ label: "Description", type: "textarea", id: `${cfg.name}-description`, placeholder: "Description", additionalProps: { rows: 3, classList: ["meta-description"] } }),
-      createFormGroup({ label: "Tags", type: "text", id: `${cfg.name}-tags`, placeholder: "Tags (comma separated)", additionalProps: { classList: ["tag-input"] } })
-    ];
-
+    const extraFields = cfg.fields.map(field => createFormGroup({ ...field, additionalProps: { ...field } }));
     extraFields.forEach(field => {
       field.querySelectorAll("input, textarea").forEach(el => {
+        panels[el.id] = el;
         el.addEventListener("input", checkPublishEnable);
       });
     });
 
-    panels[`${cfg.name}-input`] = input;
-    panels[`${cfg.name}-preview`] = preview;
-
-    return createEl("div", { class: ["file-input-wrapper"] }, [input, preview, ...extraFields]);
-  }
-
-  // ------------------- Tabs -------------------
-  // TAB_CONFIG.forEach(cfg => {
-  //   const btn = createTabButton(cfg.name, () => switchTab(cfg.name));
-  //   tabButtons[cfg.name] = btn;
-  //   tabHeader.appendChild(btn);
-
-  //   const content = createTabContent(cfg);
-  //   const panel = createPanel(`${cfg.type}-panel`, [content]);
-  //   panel.style.display = "none"; // Hide initially
-  //   panels[cfg.name] = panel;
-  // });
-
-  TAB_CONFIG.forEach(cfg => {
-    const btn = createTabButton(createIconButton({ svgMarkup: cfg.icon, classSuffix: "clrful" }), () => switchTab(cfg.name));
-    tabButtons[cfg.name] = btn;
-    tabHeader.appendChild(btn);
-    
-    btn.dataset["tab"] = cfg.name;
-
-    const content = createTabContent(cfg);
+    const content = cfg.type === "text" ? extraFields[0] : createEl("div", { class: ["file-input-wrapper"] }, [input, preview, ...extraFields]);
     const panel = createPanel(`${cfg.type}-panel`, [content]);
-    panel.style.display = "none"; // Hide initially
+    panel.style.display = "none";
     panels[cfg.name] = panel;
   });
-
 
   const panelWrapper = createEl("div", { class: ["panel-wrapper"] });
   Object.values(panels)
     .filter(p => p.getAttribute("role") === "tabpanel")
-    .forEach(panelWrapper.appendChild.bind(panelWrapper));
+    .forEach(panel => panelWrapper.appendChild(panel));
 
-  // const publishBtn = createEl("button", { id: "publish-btn", class: ["publish-btn"], disabled: true }, ["Publish"]);
-  const publishBtn = createEl("button", {
-    id: "publish-btn",
-    class: ["publish-btn"],
-    disabled: true,
-    style: "display: none" // 👈 Hide initially
-  }, ["Publish"]);
-
+  const publishBtn = createEl("button", { id: "publish-btn", class: ["publish-btn"], disabled: true, style: "display: none" }, ["Publish"]);
   publishBtn.addEventListener("click", handlePublish);
 
   formCon.appendChild(tabHeader);
@@ -168,22 +212,19 @@ export function displayTumblr(isLoggedIn, root) {
 
   refreshFeed();
 
-  // ------------------- Core -------------------
+  // --- Core Functions ---
   function switchTab(tabName) {
-    if (!tabName || !panels[tabName]) return;
-
-    TAB_CONFIG.forEach(cfg => {
-      panels[cfg.name].style.display = cfg.name === tabName ? "block" : "none";
+    if (!panels[tabName]) return;
+    activeTab = tabName;
+    Object.entries(panels).forEach(([name, panel]) => {
+      if (panel.getAttribute("role") === "tabpanel") panel.style.display = name === tabName ? "block" : "none";
     });
-
     Object.entries(tabButtons).forEach(([name, btn]) => {
       const selected = name === tabName;
       btn.setAttribute("aria-selected", selected);
       btn.classList.toggle("active", selected);
     });
-
-    activeTab = tabName;
-    publishBtn.style.display = "inline-block"; // 👈 Show when tab is active
+    publishBtn.style.display = "inline-block";
     checkPublishEnable();
   }
 
@@ -193,7 +234,13 @@ export function displayTumblr(isLoggedIn, root) {
       return;
     }
     const cfg = TAB_CONFIG.find(c => c.name === activeTab);
-    publishBtn.disabled = !handlers[cfg.type].isValid();
+    if (cfg.type === "video") {
+      const file = panels["Video-input"]?.files[0];
+      const title = panels["Video-title"]?.value.trim();
+      publishBtn.disabled = !(file && title);
+    } else {
+      publishBtn.disabled = !handlers[cfg.type].isValid(panels);
+    }
   }
 
   async function handlePublish() {
@@ -214,27 +261,172 @@ export function displayTumblr(isLoggedIn, root) {
 
   function resetInputs() {
     Object.entries(panels).forEach(([key, panel]) => {
-      if (panel.tagName === "DIV") {
-        panel.querySelectorAll("input, textarea").forEach(el => {
-          el.value = el.type === "file" ? "" : "";
-        });
-      }
-      if (key.endsWith("-preview") && panel instanceof HTMLElement) {
-        panel.innerHTML = "";
-      }
+      if (panel instanceof HTMLElement) panel.querySelectorAll("input, textarea").forEach(el => el.value = "");
+      if (key.endsWith("-preview") && panel instanceof HTMLElement) clearChildren(panel);
     });
+    videoThumbnailFile = null;
     checkPublishEnable();
   }
 
-  async function refreshFeed() {
-    await fetchFeed(feedContainer);
-  }
+  async function refreshFeed() { await fetchFeed(feedContainer); }
 
   async function buildFormData() {
     const formData = new FormData();
     const active = TAB_CONFIG.find(c => c.name === activeTab);
     formData.append("type", active.type);
-    handlers[active.type].appendFormData(formData);
+    handlers[active.type].appendFormData(formData, panels);
+    if (active.type === "video" && videoThumbnailFile) formData.append("thumbnail", videoThumbnailFile);
     return formData;
   }
 }
+// export function displayTumblr(isLoggedIn, root) {
+//   let activeTab = null;
+//   const panels = {};
+//   const tabButtons = {};
+
+//   root.innerHTML = "";
+
+//   const layout = createEl("div", { class: ["tumblr-layout"] });
+//   const formCon = createEl("div", { class: ["tumblr-form"] });
+//   const tabHeader = createEl("div", { class: ["tab-header"], role: "tablist" });
+
+//   // Create tabs + panels
+//   TAB_CONFIG.forEach(cfg => {
+//     const btn = createTabButton(
+//       createIconButton({ svgMarkup: cfg.icon, classSuffix: "clrful" }),
+//       () => switchTab(cfg.name)
+//     );
+//     btn.dataset["tab"] = cfg.name;
+//     tabButtons[cfg.name] = btn;
+//     tabHeader.appendChild(btn);
+
+//     const input = cfg.type !== "text" ? createFileInput(cfg.type, cfg.multiple) : null;
+//     const preview = cfg.type !== "text" ? createPreviewContainer(`${cfg.type}-preview`) : null;
+
+//     if (input) {
+//       input.addEventListener("change", () => {
+//         renderPreviewList(Array.from(input.files), preview, cfg.type, input, checkPublishEnable);
+//         checkPublishEnable();
+//       });
+//       panels[`${cfg.name}-input`] = input;
+//       panels[`${cfg.name}-preview`] = preview;
+//     }
+
+//     const extraFields = cfg.fields.map(field =>
+//       createFormGroup({ ...field, additionalProps: { ...field } })
+//     );
+
+//     extraFields.forEach(field => {
+//       field.querySelectorAll("input, textarea").forEach(el => {
+//         panels[el.id] = el;
+//         el.addEventListener("input", checkPublishEnable);
+//       });
+//     });
+
+//     const content = cfg.type === "text"
+//       ? extraFields[0]
+//       : createEl("div", { class: ["file-input-wrapper"] }, [input, preview, ...extraFields]);
+
+//     const panel = createPanel(`${cfg.type}-panel`, [content]);
+//     panel.style.display = "none";
+//     panels[cfg.name] = panel;
+//   });
+
+//   const panelWrapper = createEl("div", { class: ["panel-wrapper"] });
+//   Object.values(panels)
+//     .filter(p => p.getAttribute("role") === "tabpanel")
+//     .forEach(panel => panelWrapper.appendChild(panel));
+
+//   const publishBtn = createEl("button", {
+//     id: "publish-btn",
+//     class: ["publish-btn"],
+//     disabled: true,
+//     style: "display: none"
+//   }, ["Publish"]);
+
+//   publishBtn.addEventListener("click", handlePublish);
+
+//   formCon.appendChild(tabHeader);
+//   formCon.appendChild(panelWrapper);
+//   formCon.appendChild(publishBtn);
+//   layout.appendChild(formCon);
+
+//   const feedContainer = createEl("div", { id: "postsContainer", class: ["tumblr-feed"] });
+//   layout.appendChild(feedContainer);
+//   root.appendChild(layout);
+
+//   refreshFeed();
+
+//   // ------------------- Core -------------------
+//   function switchTab(tabName) {
+//     if (!panels[tabName]) return;
+//     activeTab = tabName;
+
+//     Object.entries(panels).forEach(([name, panel]) => {
+//       if (panel.getAttribute("role") === "tabpanel") {
+//         panel.style.display = name === tabName ? "block" : "none";
+//       }
+//     });
+
+//     Object.entries(tabButtons).forEach(([name, btn]) => {
+//       const selected = name === tabName;
+//       btn.setAttribute("aria-selected", selected);
+//       btn.classList.toggle("active", selected);
+//     });
+
+//     publishBtn.style.display = "inline-block";
+//     checkPublishEnable();
+//   }
+
+//   function checkPublishEnable() {
+//     if (!activeTab) {
+//       publishBtn.disabled = true;
+//       return;
+//     }
+//     const cfg = TAB_CONFIG.find(c => c.name === activeTab);
+//     publishBtn.disabled = !handlers[cfg.type].isValid(panels);
+//   }
+
+//   async function handlePublish() {
+//     publishBtn.disabled = true;
+//     try {
+//       const formData = await buildFormData();
+//       const csrfToken = await getCSRFToken();
+//       const res = await apiFetch("/feed/post", "POST", formData, { headers: { "X-CSRF-Token": csrfToken } });
+//       if (!res || res.error) throw new Error(res?.error || "Upload failed");
+//       renderNewPost(Array.isArray(res.data) ? res.data : [res.data], 0, feedContainer);
+//       resetInputs();
+//     } catch (err) {
+//       console.error("Publish error:", err);
+//     } finally {
+//       publishBtn.disabled = false;
+//     }
+//   }
+
+//   function resetInputs() {
+//     Object.entries(panels).forEach(([key, panel]) => {
+//       if (panel instanceof HTMLElement) {
+//         panel.querySelectorAll("input, textarea").forEach(el => {
+//           if (el.type === "file") el.value = "";
+//           else el.value = "";
+//         });
+//       }
+//       if (key.endsWith("-preview") && panel instanceof HTMLElement) {
+//         clearChildren(panel);
+//       }
+//     });
+//     checkPublishEnable();
+//   }
+
+//   async function refreshFeed() {
+//     await fetchFeed(feedContainer);
+//   }
+
+//   async function buildFormData() {
+//     const formData = new FormData();
+//     const active = TAB_CONFIG.find(c => c.name === activeTab);
+//     formData.append("type", active.type);
+//     handlers[active.type].appendFormData(formData, panels);
+//     return formData;
+//   }
+// }

@@ -1,4 +1,6 @@
+// ContextMenu.mjs
 import "../../../css/ui/ContextMenu.css";
+import { createElement } from "../../components/createElement";
 
 const ContextMenu = (() => {
   let menu = null;
@@ -6,30 +8,20 @@ const ContextMenu = (() => {
   const createMenu = (options, x, y) => {
     removeMenu();
 
-    menu = document.createElement("div");
-    menu.className = "context-menu";
-    menu.setAttribute("role", "menu");
+    menu = createElement("div", {
+      class: "context-ctx",
+      role: "menu"
+    });
 
     options.forEach(({ label, action, disabled = false }) => {
-      const item = document.createElement("div");
-      item.className = "menu-item";
-      item.textContent = label;
+      const item = createElement("div", {
+        class: `ctx-item${disabled ? " disabled" : ""}`,
+        role: "menuitem",
+        tabindex: disabled ? -1 : 0
+      }, label); // ✅ pass string directly
 
-      if (disabled) {
-        item.classList.add("disabled");
-      } else {
-        item.tabIndex = 0;
-        item.addEventListener("click", (e) => {
-          e.stopPropagation();
-          action();
-          removeMenu();
-        });
-        item.addEventListener("keydown", (e) => {
-          if (e.key === "Enter") {
-            action();
-            removeMenu();
-          }
-        });
+      if (!disabled) {
+        item._action = action;
       }
 
       menu.appendChild(item);
@@ -38,28 +30,70 @@ const ContextMenu = (() => {
     document.body.appendChild(menu);
     positionMenu(x, y);
     setupEventListeners();
+    focusFirstItem();
   };
 
   const positionMenu = (x, y) => {
     const { offsetWidth, offsetHeight } = menu;
-    const { innerWidth, innerHeight } = window;
+    const { innerWidth, innerHeight, scrollX, scrollY } = window;
 
-    menu.style.top = `${Math.min(y, innerHeight - offsetHeight)}px`;
-    menu.style.left = `${Math.min(x, innerWidth - offsetWidth)}px`;
+    const left = Math.min(x, scrollX + innerWidth - offsetWidth);
+    const top = Math.min(y, scrollY + innerHeight - offsetHeight);
+
+    menu.style.left = `${left}px`;
+    menu.style.top = `${top}px`;
   };
 
   const setupEventListeners = () => {
-    document.addEventListener("mousedown", removeMenu, { once: true });
-    window.addEventListener("scroll", removeMenu, { once: true });
-    window.addEventListener("resize", removeMenu, { once: true });
+    menu.addEventListener("click", (e) => {
+      const item = e.target.closest(".ctx-item:not(.disabled)");
+      if (!item) return;
+      item._action?.();
+      removeMenu();
+    });
 
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") removeMenu();
-    }, { once: true });
+    menu.addEventListener("keydown", (e) => {
+      const items = [...menu.querySelectorAll(".ctx-item:not(.disabled)")];
+      const current = document.activeElement;
+      let idx = items.indexOf(current);
+
+      if (e.key === "Escape") {
+        e.preventDefault();
+        removeMenu();
+      } else if (e.key === "ArrowDown") {
+        e.preventDefault();
+        items[(idx + 1) % items.length].focus();
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        items[(idx - 1 + items.length) % items.length].focus();
+      } else if (e.key === "Enter" && current._action) {
+        e.preventDefault();
+        current._action();
+        removeMenu();
+      }
+    });
+
+    document.addEventListener("mousedown", outsideClickHandler);
+    window.addEventListener("scroll", removeMenu, { passive: true });
+    window.addEventListener("resize", removeMenu);
+  };
+
+  const outsideClickHandler = (e) => {
+    if (!menu.contains(e.target)) {
+      removeMenu();
+    }
+  };
+
+  const focusFirstItem = () => {
+    const first = menu.querySelector(".ctx-item:not(.disabled)");
+    first?.focus();
   };
 
   const removeMenu = () => {
     if (menu) {
+      document.removeEventListener("mousedown", outsideClickHandler);
+      window.removeEventListener("scroll", removeMenu);
+      window.removeEventListener("resize", removeMenu);
       menu.remove();
       menu = null;
     }
@@ -67,6 +101,5 @@ const ContextMenu = (() => {
 
   return createMenu;
 })();
-
 
 export default ContextMenu;

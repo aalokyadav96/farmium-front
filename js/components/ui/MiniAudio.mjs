@@ -1,5 +1,5 @@
 import "../../../css/ui/MiniAudio.css";
-import { PauseSVG, playSVG } from "../svgs.js";
+import { pauseSVG, playSVG } from "../svgs.js";
 import { createElement } from "../createElement.js";
 
 function MiniAudio({ poster, audioUrl, title = "" }) {
@@ -48,7 +48,7 @@ function MiniAudio({ poster, audioUrl, title = "" }) {
 
     if (audio.paused) {
       audio.play();
-      playBtn.innerHTML = PauseSVG;
+      playBtn.innerHTML = pauseSVG;
     } else {
       audio.pause();
       playBtn.innerHTML = playSVG;

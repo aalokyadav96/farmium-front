@@ -1,3 +1,4 @@
+
 import { createElement } from "../../components/createElement.js";
 import { apiFetch } from "../../api/api.js";
 import { Button } from "../../components/base/Button.js";
@@ -117,18 +118,6 @@ export async function displayListingPage(container, {
       renderPage(filtered);
     });
     
-    // const paginationWrapper = buildPagination(() => {
-    //   if (currentPage > 1) {
-    //     currentPage--;
-    //     renderPage(filterControls.currentFiltered || []);
-    //   }
-    // }, () => {
-    //   const filtered = filterControls.currentFiltered || [];
-    //   if (currentPage * pageSize < filtered.length) {
-    //     currentPage++;
-    //     renderPage(filtered);
-    //   }
-    // });
 
     main.appendChild(paginationWrapper.wrapper);
 

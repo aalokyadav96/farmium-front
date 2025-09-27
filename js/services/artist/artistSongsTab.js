@@ -4,7 +4,7 @@ import { createFormGroup } from "../../components/createFormGroup.js";
 import Modal from "../../components/ui/Modal.mjs";
 import Button from "../../components/base/Button.js";
 import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
-import { playSVG, PauseSVG } from "../../components/svgs.js";
+import { playSVG, pauseSVG } from "../../components/svgs.js";
 
 // 🎵 Global State
 let currentAudio = null;
@@ -81,7 +81,7 @@ function playSong(song, container) {
     currentAudio = audio;
 
     if (song._playBtn) {
-        song._playBtn.innerHTML = PauseSVG;
+        song._playBtn.innerHTML = pauseSVG;
         currentPlayBtn = song._playBtn;
     }
 }

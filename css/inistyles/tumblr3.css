@@ -198,7 +198,8 @@
   stroke: var(--stroke-svg);
 }
 
-.tumblr-layout .clrfill {
+/* .tumblr-layout .clrfill { */
+.clrfill {
   width: 2rem;
   height: 2rem;
   fill: var(--stroke-svg);

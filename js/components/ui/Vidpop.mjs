@@ -3,7 +3,7 @@ import { createIconButton } from "../../utils/svgIconButton";
 import { xSVG } from "../svgs";
 import { generateVideoPlayer } from "./vidpopHelpers";
 
-const Vidpop = (mediaSrc, type, videoid, options = {}) => {
+const Vidpop = (mediaSrc, videoid, options = {}) => {
   const { poster = null, theme = "light", qualities = [], subtitles = [] } = options;
 
   const sightbox = document.createElement("div");

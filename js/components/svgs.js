@@ -16,7 +16,7 @@ let downloadSVG = `<svg class="clrful" viewBox="0 0 24 24" width="24" height="24
 
 let playSVG = `<svg class="clrful" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke-linecap="round" stroke-linejoin="round" ><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`;
 
-let PauseSVG = `<svg class="clrful" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke-linecap="round" stroke-linejoin="round" ><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>`;
+let pauseSVG = `<svg class="clrful" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke-linecap="round" stroke-linejoin="round" ><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>`;
 
 let headphonesSVG = `<svg class="clrful" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke-linecap="round" stroke-linejoin="round" ><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path></svg>`;
 
@@ -99,7 +99,12 @@ let starFilledSVG = plusSquareSVG;
 
 let commentSVG = `<svg aria-label="Comment" class="clrful" fill="none" height="24" role="img" viewBox="0 0 24 24" width="24"><title>Comment</title><path d="M20.656 17.008a9.993 9.993 0 1 0-3.59 3.615L22 22Z" fill="none" stroke-linejoin="round" stroke-width="2"></path></svg>`;
 
-let menuSVG = `<svg class="clrful" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke-linecap="round" stroke-linejoin="round" >
+let menuSVG = `<svg class="clrful" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke-linecap="round" stroke-linejoin="round">
 <title>Menu</title><line x1="7" y1="12" x2="17" y2="12"></line><line x1="4" y1="6" x2="20" y2="6"></line><line x1="5" y1="18" x2="19" y2="18"></line></svg>`;
 
-export { profileSVG, searchSVG, liveStreamSVG, chatSVG, heartSVG, moonSVG, settingsSVG, downloadSVG, playSVG, PauseSVG, headphonesSVG, imageSVG, filterSVG, placesSVG, coffeeSVG, calendarSVG, locaSVG, evaSVG, plusCircleSVG, plusSquareSVG, moreSVG, notifSVG, shopBagSVG, xSVG, dragBoxSVG, logoutSVG, cartSVG, arrowLeftSVG, homeSVG, commentSVG, cardSVG, pipSVG, maximizeSVG, vol0SVG, vol1SVG, vol2SVG, muteSVG, zoomInSVG, zoomOutSVG, warningSVG, morevSVG, starEmptySVG, starFilledSVG, menuSVG };
+let skipBackSVG = `<svg class="clrful" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>`;
+
+let skipForwardSVG = `<svg class="clrful" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>`;
+
+
+export { profileSVG, searchSVG, liveStreamSVG, chatSVG, heartSVG, moonSVG, settingsSVG, downloadSVG, playSVG, pauseSVG, headphonesSVG, imageSVG, filterSVG, placesSVG, coffeeSVG, calendarSVG, locaSVG, evaSVG, plusCircleSVG, plusSquareSVG, moreSVG, notifSVG, shopBagSVG, xSVG, dragBoxSVG, logoutSVG, cartSVG, arrowLeftSVG, homeSVG, commentSVG, cardSVG, pipSVG, maximizeSVG, vol0SVG, vol1SVG, vol2SVG, muteSVG, zoomInSVG, zoomOutSVG, warningSVG, morevSVG, starEmptySVG, starFilledSVG, menuSVG, skipBackSVG, skipForwardSVG };

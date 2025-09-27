@@ -272,5 +272,5 @@
   /* .vflex { display:flex; flex-direction:column; gap:8px; } */
   
   /* subtle focus outlines for keyboard users */
-  :focus { outline: 3px solid rgba(3,102,214,0.12); outline-offset:3px; border-radius:6px; }
+  /* :focus { outline: 3px solid rgba(3,102,214,0.12); outline-offset:3px; border-radius:6px; } */
   

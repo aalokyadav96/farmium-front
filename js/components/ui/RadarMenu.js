@@ -4,7 +4,7 @@ import { makeDraggable } from "../makeDraggable.js"; // Import draggable utility
 const RadarMenu = (menuItems = [], options = {}) => {
   const {
     buttonText = "+",
-    menuSize = 560,
+    menuSize = 360,
     radius = 112,
     baseAngle = 270,
     startAngle = 0

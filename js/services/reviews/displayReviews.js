@@ -41,7 +41,7 @@ async function displayReviews(reviewsContainer, isCreator, isLoggedIn, entityTyp
     if (!isCreator && isLoggedIn) {
         const addButton = Button("Add Review", "add-review-btn", {
             click: () => handleAddReview(actionContainer, entityType, entityId)
-        });
+        }, "buttonx");
         reviewsContainer.appendChild(addButton);
     }
 

@@ -1,8 +1,23 @@
 import "../../../css/ui/VideoPlayer.css";
 import Vidpop from "./Vidpop.mjs";
 import { createIconButton } from "../../utils/svgIconButton";
-import { maximizeSVG } from "../svgs.js";
+import { maximizeSVG, muteSVG, vol2SVG, playSVG, pauseSVG } from "../svgs.js";
+import { setupSubtitles } from "./vidpopHelpers/subtitles.js";
+import { createElement } from "../../components/createElement";
+// import { createControls } from "./vidpopHelpers/controls.js";
+
 // ---- Video Helpers ----
+const determineInitialSource = (baseSrc, availableResolutions) => {
+  const stored = localStorage.getItem("videoQuality");
+  const qualityNum = stored ? Number(stored) : null;
+  const lowestAvailable = Math.min(...availableResolutions);
+  const fallback = `${baseSrc}-${lowestAvailable}.mp4`;
+
+  return qualityNum && availableResolutions.includes(qualityNum)
+    ? `${baseSrc}-${qualityNum}.mp4`
+    : fallback;
+};
+
 const createVideoElement = (src, resolutions, poster) => {
   const video = document.createElement("video");
   video.setAttribute("class", "video-player");
@@ -17,6 +32,7 @@ const createVideoElement = (src, resolutions, poster) => {
   return video;
 };
 
+
 const applyVideoAttributes = (video, attrs = {}) => {
   Object.entries(attrs).forEach(([key, value]) => {
     if (key in video) video[key] = value;
@@ -24,41 +40,27 @@ const applyVideoAttributes = (video, attrs = {}) => {
 };
 
 const togglePlayOnClick = (video) => {
-  video.addEventListener("click", () => {
-    video.paused ? video.play() : video.pause();
-  });
-};
-
-const determineInitialSource = (baseSrc, availableResolutions) => {
-  const stored = localStorage.getItem("videoQuality");
-  const qualityNum = stored ? Number(stored) : null;
-  const lowestAvailable = Math.min(...availableResolutions);
-  const fallback = `${baseSrc}-${lowestAvailable}.mp4`;
-
-  return qualityNum && availableResolutions.includes(qualityNum)
-    ? `${baseSrc}-${qualityNum}.mp4`
-    : fallback;
+  const handler = () => video.paused ? video.play() : video.pause();
+  video.addEventListener("click", handler);
+  return () => video.removeEventListener("click", handler);
 };
 
 // ---- Quality Selector ----
 export const createQualitySelector = (video, baseSrc, availableResolutions) => {
-  const selector = document.createElement("select");
-  selector.setAttribute("class", "quality-selector buttonx");
+  const selector = createElement("select", { class: "quality-selector buttonx" });
 
   const allQualities = [1440, 1080, 720, 480, 360, 240, 144];
   const available = allQualities.filter(q => availableResolutions.includes(q));
 
   const stored = localStorage.getItem("videoQuality") || `${Math.min(...availableResolutions)}`;
 
+  const fragment = document.createDocumentFragment();
   available.forEach((quality) => {
-    const option = document.createElement("option");
-    option.setAttribute("value", `${baseSrc}-${quality}.mp4`);
-    option.appendChild(document.createTextNode(`${quality}p`));
-    if (parseInt(stored) === quality) {
-      option.setAttribute("selected", "true");
-    }
-    selector.appendChild(option);
+    const option = createElement("option", { value: `${baseSrc}-${quality}.mp4` }, [`${quality}p`]);
+    if (parseInt(stored) === quality) option.setAttribute("selected", "true");
+    fragment.appendChild(option);
   });
+  selector.appendChild(fragment);
 
   const switchQuality = (target) => {
     const selectedSrc = target.value;
@@ -69,94 +71,158 @@ export const createQualitySelector = (video, baseSrc, availableResolutions) => {
     localStorage.setItem("videoQuality", selectedQuality);
     video.src = selectedSrc;
 
-    video.addEventListener(
-      "loadedmetadata",
-      () => {
-        video.currentTime = currentTime;
-        if (!wasPaused) video.play();
-      },
-      { once: true }
-    );
+    const loadedHandler = () => {
+      video.currentTime = currentTime;
+      if (!wasPaused) video.play();
+    };
+    video.addEventListener("loadedmetadata", loadedHandler, { once: true });
   };
 
-  selector.addEventListener("change", (e) => switchQuality(e.target));
-  selector.addEventListener("click", (e) => {
-    if (e.target.tagName === "OPTION") switchQuality(selector);
-  });
+  const changeHandler = (e) => switchQuality(e.target);
+  selector.addEventListener("change", changeHandler);
 
-  return { selector, qualities: available };
+  return {
+    selector,
+    qualities: available,
+    cleanup: () => selector.removeEventListener("change", changeHandler)
+  };
 };
 
 // ---- Main VideoPlayer Component ----
 const VideoPlayer = (
-  { src, poster, controls = true, autoplay = false, muted = true, theme = "light", loop = false },
+  { src, poster, controls = true, autoplay = false, muted = true, theme = "light", loop = false, subtitles = [] },
   videoId,
   availableResolutions
 ) => {
-  const container = document.createElement("div");
-  container.setAttribute("class", `video-container theme-${theme}`);
-  container.setAttribute("role", "region");
-  container.setAttribute("aria-label", "Video Player Container");
+  const container = createElement("div", {
+    class: `video-container theme-${theme}`,
+    role: "region",
+    "aria-label": "Video Player Container"
+  });
 
-  const controlsContainer = document.createElement("div");
-  controlsContainer.setAttribute("class", "hflex-sb vcon");
-
-  const videocon = document.createElement("div");
-  videocon.setAttribute("class", "videocon");
+  const controlsContainer = createElement("div", { class: "hflex-sb vcon" });
+  const videocon = createElement("div", { class: "videocon" });
 
   const baseSrc = src.replace(/\.mp4$/, "");
   const video = createVideoElement(src, availableResolutions, poster);
 
+
   applyVideoAttributes(video, { controls, muted, loop });
+
+  let observer;
   if (autoplay) {
-    // ✅ Use IntersectionObserver to control autoplay
-    const observer = new IntersectionObserver(
+    observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            video.play().catch(() => {}); // suppress autoplay errors
+            video.play().catch(() => { });
           } else {
             video.pause();
           }
         });
       },
-      { threshold: 0.5 } // at least 50% visible
+      { threshold: 0.5 }
     );
     observer.observe(video);
   }
 
-  togglePlayOnClick(video);
+  // // --- Play/Pause Button ---
+  // const playButton = createIconButton({
+  //   classSuffix: "playpause bonw",
+  //   svgMarkup: video.paused ? playSVG : pauseSVG, // show correct initial icon
+  //   onClick: () => {
+  //     if (video.paused) {
+  //       video.play();
+  //       playButton.innerHTML = pauseSVG;
+  //     } else {
+  //       video.pause();
+  //       playButton.innerHTML = playSVG;
+  //     }
+  //   },
+  //   label: "",
+  //   ariaLabel: "Play/Pause"
+  // });
+
+  // // Append to controls
+  // controlsContainer.appendChild(playButton);
+
+
+  const removeTogglePlay = togglePlayOnClick(video);
 
   let availableQualities = [];
+  let qualityCleanup = null;
   if (availableResolutions?.length) {
-    const { selector, qualities } = createQualitySelector(video, baseSrc, availableResolutions);
-    if (selector) controlsContainer.appendChild(selector);
+    const { selector, qualities, cleanup } = createQualitySelector(video, baseSrc, availableResolutions);
+    controlsContainer.appendChild(selector);
     availableQualities = qualities;
+    qualityCleanup = cleanup;
+  }
+
+
+  // --- Mute Button ---
+  const muteButton = createIconButton({
+    classSuffix: "bonw",
+    svgMarkup: video.muted ? muteSVG : vol2SVG,
+    onClick: () => {
+      video.muted = !video.muted;
+      muteButton.innerHTML = video.muted ? muteSVG : vol2SVG;
+      muteButton.setAttribute("aria-label", video.muted ? "Muted" : "Unmuted");
+    },
+    label: ""
+  });
+  controlsContainer.appendChild(muteButton);
+
+
+  // Subtitles
+  if (subtitles.length !== 0) {
+    const subtitleContainer = document.createElement("div");
+    subtitleContainer.className = "subtitle-container";
+    videocon.appendChild(subtitleContainer);
+    setupSubtitles(video, subtitles, subtitleContainer);
   }
 
   const theaterButton = createIconButton({
     classSuffix: "bonw",
     svgMarkup: maximizeSVG,
     onClick: () => {
-      Vidpop(video.currentSrc, "video", videoId, {
+      Vidpop(video.currentSrc, videoId, {
         poster,
         theme,
         qualities: availableQualities.map(q => ({
           label: `${q}p`,
           src: `${baseSrc}-${q}.mp4`
-        })),
+        }))
       });
     },
-    label: ""
+    label: "",
+    ariaLabel: "Activate Theater Mode"
   });
 
-  video.setAttribute("aria-label", "Video Player");
   theaterButton.setAttribute("title", "Activate Theater Mode");
-
   controlsContainer.appendChild(theaterButton);
-  videocon.appendChild(video);
-  videocon.appendChild(controlsContainer);
+
+  /* */
+  // let qties = availableQualities.map(q => ({
+  //   label: `${q}p`,
+  //   src: `${baseSrc}-${q}.mp4`
+  // }));
+  // console.log(createControls(video, src, qties, videoId, controlsContainer));
+  // const controlsElement = createControls(video, src, qties, videoId, container);
+  // controlsContainer.appendChild(controlsElement);
+  /* */
+
+  const fragment = document.createDocumentFragment();
+  fragment.appendChild(video);
+  fragment.appendChild(controlsContainer);
+  videocon.appendChild(fragment);
   container.appendChild(videocon);
+
+  // ---- Cleanup function ----
+  container.cleanup = () => {
+    removeTogglePlay();
+    if (qualityCleanup) qualityCleanup();
+    if (observer) observer.disconnect();
+  };
 
   return container;
 };

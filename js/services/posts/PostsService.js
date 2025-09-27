@@ -40,7 +40,7 @@ function createPostCard(post) {
     ])
   ]);
 
-  const postLink = createElement("a", { href: `/post/${encodeURIComponent(post.postid)}` }, [
+  const postLink = createElement("div", { class: "post-card" }, [
     Imagex({
       src: post.thumb
         ? resolveImagePath(EntityType.POST, PictureType.THUMB, post.thumb)
@@ -52,5 +52,5 @@ function createPostCard(post) {
     postInfo
   ]);
 
-  return createElement("div", { class: "post-card" }, [postLink]);
+  return createElement("a", { href: `/post/${encodeURIComponent(post.postid)}` }, [postLink]);
 }

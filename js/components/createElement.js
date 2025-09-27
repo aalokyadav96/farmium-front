@@ -13,7 +13,8 @@ function createElement(tag, attributes = {}, children = []) {
                 element.style[prop] = val;
             }
         } else if (key === "class" && typeof value === "string") {
-            const classes = value.trim().split(/\s+/);
+            // Filter out empty strings after splitting
+            const classes = value.trim().split(/\s+/).filter(c => c.length > 0);
             if (classes.length) {
                 element.classList.add(...classes);
             }
@@ -46,34 +47,3 @@ function createElement(tag, attributes = {}, children = []) {
 }
 
 export { createElement };
-
-
-/*
-import { createElement } from "./createElement.js";
-
-// Example: A card with a title, button, and dataset/style/events
-const card = createElement("div", {
-  class: "card highlighted",
-  style: { border: "1px solid #333", padding: "10px", backgroundColor: "#fafafa" },
-  dataset: { postid: "123", role: "info" },
-}, [
-  createElement("h2", { class: "card-title" }, ["Hello World"]),  // string child
-  createElement("p", {}, ["This card demonstrates all features of createElement."]),
-  createElement("input", {
-    type: "text",
-    value: "Default text",
-    class: "card-input",
-  }),
-  createElement("button", {
-    class: "card-btn",
-    events: {
-      click: () => alert("Button clicked!"),
-      mouseover: () => console.log("Hovered"),
-    },
-    style: { cursor: "pointer", marginTop: "8px" },
-  }, ["Click Me"])
-]);
-
-document.body.appendChild(card);
-
-*/

@@ -2,7 +2,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 4px 6px;
+  padding: 4px 0.6rem;
   border-bottom: 1px solid var(--color-border);
 }
   
@@ -10,6 +10,7 @@
     flex-shrink: 0;
     display: flex;
     gap: 0.4rem;
+    z-index: 1002;
   }
   
   .logo-link {
@@ -22,7 +23,7 @@
   .header-content {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 0.5rem;
   }
   
   .iconic-button {
@@ -42,10 +43,10 @@
     align-items: center;
   }
   
-  .iconic-button .icon:hover {
+  /* .iconic-button .icon:hover {
     background-color: #f0f0f0;
     border-radius: 50%;
-  }
+  } */
   
   .dropdown {
     position: relative;
@@ -102,8 +103,8 @@
   }
   
   .profile-pic {
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     object-fit: cover;
     border-radius: 50%;
     cursor: pointer;

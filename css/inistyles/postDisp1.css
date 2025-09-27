@@ -107,7 +107,9 @@
 }
 
 #feedpostcon .feed-item .logoicon:hover {
-  background-color: #e0e0e0;
+  filter: drop-shadow(1px 1px #ffffff);
+  background-color: black;
+  border-radius: 50%;
 }
 
 /* Meta */

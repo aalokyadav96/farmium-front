@@ -20,6 +20,7 @@ import {
   displayPlaceEvents,
   displayPlaceDetailsFallback,
 } from "./customTabs.js";
+import { displayPlaceJobs } from "../jobs/jobs.js";
 import Notify from "../../components/ui/Notify.mjs";
 import { displayBooking } from "../booking/booking.js";
 import Button from "../../components/base/Button.js";
@@ -103,7 +104,7 @@ export default async function displayPlace(isLoggedIn, placeId, contentContainer
     editSection.appendChild(bookingContainer);
 
 
-    const bookButton = Button("View Bookings","booking-btn", {
+    const bookButton = Button("View Bookings", "booking-btn", {
       click: () => {
         displayBooking(
           {
@@ -116,7 +117,7 @@ export default async function displayPlace(isLoggedIn, placeId, contentContainer
           bookingContainer
         );
       }
-    },"buttonx primary",{"margin-top":"16px","padding":"8px 16px","cursor":"pointer"});
+    }, "buttonx primary", { "margin-top": "16px", "padding": "8px 16px", "cursor": "pointer" });
     bookingContainer.appendChild(bookButton);
 
 
@@ -181,8 +182,18 @@ export default async function displayPlace(isLoggedIn, placeId, contentContainer
         title: "Reviews",
         id: "reviews-tab",
         render: (container) => { try { displayReviews(container, isCreator, isLoggedIn, "place", placeId); } catch { container.textContent = "Reviews unavailable."; } },
-      }
+      },
     );
+
+    // if (placeData.jobs) {
+      tabs.push(
+        {
+          title: "Jobs",
+          id: "jobs-tab",
+          render: (container) => { try { displayPlaceJobs(container, isCreator, isLoggedIn, "place", placeId); } catch { container.textContent = "No jobs available."; } },
+        },
+      );
+    // }
 
     persistTabs(contentContainer, tabs, `place-tabs:${placeId}`);
 

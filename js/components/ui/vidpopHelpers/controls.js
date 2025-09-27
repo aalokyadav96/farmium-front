@@ -1,28 +1,35 @@
-
-
-import { setupVideoUtilityFunctions } from "../video-utils/index.js";
 import { createFilterSelector } from "./filters.js";
-import { togglePictureInPicture } from "./vutils.js";
-
 import { createProgressBar } from "./progressBar.js";
 import { createQualitySelector } from "./qualitySelector.js";
 import { createSpeedDropdown } from "./speedDropdown.js";
 import { toggleFullScreen, setupFullscreenControls } from "./fullscreen.js";
 import { createElement } from "../../createElement.js";
 import { createIconButton } from "../../../utils/svgIconButton.js";
-import { 
-  dragBoxSVG, maximizeSVG, muteSVG, pipSVG, vol2SVG, settingsSVG 
-} from "../../../components/svgs.js";
+import { maximizeSVG, muteSVG, vol2SVG, settingsSVG, skipBackSVG, skipForwardSVG } from "../../../components/svgs.js";
 
 export function appendElements(parent, children) {
   children.forEach(child => child && parent.appendChild(child));
 }
-export function createControls(video, mediaSrc, qualities, videoid, videoPlayer) {
-  const controls = createElement("div", { class: "controlcon" }, []);
-  const { bar: progressBar } = createProgressBar();
-  const buttons = createElement("div", { class: "buttons" }, []);
 
-  // ✅ Updated: always allow selecting same resolution
+function formatTime(seconds) {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+}
+
+export function createControls(video, mediaSrc, qualities, videoid, videoPlayer) {
+  const controls = createElement("div", { class: "controlcon" });
+
+  // --- Time Display ---
+  const timeDisplay = createElement("div", { class: "time-display" }, ["0:00 / 0:00"]);
+
+  // --- Progress Bar ---
+  const { bar: progressBar } = createProgressBar();
+
+  // Buttons container
+  const buttons = createElement("div", { class: "buttons" });
+
+  // Optional Quality Selector
   const qualitySelector = qualities.length 
     ? createQualitySelector(video, qualities, { allowSame: true }) 
     : null;
@@ -30,64 +37,96 @@ export function createControls(video, mediaSrc, qualities, videoid, videoPlayer)
   const speedDropdown = createSpeedDropdown(video);
   const filterSelector = createFilterSelector(video);
 
-  // --- Mute button ---
+  // --- Mute Button ---
   const muteButton = createIconButton({
     classSuffix: "mute bonw",
     svgMarkup: video.muted ? muteSVG : vol2SVG,
     onClick: () => {
       video.muted = !video.muted;
       muteButton.innerHTML = video.muted ? muteSVG : vol2SVG;
-      muteButton.setAttribute("title", video.muted ? "Muted" : "Unmuted");
+      muteButton.setAttribute("aria-label", video.muted ? "Muted" : "Unmuted");
     },
     label: ""
   });
 
-  // --- Fullscreen button ---
+  // --- Fullscreen Button ---
   const fullscreenButton = createIconButton({
     classSuffix: "fullscreen bonw",
     svgMarkup: maximizeSVG,
     onClick: () => toggleFullScreen(videoPlayer),
-    label: ""
+    label: "",
+    ariaLabel: "Toggle Fullscreen"
   });
 
-  // --- Dropup menu ---
-  const dropupMenu = createElement("div", { class: "dropup-menu hidden" }, []);
-  appendElements(dropupMenu, [
-    speedDropdown,
-    filterSelector,
-    createIconButton({
-      classSuffix: "drag bonw",
-      svgMarkup: dragBoxSVG,
-      onClick: () => setupVideoUtilityFunctions(video, videoid),
-      label: ""
-    }),
-    createIconButton({
-      classSuffix: "pip bonw",
-      svgMarkup: pipSVG,
-      onClick: () => togglePictureInPicture(video),
-      label: ""
-    })
-  ]);
+  document.addEventListener("fullscreenchange", () => {
+    if (document.fullscreenElement === videoPlayer) {
+      fullscreenButton.setAttribute("aria-label", "Exit Fullscreen");
+    } else {
+      fullscreenButton.setAttribute("aria-label", "Enter Fullscreen");
+    }
+  });
+
+  // --- Skip Buttons ---
+  const skipBackButton = createIconButton({
+    classSuffix: "skipback bonw",
+    svgMarkup: skipBackSVG,
+    onClick: () => { video.currentTime = Math.max(video.currentTime - 10, 0); },
+    label: "",
+    ariaLabel: "Skip Back 10 seconds"
+  });
+
+  const skipForwardButton = createIconButton({
+    classSuffix: "skipforward bonw",
+    svgMarkup: skipForwardSVG,
+    onClick: () => { video.currentTime = Math.min(video.currentTime + 10, video.duration); },
+    label: "",
+    ariaLabel: "Skip Forward 10 seconds"
+  });
+
+  // --- Dropup Menu ---
+  const dropupMenu = createElement("div", { class: "dropup-menu hidden" });
+  appendElements(dropupMenu, [speedDropdown, filterSelector]);
 
   const settingsButton = createIconButton({
     classSuffix: "settings bonw",
     svgMarkup: settingsSVG,
-    onClick: () => {
-      dropupMenu.classList.toggle("hidden");
-    },
-    label: ""
+    onClick: () => { dropupMenu.classList.toggle("hidden"); },
+    label: "",
+    ariaLabel: "Settings"
   });
 
-  // --- Add to DOM ---
+  document.addEventListener("click", (e) => {
+    if (!dropupMenu.contains(e.target) && !settingsButton.contains(e.target)) {
+      dropupMenu.classList.add("hidden");
+    }
+  });
+
+  // --- Append all buttons ---
   appendElements(buttons, [
     qualitySelector,
     muteButton,
+    skipBackButton,
+    skipForwardButton,
     settingsButton,
     fullscreenButton
-  ]);
+  ].filter(Boolean));
 
   buttons.appendChild(dropupMenu);
-  appendElements(controls, [progressBar, buttons]);
+
+  // --- Append to controls ---
+  appendElements(controls, [timeDisplay, progressBar, buttons]);
+
+  // --- Update Time Display ---
+  const updateTime = () => {
+    const elapsed = formatTime(video.currentTime);
+    const total = formatTime(video.duration || 0);
+    timeDisplay.textContent = `${elapsed} / ${total}`;
+  };
+
+  video.addEventListener("timeupdate", updateTime);
+  video.addEventListener("loadedmetadata", updateTime);
+
+  // Fullscreen controls logic
   setupFullscreenControls(videoPlayer, controls);
 
   return controls;

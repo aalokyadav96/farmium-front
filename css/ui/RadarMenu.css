@@ -45,9 +45,9 @@
   position: fixed;
   bottom: 10px;
   right: 10px;
-  /* left: calc(50vw - 60px); */
-  /* left: 50%; */
-  /* transform: translateX(-50%); */
+  left: calc(50vw - 60px);
+  left: 50%;
+  transform: translateX(-50%);
 }
 
   .radar-menu {

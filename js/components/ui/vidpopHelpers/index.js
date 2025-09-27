@@ -3,48 +3,84 @@ import { setupSubtitles } from "./subtitles.js";
 import { createVideoElement } from "./createVideo.js";
 import { setupQualitySwitch } from "./setupQualitySwitch.js";
 import { setupProgress } from "./setupProgress.js";
-import { setupClickToPlay } from "./setupClickToPlay.js";
 import { setupFullscreenOrientation } from "./setupOrientation.js";
+import { setupVideoUtilityFunctions } from "../video-utils/index.js";
+import { setupVideoContextMenu } from "./videoContextMenu.js";
 
-async function generateVideoPlayer(mediaSrc, poster, qualities, subtitles, videoid) {
-  const videoPlayer = document.createElement("div");
-  videoPlayer.id = "video-player";
-  // Create the main <video> element
-  const video = createVideoElement({ mediaSrc, poster, qualities });
+// ---- Core Setup Helpers ----
+export function setupClickToPlay(video) {
+  const handler = () => (video.paused ? video.play() : video.pause());
+  video.addEventListener("click", handler);
 
-  // Add subtitle track container if any
-  if (subtitles.length !== 0) {
-    const subtitleContainer = document.createElement("div");
-    subtitleContainer.className = "subtitle-container";
-    videoPlayer.appendChild(subtitleContainer);
-    await setupSubtitles(video, subtitles, subtitleContainer);
-  }
+  // Return cleanup so callers can remove listener if needed
+  return () => video.removeEventListener("click", handler);
+}
 
-  // Create control bar
-  const controls = createControls(video, mediaSrc, qualities, videoid, videoPlayer);
+export async function setupSubtitleTrack(video, subtitles, container) {
+  if (!subtitles || subtitles.length === 0) return null;
+  await setupSubtitles(video, subtitles, container);
+  return container;
+}
 
-  // Append video and controls to player
-  videoPlayer.appendChild(video);
-  videoPlayer.appendChild(controls);
+export function setupControlBar(video, mediaSrc, qualities, videoid, container) {
+  return createControls(video, mediaSrc, qualities, videoid, container);
+}
 
-  // Setup progress bar updates
+export function setupVideoProgress(video, controls) {
   const progressBar = controls.querySelector(".progress-bar");
   const progress = controls.querySelector(".progress");
   setupProgress(video, progressBar, progress);
+}
 
-  // Setup click-to-play
-  setupClickToPlay(video);
-
-  // Setup quality selector switching
+export function setupQualitySelector(video, qualities, controls) {
   const qualitySelector = controls.querySelector(".quality-selector");
   if (qualitySelector) {
     setupQualitySwitch(video, qualities, qualitySelector);
   }
+}
 
-  // Setup fullscreen + orientation logic
+export function setupFullscreen(videoPlayer, video) {
   setupFullscreenOrientation(videoPlayer, video);
+}
+
+// ---- Main Generator (uses all helpers) ----
+export async function generateVideoPlayer(mediaSrc, poster, qualities, subtitles, videoid) {
+  const videoPlayer = document.createElement("div");
+  videoPlayer.id = "video-player";
+
+  // Video element
+  const video = createVideoElement({ mediaSrc, poster, qualities });
+
+  // Subtitles
+  if (subtitles.length !== 0) {
+    const subtitleContainer = document.createElement("div");
+    subtitleContainer.className = "subtitle-container";
+    videoPlayer.appendChild(subtitleContainer);
+    await setupSubtitleTrack(video, subtitles, subtitleContainer);
+  }
+
+  // Controls
+  const controls = setupControlBar(video, mediaSrc, qualities, videoid, videoPlayer);
+
+  // Utilities
+  setupVideoUtilityFunctions(video, videoid);
+  setupVideoContextMenu(video);
+
+  // Append
+  videoPlayer.appendChild(video);
+  videoPlayer.appendChild(controls);
+
+  // Progress
+  setupVideoProgress(video, controls);
+
+  // Click-to-play
+  setupClickToPlay(video);
+
+  // Quality selector
+  setupQualitySelector(video, qualities, controls);
+
+  // Fullscreen
+  setupFullscreen(videoPlayer, video);
 
   return videoPlayer;
 }
-
-export { generateVideoPlayer };

@@ -1,5 +1,5 @@
 import "../../../css/ui/MinAudio.css";
-import {PauseSVG, playSVG} from "../svgs.js";
+import {pauseSVG, playSVG} from "../svgs.js";
 import {createElement} from "../createElement.js";
 
 function MinAudio(audioSrc) {
@@ -25,7 +25,7 @@ function MinAudio(audioSrc) {
   poster.addEventListener("click", () => {
     if (audio.paused) {
       audio.play();
-      overlayIcon.innerHTML = `${PauseSVG}`;
+      overlayIcon.innerHTML = `${pauseSVG}`;
     } else {
       audio.pause();
       overlayIcon.innerHTML = `${playSVG}`;

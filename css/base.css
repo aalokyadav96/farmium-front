@@ -186,7 +186,7 @@ textarea {
 }
 
 main {
-  padding: 0.6rem;
+  padding: 1rem;
   min-height: 100vh;
   margin-bottom: 4rem;
 }
@@ -260,4 +260,23 @@ aside h3 {
 .word-safe {
   max-width: 100%;
   white-space: normal;          /* Ensure it wraps */
+}
+
+
+.category-chips {
+  display: flex;
+  margin: 0.5rem 0;
+  overflow-x: auto;
+}
+
+.category-chips .category-chip {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  border-radius: 16px;
+}
+
+.category-chips .category-chip.active {
+  background: #007bff;
+  color: white;
 }

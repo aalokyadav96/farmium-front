@@ -4,6 +4,7 @@ import { navigate } from "../routes/index.js";
 import { getState, subscribeDeep } from "../state/state.js";
 import { openNotificationsModal } from "../services/notifications/notifModal.js";
 import { createIconButton } from "../utils/svgIconButton.js";
+import { tmessaging } from "./tumblrSvgs.js";
 // import { openCartModal } from "../services/cart/cartModal.js";
 
 // --- Update container children based on login state
@@ -29,7 +30,7 @@ function updateNav(container, divs) {
   if (isLoggedIn) {
     container.appendChild(createIconButton({
       classSuffix: "play",
-      svgMarkup: chatSVG,
+      svgMarkup: tmessaging,
       onClick: () => navigate("/merechats"),
       // onClick: () => navigate("/discord"),
       label: ""

@@ -75,7 +75,7 @@ function navigate(path) {
 
   saveScroll(document.getElementById("content"), getRouteState(window.location.pathname));
   history.pushState(null, "", path);
-  
+
   loadContent(path)
     .catch(err => console.error("Navigation failed:", err))
     .finally(() => {

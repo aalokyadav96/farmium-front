@@ -25,7 +25,7 @@
   }
    */
   /* Sidebar */
-  .sidebar {
+  .homesidebar {
     flex: 1;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
@@ -33,7 +33,7 @@
   }
   
   @media (max-width: 768px) {
-    .sidebar {
+    .homesidebar {
       padding: 1rem;
     }
   }
@@ -159,7 +159,7 @@
       gap: 1rem;
     }
   }
-  
+/*   
   .create-section {
     flex: 1;
     padding: 1rem;
@@ -188,7 +188,7 @@
     border-radius: 6px;
     cursor: pointer;
   }
-  
+   */
   /* Info Widget */
   .info-widget {
     font-size: 1rem;
