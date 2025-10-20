@@ -1,6 +1,7 @@
 import "../../../css/ui/MinAudio.css";
 import {pauseSVG, playSVG} from "../svgs.js";
 import {createElement} from "../createElement.js";
+import Imagex from "../base/Imagex.js";
 
 function MinAudio(audioSrc) {
   const player = document.createElement("div");
@@ -9,8 +10,7 @@ function MinAudio(audioSrc) {
   const thumbnailWrapper = document.createElement("div");
   thumbnailWrapper.className = "thumbnail-wrapper";
 
-  const poster = document.createElement("img");
-  poster.src = audioSrc.poster || "";
+  const poster = Imagex({src:audioSrc.poster || ""});
   poster.alt = "Audio Poster";
   poster.className = "audio-thumbnail";
 

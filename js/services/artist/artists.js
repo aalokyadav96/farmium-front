@@ -30,9 +30,12 @@ export function displayArtists(container, isLoggedIn) {
 }
 
 function createArtistCard(artist) {
+  // const imgSrc = artist.photo
+  //   ? resolveImagePath(EntityType.ARTIST, PictureType.THUMB, artist.photo)
+  //   : "https://via.placeholder.com/300x300?text=No+Image";
   const imgSrc = artist.photo
     ? resolveImagePath(EntityType.ARTIST, PictureType.THUMB, artist.photo)
-    : "https://via.placeholder.com/300x300?text=No+Image";
+    : "";
 
   return createElement("div", { class: "artist-card" }, [
     Imagex({ src: imgSrc, alt: artist.name || "Unnamed Artist", classes: "artist-thumb" }),

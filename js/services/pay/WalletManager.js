@@ -1,6 +1,6 @@
 import { createElement } from "../../components/createElement.js";
 import { Button } from "../../components/base/Button.js";
-import { apipFetch } from "../../api/api.js";
+import { apiFetch } from "../../api/api.js";
 import { v4 as uuidv4 } from "https://jspm.dev/uuid";
 
 export function WalletManager() {
@@ -18,7 +18,6 @@ export function WalletManager() {
         createElement("option", { value: "wallet" }, ["Wallet"]),
         createElement("option", { value: "card" }, ["Card"]),
         createElement("option", { value: "upi" }, ["UPI"]),
-        createElement("option", { value: "cod" }, ["Cash on Delivery"])
     ]);
 
     const topupBtn = Button("Top Up", "topup-btn", {
@@ -34,7 +33,7 @@ export function WalletManager() {
             topupBtn.disabled = true;
             try {
                 const idempotencyKey = uuidv4();
-                const res = await apipFetch("/wallet/topup", "POST", { amount, method }, {
+                const res = await apiFetch("/wallet/topup", "POST", { amount, method }, {
                     headers: { "Idempotency-Key": idempotencyKey }
                 });
                 if (res?.success) {
@@ -55,7 +54,7 @@ export function WalletManager() {
 
     async function loadBalance() {
         try {
-            const res = await apipFetch("/wallet/balance");
+            const res = await apiFetch("/wallet/balance");
             if (res && res.balance !== undefined) {
                 balanceEl.textContent = "Wallet Balance: ₹" + res.balance.toFixed(2);
             } else {

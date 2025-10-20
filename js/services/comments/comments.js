@@ -73,20 +73,6 @@ function renderComment(comment) {
             comment.createdAt ? new Date(comment.createdAt).toLocaleString() : ""
         ])
     ]);
-    // // avatar
-    // const avatar = Imagex( {
-    //     src: cmtavatar,
-    //     alt: `${user.username || "Unknown"}'s avatar`,
-    //     classes: "comment-avatar"
-    // });
-
-    // // username + timestamp
-    // const header = createElement("div", { class: "comment-header" }, [
-    //     createElement("span", { class: "comment-username" }, [user.username || "Unknown"]),
-    //     createElement("span", { class: "comment-timestamp" }, [
-    //         comment.createdAt ? new Date(comment.createdAt).toLocaleString() : ""
-    //     ])
-    // ]);
 
     // text content
     const body = createElement("div", { class: "comment-body" }, [
@@ -211,16 +197,6 @@ async function handleSubmit(e, postId, entityType) {
     }
 }
 
-// /**
-//  * Debounce utility
-//  */
-// function debounce(fn, delay) {
-//     let t;
-//     return (...args) => {
-//         clearTimeout(t);
-//         t = setTimeout(() => fn.apply(null, args), delay);
-//     };
-// }
 
 /**
  * Create a comments section for a specific post

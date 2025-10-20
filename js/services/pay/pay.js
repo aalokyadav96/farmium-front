@@ -1,6 +1,6 @@
 import { createElement } from "../../components/createElement.js";
 import { Button } from "../../components/base/Button.js";
-import { apipFetch } from "../../api/api.js";
+import { apiFetch } from "../../api/api.js";
 import Modal from "../../components/ui/Modal.mjs";
 import { v4 as uuidv4 } from "https://jspm.dev/uuid";
 
@@ -8,7 +8,7 @@ export async function showPaymentModal({ entityType, entityId, entityName }) {
     // Fetch wallet balance
     let walletBalance = 0;
     try {
-        const res = await apipFetch("/wallet/balance", "GET");
+        const res = await apiFetch("/wallet/balance", "GET");
         walletBalance = res.balance || 0;
     } catch (err) {
         console.error("Failed to fetch wallet balance", err);
@@ -117,7 +117,7 @@ export async function showPaymentModal({ entityType, entityId, entityName }) {
 
                 try {
                     const idempotencyKey = uuidv4();
-                    const res = await apipFetch("/wallet/pay", "POST", {
+                    const res = await apiFetch("/wallet/pay", "POST", {
                         entityType,
                         entityId,
                         method: selectedMethod,

@@ -122,23 +122,12 @@ function renderImageGroup(images) {
 
   images.forEach(img => {
     const realSrc = resolveImagePath(EntityType.POST, PictureType.PHOTO, img.url);
+    console.log(realSrc);
     const imgEl = Imagex({
-      src: PLACEHOLDER,
+      src: realSrc,
       alt: img.alt || "Post Image",
       classes: "post-image"
     });
-
-    imgEl.decoding = "async";
-    imgEl.style.opacity = "0";
-    imgEl.style.transition = "opacity 220ms ease";
-
-    if (lazyObserver) {
-      imgEl.dataset.src = realSrc;
-      lazyObserver.observe(imgEl);
-    } else {
-      imgEl.src = realSrc;
-      imgEl.addEventListener("load", () => imgEl.style.opacity = "1", { once: true });
-    }
 
     // Delegate click later
     group.appendChild(imgEl);

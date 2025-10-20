@@ -108,6 +108,7 @@
 
 .place-info p {
   font-size: var(--font-size-sm);
+  font-style: italic;
   margin-bottom: var(--space-xs);
 }
 

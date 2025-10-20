@@ -4,6 +4,7 @@ import { navigate } from "../../../routes/index.js";
 import { formatRelativeTime } from "../../../utils/dateUtils.js";
 import { saveJob } from "./utils.js";
 import { resolveImagePath, EntityType, PictureType } from "../../../utils/imagePaths.js";
+import Imagex from "../../../components/base/Imagex.js";
 
 export function buildCard(job) {
   const bannerFilename = job.banner || "placeholder.jpg";
@@ -20,22 +21,26 @@ export function buildCard(job) {
 
   const badgeTags = tags.length
     ? createElement("div", { class: "baito-tags" }, tags.map(tag =>
-        createElement("span", { class: "baito-tag" }, [`#${tag}`])
-      ))
+      createElement("span", { class: "baito-tag" }, [`#${tag}`])
+    ))
     : null;
 
-  const img = createElement("img", {
+  const img = Imagex({
     src: imgSrc,
     alt: job.title || "baito banner",
     loading: "lazy",
-    class: "baito-banner-thumb"
+    classes: "baito-banner-thumb"
   });
 
-  img.onerror = () => {
-    img.src = resolveImagePath(EntityType.DEFAULT, PictureType.STATIC, "placeholder.jpg");
-  };
+  // img.onerror = () => {
+  //   img.src = resolveImagePath(EntityType.DEFAULT, PictureType.STATIC, "placeholder.jpg");
+  // };
 
-  const imageWrapper = createElement("div", { class: "baito-card-img" }, [img]);
+  const imageWrapper = createElement("div", {
+    "events": {
+      click: () => { navigate(`/baito/${job.baitoid}`) }
+    }, class: "baito-card-img"
+  }, [img]);
 
   const contentWrapper = createElement("div", { class: "baito-card-content" }, [
     createElement("h3", { class: "baito-title" }, [job.title || "Untitled"]),

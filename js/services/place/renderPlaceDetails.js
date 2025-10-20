@@ -5,7 +5,21 @@ import Button from "../../components/base/Button.js";
 import { reportPost } from "../reporting/reporting.js";
 import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
 import { updateImageWithCrop } from "../../utils/bannerEditor.js"; // adjust path
+import Imagex from "../../components/base/Imagex.js";
+import Bannerx from "../../components/base/Bannerx.js";
 // import { jobsHire } from "../jobs/jobs.js"; // adjust path
+
+/** Banner section */
+function createEventBannerSection(place, isCreator) {
+  return Bannerx({
+    isCreator : isCreator,
+    bannerkey : place.banner,
+    banneraltkey : `Banner for ${place.name || "Place"}`,
+    bannerentitytype : EntityType.PLACE,
+    stateentitykey : "place",
+    bannerentityid : place.placeid
+  });
+}
 
 function renderPlaceDetails(isLoggedIn, content, place, isCreator) {
   content.replaceChildren();
@@ -15,43 +29,7 @@ console.log(place);
   const latitude = place.coordinates?.lat || "N/A";
   const longitude = place.coordinates?.lng || "N/A";
 
-  // Banner section
-  // const bannerFilename = place.banner || "placeholder.png";
-  const bannerSrc = resolveImagePath(EntityType.PLACE, PictureType.BANNER, place.banner);
-
-  const bannerImg = createElement("img", {
-    id: "place-banner-img",
-    src: bannerSrc,
-    alt: place.name || "Place Banner",
-    loading: "lazy",
-  });
-
-  bannerImg.onerror = () => {
-    bannerImg.src = resolveImagePath(EntityType.DEFAULT, PictureType.STATIC, "placeholder.png");
-  };
-
-  const bannerSection = createElement("section", {
-    id: "place-banner",
-    class: "placedetails"
-  }, [bannerImg]);
-
-  if (isCreator){
-    // Add Banner Edit Button here
-    const bannerEditButton = createElement("button", { class: "edit-banner-pic" }, ["Edit Banner"]);
-    bannerEditButton.addEventListener("click", () => {
-      updateImageWithCrop({
-        entityType: EntityType.PLACE,
-        imageType: "banner",
-        stateKey: "banner",
-        stateEntityKey: "place",
-        previewElementId: "place-banner-img",
-        pictureType: PictureType.BANNER,
-        entityId: place.placeid  // <-- pass placeid here
-      });
-    });
-    
-    bannerSection.appendChild(bannerEditButton);
-  }
+  
   // Core details section
   const detailsSection = createElement("section", { id: "placedetails", class: "placedetails" }, [
     createElement("h1", {}, [place.name]),
@@ -105,7 +83,8 @@ console.log(place);
     detailsSection.appendChild(reportBtn);
   }
 
-  content.appendChild(bannerSection);
+  // content.appendChild(bannerSection);
+  content.appendChild(createEventBannerSection(place, isCreator));
   content.appendChild(detailsSection);
 }
 

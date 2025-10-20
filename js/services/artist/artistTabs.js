@@ -3,7 +3,8 @@ import { displayMerchandise } from "../merch/merchService.js";
 // import { displayMedia } from "../media/mediaService.js";
 import { createElement } from "../../components/createElement.js";
 import Modal from "../../components/ui/Modal.mjs";
-import { displayMediaFeed } from "../media/dispMediFeed.js";
+import Button from "../../components/base/Button.js";
+import { navigate } from "../../routes/index.js";
 
 async function renderAlbumsTab(container, artistID, isCreator) {
     try {
@@ -30,19 +31,19 @@ async function renderAlbumsTab(container, artistID, isCreator) {
     }
 }
 
-async function renderPostsTab(container, artistID, isLoggedIn) {
-    // try {
-    //     displayMedia(container, "artist", artistID, isLoggedIn);
-    // } catch (err) {
-    //     container.innerHTML = "<p>Error loading posts.</p>";
-    // }
+// async function renderPostsTab(container, artistID, isLoggedIn) {
+//     // try {
+//     //     displayMedia(container, "artist", artistID, isLoggedIn);
+//     // } catch (err) {
+//     //     container.innerHTML = "<p>Error loading posts.</p>";
+//     // }
 
-    try {
-        displayMediaFeed(container, "artist", artistID, isLoggedIn);
-    } catch (err) {
-        container.innerHTML = "<p>Error loading posts.</p>";
-    }
-}
+//     try {
+//         displayMediaFeed(container, "artist", artistID, isLoggedIn);
+//     } catch (err) {
+//         container.innerHTML = "<p>Error loading posts.</p>";
+//     }
+// }
 
 async function renderMerchTab(container, artistID, isCreator, isLoggedIn) {
     try {
@@ -86,7 +87,9 @@ async function renderEventsTab(container, artistID, isCreator) {
                 `${eventx.date} at ${eventx.venue} — ${eventx.city}, ${eventx.country}`,
                 createElement("br"),
                 eventx.eventid
-                    ? createElement("a", { href: `/event/${eventx.eventid}`, target: "_blank" }, ["View Event"])
+                    ? Button("View Event", "", {
+                        click: () => { navigate(`/event/${eventx.eventid}`) }
+                    })
                     : ""
             ]);
             ul.appendChild(li);
@@ -193,7 +196,6 @@ function openAddToEventModal(artistID) {
 
 export {
     renderAlbumsTab,
-    renderPostsTab,
     renderMerchTab,
     // renderBehindTheScenesTab,
     renderEventsTab

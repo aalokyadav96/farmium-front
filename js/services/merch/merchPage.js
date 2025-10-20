@@ -4,6 +4,7 @@ import Button from "../../components/base/Button.js";
 import { addToCart } from "../cart/addToCart.js";
 import { getState } from "../../state/state.js";
 import { EntityType, PictureType, resolveImagePath } from "../../utils/imagePaths.js";
+import Imagex from "../../components/base/Imagex.js";
 
 export async function displayMerch(contentContainer, merchID, isLoggedIn) {
   // Clear existing content
@@ -43,7 +44,7 @@ export async function displayMerch(contentContainer, merchID, isLoggedIn) {
 
     const imgContainer = createElement("div", { class: "product-image-container", style: "flex:1 1 300px;text-align:center;" }, []);
     if (data.merch_pic) {
-      const img = createElement("img", { src: resolveImagePath(EntityType.MERCH, PictureType.THUMB, data.merch_pic), alt: data.name || "Merch Image", style: "max-width:100%;border-radius:4px;" });
+      const img = Imagex({ src: resolveImagePath(EntityType.MERCH, PictureType.THUMB, data.merch_pic), alt: data.name || "Merch Image", style: "max-width:100%;border-radius:4px;" });
       imgContainer.appendChild(img);
     } else {
       const placeholder = createElement("div", { style: "width:100%;padding-top:75%;background-color:#f0f0f0;border-radius:4px;position:relative;" }, []);

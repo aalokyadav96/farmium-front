@@ -9,6 +9,8 @@ import {
 } from "../state/state.js";
 
 let isNavigating = false;
+let isHeaderRendered = false;
+let isNavRendered = false;
 
 /**
  * Loads layout and route content into static containers
@@ -25,36 +27,44 @@ async function loadContent(url) {
     return;
   }
 
-  // hydrate persisted state only once
+  // Hydrate persisted state only once
   const hydratedToken = localStorage.getItem("token");
   const hydratedUser = localStorage.getItem("user");
   const hydratedUsername = localStorage.getItem("username");
 
   if (hydratedToken && hydratedUser) {
-    // setState({ token: hydratedToken, user: JSON.parse(hydratedUser) }, true);
-    setState({ token: hydratedToken, user: hydratedUser, username: hydratedUsername }, true);
+    setState(
+      { token: hydratedToken, user: hydratedUser, username: hydratedUsername },
+      true
+    );
   }
 
-  // Clear dynamic DOM sections
-  header.replaceChildren();
-  nav.replaceChildren();
+  // Clear only dynamic content
   main.replaceChildren();
 
-  // Render layout
-  const headerContent = createheader();
-  if (headerContent) header.appendChild(headerContent);
-
-  const navContent = createNav();
-  // if (navContent && url != "/home" && !url.startsWith("/feedpost/")) {
-  if (navContent && url != "/home" && url != "/map") {
-    nav.appendChild(navContent);
-    highlightActiveNav(url); // 🔥 This makes sure the active link reflects current URL
+  // Render header only once
+  if (!isHeaderRendered) {
+    const headerContent = createheader();
+    if (headerContent) header.appendChild(headerContent);
+    isHeaderRendered = true;
   }
 
-  // Render page module
+  // Render nav only if not rendered and route allows it
+  if (!isNavRendered && url !== "/home" && url !== "/merechats") {
+    const navContent = createNav();
+    if (navContent) {
+      nav.appendChild(navContent);
+      isNavRendered = true;
+    }
+  }
+
+  // Update active nav link for current route
+  highlightActiveNav(url);
+
+  // Render main page module
   await render(url, main);
 
-  // Restore scroll
+  // Restore scroll position
   restoreScroll(main, getRouteState(url));
 }
 
@@ -77,7 +87,7 @@ function navigate(path) {
   history.pushState(null, "", path);
 
   loadContent(path)
-    .catch(err => console.error("Navigation failed:", err))
+    .catch((err) => console.error("Navigation failed:", err))
     .finally(() => {
       isNavigating = false;
     });

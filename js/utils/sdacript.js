@@ -1,3 +1,5 @@
+import { AD_URL } from "../state/state";
+
 (function () {
     const adElements = document.querySelectorAll(".advertisement");
 
@@ -43,7 +45,7 @@
             return;
         }
 
-        fetch(`http://localhost:4000/api/sda?category=${category}`)
+        fetch(`${AD_URL}?category=${category}`)
             .then((response) => response.json())
             .then((ads) => {
                 if (!ads.length) {

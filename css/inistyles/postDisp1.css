@@ -95,6 +95,7 @@
   border-radius: 6px;
   border: 1px solid #ddd;
   font-size: 14px;
+  width: auto;
 }
 
 #feedpostcon .feed-item .logoicon {
@@ -162,65 +163,126 @@
 }
 
 /* Actions */
-#feedpostcon .feed-item .post-actions {
+.post-actions {
   display: flex;
-  gap: 6px;
   align-items: center;
-  flex-wrap: wrap;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  font-family: var(--font-body);
+  color: var(--color-fg);
 }
 
-#feedpostcon .feed-item .post-actions button {
-  border: none;
+/* === Action Buttons === */
+.post-actions .more-btn,
+.post-actions .comment,
+.post-actions .like {
   background: none;
+  border: none;
   cursor: pointer;
-  font-size: 0.8rem;
-  display: flex;
-  flex-direction: row-reverse;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  border-radius: 8px;
-  transition: background-color 0.2s ease;
+  gap: var(--space-xs);
+  font-size: var(--font-size-base);
+  color: var(--color-muted);
+  transition: color var(--transition-fast);
 }
 
-#feedpostcon .feed-item .post-actions button svg {
-  max-width: 2.6rem;
+.post-actions button:hover {
+  color: var(--color-accent);
 }
 
-/* More dropdown */
-#feedpostcon .feed-item .more-wrapper {
+/* === Like Button === */
+.post-actions .like svg {
+  stroke: var(--color-muted);
+  transition: stroke var(--transition-fast);
+}
+
+.post-actions .like:hover svg {
+  stroke: var(--color-accent);
+}
+
+.post-actions .liked svg {
+  stroke: var(--color-error);
+}
+
+.post-actions .liked span {
+  color: var(--color-error);
+  font-weight: bold;
+}
+
+/* === Comment Button === */
+.post-actions .comment svg {
+  stroke: var(--color-muted);
+  transition: stroke var(--transition-fast);
+}
+
+.post-actions .comment:hover svg {
+  stroke: var(--color-accent);
+}
+
+/* === More Button and Dropdown === */
+.post-actions .more-wrapper {
   position: relative;
+  display: flex;
 }
 
-#feedpostcon .feed-item .more-btn {
-  font-size: 20px;
-  background: none;
-  border: none;
-  cursor: pointer;
+.post-actions .more-btn svg {
+  stroke: var(--color-muted);
+  transition: stroke var(--transition-fast);
 }
 
-#feedpostcon .feed-item .dropdown {
+.post-actions .more-btn:hover svg {
+  stroke: var(--color-accent);
+}
+
+.post-actions .dropdown {
   position: absolute;
-  top: 100%;
+  bottom: calc(100% + var(--space-xs));
   right: 0;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-elev-2);
   display: flex;
   flex-direction: column;
   min-width: 120px;
   z-index: 10;
-  gap: 10px;
-  padding: 8px;
 }
 
-#feedpostcon .feed-item .dropdown.hidden {
+.post-actions .dropdown.hidden {
   display: none;
 }
 
-.edit-btn {
-  background-color: var(--color-accent);
-  color: var(--color-bg);
+.post-actions .dropdown button {
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-sm);
+  text-align: left;
+  /* background: none; */
+  border: none;
+  color: var(--color-fg);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
 }
+
+.post-actions .dropdown button:hover {
+  background-color: var(--color-space);
+}
+
+/* === Edit Button Style === */
+.post-actions .edit-btn.button {
+  background-color: var(--color-btn-bg);
+  color: var(--color-btn-fg);
+  border-radius: var(--radius-sm);
+  margin: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-sm);
+  transition: background-color var(--transition-fast);
+}
+
+.post-actions .edit-btn.button:hover {
+  background-color: var(--color-btn-hover-bg);
+}
+
 
 /* base wrapper for videos inside posts */
 .video-wrapper {
@@ -340,8 +402,8 @@
     align-items: flex-start;
   } */
 
-  #feedpostcon .feed-item .dropdown {
+  /* #feedpostcon .feed-item .dropdown {
     right: auto;
     left: 0;
-  }
+  } */
 }

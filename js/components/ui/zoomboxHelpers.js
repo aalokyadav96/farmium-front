@@ -1,4 +1,5 @@
 import { dispatchZoomBoxEvent } from "../../utils/eventDispatcher.js";
+import Imagex from "../base/Imagex.js";
 
 /* =========================
    Basic UI Creation Functions
@@ -15,17 +16,18 @@ export const createOverlay = () => {
 
 // Create the primary image element
 export const createImageElement = (src) => {
-    const img = document.createElement("img");
-    img.src = src;
+    const img = Imagex({
+        src: src,
+    });
     img.alt = "ZoomBox Image";
     img.style.transition = "transform 0.2s ease-out";
     img.style.willChange = "transform";
     // ← here’s the key:
     img.style.transformOrigin = "50% 50%";
     return img;
-  };
-  
-  export function createVideoElement(src) {
+};
+
+export function createVideoElement(src) {
     const video = document.createElement("video");
     video.src = src;
     video.controls = true;
@@ -36,14 +38,6 @@ export const createImageElement = (src) => {
     return video;
 }
 
-// export const createImageElement = (src) => {
-//     const img = document.createElement("img");
-//     img.src = src;
-//     img.alt = "ZoomBox Image";
-//     img.style.transition = "transform 0.2s ease-out";
-//     img.style.willChange = "transform";
-//     return img;
-// };
 
 // Apply dark mode if needed
 export const applyDarkMode = (el) => {
@@ -73,19 +67,19 @@ export const preloadImages = (images, index) => {
 export const updateTransform = (img, state) => {
     // make 100% sure we’re scaling & rotating around the center:
     img.style.transformOrigin = "50% 50%";
-  
+
     // build the transform string
     const transformStr = [
-      `translate(${state.panX}px, ${state.panY}px)`,
-      `scale(${state.zoomLevel})`,
-      `rotate(${state.angle}deg)`,
-      state.flip ? "scaleX(-1)" : ""
+        `translate(${state.panX}px, ${state.panY}px)`,
+        `scale(${state.zoomLevel})`,
+        `rotate(${state.angle}deg)`,
+        state.flip ? "scaleX(-1)" : ""
     ].join(" ");
-  
+
     img.style.transform = transformStr;
     updateCursor(img, state);
-  };
-  
+};
+
 
 // Update cursor style based on zoom status
 export const updateCursor = (img, state) => {
@@ -312,15 +306,15 @@ export const handleTouchMove = (e, state, img, container) => {
         const prevZoom = state.zoomLevel;
         const scaleFactor = newDistance / state.initialPinchDistance;
         state.zoomLevel = Math.max(1, Math.min(3, state.initialZoom * scaleFactor));
-  
+
         const rect = img.getBoundingClientRect();
         const midX = ((e.touches[0].clientX + e.touches[1].clientX) / 2) - rect.left;
         const midY = ((e.touches[0].clientY + e.touches[1].clientY) / 2) - rect.top;
         const zoomFactor = state.zoomLevel / prevZoom;
-  
+
         state.panX -= (midX - state.panX) * (zoomFactor - 1);
         state.panY -= (midY - state.panY) * (zoomFactor - 1);
-  
+
         updateTransform(img, state);
         showZoomIndicator(container, state.zoomLevel);
         dispatchZoomBoxEvent("zoom", { level: state.zoomLevel });
@@ -399,7 +393,7 @@ export const createZoomButtons = (img, state, container) => {
     zoomInBtn.className = "zoombox-zoom-in-btn";
     zoomInBtn.onclick = () => {
         // Simulate a positive delta for zoom in
-        const fakeEvent = { deltaY: -1, clientX: window.innerWidth/2, clientY: window.innerHeight/2, preventDefault: () => {} };
+        const fakeEvent = { deltaY: -1, clientX: window.innerWidth / 2, clientY: window.innerHeight / 2, preventDefault: () => { } };
         smoothZoom(fakeEvent, img, state, container);
     };
 
@@ -408,7 +402,7 @@ export const createZoomButtons = (img, state, container) => {
     zoomOutBtn.className = "zoombox-zoom-out-btn";
     zoomOutBtn.onclick = () => {
         // Simulate a negative delta for zoom out
-        const fakeEvent = { deltaY: 1, clientX: window.innerWidth/2, clientY: window.innerHeight/2, preventDefault: () => {} };
+        const fakeEvent = { deltaY: 1, clientX: window.innerWidth / 2, clientY: window.innerHeight / 2, preventDefault: () => { } };
         smoothZoom(fakeEvent, img, state, container);
     };
 

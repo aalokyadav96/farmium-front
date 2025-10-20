@@ -45,10 +45,9 @@ const printTicket = async (eventId) => {
 
   form.append(codeLabel, codeInput, submitButton);
 
-  const formModal = Modal({
+  const { close: closeFormModal } = Modal({
     title: 'Print Your Ticket',
     content: form,
-    onClose: () => formModal.remove(),
   });
 
   form.addEventListener('submit', async (e) => {
@@ -57,35 +56,33 @@ const printTicket = async (eventId) => {
     const uniqueCode = codeInput.value.trim();
 
     if (!uniqueCode) {
-      alert('Please enter both Ticket ID and Unique Code.');
+      alert('Please enter the Unique Code.');
       return;
     }
 
     const loadingText = document.createElement('p');
     loadingText.textContent = 'Printing your ticket...';
 
-    const loadingModal = Modal({
+    const { close: closeLoadingModal } = Modal({
       title: 'Ticket Printing',
       content: loadingText,
-      onClose: () => loadingModal.remove(),
     });
 
     const success = await printTicketPDF(eventId, uniqueCode);
 
-    loadingModal.remove();
-    formModal.remove();
+    closeLoadingModal();
+    closeFormModal();
 
     const resultContent = document.createElement('div');
     const resultText = document.createElement('p');
     resultText.textContent = success
-      ? 'Your ticket has been downloaded.'
-      : 'Failed to generate ticket. Please try again.';
+      ? '✅ Your ticket has been downloaded.'
+      : '❌ Failed to generate ticket. Please try again.';
     resultContent.appendChild(resultText);
 
     Modal({
       title: 'Ticket Result',
       content: resultContent,
-      onClose: () => document.querySelector('.modal')?.remove(),
     });
   });
 };

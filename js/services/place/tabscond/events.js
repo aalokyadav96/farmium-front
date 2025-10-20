@@ -1,4 +1,5 @@
 import { SRC_URL, apiFetch } from "../../../api/api.js";
+import Button from "../../../components/base/Button.js";
 import { createElement } from "../../../components/createElement.js";
 import { resolveImagePath, EntityType, PictureType } from "../../../utils/imagePaths.js";
 
@@ -188,29 +189,16 @@ function openEventModal(event) {
 function createModalIfNotExists() {
     if (document.getElementById('event-modal')) return;
 
-    const modal = document.createElement('div');
-    modal.id = 'event-modal';
-    modal.style.display = 'none';
-    modal.style.position = 'fixed';
-    // modal.style.top = '10%';
-    // modal.style.left = '10%';
-    // modal.style.right = '10%';
-    modal.style.top = '0';
-    modal.style.left = '0';
-    modal.style.right = '0';
-    modal.style.backgroundColor = '#fff';
-    modal.style.border = '1px solid #000';
-    modal.style.padding = '20px';
-    modal.style.zIndex = 1000;
-    modal.style.overflowY = "scroll";
-    modal.style.maxHeight = "100vh";
+    const modal = createElement("div", {
+        id: "event-modal", class: "event-modal",
+    }, []);
 
-    const closeBtn = document.createElement('button');
-    closeBtn.textContent = 'Close';
-    closeBtn.addEventListener('click', () => {
-        modal.style.display = 'none';
-        overlay.style.display = 'none';
-    });
+    const closeBtn = Button("Close", "", {
+        click: () => {
+            modal.style.display = 'none';
+            overlay.style.display = 'none';
+        }
+    }, "buttonx secondary");
     modal.appendChild(closeBtn);
 
     const content = document.createElement('div');

@@ -1,4 +1,4 @@
-import { apipFetch } from "../../api/api.js";
+import { apiFetch } from "../../api/api.js";
 import { createElement } from "../../components/createElement.js";
 import { Button } from "../../components/base/Button.js";
 import { v4 as uuidv4 } from "https://jspm.dev/uuid";
@@ -23,7 +23,7 @@ export function WalletTransactions({ onBalanceChange }) {
     async function loadTransactions() {
         container.querySelectorAll(".txn-item, .load-more, .txn-error").forEach(el => el.remove());
         try {
-            const res = await apipFetch(`/wallet/transactions?skip=${skip}&limit=${limit}`);
+            const res = await apiFetch(`/wallet/transactions?skip=${skip}&limit=${limit}`);
             if (!res || !res.transactions) {
                 container.appendChild(createElement("div", { class: "txn-error" }, ["Error loading transactions"]));
                 return;
@@ -71,7 +71,7 @@ export function WalletTransactions({ onBalanceChange }) {
                             refundBtn.disabled = true;
                             try {
                                 const idempotencyKey = uuidv4();
-                                const refundRes = await apipFetch("/wallet/refund", "POST", {
+                                const refundRes = await apiFetch("/wallet/refund", "POST", {
                                     transaction_id: txn.id
                                 }, { headers: { "Idempotency-Key": idempotencyKey } });
 

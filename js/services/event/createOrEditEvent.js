@@ -1,4 +1,4 @@
-import { APIG_URL, getState } from "../../state/state.js";
+import { API_URL, getState } from "../../state/state.js";
 import { apiFetch } from "../../api/api.js";
 import { navigate } from "../../routes/index.js";
 import { createElement } from "../../components/createElement.js";
@@ -19,7 +19,7 @@ function addAutoConListeners(eventPlaceInput) {
         }
 
         try {
-            const response = await fetch(`${APIG_URL}/suggestions/places?query=${query}`);
+            const response = await fetch(`${API_URL}/suggestions/places?query=${query}`);
             const suggestions = await response.json();
 
             autocompleteList.replaceChildren();

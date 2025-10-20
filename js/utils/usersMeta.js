@@ -27,7 +27,7 @@ function setToLocalStorage(id, data) {
 
 /**
  * Fetch minimal user info for given IDs.
- * Returns an object { userid: { username, name, profile_picture } }
+ * Returns an object { userid: { username, name, avatar } }
  */
 export async function fetchUserMeta(userIds = []) {
     const result = {};

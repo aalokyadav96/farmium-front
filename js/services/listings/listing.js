@@ -1,153 +1,233 @@
-
 import { createElement } from "../../components/createElement.js";
 import { apiFetch } from "../../api/api.js";
 import { Button } from "../../components/base/Button.js";
-import { paginate, createFilterControls } from "../../utils/listUtils.js";
 
-// --- Generic Listing Page ---
+// ---- Centralized Type Configuration ----
+const LIST_CONFIG = {
+  events: {
+    searchable: item =>
+      [item.title, item.placename, ...(item.tags || [])].join(" ").toLowerCase(),
+    categories: items => [...new Set(items.map(i => i.category).filter(Boolean))],
+    sorters: {
+      date: (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+      price: (a, b) => Math.min(...(a.prices || [0])) - Math.min(...(b.prices || [0])),
+      title: (a, b) => (a.title || "").localeCompare(b.title || "")
+    }
+  },
+
+  recipes: {
+    searchable: item =>
+      [item.title, ...(item.ingredients || []).map(i => i.name)].join(" ").toLowerCase(),
+    categories: items => [...new Set(items.map(i => i.category).filter(Boolean))],
+    sorters: {
+      title: (a, b) => (a.title || "").localeCompare(b.title || ""),
+      date: (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+      views: (a, b) => (b.views || 0) - (a.views || 0)
+    }
+  },
+
+  places: {
+    searchable: item => (item.name || "").toLowerCase(),
+    categories: items => [...new Set(items.map(i => i.type || i.category).filter(Boolean))],
+    sorters: {
+      name: (a, b) => (a.name || "").localeCompare(b.name || ""),
+      capacity: (a, b) => (a.capacity || 0) - (b.capacity || 0),
+      recent: (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    }
+  },
+
+  posts: {
+    searchable: item =>
+      [item.title, item.category, item.subcategory, item.createdBy]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase(),
+    categories: items => [...new Set(items.map(i => i.category).filter(Boolean))],
+    sorters: {
+      date: (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+      subcategory: (a, b) => (a.subcategory || "").localeCompare(b.subcategory || ""),
+      title: (a, b) => (a.title || "").localeCompare(b.title || "")
+    }
+  },
+
+  default: {
+    searchable: item =>
+      [item.title, item.name, item.description].filter(Boolean).join(" ").toLowerCase(),
+    categories: items => [...new Set(items.map(i => i.category).filter(Boolean))],
+    sorters: {
+      date: (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+      title: (a, b) => (a.title || "").localeCompare(b.title || ""),
+      views: (a, b) => (b.views || 0) - (a.views || 0)
+    }
+  }
+};
+
+
+// ---- Filtering & Sorting ----
+function applyFilters({ items, keyword, category, sortBy, type }) {
+  const cfg = LIST_CONFIG[type] || LIST_CONFIG.default;
+  const kw = (keyword || "").toLowerCase();
+
+  const filtered = items.filter(item => {
+    const text = cfg.searchable(item);
+    const matchesKeyword = kw ? text.includes(kw) : true;
+    const matchesCategory = category ? item.category === category : true;
+    return matchesKeyword && matchesCategory;
+  });
+
+  const sorter = cfg.sorters[sortBy] || cfg.sorters.date || (() => 0);
+  return filtered.sort(sorter);
+}
+
+
+// ---- UI Filter Controls ----
+function createFilterControls({ type, items, onRender }) {
+  const cfg = LIST_CONFIG[type] || LIST_CONFIG.default;
+  const wrapper = createElement("div", { class: `${type}-controls` });
+
+  const searchInput = createElement("input", {
+    type: "text",
+    name: `search-${Date.now()}`,
+    placeholder: `Search ${type}...`
+  });
+
+  const sortSelect = createElement(
+    "select",
+    { name: `sort-${Date.now()}` },
+    Object.entries(cfg.sorters).map(([key]) =>
+      createElement("option", { value: key }, [key[0].toUpperCase() + key.slice(1)])
+    )
+  );
+
+  const categories = cfg.categories(items);
+  const chipConContainer = createElement("div", { class: "chipscon" }, []);
+  const chipContainer = createElement("div", { class: "category-chips" }, []);
+  chipConContainer.appendChild(chipContainer);
+
+  let selectedCategory = null;
+
+  categories.forEach(cat => {
+    const chip = createElement("span", { class: "category-chip" }, [cat]);
+    chip.addEventListener("click", () => {
+      selectedCategory = selectedCategory === cat ? null : cat;
+      renderFiltered();
+    });
+    chipContainer.appendChild(chip);
+  });
+
+  wrapper.append(searchInput, sortSelect);
+
+  function renderFiltered() {
+    const filtered = applyFilters({
+      items,
+      keyword: searchInput.value,
+      category: selectedCategory,
+      sortBy: sortSelect.value,
+      type
+    });
+    onRender(filtered);
+  }
+
+  searchInput.addEventListener("input", renderFiltered);
+  sortSelect.addEventListener("change", renderFiltered);
+
+  renderFiltered();
+
+  return {
+    controls: wrapper,
+    chipConContainer,
+    reset: () => {
+      searchInput.value = "";
+      selectedCategory = null;
+      renderFiltered();
+    }
+  };
+}
+
+
+// ---- Pagination ----
+function paginate(items, page, size) {
+  const start = (page - 1) * size;
+  return items.slice(start, start + size);
+}
+
+
+// ---- Listing Page ----
 export async function displayListingPage(container, {
   title = "",
   apiEndpoint,
-  cardBuilder,      // function: item => HTMLElement
-  type = "generic", // "baitos", "events", etc
+  cardBuilder,
+  type = "generic",
   pageSize = 10,
-  sidebarActions   // optional function: aside => void
+  sidebarActions
 }) {
   container.replaceChildren();
-
-  // Layout
   const layout = createElement("div", { class: `${type}-page` });
   const aside = createElement("aside", { class: `${type}-aside` });
   const main = createElement("div", { class: `${type}-main` });
   layout.append(main, aside);
   container.appendChild(layout);
 
-  // Sidebar
-  if (typeof sidebarActions === "function") sidebarActions(aside);
-
-  // Main header
+  if (sidebarActions) sidebarActions(aside);
   if (title) main.appendChild(createElement("h1", {}, [title]));
 
-  // List container
   const listSection = createElement("div", { class: `${type}-list` });
   main.appendChild(listSection);
 
-  // Pagination state
   let items = [];
   let currentPage = 1;
-  let isLoading = false;
-  let loadFailed = false;
 
-  function setLoading(flag) { isLoading = !!flag; }
+  // --- Fetch data from API ---
+  const data = await apiFetch(apiEndpoint);
 
-  function clearElement(el) { el.replaceChildren(); }
+  // handle different backend structures
+  if (Array.isArray(data)) {
+    items = data;
+  } else if (data?.data) {
+    items = data.data;
+  } else if (data?.[type]) {
+    // e.g. { posts: [...] }
+    items = data[type];
+  } else {
+    items = [];
+  }
 
-  function renderPage(filteredItems) {
-    clearElement(listSection);
-
-    if (loadFailed) {
-      listSection.appendChild(
-        createElement("p", { class: "error-msg" }, [`⚠️ Failed to load ${type}. Please try again later.`])
-      );
-      return;
+  // --- Create filters and pagination ---
+  const filterControls = createFilterControls({
+    type,
+    items,
+    onRender: filtered => {
+      currentPage = 1;
+      renderPage(filtered);
     }
+  });
 
-    if (isLoading) {
-      listSection.appendChild(createElement("p", {}, ["⏳ Loading..."]));
-      return;
-    }
+  const filterToggle = createElement(
+    "details",
+    { open: true, class: `${type}-filter-toggle` },
+    [createElement("summary", {}, ["🔍 Filters"]), filterControls.controls]
+  );
 
-    const pageData = paginate(filteredItems, currentPage, pageSize);
+  main.insertBefore(filterToggle, listSection);
+  main.insertBefore(filterControls.chipConContainer, listSection);
 
-    if (!pageData.length) {
+  function renderPage(filtered) {
+    listSection.replaceChildren();
+    const paged = paginate(filtered, currentPage, pageSize);
+
+    if (!paged.length) {
       listSection.appendChild(
         createElement("div", { class: "empty-state" }, [
-          createElement("p", {}, [`😢 No matching ${type}.`]),
-          Button("Clear Filters", "clear-filters-inline", {
-            click: () => {
-              if (typeof filterControls.reset === "function") filterControls.reset();
-            }
-          }, "buttonx btn-secondary")
+          createElement("p", {}, [`No ${type} found.`]),
+          Button("Clear Filters", "", { click: () => filterControls.reset() }, "buttonx btn-secondary")
         ])
       );
       return;
     }
 
-    pageData.forEach(item => listSection.appendChild(cardBuilder(item)));
+    paged.forEach(item => listSection.appendChild(cardBuilder(item)));
   }
 
-  function buildPagination(prevCb, nextCb) {
-    const wrapper = createElement("div", { class: "pagination-wrapper" });
-    const prevBtn = Button("◀ Prev", "", { click: prevCb }, "buttonx btn-secondary");
-    const nextBtn = Button("Next ▶", "", { click: nextCb }, "buttonx btn-secondary");
-    wrapper.append(prevBtn, nextBtn);
-
-    function update(totalItems) {
-      const totalPages = Math.ceil(totalItems / pageSize);
-      prevBtn.disabled = currentPage === 1 || totalPages <= 1;
-      nextBtn.disabled = currentPage >= totalPages || totalPages <= 1;
-    }
-
-    return { wrapper, prevBtn, nextBtn, update };
-  }
-
-  try {
-    setLoading(true);
-    listSection.appendChild(createElement("p", {}, ["⏳ Loading..."]));
-
-    let resp = await apiFetch(apiEndpoint);
-
-    // --- normalize array from API response ---
-    if (Array.isArray(resp)) items = resp;
-    else if (resp?.events) items = resp.events;
-    else if (resp?.posts) items = resp.posts;
-    else if (resp?.recipes) items = resp.recipes;
-    else if (resp?.data) items = resp.data;
-    else items = [];
-
-    setLoading(false);
-    loadFailed = false;
-
-    // --- Pagination controls ---
-    const paginationWrapper = buildPagination(() => {
-      if (currentPage > 1) currentPage--;
-      renderPage(filterControls.currentFiltered || []);
-    }, () => {
-      const filtered = filterControls.currentFiltered || [];
-      if (currentPage * 10 < filtered.length) currentPage++;
-      renderPage(filtered);
-    });
-    
-
-    main.appendChild(paginationWrapper.wrapper);
-
-    // --- Filter controls ---
-    const filterControls = createFilterControls({
-      type,
-      items,
-      onRender: filtered => {
-        currentPage = 1;
-        renderPage(filtered);
-        paginationWrapper.update(filtered.length);
-      }
-    });
-
-    const filterToggle = createElement(
-      "details",
-      { class: `${type}-filter-toggle`, open: true },
-      [createElement("summary", { class: `${type}-filter-summary` }, ["🔍 Filter"]), filterControls.controls]
-    );
-
-    main.insertBefore(filterToggle, listSection);
-    main.insertBefore(filterControls.chipContainer, listSection);
-
-  } catch (err) {
-    setLoading(false);
-    loadFailed = true;
-    clearElement(listSection);
-    listSection.appendChild(
-      createElement("p", { class: "error-msg" }, [`⚠️ Failed to load ${type}. Please try again later.`])
-    );
-    console.error(err);
-  }
+  // --- Initial Render ---
+  renderPage(items);
 }

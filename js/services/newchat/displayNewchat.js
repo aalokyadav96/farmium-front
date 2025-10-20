@@ -1,6 +1,7 @@
 import { createElement } from "../../components/createElement.js";
-import { state } from "../../state/state.js";
+import { CHATDROP_URL, state } from "../../state/state.js";
 import { renderMessage } from "./renderMessage.js";
+import { chatFetch } from "../../api/api.js";
 
 export function displayOneChat(contentContainer, chatId, isLoggedIn, currentUserId) {
   clearContainer(contentContainer);
@@ -16,8 +17,9 @@ export function displayOneChat(contentContainer, chatId, isLoggedIn, currentUser
     const warning = createElement("div", { class: "login-warning" }, ["You are not logged in."]);
     chatBox.appendChild(warning);
   }
-
-  chatBox.append(messagesContainer, inputRow, fileInput, uploadButton, dropZone, progressBar);
+  let upcon = createElement("div", {class:"upcon"}, []);
+  upcon.append(inputRow, fileInput, uploadButton, progressBar, dropZone);
+  chatBox.append(messagesContainer, upcon);
   contentContainer.appendChild(chatBox);
 
   const socket = createWebSocket(chatId);
@@ -65,7 +67,7 @@ function disableInputs(elements) {
 function createWebSocket(chatId) {
   const protocol = location.protocol === "https:" ? "wss" : "ws";
   return new WebSocket(
-    `${protocol}://localhost:4000/ws/newchat/${encodeURIComponent(chatId)}?token=${encodeURIComponent(state.token)}`
+    `${protocol}://localhost:3810/ws/newchat/${encodeURIComponent(chatId)}?token=${encodeURIComponent(state.token)}`
   );
 }
 
@@ -112,7 +114,8 @@ function setupFileUpload(fileInput, uploadButton, dropZone, chatId, progressBar)
     formData.append("chat", chatId);
 
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", `http://localhost:4000/newchat/upload`);
+    // xhr.open("POST", `http://localhost:6925/api/v1/filedrop`);
+    xhr.open("POST", CHATDROP_URL);
     if (state.token) xhr.setRequestHeader("Authorization", `Bearer ${state.token}`);
 
     progressBar.style.display = "block";
@@ -124,7 +127,45 @@ function setupFileUpload(fileInput, uploadButton, dropZone, chatId, progressBar)
     xhr.onload = () => {
       progressBar.style.display = "none";
       fileInput.value = "";
+
+      try {
+        const uploaded = JSON.parse(xhr.responseText); // filedrop response
+        if (!Array.isArray(uploaded)) return;
+
+        // artificial delay before calling chatFetch
+        setTimeout(() => {
+          chatFetch(
+            "/newchat/upload",
+            "POST",
+            JSON.stringify({
+              chat: chatId,
+              files: uploaded
+            }),
+            {
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${state.token}`
+              }
+            }
+          ).then(async res => {
+            if (!res) return;
+            try {
+              const msg = typeof res === "string" ? JSON.parse(res) : res;
+
+              // another artificial delay before rendering
+              await new Promise(resolve => setTimeout(resolve, 500));
+
+              await renderMessage(msg, document.getElementById("messages"), state.userId, null);
+            } catch (err) {
+              console.error("Failed to render upload message", err);
+            }
+          });
+        }, 500); // delay before chatFetch
+      } catch (err) {
+        console.error("Invalid upload response", err);
+      }
     };
+
 
     xhr.onerror = () => {
       progressBar.style.display = "none";

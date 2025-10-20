@@ -1,4 +1,4 @@
-import { apiFetch, apigFetch } from "../../api/api.js";
+import { apiFetch, apiFetch } from "../../api/api.js";
 import Button from "../../components/base/Button.js";
 import { createElement } from "../../components/createElement.js";
 import Modal from "../../components/ui/Modal.mjs";
@@ -57,7 +57,7 @@ function displayItinerary(isLoggedIn, divContainerNode) {
   async function loadItineraries() {
     listDiv.innerHTML = '<p>Loading...</p>';
     try {
-      const list = await apigFetch('/itineraries');
+      const list = await apiFetch('/itineraries');
       renderItineraryList(list);
     } catch {
       listDiv.innerHTML = '<p>Error loading itineraries.</p>';
@@ -67,7 +67,7 @@ function displayItinerary(isLoggedIn, divContainerNode) {
   async function searchItineraries(qs) {
     listDiv.innerHTML = '<p>Searching...</p>';
     try {
-      const list = await apigFetch(`/itineraries/search?${qs}`);
+      const list = await apiFetch(`/itineraries/search?${qs}`);
       renderItineraryList(list);
     } catch {
       listDiv.innerHTML = '<p>Error searching itineraries.</p>';

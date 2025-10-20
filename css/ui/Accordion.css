@@ -64,7 +64,7 @@ details[open] .accordion-header {
 
 /* Icon animation */
 .accordion-header::after {
-  content: "⮟";
+  content: "▲";
   transition: transform 0.3s ease-in-out;
 }
 

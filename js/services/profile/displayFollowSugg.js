@@ -1,14 +1,15 @@
-import { SRC_URL, apigFetch } from "../../api/api.js";
+import { SRC_URL, apiFetch } from "../../api/api.js";
 import { navigate } from "../../routes/index.js";
 // import { toggleFollow } from "./toggleFollow.js";
 import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
 import Notify from "../../components/ui/Notify.mjs";
+import Imagex from "../../components/base/Imagex.js";
 
 async function displayFollowSuggestions(userid, suggestionsSection) {
     suggestionsSection.replaceChildren(); // Clear previous content
 
     try {
-        const suggestions = await apigFetch(`/suggestions/follow?userid=${userid}`);
+        const suggestions = await apiFetch(`/suggestions/follow?userid=${userid}`);
 
         if (suggestions && suggestions.length > 0) {
             const heading = document.createElement("h3");
@@ -23,11 +24,10 @@ async function displayFollowSuggestions(userid, suggestionsSection) {
                 listItem.className = "suggestion-item";
 
                 // Profile Picture
-                const profilePic = document.createElement("img");
-                // profilePic.className = "profile-picture";
-                profilePic.className = "circle padd-4";
-                // profilePic.src = user.userid ? `${SRC_URL}/userpic/thumb/${user.userid}.jpg` : "${SRC_URL}/userpic/thumb/default-avatar.jpg";
-                profilePic.src = resolveImagePath(EntityType.USER, PictureType.THUMB, `${user.userid}.jpg`);
+                const profilePic = Imagex({
+                    src: resolveImagePath(EntityType.USER, PictureType.THUMB, `${user.userid}.jpg`),
+                    class: "circle padd-4",
+                });
                 profilePic.alt = `${user.username}'s profile`;
                 profilePic.setAttribute("loading", "lazy");
                 

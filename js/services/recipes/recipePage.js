@@ -1,13 +1,19 @@
 import { createElement } from "../../components/createElement.js";
 import Button from "../../components/base/Button.js";
 import { addToCart } from "../cart/addToCart.js";
-import { apiFetch } from "../../api/api.js";
+import { apiFetch, bannerFetch } from "../../api/api.js";
 import { getState } from "../../state/state.js";
 import { editRecipe } from "./createOrEditRecipe.js";
 import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
-import Imagex from "../../components/base/Imagex.js";
+// import Imagex from "../../components/base/Imagex.js";
+import Bannerx from "../../components/base/Bannerx.js";
+import Galleryx from "../../components/base/Galleryx.js";
 import { createCommentsSection } from "../comments/comments.js";
-import Sightbox from "../../components/ui/Sightbox_zoom.mjs";
+import Notify from "../../components/ui/Notify.mjs";
+import { ImageGallery } from "../../components/ui/IMageGallery.mjs";
+// import Sightbox from "../../components/ui/Sightbox_zoom.mjs";
+// import { updateImageWithCrop } from "../../utils/bannerEditor.js";
+
 
 // --- LocalStorage Helpers ---
 function getStepKey(recipeId) { return `completedSteps:${recipeId}`; }
@@ -46,53 +52,21 @@ function renderAuthor(recipe, currentUser) {
     createElement("a", { href: `/user/${recipe.userId}` }, [recipe.userName || recipe.userId])
   ]);
 }
-function renderGallery(images, title) {
-  let imgIndex = 0;
-  const imageEl = Imagex({
-      src: images.length ? resolveImagePath(EntityType.RECIPE, PictureType.PHOTO, images[0]) : "",
-      alt: title,
-      classes: "thumbnail"
+
+
+function createRecipeBannerSection(recipe, currentUser) {
+  const isCreator = recipe.userId === currentUser;
+  return Bannerx({
+    isCreator: isCreator,
+    bannerkey: recipe.banner,
+    banneraltkey: `Banner for ${recipe.name || "Recipe"}`,
+    bannerentitytype: EntityType.RECIPE,
+    stateentitykey: "recipe",
+    bannerentityid: recipe.recipeid
   });
-
-  const prevBtn = Button("Prev", "prev-img", {}, "small-button");
-  const nextBtn = Button("Next", "next-img", {}, "small-button");
-
-  // Update image source
-  function updateImg() {
-      if (!images.length) return;
-      imageEl.src = resolveImagePath(EntityType.RECIPE, PictureType.PHOTO, images[imgIndex]);
-  }
-
-  // Navigate buttons
-  prevBtn.addEventListener("click", () => {
-      imgIndex = (imgIndex - 1 + images.length) % images.length;
-      updateImg();
-  });
-
-  nextBtn.addEventListener("click", () => {
-      imgIndex = (imgIndex + 1) % images.length;
-      updateImg();
-  });
-
-  // Touch swipe support
-  let touchStartX = 0;
-  imageEl.addEventListener("touchstart", e => touchStartX = e.changedTouches[0].screenX, { passive: true });
-  imageEl.addEventListener("touchend", e => {
-      const dx = e.changedTouches[0].screenX - touchStartX;
-      if (dx > 50) prevBtn.click();
-      else if (dx < -50) nextBtn.click();
-  }, { passive: true });
-
-  // Single click listener for Sightbox
-  imageEl.addEventListener("click", () => {
-      if (images.length) Sightbox(
-          images.map(img => resolveImagePath(EntityType.RECIPE, PictureType.PHOTO, img)), 
-          imgIndex
-      );
-  }, { passive: true });
-
-  return createElement("div", { class: "image-gallery" }, [imageEl, prevBtn, nextBtn]);
 }
+
+
 function renderInfoBox(recipe) {
   const infoRow = (label, value) =>
     createElement("div", { class: "info-row" }, [
@@ -371,7 +345,29 @@ function renderActions(recipe, currentUser, contentContainer, isFavorite, recipe
   return createElement("div", { class: "recipe-actions" }, actions);
 }
 
-// --- Main Export ---
+
+export function showGallery(recipe, isCreator, contentContainer = null) {
+  return Galleryx({
+    isCreator,
+    existingImages: recipe.images || [],
+    galleryEntityType: EntityType.RECIPE,
+    contentContainer,
+    onSubmit: async (formData) => {
+      return await bannerFetch(`/gallery/recipe/${recipe.recipeid}/images`, "PUT", formData);
+    },
+    onSuccess: (res) => {
+      console.log("Images updated", res);
+      Notify("Images updated successfully", {
+        type: "success",
+        duration: 3000,
+        dismissible: true
+      });
+      displayRecipe(contentContainer, true, recipe.recipeid);
+    }
+  });
+}
+
+
 export async function displayRecipe(content, isLoggedIn, recipeId) {
   content.replaceChildren();
   const container = createElement("div", { class: "recipepage" });
@@ -389,23 +385,81 @@ export async function displayRecipe(content, isLoggedIn, recipeId) {
   }
 
   const isFavorite = getFavorites().includes(recipeId);
+  const isCreator = currentUser && recipe.userId === currentUser;
 
+  // --- Recipe Header ---
+  const titleEl = createElement("h2", {}, [recipe.title || "Untitled"]);
+  const metaInfo = [];
+
+  if (recipe.version) {
+    metaInfo.push(createElement("p", { class: "version-info" }, [`Version ${recipe.version}`]));
+  }
+  if (recipe.lastUpdated) {
+    metaInfo.push(
+      createElement("p", { class: "version-info" }, [
+        `Last updated: ${new Date(recipe.lastUpdated).toLocaleDateString()}`
+      ])
+    );
+  }
+
+  // --- Banner + Info ---
+  const bannerEl = createRecipeBannerSection(recipe, currentUser);
+  const infoBox = renderInfoBox(recipe);
+  const tagsEl = renderTags(recipe.tags);
+
+  // --- Image Gallery Section ---
+  const gallerySection = createElement("div", { class: "gallery-section" });
+  const cleanImageNames = (recipe.images || []).filter(Boolean);
+  if (cleanImageNames.length) {
+    const fullURLs = cleanImageNames.map(name =>
+      resolveImagePath(EntityType.RECIPE, PictureType.PHOTO, name)
+    );
+    gallerySection.appendChild(ImageGallery(fullURLs));
+  }
+
+  if (isCreator) {
+    const addImagesBtn = Button("Add Images", "", {
+      click: () => {
+        const galleryView = showGallery(recipe, isCreator, container);
+        content.replaceChildren(galleryView);
+
+        const backBtn = Button("← Back to Recipe", "", {
+          click: async () => {
+            await displayRecipe(content, isLoggedIn, recipeId);
+          }
+        });
+        galleryView.prepend(backBtn);
+      }
+    });
+    gallerySection.appendChild(addImagesBtn);
+  }
+
+  // --- Ingredients + Steps + Actions ---
+  const ingredientsTitle = createElement("h3", {}, ["Ingredients"]);
+  const ingredientsEl = renderIngredients(recipe.ingredients, isLoggedIn, recipe);
+  const stepsTitle = createElement("h3", {}, ["Steps"]);
+  const stepsEl = renderSteps(recipeId, recipe.steps || [], recipe);
+  const actionsEl = renderActions(recipe, currentUser, container, isFavorite, recipeId);
+  const commentsEl = renderComments(recipe);
+
+  // --- Final Assembly ---
   container.replaceChildren(
-    createElement("h2", {}, [recipe.title || "Untitled"]),
-    ...(recipe.version ? [createElement("p", { class: "version-info" }, [`Version ${recipe.version}`])] : []),
-    ...(recipe.lastUpdated ? [createElement("p", { class: "version-info" }, [`Last updated: ${new Date(recipe.lastUpdated).toLocaleDateString()}`])] : []),
+    titleEl,
+    ...metaInfo,
     renderAuthor(recipe, currentUser),
-    renderGallery(Array.isArray(recipe.imageUrls) ? recipe.imageUrls : [], recipe.title),
-    renderInfoBox(recipe),
-    renderTags(recipe.tags),
-    createElement("h3", {}, ["Ingredients"]),
-    renderIngredients(recipe.ingredients, isLoggedIn, recipe),
-    createElement("h3", {}, ["Steps"]),
-    renderSteps(recipeId, recipe.steps || [], recipe),
-    renderActions(recipe, currentUser, container, isFavorite, recipeId),
-    renderComments(recipe)
+    bannerEl,
+    infoBox,
+    tagsEl,
+    ingredientsTitle,
+    ingredientsEl,
+    gallerySection,
+    stepsTitle,
+    stepsEl,
+    actionsEl,
+    commentsEl
   );
 }
+
 
 // --- Utils ---
 function formatTime(sec) {

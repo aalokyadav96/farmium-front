@@ -5,9 +5,12 @@ import { deleteEvent } from "./eventService.js";
 import { viewEventAnalytics } from "./eventAnalytics.js";
 import { reportPost } from "../reporting/reporting.js";
 import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
-import { updateImageWithCrop } from "../../utils/bannerEditor.js";
+// import { updateImageWithCrop } from "../../utils/bannerEditor.js";
 import { starEmptySVG, starFilledSVG } from "../../components/svgs.js";
 import { createIconButton } from "../../utils/svgIconButton.js";
+import { hireVendors } from "../jobs/vendors/vendors.js";
+// import Imagex from "../../components/base/Imagex.js";
+import Bannerx from "../../components/base/Bannerx.js";
 
 
 // Config for displaying event details
@@ -98,21 +101,6 @@ const createSaveButton = eventid => {
     return icon;
 };
 
-// const createSaveButton = eventid => {
-//     const icon = createElement("span", {
-//         style: `cursor:pointer;font-size:20px;color:${getSavedEvents().includes(eventid) ? "gold" : "gray"}`,
-//         title: "Save Event"
-//     }, [getSavedEvents().includes(eventid) ? "★" : "☆"]);
-
-//     icon.addEventListener("click", () => {
-//         toggleSaveEvent(eventid);
-//         const nowSaved = getSavedEvents().includes(eventid);
-//         icon.replaceChildren(nowSaved ? "★" : "☆");
-//         icon.setAttribute("style", `cursor:pointer;font-size:20px;color:${nowSaved ? "gold" : "gray"}`);
-//     });
-//     return icon;
-// };
-
 // Share
 const createShareButton = eventid => {
     const btn = Button("Share", "", {
@@ -149,37 +137,19 @@ const createPlaceLink = (placename, placeid) => createElement('p', {}, [
     createElement('a', { href: `/place/${placeid}` }, [createElement('strong', {}, [`Place: ${placename}`])])
 ]);
 
-// Banner section
-function createBannerSection(eventData, isCreator) {
-    const bannerSection = createElement("div", { class: "banner-section" });
-    const bannerSrc = resolveImagePath(EntityType.EVENT, PictureType.BANNER, eventData.banner);
-    const bannerImage = createElement("img", {
-        id: "event-banner-img",
-        src: bannerSrc,
-        alt: `Banner for ${eventData.title || "Event"}`,
-        class: "event-banner-image"
-    });
-    bannerImage.addEventListener("error", () => {
-        bannerImage.src = resolveImagePath(EntityType.DEFAULT, PictureType.STATIC, "banner.jpg");
-    });
-    bannerSection.appendChild(bannerImage);
 
-    if (isCreator) {
-        const bannerEditBtn = createElement("button", { class: "edit-banner-pic" }, ["Edit Banner"]);
-        bannerEditBtn.addEventListener("click", () => updateImageWithCrop({
-            entityType: EntityType.EVENT,
-            imageType: "banner",
-            stateKey: "banner",
-            stateEntityKey: "event",
-            previewElementId: "event-banner-img",
-            pictureType: PictureType.BANNER,
-            entityId: eventData.eventid
-        }));
-        bannerSection.appendChild(bannerEditBtn);
-    }
-
-    return bannerSection;
-}
+/** Banner section */
+function createEventBannerSection(eventdata, isCreator) {
+    return Bannerx({
+      isCreator : isCreator,
+      bannerkey : eventdata.banner,
+      banneraltkey : `Banner for ${eventdata.name || "Event"}`,
+      bannerentitytype : EntityType.EVENT,
+      stateentitykey : "event",
+      bannerentityid : eventdata.eventid
+    });
+  }
+  
 
 // Info section
 function createInfoSection(eventData, isCreator, isLoggedIn) {
@@ -196,11 +166,12 @@ function createInfoSection(eventData, isCreator, isLoggedIn) {
     const actions = [];
 
     let evanacon = createElement("div", {}, []);
-
+    
     if (isLoggedIn && isCreator) {
         actions.push({ text: '✏ Edit Event', onClick: () => editEvent(isLoggedIn, eventData.eventid, document.getElementById("editevent")), classes: ['edit-btn', "buttonx"] });
         actions.push({ text: '🗑 Delete Event', onClick: () => deleteEvent(isLoggedIn, eventData.eventid), classes: ['delete-btn', 'buttonx'] });
         actions.push({ text: '📊 View Analytics', onClick: () => viewEventAnalytics(evanacon, isLoggedIn, eventData.eventid), classes: ['analytics-btn', "buttonx"] });
+        actions.push({ text: 'Hire Vendors', onClick: () => hireVendors(evanacon, isLoggedIn, eventData.eventid), classes: ['analytics-btn', "buttonx"] });
     } else if (isLoggedIn) {
         actions.push({ text: 'Report Event', onClick: () => reportPost(eventData.eventid, 'event') });
     }
@@ -229,7 +200,8 @@ export async function displayEventDetails(content, eventData, isCreator, isLogge
     const wrapper = createElement("div", { class: `event-wrapper ${getEventColorClass(eventData.category)}` });
     const card = createElement("div", { class: "eventx-card hvflex" });
 
-    card.append(createBannerSection(eventData, isCreator));
+    // card.append(createBannerSection(eventData, isCreator));
+    card.append(createEventBannerSection(eventData, isCreator));
     card.append(createInfoSection(eventData, isCreator, isLoggedIn));
 
     wrapper.appendChild(card);

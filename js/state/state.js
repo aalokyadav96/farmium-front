@@ -1,27 +1,25 @@
-// --- API URLs ---
-// const API_URL = "http://localhost:4000/api/v1";
-// const APIG_URL = API_URL;
-// const AGI_URL = "http://localhost:4000/agi/v1";
-// const APIP_URL = "http://localhost:4000/api/p1";
-// const SRC_URL = "http://localhost:4000/static";
-// const SEARCH_URL = API_URL;
-// const CHAT_URL = "http://localhost:4000";
+const MAIN_URL = "http://localhost:4000";
+// const MAIN_URL = "https://gallium.onrender.com";
 
-const API_URL = "https://gallium.onrender.com/api/v1";
-const APIG_URL = "https://gallium.onrender.com/api/v1";
-const AGI_URL = "https://gallium.onrender.com/api/v1";
-const SRC_URL = "https://gallium.onrender.com/static";
-const SEARCH_URL = "https://gallium.onrender.com/api/v1";
-const APIP_URL = "https://gallium.onrender.com/api/p1";
-const CHAT_URL = "https://gallium.onrender.com";
+// --- API URLs ---
+const API_URL = `${MAIN_URL}/api/v1`;
+const AD_URL = `${MAIN_URL}/api/sda`;
+const SEARCH_URL = `${MAIN_URL}/api/v1`;
+const SRC_URL = "http://localhost:4002/static";
+const BANNERDROP_URL = `http://localhost:6925`;
+const FILEDROP_URL = `${BANNERDROP_URL}/filedrop`;
+const CHATDROP_URL = `${BANNERDROP_URL}/api/v1/filedrop`;
+const LIVE_URL = "http://localhost:7143";
+const CHAT_URL = "http://localhost:3810";
+
 
 // --- Allowed and persisted keys ---
 const allowedKeys = new Set([
-  "token", "user", "username", "userProfile", "refreshToken", "socket", "role", "environment",
+  "token", "user", "username", "userProfile", "socket", "role", "environment",
   "lang", "lastPath", "currentRoute", "routeCache", "routeState", "currentChatId", "isLoading"
 ]);
 
-const PERSISTED_KEYS = ["token", "userProfile", "refreshToken", "user", "username"];
+const PERSISTED_KEYS = ["token", "userProfile", "user", "username"];
 
 // --- Event system ---
 const globalEvents = {};
@@ -115,7 +113,6 @@ const rawState = {
   token: sessionStorage.getItem("token") || localStorage.getItem("token") || null,
   userProfile: safeParse("userProfile") || {},
   user: safeParse("user") || {},
-  refreshToken: sessionStorage.getItem("refreshToken") || localStorage.getItem("refreshToken") || null,
   lastPath: window.location.pathname,
   lang: "en",
   currentRoute: null,
@@ -268,7 +265,7 @@ function setLoading(val) { setState("isLoading", val); }
 // --- Exports ---
 export {
   state,
-  API_URL, APIG_URL, APIP_URL, AGI_URL, SRC_URL, SEARCH_URL, CHAT_URL,
+  API_URL, SRC_URL, SEARCH_URL, CHAT_URL, FILEDROP_URL, AD_URL, CHATDROP_URL, BANNERDROP_URL, LIVE_URL,
 
   // core
   getState, setState, clearState, getGlobalSnapshot,

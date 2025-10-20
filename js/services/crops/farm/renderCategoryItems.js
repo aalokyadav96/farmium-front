@@ -1,4 +1,4 @@
-import { apigFetch } from "../../../api/api.js";
+import { apiFetch } from "../../../api/api.js";
 import { createElement } from "../../../components/createElement.js";
 import { displayCropCard } from "../crop/displayCropCard.js";
 
@@ -16,7 +16,7 @@ export async function renderCategoryItems(container, category, filters = {}) {
             lng: filters.lng || ""
         });
 
-        const res = await apigFetch(`/crops?${query.toString()}`);
+        const res = await apiFetch(`/crops?${query.toString()}`);
         if (!res.success || !res.crops?.length) {
             container.textContent = "No items found in this category.";
             return;

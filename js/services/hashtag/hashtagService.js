@@ -3,6 +3,7 @@ import { reportPost } from "../reporting/reporting.js";
 import { apiFetch } from "../../api/api.js";
 import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
 import { createTabs } from "../../components/ui/createTabs.js";
+import Imagex from "../../components/base/Imagex.js";
 
 // --- Helpers ---
 const DEFAULT_LIMIT = 20;
@@ -144,7 +145,7 @@ async function renderMediaTab(container, hashtag, page = 0, limit = DEFAULT_LIMI
                 "a",
                 { class: "grid-item", href: `/feedpost/${post.postid}` },
                 [
-                    createElement("img", {
+                    Imagex( {
                         src: thumbSrc,
                         alt: post.title || "Post",
                         loading: "lazy"

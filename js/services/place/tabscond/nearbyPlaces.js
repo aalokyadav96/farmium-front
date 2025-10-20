@@ -1,4 +1,4 @@
-import { apigFetch } from "../../../api/api";
+import { apiFetch } from "../../../api/api";
 import { createElement } from "../../../components/createElement";
 import Button from "../../../components/base/Button";
 import { navigate } from "../../../routes";
@@ -14,7 +14,7 @@ let currentView = "grid"; // "grid" or "list"
 export async function displayPlaceNearby(container, placeId) {
     clearElement(container);
 
-    const nearbyPlaces = await apigFetch(`/suggestions/places/nearby?place=${placeId}&lat=28.6139&lng=77.2090`);
+    const nearbyPlaces = await apiFetch(`/suggestions/places/nearby?place=${placeId}&lat=28.6139&lng=77.2090`);
     if (!Array.isArray(nearbyPlaces) || nearbyPlaces.length === 0) {
         container.appendChild(createElement("p", {}, ["No nearby Places found."]));
         return;
@@ -162,7 +162,6 @@ function placeCard(place, index = 0) {
         "data-category": place.category || "Uncategorized"
     }, [
         createElement("div", { class: "nearby-image" }, [
-            // createElement("img", { src: imgSrc, alt: place.name || "Place Image" }, [])
             Imagex({ src: imgSrc, alt: place.name || "Place Image" }, [])
         ]),
         createElement("div", { class: "nearby-details" }, [

@@ -1,38 +1,34 @@
-import "../../../css/ui/Sightbox.css";
-import {createZoomableMedia} from "./createZoomableMedia";
+import "../../../css/ui/SightboxZoom.css";
+import { createZoomableMedia } from "./createZoomableMedia";
+import { createElement } from "../../components/createElement";
 
 const Sightbox = (mediaSrc, mediaType = "image") => {
   if (document.getElementById("sightbox")) return;
 
-  const sightbox = document.createElement("div");
-  sightbox.id = "sightbox";
-  sightbox.className = "sightbox";
+  const overlay = createElement("div", { 
+    id: "", 
+    class: "sightboxz-overlay", 
+    events: { click: () => closeSightbox() } 
+  });
 
-  const overlay = document.createElement("div");
-  overlay.className = "sightbox-overlay";
-  overlay.addEventListener("click", closeSightbox);
-
-  const content = document.createElement("div");
-  content.className = "sightbox-content";
-  content.setAttribute("tabindex", "-1");
-
-  // zoomable media
   const { container, mediaEl, resetZoomBtn } = createZoomableMedia(mediaSrc, mediaType);
-  content.appendChild(container);
 
-  // close button
-  const closeButton = document.createElement("button");
-  closeButton.className = "sightbox-close";
-  closeButton.textContent = "×";
-  closeButton.setAttribute("aria-label", "Close");
-  closeButton.addEventListener("click", closeSightbox);
-  content.appendChild(closeButton);
+  const closeButton = createElement("button", { 
+    class: "sightboxz-close", 
+    "aria-label": "Close", 
+    events: { click: () => closeSightbox() } 
+  }, [document.createTextNode("×")]);
 
-  // reset zoom button
-  content.appendChild(resetZoomBtn);
+  const content = createElement("div", { 
+    class: "sightboxz-content", 
+    tabindex: "-1" 
+  }, [container, closeButton, resetZoomBtn]);
 
-  sightbox.appendChild(overlay);
-  sightbox.appendChild(content);
+  const sightbox = createElement("div", { id: "sightbox", class: "sightboxz" }, [
+    overlay,
+    content
+  ]);
+
   document.getElementById("app").appendChild(sightbox);
 
   content.focus();
@@ -55,8 +51,8 @@ const Sightbox = (mediaSrc, mediaType = "image") => {
     }
   }
 
-  function onPopState(e) {
-    if (e.state && e.state.sightboxOpen) {
+  function onPopState() {
+    if (document.getElementById("sightbox")) {
       closeSightbox(true);
     }
   }

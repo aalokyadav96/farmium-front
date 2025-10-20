@@ -57,7 +57,7 @@ function createCropList(crops) {
         const cropCard = createElement("div", { class: "crop__card" });
 
         const img = Imagex( {
-            src: resolveImagePath(EntityType.CROP, PictureType.THUMB, crop.imageUrl),
+            src: resolveImagePath(EntityType.CROP, PictureType.THUMB, crop.banner),
             alt: crop.name,
             classes: "crop__image"
         });
@@ -98,10 +98,10 @@ function renderFeaturedFarm(container, farm) {
 
     const section = createElement("section", { class: "farm__featured" }, [
         createElement("h3", {}, ["🌟 Featured Farm"]),
-        createElement("img", {
+        Imagex({
             src: resolveImagePath(EntityType.FARM, PictureType.THUMB, farm.photo),
             alt: farm.name,
-            class: "farm__featured-photo"
+            classes: "farm__featured-photo"
         }),
         createElement("h4", {}, [farm.name]),
         createElement("p", {}, [farm.location]),

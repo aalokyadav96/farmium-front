@@ -1,7 +1,7 @@
-import { apigFetch } from "../../api/api.js";
-import { createElement } from "../../components/createElement.js";
-import { renderPost } from "../feed/renders/renderPost.js";
-import { displayMedia } from "./mediaService.js";
+// import { apiFetch } from "../../api/api.js";
+// import { createElement } from "../../components/createElement.js";
+// import { renderPost } from "../feed/renders/renderPost.js";
+import { displayMedia } from "./ui/mediaGallery.js";
 
 export async function displayMediaFeed(container, entityType, entityID, isLoggedIn) {
     displayMedia(container, entityType, entityID, isLoggedIn)
@@ -9,7 +9,7 @@ export async function displayMediaFeed(container, entityType, entityID, isLogged
     // container.appendChild(feedContainer);
 
     // try {
-    //     const response = await apigFetch(`/feed/media/${entityType}/${entityID}`);
+    //     const response = await apiFetch(`/feed/media/${entityType}/${entityID}`);
     //     if (!response.ok || !Array.isArray(response.data)) {
     //         throw new Error("Invalid feed response");
     //     }

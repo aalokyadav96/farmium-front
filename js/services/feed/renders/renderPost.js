@@ -38,8 +38,13 @@ export async function renderPost(posts, postsContainer) {
         const renderers = {
             image: () => RenderImagePost(mediaContainer, mediaUrls),
             video: () => {
-                const videos = mediaUrls.map(m => resolveImagePath(EntityType.FEED, PictureType.VIDEO, m));
-                RenderVideoPost(mediaContainer, videos, mediaUrls, post.resolution);
+                let subtits = [];
+                // const posterPath = resolveImagePath(EntityType.FEED, PictureType.POSTER, post.thumbnail);
+                const posterPath = resolveImagePath(EntityType.FEED, PictureType.POSTER, `${post.media_url}.jpg`);
+                const resolutions = post?.resolution || [];
+                // const media = mediaUrls.map(m => resolveImagePath(EntityType.FEED, PictureType.VIDEO, `${m}.mp4`));
+                const media = post.media.map(m => resolveImagePath(EntityType.FEED, PictureType.VIDEO, m));
+                RenderVideoPost(mediaContainer, media, mediaUrls, resolutions, subtits, posterPath);
             },
             text: () => mediaContainer.appendChild(createElement("p", {}, [post.text || ""]))
         };

@@ -3,7 +3,7 @@ import { Button } from "../../components/base/Button.js";
 import Imagex from "../../components/base/Imagex.js";
 import { navigate } from "../../routes/index.js";
 import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
-import { displayListingPage } from "../../utils/displayListingPage.js"; // generic listing page
+import { displayListingPage } from "../../utils/displayListingPage.js";
 
 export function displayPosts(container, isLoggedIn) {
   container.replaceChildren();
@@ -16,9 +16,16 @@ export function displayPosts(container, isLoggedIn) {
     pageSize: 10,
     sidebarActions: aside => {
       aside.appendChild(createElement("h3", {}, ["Actions"]));
-      aside.append(
-        Button("Create Post", "crtbtn-allposts", { click: () => navigate("/create-post") }, "buttonx")
-      );
+      if (isLoggedIn) {
+        aside.append(
+          Button(
+            "Create Post",
+            "crtbtn-allposts",
+            { click: () => navigate("/create-post") },
+            "buttonx"
+          )
+        );
+      }
     }
   });
 }
@@ -36,21 +43,35 @@ function createPostCard(post) {
     ]),
     createElement("p", {}, [
       createElement("strong", {}, ["Posted on: "]),
-      new Date(post.createdAt).toLocaleString()
+      post.createdAt ? new Date(post.createdAt).toLocaleString() : "-"
+    ]),
+    createElement("p", {}, [
+      createElement("strong", {}, ["Created By: "]),
+      post.createdBy || "-"
     ])
   ]);
 
-  const postLink = createElement("div", { class: "post-card" }, [
-    Imagex({
-      src: post.thumb
-        ? resolveImagePath(EntityType.POST, PictureType.THUMB, post.thumb)
-        : "/default-thumb.png",
-      alt: `${post.title || "Untitled"} Image`,
-      loading: "lazy",
-      style: "width:100%;aspect-ratio:16/9;object-fit:cover;"
-    }),
+  const postThumb = Imagex({
+    src: post.thumb
+      ? resolveImagePath(EntityType.POST, PictureType.THUMB, post.thumb)
+      : "/default-thumb.png",
+    alt: `${post.title || "Untitled"} Image`,
+    loading: "lazy",
+    style: "width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:4px;"
+  });
+
+  const postCard = createElement("div", { class: "post-card" }, [
+    postThumb,
     postInfo
   ]);
 
-  return createElement("a", { href: `/post/${encodeURIComponent(post.postid)}` }, [postLink]);
+  return createElement("a", {
+    href: "#",
+    events: {
+      click: e => {
+        e.preventDefault();
+        navigate(`/post/${encodeURIComponent(post.postid)}`);
+      }
+    }
+  }, [postCard]);
 }

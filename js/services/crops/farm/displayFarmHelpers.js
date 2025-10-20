@@ -7,6 +7,8 @@ import { addToCart } from "../../cart/addToCart.js";
 import { resolveImagePath, EntityType, PictureType } from "../../../utils/imagePaths.js";
 import { editFarm } from "./editFarm.js";
 import Imagex from "../../../components/base/Imagex.js";
+import { updateImageWithCrop } from "../../../utils/bannerEditor.js";
+import Bannerx from "../../../components/base/Bannerx.js";
 // import { renderListingCard } from "../crop/renderListingCard.js";
 
 // ─────────── Render the farm’s top‐level detail block ───────────
@@ -117,16 +119,29 @@ export async function renderCrops(
   }
 }
 
+
+function createCropBannerSection(crop, isCreator) {
+  return Bannerx({
+    isCreator : isCreator,
+    bannerkey : crop.banner,
+    banneraltkey : `Banner for ${crop.name || "Crop"}`,
+    bannerentitytype : EntityType.CROP,
+    stateentitykey : "crop",
+    bannerentityid : crop.cropid
+  });
+}
+
 // ─────────── Individual crop card ───────────
 function createCropCard(crop, farmName, farmId, mainCon, editcon, isLoggedIn, isCreator) {
   const card = createElement("div", { class: "crop-card" });
 console.log(crop);
 
-  const img = Imagex({
-    src: resolveImagePath(EntityType.CROP, PictureType.THUMB, crop.imageUrl),
-    alt: crop.name,
-    class: "crop__image"
-  });
+const banner = createCropBannerSection(crop, isCreator); 
+  // const img = Imagex({
+  //   src: resolveImagePath(EntityType.CROP, PictureType.THUMB, crop.imageUrl),
+  //   alt: crop.name,
+  //   class: "crop__image"
+  // });
 
   const formatDate = (isoStr) =>
     isoStr ? new Date(isoStr).toLocaleDateString(undefined, {
@@ -148,7 +163,7 @@ console.log(crop);
   }).format(crop.price);
 
   card.append(
-    img,
+    banner,
     createElement("h4", {}, [crop.name]),
     createElement("p", {}, [`💰 ${price} per ${crop.unit}`]),
     createElement("p", {}, [`📦 Stock: ${crop.quantity}`]),

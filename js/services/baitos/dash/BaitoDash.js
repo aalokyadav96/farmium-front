@@ -18,7 +18,7 @@ export async function baitoApplicantDash(container) {
   let applications = [];
   try {
     applications = await apiFetch("/baitos/applications");
-  } catch (err) {
+  } catch {
     wrapper.appendChild(createElement("p", { class: "error" }, ["❌ Failed to load applications."]));
     return;
   }
@@ -32,7 +32,7 @@ export async function baitoApplicantDash(container) {
   const filterRow = createElement("div", { class: "filter-row" });
   const statusFilter = createElement("select", { id: "status-filter" }, [
     createElement("option", { value: "" }, ["All Statuses"]),
-    ...["Submitted","Viewed","Shortlisted","Interview Scheduled","Rejected","Hired"].map(status =>
+    ...["Submitted", "Viewed", "Shortlisted", "Interview Scheduled", "Rejected", "Hired"].map(status =>
       createElement("option", { value: status }, [status])
     )
   ]);
@@ -46,6 +46,7 @@ export async function baitoApplicantDash(container) {
 
   function render(filteredApps) {
     list.replaceChildren();
+
     if (!filteredApps.length) {
       list.appendChild(createElement("p", { class: "empty" }, ["No applications match your filter."]));
       return;
@@ -66,17 +67,34 @@ export async function baitoApplicantDash(container) {
         card.appendChild(createElement("p", { class: "feedback" }, [`📩 Feedback: ${app.feedback}`]));
       }
 
-      const viewBtn = Button("🔎 View Listing", "", { click: () => navigate(`/baito/${app.jobId}`) }, "buttonx btn-secondary");
-      const withdrawBtn = Button("❌ Withdraw", "", { click: async () => {
-        if (!confirm("Are you sure you want to withdraw your application?")) return;
-        try {
-          await apiFetch(`/baitos/applications/${app._id}`, "DELETE");
-          Notify("Application withdrawn", { type: "success", duration: 3000, dismissible: true });
-          baitoApplicantDash(container);
-        } catch {
-          Notify("Failed to withdraw", { type: "error", duration: 3000, dismissible: true });
+      const viewBtn = Button("🔎 View Listing", "", {
+        click: () => navigate(`/baito/${app.jobId}`)
+      }, "buttonx btn-secondary");
+
+      const withdrawBtn = Button("❌ Withdraw", "", {
+        click: async () => {
+          const confirmModal = Modal({
+            title: "Confirm Withdrawal",
+            content: createElement("p", {}, [`Are you sure you want to withdraw your application for "${app.title}"?`]),
+            buttons: [
+              Button("Cancel", "", { click: close => close() }, "buttonx btn-secondary"),
+              Button("Yes, Withdraw", "", {
+                click: async close => {
+                  try {
+                    await apiFetch(`/baitos/applications/${app._id}`, "DELETE");
+                    Notify("Application withdrawn", { type: "success", duration: 3000 });
+                    close();
+                    baitoApplicantDash(container);
+                  } catch {
+                    Notify("Failed to withdraw", { type: "error", duration: 3000 });
+                    close();
+                  }
+                }
+              }, "buttonx btn-danger")
+            ]
+          });
         }
-      } }, "buttonx btn-danger");
+      }, "buttonx btn-danger");
 
       card.append(createElement("div", { class: "action-row" }, [viewBtn, withdrawBtn]));
       list.appendChild(card);
@@ -86,13 +104,13 @@ export async function baitoApplicantDash(container) {
   render(applications);
 
   // Filter events
-  statusFilter.addEventListener("change", () => applyFilters());
-  searchInput.addEventListener("input", () => applyFilters());
+  statusFilter.addEventListener("change", applyFilters);
+  searchInput.addEventListener("input", applyFilters);
 
   function applyFilters() {
     const status = statusFilter.value;
     const search = searchInput.value.toLowerCase();
-    const filtered = applications.filter(app => 
+    const filtered = applications.filter(app =>
       (status ? app.status === status : true) &&
       (search ? (app.title || "").toLowerCase().includes(search) : true)
     );
@@ -109,11 +127,16 @@ function buildAdminCard(job) {
     createElement("p", {}, [`📝 Applications: ${job.applicationsCount || 0}`])
   );
 
-  const viewBtn = Button("👥 View Applicants", "", { click: () => showApplicantsModal(job) }, "buttonx btn-secondary");
-  const copyLinkBtn = Button("🔗 Copy Job Link", "", { click: () => {
-    navigator.clipboard.writeText(`${window.location.origin}/baito/${job.baitoid}`);
-    Notify("Job link copied!", { type: "success", duration: 3000, dismissible: true });
-  } }, "buttonx btn-primary");
+  const viewBtn = Button("👥 View Applicants", "", {
+    click: () => showApplicantsModal(job)
+  }, "buttonx btn-secondary");
+
+  const copyLinkBtn = Button("🔗 Copy Job Link", "", {
+    click: () => {
+      navigator.clipboard.writeText(`${window.location.origin}/baito/${job.baitoid}`);
+      Notify("Job link copied!", { type: "success", duration: 3000 });
+    }
+  }, "buttonx btn-primary");
 
   card.append(createElement("div", { class: "action-row" }, [viewBtn, copyLinkBtn]));
   return card;
@@ -121,12 +144,14 @@ function buildAdminCard(job) {
 
 export async function baitoEmployerDash(container) {
   container.replaceChildren();
-
   container.appendChild(createElement("h2", {}, ["🏢 Your Posted Baitos"]));
 
   let jobs = [];
   try { jobs = await apiFetch("/baitos/mine"); }
-  catch { container.appendChild(createElement("p", { class: "error" }, ["❌ Failed to load your baito listings."])); return; }
+  catch {
+    container.appendChild(createElement("p", { class: "error" }, ["❌ Failed to load your baito listings."]));
+    return;
+  }
 
   if (!jobs.length) {
     container.appendChild(createElement("p", { class: "empty-state" }, ["You haven’t posted any baitos yet."]));
@@ -141,13 +166,15 @@ export async function baitoEmployerDash(container) {
 // ---------------- Modal to show applicants ----------------
 export async function showApplicantsModal(job) {
   let applicants = [];
-  try { applicants = await apiFetch(`/baitos/baito/${job.baitoid}/applicants`); }
-  catch { 
-    Notify("Failed to fetch applicants", { type: "error", duration: 3000, dismissible: true });
-    return; 
+  try {
+    applicants = await apiFetch(`/baitos/baito/${job.baitoid}/applicants`);
+  } catch {
+    Notify("Failed to fetch applicants", { type: "error", duration: 3000 });
+    return;
   }
 
   const content = createElement("div", { class: "applicant-list" });
+
   if (!applicants.length) {
     content.appendChild(createElement("p", {}, ["No applications yet."]));
   } else {
@@ -159,23 +186,29 @@ export async function showApplicantsModal(job) {
       ]);
 
       row.addEventListener("click", () => {
-        const detailModal = Modal({
+        Modal({
           title: `Applicant: ${app.username}`,
           content: createElement("div", {}, [
             createElement("p", {}, [`📩 ${app.pitch}`]),
             createElement("p", {}, [`📅 Applied: ${new Date(app.submittedAt).toLocaleString()}`])
           ]),
-          onClose: () => detailModal.remove()
+          buttons: [
+            Button("Close", "", { click: close => close() }, "buttonx btn-secondary")
+          ]
         });
-        document.body.appendChild(detailModal);
       });
 
       content.appendChild(row);
     });
   }
 
-  const modal = Modal({ title: `Applicants for "${job.title}"`, content, onClose: () => modal.remove() });
-  document.body.appendChild(modal);
+  Modal({
+    title: `Applicants for "${job.title}"`,
+    content,
+    buttons: [
+      Button("Close", "", { click: close => close() }, "buttonx btn-secondary")
+    ]
+  });
 }
 
 // ---------------- Main Dashboard Navigation ----------------

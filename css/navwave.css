@@ -1,13 +1,13 @@
 .primary-nav {
   z-index: 1;
   background: var(--color-bg);
-  position: fixed;
+  position: relative;
   bottom: 0;
   width: 100%;
 }
 
 /* Mobile (portrait + landscape): fixed at bottom */
-@media (max-width: 767px) {
+/* @media (max-width: 767px) {
   .primary-nav {
     position: relative;
     height: 48px;
@@ -15,7 +15,7 @@
     top: auto;
     border-top: 1px solid #ddd;
   }
-}
+} */
 
 
 .navigation {

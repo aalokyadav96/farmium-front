@@ -3,7 +3,9 @@ import { createElement } from "../../components/createElement.js";
 import Button from "../../components/base/Button.js";
 import { createFormGroup } from "../../components/createFormGroup.js";
 import { apiFetch } from "../../api/api.js";
-import { navigate } from "../../routes/index.js";
+// import { navigate } from "../../routes/index.js";
+// import Imagex from "../../components/base/Imagex.js";
+import { displayRecipe } from "./recipePage.js";
 
 export function createRecipe(container) {
   renderRecipeForm(container, "create", null);
@@ -191,43 +193,6 @@ function renderRecipeForm(container, mode = "create", recipe = null) {
     additionalProps: { rows: 3 },
   });
 
-  // --- Image Upload ---
-  const imageGroup = createFormGroup({
-    label: "Upload Images",
-    type: "file",
-    id: "imageUrls",
-    additionalProps: { accept: "image/*", multiple: true },
-  });
-
-  const previewContainer = createElement("div", {
-    style: "display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;",
-  });
-  imageGroup.appendChild(previewContainer);
-
-  // Show existing images if editing
-  if (recipe?.imageUrls?.length) {
-    recipe.imageUrls.forEach(url => {
-      const img = createElement("img", {
-        src: url,
-        style: "max-width:150px; max-height:150px; object-fit:cover; border-radius:6px;",
-      });
-      previewContainer.appendChild(img);
-    });
-  }
-
-  const imageInput = imageGroup.querySelector("input");
-  imageInput.addEventListener("change", e => {
-    previewContainer.replaceChildren();
-    Array.from(e.target.files).forEach(file => {
-      const img = createElement("img", {
-        src: URL.createObjectURL(file),
-        style: "max-width:150px; max-height:150px; object-fit:cover; border-radius:6px;",
-      });
-      img.addEventListener("load", () => URL.revokeObjectURL(img.src), { once: true });
-      previewContainer.appendChild(img);
-    });
-  });
-
   // --- Submit Button ---
   const submitBtn = Button(mode === "edit" ? "Update Recipe" : "Create Recipe", "", { type: "submit" });
 
@@ -235,7 +200,7 @@ function renderRecipeForm(container, mode = "create", recipe = null) {
     e.preventDefault();
     const formData = new FormData(form);
     const endpoint = mode === "edit"
-      ? `/recipes/recipe/${recipe?.recipeid || recipe?.id}`
+      ? `/recipes/recipe/${recipe?.recipeid}`
       : "/recipes";
     const method = mode === "edit" ? "PUT" : "POST";
 
@@ -244,10 +209,11 @@ function renderRecipeForm(container, mode = "create", recipe = null) {
       console.log("Recipe saved:", result);
       if (mode === "create") {
         form.reset();
-        previewContainer.replaceChildren();
+        // previewContainer.replaceChildren();
       }
       alert("Recipe saved successfully!");
-      navigate(`/recipe/${result.recipeid}`);
+      // navigate(`/recipe/${recipe?.recipeid}`);
+      displayRecipe(container, true, recipe?.recipeid);
     } catch (err) {
       console.error("Upload failed:", err);
       alert("Failed to save recipe.");
@@ -269,7 +235,7 @@ function renderRecipeForm(container, mode = "create", recipe = null) {
     stepsGroup,
     videoGroup,
     notesGroup,
-    imageGroup,
+    // imageGroup,
     submitBtn
   );
 

@@ -90,11 +90,17 @@ const enableDragDrop = (ul, toggle) => {
 /** Create navigation bar */
 const createNav = () => {
     const defaultNavItems = [
+        // { href: "/dash", label: "Dash" },
+        // { href: "/farms", label: "Farms" },
+        // { href: "/crops", label: "Crops" },
+        // { href: "/tools", label: "Tools" },
+        // { href: "/products", label: "Products" },
+        // { href: "/recipes", label: "Recipes" },
+        { href: "/baitos", label: "Baito" },
         { href: "/grocery", label: "Grocery" },
+        { href: "/baitos/hire", label: "Hire" },
         { href: "/places", label: "Places" },
         { href: "/events", label: "Events" },
-        { href: "/baitos", label: "Baito" },
-        { href: "/baitos/hire", label: "Hire" },
         { href: "/social", label: "Social" },
         { href: "/posts", label: "Posts" },
         { href: "/itinerary", label: "Itinerary" },

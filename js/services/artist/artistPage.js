@@ -1,5 +1,4 @@
 import {
-  renderPostsTab,
   renderMerchTab,
   renderEventsTab
 } from "./artistTabs.js";
@@ -16,6 +15,8 @@ import { persistTabs } from "../../utils/persistTabs.js";
 import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
 import { updateImageWithCrop } from "../../utils/bannerEditor.js";
 import Imagex from "../../components/base/Imagex.js";
+import { renderPostsTab } from "./moretabs.js";
+import { renderLiveTab } from "./moretabs.js";
 
 // --- CREATOR-ONLY BANNER SECTION ---
 function createArtistBannerSection(artist, isCreator) {
@@ -129,10 +130,11 @@ export async function displayArtist(content, artistID, isLoggedIn) {
 
     // --- TABS ---
     const tabs = [
-      { title: "Overview", id: "overview", render: (c) => renderOverviewTab(c, artist, isCreator, isLoggedIn) },
-      { title: "Events", id: "events", render: (c) => renderEventsTab(c, artistID, isCreator) },
-      { title: "Posts", id: "posts", render: (c) => renderPostsTab(c, artistID, isLoggedIn) },
-      { title: "Merch", id: "merch", render: (c) => renderMerchTab(c, artistID, isCreator, isLoggedIn) }
+      { title: "Overview", id: "artist-overview", render: (c) => renderOverviewTab(c, artist, isCreator, isLoggedIn) },
+      { title: "Events", id: "artist-events", render: (c) => renderEventsTab(c, artistID, isCreator) },
+      { title: "Posts", id: "artist-posts", render: (c) => renderPostsTab(c, artistID, isLoggedIn) },
+      { title: "Live", id: "artist-live", render: (c) => renderLiveTab(c, artistID, isLoggedIn, isCreator) },
+      { title: "Merch", id: "artist-merch", render: (c) => renderMerchTab(c, artistID, isCreator, isLoggedIn) }
     ];
 
     const songCategories = ["singer", "band", "musician", "rapper", "composer"];
@@ -207,7 +209,7 @@ function renderOverviewTab(container, artist, isCreator, isLoggedIn) {
   if (artist.members?.length > 0) {
     const memberItems = artist.members.map(member => {
       const photoSrc = resolveImagePath(EntityType.ARTIST, PictureType.THUMB, member.image);
-      const img = createElement("img", { src: photoSrc, alt: member.name, class: "member-photo" });
+      const img = Imagex({ src: photoSrc, alt: member.name, classes: "member-photo" });
 
       const text = createElement("div", { class: "member-text" }, [
         createElement("span", {}, [

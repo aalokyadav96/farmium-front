@@ -2,7 +2,6 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-lg);
-  padding: var(--container-padding);
   max-width: var(--max-width);
   margin: 0 auto;
   background-color: var(--color-bg);
@@ -48,6 +47,10 @@
   flex-wrap: wrap;
   gap: var(--space-sm);
   margin-top: var(--space-sm);
+}
+
+.recipes-controls input {
+  padding: 0.4rem;
 }
 
 .recipes-search {

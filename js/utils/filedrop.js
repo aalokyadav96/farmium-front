@@ -1,13 +1,26 @@
 import { apiFetch } from "../api/api";
 import { createElement } from "../components/createElement";
-import { CDN_URL } from "../state/state";
-// import { EntityType, PictureType } from "../../utils/imagePaths.js";
-import Notify from "../../components/ui/Notify.mjs";
+import { FILEDROP_URL } from "../state/state";
+import Notify from "../components/ui/Notify.mjs";
 
 const CHUNK_SIZE = 256 * 1024; // 256KB
+const ALLOWED_TYPES = ["image/jpeg", "image/png"];
+
+// Validate file MIME type by reading first 512 bytes (like backend)
+async function validateFile(file) {
+    const blob = file.slice(0, 512);
+    const buffer = await blob.arrayBuffer();
+    const arr = new Uint8Array(buffer);
+    const header = String.fromCharCode.apply(null, arr);
+    const mime = new Blob([header]).type || file.type;
+
+    if (!ALLOWED_TYPES.includes(mime)) {
+        throw new Error(`Unsupported file type: ${file.type}`);
+    }
+}
 
 export async function uploadChunk(formData, signal) {
-    const res = await fetch(`${CDN_URL}/uploads/chunk`, {
+    const res = await fetch(`${FILEDROP_URL}/uploads/chunk`, {
         method: "POST",
         body: formData,
         signal
@@ -27,6 +40,8 @@ export async function uploadFileInChunks({
     onProgress = () => {},
     maxRetries = 3
 }) {
+    await validateFile(file); // frontend MIME check
+
     const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
     let uploadedBytes = 0;
 
@@ -68,28 +83,7 @@ export async function uploadFileInChunks({
     return { fileName: file.name, status: "uploaded" };
 }
 
-async function fileAlreadyExists({ entityType, pictureType, entityId, fileName }) {
-    try {
-        const res = await fetch(
-            `${CDN_URL}/uploads/exists?entityType=${entityType}&pictureType=${pictureType}&entityId=${entityId}&fileName=${encodeURIComponent(fileName)}`,
-            { method: 'HEAD' }
-        );
-        return res.ok;
-    } catch {
-        return false;
-    }
-}
-
-// async function fileAlreadyExists({ entityType, pictureType, entityId, fileName }) {
-//     try {
-//         const res = await apiFetch(`/uploads/exists?entityType=${entityType}&pictureType=${pictureType}&entityId=${entityId}&fileName=${encodeURIComponent(fileName)}`, 'HEAD');
-//         return res?.ok;
-//     } catch {
-//         return false;
-//     }
-// }
-
-export function uploadImagesWithQueue({
+export async function uploadImagesWithQueue({
     files,
     entityType,
     pictureType,
@@ -100,17 +94,14 @@ export function uploadImagesWithQueue({
     onError = () => {},
     concurrency = 3
 }) {
-    const allowedTypes = ["image/jpeg", "image/png"];
-    const queue = files.filter(file => allowedTypes.includes(file.type));
+    const queue = files.filter(file => ALLOWED_TYPES.includes(file.type));
     const uploaded = [];
     const failed = [];
     const controllers = [];
 
     if (queue.length < files.length) {
-        Notify("Only .jpg and .png files are allowed.", {type:"success",duration:3000, dismissible:true});
+        Notify("Only .jpg and .png files are allowed.", {type:"warning",duration:3000, dismissible:true});
     }
-
-    const slots = Array.from({ length: concurrency }, (_, i) => startNext(i));
 
     function createProgressBar(fileName) {
         const label = createElement("div", {}, [`Uploading ${fileName}`]);
@@ -121,42 +112,54 @@ export function uploadImagesWithQueue({
     }
 
     async function startNext(slotId) {
-        if (!queue.length) return;
+        while (queue.length) {
+            const file = queue.shift();
+            const controller = new AbortController();
+            controllers.push(controller);
 
-        const file = queue.shift();
-        const controller = new AbortController();
-        controllers.push(controller);
+            const bar = createProgressBar(file.name);
 
-        const bar = createProgressBar(file.name);
-
-        try {
-            const result = await uploadFileInChunks({
-                file,
-                entityType,
-                pictureType,
-                entityId,
-                token,
-                signal: controller.signal,
-                onProgress: percent => bar.value = percent
-            });
-            uploaded.push(result);
-        } catch (err) {
-            failed.push({ file, error: err.message });
-            bar.value = 0;
-            bar.classList.add("error");
-            Notify(`Upload failed: ${file.name}`, {type:"success",duration:3000, dismissible:true});
+            try {
+                const result = await uploadFileInChunks({
+                    file,
+                    entityType,
+                    pictureType,
+                    entityId,
+                    token,
+                    signal: controller.signal,
+                    onProgress: percent => bar.value = percent
+                });
+                uploaded.push(result);
+            } catch (err) {
+                failed.push({ file, error: err.message });
+                bar.value = 0;
+                bar.classList.add("error");
+                Notify(`Upload failed: ${file.name}`, {type:"error",duration:3000, dismissible:true});
+            }
         }
-
-        await startNext(slotId);
     }
 
-    Promise.all(slots).then(() => {
-        if (uploaded.length) onComplete(uploaded);
-        if (failed.length) onError(failed);
-    });
+    // Run slots concurrently
+    const slots = Array.from({ length: concurrency }, (_, i) => startNext(i));
+    await Promise.all(slots);
+
+    if (uploaded.length) onComplete(uploaded);
+    if (failed.length) onError(failed);
 
     return {
         cancelAll: () => controllers.forEach(ctrl => ctrl.abort())
     };
 }
 
+
+async function fileAlreadyExists({ entityType, pictureType, entityId, fileName }) {
+    try {
+        const res = await fetch(
+            `${FILEDROP_URL}/uploads/exists?entityType=${entityType}&pictureType=${pictureType}&entityId=${entityId}&fileName=${encodeURIComponent(fileName)}`,
+            { method: 'HEAD' }
+        );
+        return res.ok;
+    } catch {
+        return false;
+    }
+}

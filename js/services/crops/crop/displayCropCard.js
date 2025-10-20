@@ -1,14 +1,15 @@
+import Imagex from "../../../components/base/Imagex.js";
 import { createElement } from "../../../components/createElement.js";
 import { resolveImagePath, EntityType, PictureType } from "../../../utils/imagePaths.js";
 
 export function displayCropCard(crop) {
     const card = createElement("div", { class: "crop-card" });
 
-    if (crop.imageUrl) {
-        const cropImg = createElement("img", {
-          src: resolveImagePath(EntityType.CROP, PictureType.BANNER, crop.imageUrl),
+    if (crop.banner) {
+        const cropImg = Imagex( {
+          src: resolveImagePath(EntityType.CROP, PictureType.BANNER, crop.banner),
           alt: crop.name,
-          class: "crop-card-image"
+          classes: "crop-card-image"
         });
         card.appendChild(cropImg);
       }

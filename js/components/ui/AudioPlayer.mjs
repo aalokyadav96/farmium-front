@@ -1,4 +1,5 @@
 import "../../../css/ui/AudioPlayer.css";
+import Imagex from "../base/Imagex";
 
 function AudioPlayer(audioSrc) {
   const player = document.createElement("div");
@@ -8,8 +9,7 @@ function AudioPlayer(audioSrc) {
   player.setAttribute("aria-label", "Audio Player");
 
   // === POSTER IMAGE ===
-  const img = document.createElement("img");
-  img.src = audioSrc.poster || "";
+  const img = Imagex({ src: audioSrc.poster || "" });
   img.alt = "Audio Thumbnail";
   img.className = "audio-poster";
 

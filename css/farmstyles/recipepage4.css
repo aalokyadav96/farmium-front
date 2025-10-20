@@ -12,6 +12,13 @@
   margin-bottom: 0.5rem;
 }
 
+.recipe-banner {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 7/3;
+  object-fit: cover;
+}
+
 .author-info {
   font-size: 0.9rem;
   margin-bottom: 1rem;
@@ -23,7 +30,7 @@
 }
 
 /* Image gallery */
-
+/* 
 .recipepage .image-gallery {
   aspect-ratio: 2/1;
   position: relative;
@@ -31,7 +38,7 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 20px;
-  background-color: var(--color-accent);
+  background-color: black;
 }
 .recipepage .image-gallery img {
   max-width: 100%;
@@ -48,7 +55,7 @@
   border-radius: 4px;
 }
 .recipepage #prev-img { left: 10px; }
-.recipepage #next-img { right: 10px; }
+.recipepage #next-img { right: 10px; } */
 
 /* Recipe info box */
 .recipe-info-box {

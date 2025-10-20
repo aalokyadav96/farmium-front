@@ -4,6 +4,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 24px;
+    margin-top: 1rem;
   }
   
   /* Main content */
@@ -20,8 +21,6 @@
   }
   
   .catalogue-aside h3 {
-    font-size: 18px;
-    margin-top: 24px;
     margin-bottom: 12px;
     border-bottom: 1px solid #ddd;
     padding-bottom: 6px;
@@ -37,10 +36,12 @@
   
   .search-box, .sort-box {
     padding: 10px 14px;
-    border: 1px solid #ccc;
+    border: 1px solid var(--color-fg);
     border-radius: 8px;
     font-size: 14px;
-    flex: 1;
+    background: var(--color-bg);
+    background-blend-mode: color-dodge;
+    color: var(--color-fg);
     transition: border-color 0.2s ease;
   }
   
@@ -120,7 +121,7 @@
   }
   
   /* View Farms button */
-  .crop-card button {
+  /* .crop-card button {
     background-color: #0078d4;
     color: white;
     border: none;
@@ -133,7 +134,7 @@
   
   .crop-card button:hover {
     background-color: #005a9e;
-  }
+  } */
   
   /* Aside buttons */
   .cta-list {

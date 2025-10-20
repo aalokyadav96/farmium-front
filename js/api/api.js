@@ -1,4 +1,4 @@
-import {  API_URL, APIG_URL, APIP_URL, SRC_URL, setState, getState } from "../state/state.js";
+import { API_URL, SRC_URL, setState, getState, CHAT_URL, BANNERDROP_URL, LIVE_URL } from "../state/state.js";
 import { logout } from "../services/auth/authService.js";
 import Notify from "../components/ui/Notify.mjs";
 
@@ -34,30 +34,27 @@ let refreshInProgress = null;
 async function refreshToken() {
     if (refreshInProgress) return refreshInProgress;
 
-    const storedRefreshToken = getState("refreshToken") || localStorage.getItem("refreshToken");
-    if (!storedRefreshToken) {
-        logout(true);
-        return false;
-    }
-
     refreshInProgress = (async () => {
         try {
+            // Call refresh endpoint; refresh token is in HttpOnly cookie so no body required.
             const response = await fetch(`${API_URL}/auth/refresh`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ refreshToken: storedRefreshToken }),
+                credentials: "include", // ensure cookie is sent
+                headers: {
+                    "Content-Type": "application/json"
+                },
             });
 
-            const data = await response.json();
+            const data = await response.json().catch(() => null);
 
             if (response.ok && data?.data?.token) {
-                const parsed = parseJwt(data.data.token);
+                const newToken = data.data.token;
+                const parsed = parseJwt(newToken);
                 setState(
                     {
-                        token: data.data.token,
-                        refreshToken: data.data.refreshToken,
+                        token: newToken,
                         role: parsed?.role || [],
-                        userId: parsed?.userId || null,
+                        userId: parsed?.userId || parsed?.userID || null,
                         username: parsed?.username || null,
                     },
                     true
@@ -65,12 +62,12 @@ async function refreshToken() {
                 return true;
             } else {
                 Notify("Session expired. Please log in again.", {type:"success",duration:3000, dismissible:true});
-                logout(true);
+                logout();
                 return false;
             }
         } catch (err) {
             Notify("Error refreshing token.", {type:"success",duration:3000, dismissible:true});
-            logout(true);
+            logout();
             return false;
         } finally {
             refreshInProgress = null;
@@ -103,6 +100,7 @@ async function apixFetch(endpoint, method = "GET", body = null, options = {}, is
             ...(getState("token") && { Authorization: `Bearer ${getState("token")}` }),
         },
         signal: options.signal,
+        credentials: options.credentials ?? "include", // send cookies by default; override with options.credentials
     };
 
     if (body) {
@@ -141,9 +139,8 @@ async function apixFetch(endpoint, method = "GET", body = null, options = {}, is
             return;
         }
 
-// // uncomment when fixed RBAC
-
-        // if (response.status === 401 && !isRetry && getState("refreshToken")) {
+        // optional retry on 401: commented out, kept for reference
+        // if (response.status === 401 && !isRetry) {
         //     const refreshed = await refreshToken();
         //     if (refreshed) {
         //         return apixFetch(endpoint, method, body, options, true);
@@ -157,8 +154,11 @@ async function apixFetch(endpoint, method = "GET", body = null, options = {}, is
             throw new Error(errorText || `HTTP ${response.status}`);
         }
 
-        if (options.responseType === "blob") return response;
+        if (options.responseType === "blob") return await response.blob();
         if (options.responseType === "arrayBuffer") return await response.arrayBuffer();
+        
+        // if (options.responseType === "blob") return response;
+        // if (options.responseType === "arrayBuffer") return await response.arrayBuffer();
 
         const text = await response.text();
         let result = null;
@@ -176,7 +176,7 @@ async function apixFetch(endpoint, method = "GET", body = null, options = {}, is
     } catch (error) {
         if (error.name === "AbortError") return;
         console.error(`Error fetching ${endpoint}:`, error);
-        Notify(error.message || "Network error", {type:"success",duration:3000, dismissible:true});
+        Notify(error.message || "Network error", {type:"error",duration:3000, dismissible:true});
         throw error;
     }
 }
@@ -188,19 +188,27 @@ async function apiFetch(endpoint, method = "GET", body = null, options = {}) {
     return apixFetch(fullUrl, method, body, { ...options, signal });
 }
 
-export async function apigFetch(endpoint, method = "GET", body = null, options = {}) {
+async function liveFetch(endpoint, method = "GET", body = null, options = {}) {
     const controller = options.controller || new AbortController();
     const signal = controller.signal;
-    const fullUrl = `${APIG_URL}${endpoint}`;
+    const fullUrl = `${LIVE_URL}${endpoint}`;
     return apixFetch(fullUrl, method, body, { ...options, signal });
 }
 
-export async function apipFetch(endpoint, method = "GET", body = null, options = {}) {
+async function bannerFetch(endpoint, method = "GET", body = null, options = {}) {
     const controller = options.controller || new AbortController();
     const signal = controller.signal;
-    const fullUrl = `${APIP_URL}${endpoint}`;
+    const fullUrl = `${BANNERDROP_URL}${endpoint}`;
     return apixFetch(fullUrl, method, body, { ...options, signal });
 }
+
+export async function chatFetch(endpoint, method = "GET", body = null, options = {}) {
+    const controller = options.controller || new AbortController();
+    const signal = controller.signal;
+    const fullUrl = `${CHAT_URL}${endpoint}`;
+    return apixFetch(fullUrl, method, body, { ...options, signal });
+}
+
 
 function clearApiCache() {
     apiCache.clear();
@@ -265,5 +273,4 @@ setInterval(() => {
     persistCacheToSession();
 }, 60 * 1000); // Every 1 minute
 
-export { apiFetch, apixFetch, API_URL, SRC_URL, clearApiCache };
-
+export { apiFetch, apixFetch, bannerFetch, liveFetch, API_URL, SRC_URL, clearApiCache };

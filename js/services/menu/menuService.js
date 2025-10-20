@@ -1,6 +1,6 @@
 import { apiFetch } from "../../api/api.js";
 import MenuCard from '../../components/ui/MenuCard.mjs';
-import { Button } from "../../components/base/Button.js";
+import Button from "../../components/base/Button.js";
 import { createElement } from "../../components/createElement.js";
 import Modal from "../../components/ui/Modal.mjs";
 import { handlePurchase } from "../payment/pay.js";
@@ -8,30 +8,121 @@ import { EntityType, PictureType, resolveImagePath } from "../../utils/imagePath
 import Notify from "../../components/ui/Notify.mjs";
 import { createFormGroup } from "../../components/createFormGroup.js";
 
+import { uploadFile } from "../media/api/mediaApi.js";
+import { uid } from "../media/ui/mediaUploadForm.js";
+// import { createMenuCard } from "./menuCard.js"; // adjust import path if needed
+
 /**
  * Add a menu item
  */
 async function addMenu(form, placeId, menuList) {
-    const formData = new FormData(form);
+    const name = form.querySelector("#menu-name").value.trim();
+    const price = parseFloat(form.querySelector("#menu-price").value);
+    const stock = parseInt(form.querySelector("#menu-stock").value, 10);
+    const imageFile = form.querySelector("#menu-image").files[0];
 
-    if (!form.checkValidity()) {
-        form.reportValidity();
+    if (!name || isNaN(price) || isNaN(stock)) {
+        Notify("Please fill in all fields correctly.", { type: "error" });
+        return;
+    }
+
+    if (imageFile && !imageFile.type.startsWith("image/")) {
+        Notify("Please upload a valid image file.", { type: "error" });
         return;
     }
 
     try {
-        const response = await apiFetch(`/places/menu/${placeId}`, 'POST', formData);
+        let uploadedImage = null;
+
+        // --- Upload image first ---
+        if (imageFile) {
+            const uploadObj = {
+                id: uid(),
+                file: imageFile,
+                previewURL: URL.createObjectURL(imageFile),
+                progress: 0,
+                uploading: true,
+                mediaEntity: "menu",
+            };
+
+            Notify("Uploading image...", { type: "info", duration: 2000 });
+            uploadedImage = await uploadFile(uploadObj);
+            if (!uploadedImage?.filename && !uploadedImage?.file) {
+                throw new Error("Image upload failed.");
+            }
+        }
+
+        // --- Send menu data ---
+        const payload = {
+            name,
+            price,
+            stock,
+            menu_pic: uploadedImage?.filename || uploadedImage?.file || "",
+        };
+
+        const response = await apiFetch(`/places/menu/${placeId}`, "POST", payload);
+
         if (response?.data?.menuid) {
             Notify("Menu added successfully!", { type: "success", duration: 3000, dismissible: true });
+
             const menuCard = createMenuCard(response.data, true, true, placeId);
             menuList.prepend(menuCard);
             form.reset();
         } else {
-            Notify(`Failed to add Menu: ${response?.message || 'Unknown error'}`, { type: "error" });
+            throw new Error(response?.message || "Unknown server error");
         }
+
     } catch (error) {
+        console.error("Error adding Menu:", error);
         Notify(`Error adding Menu: ${error.message}`, { type: "error" });
     }
+}
+
+/**
+ * Add Menu Form modal
+ */
+function addMenuForm(placeId, menuList) {
+    const form = createElement("form", { id: "add-menu-form", class: "create-section" });
+
+    const fields = [
+        { label: "Menu Name", type: "text", id: "menu-name", name: "name", placeholder: "Menu Name", required: true },
+        { label: "Price", type: "number", id: "menu-price", name: "price", placeholder: "Price", required: true, additionalProps: { min: 0, step: "0.01" } },
+        { label: "Stock Available", type: "number", id: "menu-stock", name: "stock", placeholder: "Stock Available", required: true, additionalProps: { min: 0 } },
+        { label: "Menu Image", type: "file", id: "menu-image", name: "image", additionalProps: { accept: "image/*" } }
+    ];
+
+    fields.forEach(f => form.appendChild(createFormGroup(f)));
+
+    const addButton = Button("Add Menu", "", {}, "buttonx");
+    addButton.type = "submit";
+    const cancelButton = Button("Cancel", "", {}, "buttonx");
+    cancelButton.type = "button";
+    form.append(addButton, cancelButton);
+
+    const modal = Modal({
+        title: "Add Menu",
+        content: form,
+    });
+
+    cancelButton.addEventListener("click", () => modal.close());
+
+    form.addEventListener("submit", async e => {
+        e.preventDefault();
+
+        const price = parseFloat(form.querySelector("#menu-price").value);
+        if (isNaN(price) || price < 0) {
+            Notify("Invalid price value. Must be a non-negative number.", { type: "error" });
+            return;
+        }
+
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        await addMenu(form, placeId, menuList);
+        modal.close();
+    });
 }
 
 /**
@@ -69,58 +160,6 @@ function createMenuCard(menu, isCreator, isLoggedIn, placeId) {
         onBuy: () => promptMenuNote(menu, placeId),
         onEdit: () => editMenuForm(menu.menuid, placeId),
         onDelete: () => deleteMenu(menu.menuid, placeId)
-    });
-}
-
-/**
- * Add Menu Form modal
- */
-function addMenuForm(placeId, menuList) {
-    const form = createElement('form', { id: 'add-menu-form', class: 'create-section' });
-
-    const fields = [
-        { label: "Menu Name", type: "text", id: "menu-name", name: "name", placeholder: "Menu Name", required: true },
-        { label: "Price", type: "number", id: "menu-price", name: "price", placeholder: "Price", required: true, additionalProps: { min: 0, step: "0.01" } },
-        { label: "Stock Available", type: "number", id: "menu-stock", name: "stock", placeholder: "Stock Available", required: true, additionalProps: { min: 0 } },
-        { label: "Menu Image", type: "file", id: "menu-image", name: "image", additionalProps: { accept: "image/*" } }
-    ];
-
-    fields.forEach(f => form.appendChild(createFormGroup(f)));
-
-    // Defensive: ensure name attributes
-    Object.entries({ "menu-name": "name", "menu-price": "price", "menu-stock": "stock", "menu-image": "image" })
-        .forEach(([id, name]) => { const el = form.querySelector(`#${id}`); if (el) el.name = name; });
-
-    const addButton = Button("Add Menu", "", {}, "buttonx");
-    addButton.type = 'submit';
-    const cancelButton = Button("Cancel", "", {}, "buttonx");
-    cancelButton.type = 'button';
-    form.append(addButton, cancelButton);
-
-    const modal = Modal({
-        title: "Add Menu",
-        content: form,
-        onClose: () => modal.close()
-    });
-
-    cancelButton.addEventListener("click", () => modal.close());
-
-    form.addEventListener("submit", async e => {
-        e.preventDefault();
-
-        const price = parseFloat(form.querySelector("#menu-price").value);
-        if (isNaN(price) || price < 0) {
-            Notify("Invalid price value. Must be a non-negative number.", { type: "error" });
-            return;
-        }
-
-        if (!form.checkValidity()) {
-            form.reportValidity();
-            return;
-        }
-
-        await addMenu(form, placeId, menuList);
-        modal.close();
     });
 }
 

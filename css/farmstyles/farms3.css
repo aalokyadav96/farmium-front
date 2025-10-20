@@ -49,7 +49,7 @@
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: var(--space-md);
+  padding: var(--space-sm);
   box-shadow: var(--shadow-elev-1);
   transition: box-shadow var(--transition-fast);
 }
@@ -171,3 +171,8 @@
   font-size: var(--font-size-sm);
   color: var(--color-muted);
 }
+
+/* .farm__Cta {
+  display: flex;
+  flex-direction: column;
+} */

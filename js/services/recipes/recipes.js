@@ -4,7 +4,8 @@ import Imagex from "../../components/base/Imagex.js";
 import { navigate } from "../../routes/index.js";
 import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
 import { displayListingPage } from "../../utils/displayListingPage.js";
-import { apigFetch } from "../../api/api.js";
+import { apiFetch } from "../../api/api.js";
+import { createRecipe } from "./createOrEditRecipe.js";
 
 export async function displayRecipes(container, isLoggedIn) {
   container.replaceChildren();
@@ -12,7 +13,7 @@ export async function displayRecipes(container, isLoggedIn) {
   // Fetch tags for filter controls
   let allTags = [];
   try {
-    const tagsResp = await apigFetch("/recipes/tags");
+    const tagsResp = await apiFetch("/recipes/tags");
     allTags = Array.isArray(tagsResp) ? tagsResp : tagsResp.tags || [];
   } catch (err) {
     console.error("Failed to load tags", err);
@@ -28,18 +29,18 @@ export async function displayRecipes(container, isLoggedIn) {
       aside.appendChild(createElement("h3", {}, ["Actions"]));
 
       if (isLoggedIn) {
-        aside.appendChild(Button("Create New Recipe", "create-recipe-btn", { click: () => navigate("/create-recipe") }, "buttonx primary"));
+        aside.appendChild(Button("Create New Recipe", "create-recipe-btn", { click: () => createRecipe(container) }, "buttonx primary"));
       }
 
-      if (allTags.length) {
-        aside.appendChild(createElement("h4", {}, ["Filter by Tags"]));
-        allTags.forEach(tag => {
-          const chip = Button(tag, `tag-${tag}`, {
-            click: () => toggleTagFilter(tag)
-          }, "buttonx tag-chip");
-          aside.appendChild(chip);
-        });
-      }
+      // if (allTags.length) {
+      //   aside.appendChild(createElement("h4", {}, ["Filter by Tags"]));
+      //   allTags.forEach(tag => {
+      //     const chip = Button(tag, `tag-${tag}`, {
+      //       click: () => toggleTagFilter(tag)
+      //     }, "buttonx tag-chip");
+      //     aside.appendChild(chip);
+      //   });
+      // }
     }
   });
 
@@ -65,7 +66,8 @@ export async function displayRecipes(container, isLoggedIn) {
 
 // Card builder
 function createRecipeCard(recipe, isLoggedIn) {
-  const imageUrl = resolveImagePath(EntityType.RECIPE, PictureType.THUMB, recipe.imageUrls?.[0]);
+  // const imageUrl = resolveImagePath(EntityType.RECIPE, PictureType.THUMB, recipe.imageUrls?.[0]);
+  const imageUrl = resolveImagePath(EntityType.RECIPE, PictureType.THUMB, recipe.banner);
   return createElement("div", { class: "recipe-card" }, [
     Imagex({ src: imageUrl, alt: recipe.title, classes: "thumbnail" }),
     createElement("h3", {}, [recipe.title]),

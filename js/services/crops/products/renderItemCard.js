@@ -2,8 +2,10 @@ import Button from "../../../components/base/Button";
 import Imagex from "../../../components/base/Imagex.js";
 import { createElement } from "../../../components/createElement";
 import Carousel from "../../../components/ui/Carousel.mjs";
+import { ImageGallery } from "../../../components/ui/IMageGallery.mjs";
 import { navigate } from "../../../routes";
 import { resolveImagePath, EntityType, PictureType } from "../../../utils/imagePaths.js";
+import {renderItemForm} from "./createOrEdit.js";
 
 export function renderItemCard(item, type, isLoggedIn, container, refresh) {
   let quantity = 1;
@@ -47,21 +49,32 @@ export function renderItemCard(item, type, isLoggedIn, container, refresh) {
   };
 
 
-  const imageGallery = item.imageUrls?.length
-  ? createElement(
-      "div",
-      { class: "image-gallery" },
-      [
-        Imagex( {
-          src: resolveImagePath(EntityType.PRODUCT, PictureType.THUMB, item.imageUrls[0]),
-          alt: item.name,
-          classes: "thumbnail"
-        })]):"";
+  // --- Image Gallery Section ---
+  const gallerySection = createElement("div", { class: "gallery-section" });
+  const cleanImageNames = (item.imageUrls || []).filter(Boolean);
+  if (cleanImageNames.length) {
+    const fullURLs = cleanImageNames.map(name =>
+      resolveImagePath(EntityType.PRODUCT, PictureType.THUMB, name)
+    );
+    console.log(fullURLs);
+    gallerySection.appendChild(ImageGallery(fullURLs));
+  }
+
+  // const imageGallery = item.imageUrls?.length
+  // ? createElement(
+  //     "div",
+  //     { class: "image-gallery" },
+  //     [
+  //       Imagex( {
+  //         src: resolveImagePath(EntityType.PRODUCT, PictureType.THUMB, item.imageUrls[0]),
+  //         alt: item.name,
+  //         classes: "thumbnail"
+  //       })]):"";
 
 
 
   const card = createElement("div", { class: `${type}-card` }, [
-    imageGallery,
+    gallerySection,
     createElement("h3", {}, [item.name]),
     createElement("p", {}, [`₹${item.price.toFixed(2)}`]),
     createElement("p", {}, [item.description]),

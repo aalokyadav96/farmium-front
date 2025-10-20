@@ -1,5 +1,5 @@
 import { createElement } from "../../../components/createElement.js";
-import { SRC_URL, apiFetch, apigFetch } from "../../../api/api.js";
+import { SRC_URL, apiFetch, apiFetch } from "../../../api/api.js";
 import { getState } from "../../../state/state.js";
 import { navigate } from "../../../routes/index.js";
 import { createOrEditBaito } from "../create/createOrEditBaito.js";
@@ -10,8 +10,11 @@ import { displayReviews } from "../../reviews/displayReviews.js";
 import Notify from "../../../components/ui/Notify.mjs";
 import { meChat } from "../../mechat/plugnplay.js";
 import { resolveImagePath, EntityType, PictureType } from "../../../utils/imagePaths.js";
-import { updateImageWithCrop } from "../../../utils/bannerEditor.js";
-import Sightbox from "../../../components/ui/SightBox.mjs";
+// import { updateImageWithCrop } from "../../../utils/bannerEditor.js";
+// import Sightbox from "../../../components/ui/SightBox.mjs";
+import Imagex from "../../../components/base/Imagex.js";
+import Bannerx from "../../../components/base/Bannerx.js";
+import { baitoAddImages } from "../create/AddBaitoImages.js";
 
 /** Open chat with employer */
 function startChatWithEmployer(userId, baitoId) {
@@ -53,7 +56,7 @@ function editBaito(baito, isLoggedIn, container) {
 function renderOwnerControls(baito, container, isLoggedIn) {
   return createElement("div", { class: "baito-owner-controls" }, [
     Button("✏️ Edit Job", "baito-edit-btn", { click: () => editBaito(baito, isLoggedIn, container) }, "buttonx btn-secondary"),
-    Button("📨 View Applicants", "view-applicants-btn", { click: () => showApplicantsModal(baito) }, "buttonx btn-secondary"),
+    Button(`📨 View Applicants (${baito.applicationcount || 0})`, "view-applicants-btn", { click: () => showApplicantsModal(baito) }, "buttonx btn-secondary"),
     Button("🗑 Delete Job", "delete-baito-btn", {
       click: async () => {
         if (!confirm("Delete this job permanently?")) return;
@@ -72,9 +75,11 @@ function renderOwnerControls(baito, container, isLoggedIn) {
 
 /** Applicant controls */
 function renderApplicantControls(baito, baitoid, isOwner, container, isLoggedIn) {
+  const expired = baito.lastdate && new Date(baito.lastdate) < new Date();
   return createElement("div", { class: "baito-user-controls" }, [
-    Button("📩 Apply / Contact", "apply-btn", {
+    Button(expired ? "⏳ Job Expired" : "📩 Apply / Contact", "apply-btn", {
       click: async (e) => {
+        if (expired) return Notify("This job is no longer accepting applications.", { type: "warning", duration: 3000, dismissible: true });
         if (!isLoggedIn) return Notify("Please log in to apply for this job.", { type: "warning", duration: 3000, dismissible: true });
         const pitch = prompt("Write a short message to the employer:");
         if (!pitch?.trim()) return Notify("Application cancelled.", { type: "success", duration: 3000, dismissible: true });
@@ -95,7 +100,7 @@ function renderApplicantControls(baito, baitoid, isOwner, container, isLoggedIn)
           btn.textContent = "📩 Apply / Contact";
         }
       }
-    }, "buttonx btn-primary"),
+    }, `buttonx btn-primary${expired ? " disabled" : ""}`),
 
     Button("⭐ Save Job", "save-job-btn", {
       click: () => {
@@ -130,7 +135,8 @@ function renderApplicantControls(baito, baitoid, isOwner, container, isLoggedIn)
 /** Fetch related jobs */
 async function fetchSimilarJobs(category, excludeId) {
   try {
-    return await apigFetch(`/baitos/related?category=${category}&exclude=${excludeId}`) || [];
+    const jobs = await apiFetch(`/baitos/related?category=${category}&exclude=${excludeId}`) || [];
+    return jobs.filter(j => j.baitoid !== excludeId); // ensure exclude works
   } catch {
     console.warn("Failed to load similar jobs");
     return [];
@@ -138,9 +144,14 @@ async function fetchSimilarJobs(category, excludeId) {
 }
 
 /** Employer info */
-function createEmployerSection(employer) {
-  if (!employer) return null;
-  const avatar = employer.avatar ? createElement("img", { src: employer.avatar, alt: "Employer", class: "employer-avatar" }) : null;
+function createEmployerSection(employer, baito) {
+  if (!employer) {
+    // fallback: show ownerId
+    return createElement("div", { class: "baito-employer" }, [
+      createElement("span", {}, [`Employer ID: ${baito.ownerId}`])
+    ]);
+  }
+  const avatar = employer.avatar ? Imagex({ src: employer.avatar, alt: "Employer", classes: "employer-avatar" }) : null;
   const name = createElement("span", {}, [employer.name || "Anonymous Employer"]);
   const verifiedBadge = employer.verified ? createElement("span", { class: "verified-badge" }, ["✅ Verified"]) : null;
   return createElement("div", { class: "baito-employer" }, [avatar, name, verifiedBadge].filter(Boolean));
@@ -148,14 +159,17 @@ function createEmployerSection(employer) {
 
 /** Job meta info */
 function createMetaSection(baito) {
+  const wageText = isNaN(Number(baito.wage)) ? baito.wage : `¥${Number(baito.wage).toLocaleString()}/hour`;
+
   const metaLines = [
-    baito.category && baito.subcategory ? `📂 ${baito.category} › ${baito.subcategory}` : null,
-    baito.wage ? `💴 Wage: ¥${Number(baito.wage).toLocaleString()}/hour` : null,
+    baito.category && baito.subcategory ? `📂 ${baito.category} › ${baito.subcategory}` : baito.category ? `📂 ${baito.category}` : null,
+    baito.wage ? `💴 Wage: ${wageText}` : null,
     baito.workHours ? `⏰ Hours: ${baito.workHours}` : null,
     baito.location ? `📍 Location: ${baito.location}` : null,
     baito.phone ? `📞 Contact: ${baito.phone}` : null,
-    baito.deadline ? `⏳ Apply by: ${new Date(baito.deadline).toLocaleDateString()}` : null,
+    baito.lastdate ? `⏳ Apply by: ${new Date(baito.lastdate).toLocaleDateString()}` : null,
     baito.createdAt ? `📅 Posted: ${new Date(baito.createdAt).toLocaleDateString()}` : null,
+    typeof baito.applicationcount === "number" ? `👥 Applications: ${baito.applicationcount}` : null,
   ].filter(Boolean);
 
   return createElement("div", { class: "baito-meta" }, metaLines.map(line => createElement("p", {}, [line])));
@@ -178,39 +192,18 @@ function createRequirementsSection(requirements) {
 }
 
 /** Banner section */
-function createBannerSection(baito, isCreator) {
-  const sightPath = resolveImagePath(EntityType.BAITO, PictureType.BANNER, baito.banner);
-  const bannerImg = createElement("img", {
-    src: sightPath,
-    alt: "Job Banner",
-    class: "baito-banner",
-    loading: "lazy",
-    id: "baito-banner-img",
+function createBaitoBannerSection(baito, isCreator) {
+  return Bannerx({
+    isCreator: isCreator,
+    bannerkey: baito.banner,
+    banneraltkey: `Banner for ${baito.name || "Baito"}`,
+    bannerentitytype: EntityType.BAITO,
+    stateentitykey: "baito",
+    bannerentityid: baito.baitoid
   });
-  bannerImg.addEventListener("click", () => Sightbox(sightPath, "image"));
-
-  const children = [bannerImg];
-
-  if (isCreator) {
-    const bannerEditButton = createElement("button", { class: "edit-banner-pic" }, ["Edit Banner"]);
-    bannerEditButton.addEventListener("click", () => {
-      updateImageWithCrop({
-        entityType: EntityType.BAITO,
-        imageType: "banner",
-        stateKey: "banner",
-        stateEntityKey: "baito",
-        previewElementId: "baito-banner-img",
-        pictureType: PictureType.BANNER,
-        entityId: baito.baitoid,
-      });
-    });
-    children.push(bannerEditButton);
-  }
-
-  return createElement("div", { class: "baito-banner-section" }, children);
 }
 
-/** Similar jobs section */
+/** Similar jobs section with improved cards */
 async function appendSimilarJobs(section, category, excludeId) {
   const similarJobs = await fetchSimilarJobs(category, excludeId);
   if (!similarJobs.length) return;
@@ -220,14 +213,29 @@ async function appendSimilarJobs(section, category, excludeId) {
   ]);
 
   similarJobs.slice(0, 4).forEach(job => {
-    details.appendChild(createElement("div", { class: "baito-related-card" }, [
-      createElement("p", {}, [job.title || "Untitled"]),
-      Button("View", "", { click: () => navigate(`/baito/${job.baitoid}`) }, "btn btn-sm"),
-    ]));
+    const wageText = isNaN(Number(job.wage)) ? job.wage : `¥${Number(job.wage).toLocaleString()}/hour`;
+    const bannerSrc = job.banner
+      ? resolveImagePath(EntityType.BAITO, PictureType.BANNER, job.banner)
+      : `${SRC_URL}/images/placeholder-banner.png`; // fallback placeholder
+
+    const card = createElement("div", { class: "baito-related-card card" }, [
+      // Banner image
+      Imagex({ src: bannerSrc, alt: job.title || "Job Banner", classes: "related-card-banner" }),
+      // Content container
+      createElement("div", { class: "related-card-content" }, [
+        createElement("h4", { class: "related-card-title" }, [job.title || "Untitled"]),
+        job.location ? createElement("p", { class: "related-card-location" }, [`📍 ${job.location}`]) : null,
+        job.wage ? createElement("p", { class: "related-card-wage" }, [`💴 ${wageText}`]) : null,
+        Button("View", "", { click: () => navigate(`/baito/${job.baitoid}`) }, "btn btn-sm btn-primary related-card-btn"),
+      ].filter(Boolean)),
+    ]);
+
+    details.appendChild(card);
   });
 
   section.appendChild(details);
 }
+
 
 /** Main display function */
 export async function displayBaito(isLoggedIn, baitoid, contentContainer) {
@@ -236,10 +244,14 @@ export async function displayBaito(isLoggedIn, baitoid, contentContainer) {
     const baito = await apiFetch(`/baitos/baito/${baitoid}`);
     if (!baito) throw new Error("Baito not found");
 
+    const isOwner = getState("user") === baito.ownerId;
+
     const section = createElement("div", { class: "baito-detail" });
     section.appendChild(createElement("h2", { class: "baito-title" }, [baito.title || "Untitled Job"]));
 
-    const employerSection = createEmployerSection(baito.employer);
+    section.appendChild(createBaitoBannerSection(baito, isOwner));
+
+    const employerSection = createEmployerSection(baito.employer, baito);
     if (employerSection) section.appendChild(employerSection);
 
     section.appendChild(createMetaSection(baito));
@@ -252,20 +264,21 @@ export async function displayBaito(isLoggedIn, baitoid, contentContainer) {
 
     if (baito.description) section.appendChild(renderExpandableDescription(baito.description));
 
-    const isOwner = getState("user") === baito.ownerId;
-
-    section.appendChild(createBannerSection(baito, isOwner));
+    // section.appendChild(createBannerSection(baito, isOwner));
 
     const cleanImageNames = baito.images?.filter(Boolean) || [];
     if (cleanImageNames.length) {
       const fullURLs = cleanImageNames.map(name => resolveImagePath(EntityType.BAITO, PictureType.PHOTO, name));
       section.appendChild(ImageGallery(fullURLs));
+      section.appendChild(Button("Add images", "", {
+        click: () => { baitoAddImages({ isLoggedIn, contentContainer, baito, mode: "edit" }) }
+      }));
     }
 
     // Review container
     const reviewSec = createElement("div", {}, []);
 
-    // Controls: owner sees edit, delete, view applicants, but no application history
+    // Controls: owner sees edit, delete, view applicants
     const controls = isOwner
       ? renderOwnerControls(baito, contentContainer, isLoggedIn)
       : renderApplicantControls(baito, baitoid, isOwner, reviewSec, isLoggedIn);

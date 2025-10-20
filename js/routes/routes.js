@@ -51,7 +51,7 @@ export const staticRoutes = {
   "/grocery": { moduleImport: () => import("../pages/crop/crops.js"), functionName: "Crops" },
 
   "/recipes": { moduleImport: () => import("../pages/recipe/recipes.js"), functionName: "Recipes" },
-  
+
   "/merechats": { moduleImport: () => import("../pages/merechats/merechats.js"), functionName: "Mechat", protected: true },
   "/discord": { moduleImport: () => import("../pages/discord/discord.js"), functionName: "Discord", protected: true },
 };
@@ -71,6 +71,20 @@ export const dynamicRoutes = [
     protected: true,
     argBuilder: safeArgBuilder
   },
+  // {
+  //   pattern: /^\/event\/([\w-]+)\/merch$/,
+  //   moduleImport: () => import("../pages/events/eventMerchPage.js"),
+  //   functionName: "EventMerch",
+  //   protected: true,
+  //   argBuilder: safeArgBuilder
+  // },
+  // {
+  //   pattern: /^\/event\/([\w-]+)\/analytics$/,
+  //   moduleImport: () => import("../pages/events/eventAnalyticsPage.js"),
+  //   functionName: "EventAnalytics",
+  //   protected: true,
+  //   argBuilder: safeArgBuilder
+  // },
   {
     pattern: /^\/event\/([\w-]+)$/,
     moduleImport: () => import("../pages/events/eventPage.js"),
@@ -97,6 +111,30 @@ export const dynamicRoutes = [
     moduleImport: () => import("../pages/merechats/merePage.js"),
     functionName: "OneChatPage",
     protected: true,
+    argBuilder: safeArgBuilder
+  },
+  {
+    pattern: /^\/newchat\/([\w-]+)$/,
+    moduleImport: () => import("../pages/merechats/merePage.js"),
+    functionName: "OneChatPage",
+    protected: true,
+    argBuilder: safeArgBuilder
+  },
+  // Route for single-segment liveid
+  {
+    pattern: /^\/live\/([\w-]+)$/,
+    moduleImport: () => import("../pages/vlive/vlivePage.js"),
+    functionName: "Vlive",
+    protected: false,
+    argBuilder: safeArgBuilder
+  },
+
+  // Route for entityType/entityId/liveid
+  {
+    pattern: /^\/live\/([\w-]+)\/([\w-]+)\/([\w-]+)$/,
+    moduleImport: () => import("../pages/vlive/entityLivePage.js"),
+    functionName: "Vlive",
+    protected: false,
     argBuilder: safeArgBuilder
   },
   {

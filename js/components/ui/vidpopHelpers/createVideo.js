@@ -6,7 +6,7 @@ export function createVideoElement({ mediaSrc, poster, qualities }) {
     video.muted = true;
     video.poster = poster;
     video.preload = "metadata";
-    video.crossOrigin = "anonymous";
+    // video.crossOrigin = "anonymous";
   
     if (qualities.length) {
       const storedQuality = localStorage.getItem("videoQuality") || "144p";

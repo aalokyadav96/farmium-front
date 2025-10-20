@@ -1,4 +1,4 @@
-import { apiFetch } from "../../api/api.js";
+import { chatFetch } from "../../api/api.js";
 import { getState } from "../../state/state.js";
 import { navigate } from "../../routes/index.js";
 import { displayOneChat } from "./displayNewchat.js";
@@ -11,7 +11,7 @@ export async function displayChats(contentContainer, isLoggedIn) {
     const wrapper = createElement("div", { class: "chat-wrapper" });
 
     // Sidebar
-    const sidebar = createElement("div", { class: "chat-sidebar" });
+    const sidebar = createElement("div", { class: "chat-topbar" });
     const list = createElement("ul", { class: "chat-list" });
     sidebar.appendChild(list);
 
@@ -22,7 +22,7 @@ export async function displayChats(contentContainer, isLoggedIn) {
     contentContainer.appendChild(wrapper);
 
     try {
-        const chats = await apiFetch("/newchats/all");
+        const chats = await chatFetch("/api/v1/newchats/all");
         const currentUser = getState("user");
 
         if (!Array.isArray(chats) || chats.length === 0) {
@@ -73,7 +73,7 @@ export async function userNewChatInit(targetUserId) {
         }
 
         const payload = { userA: currentUserId, userB: targetUserId };
-        const data = await apiFetch("/newchats/init", "POST", JSON.stringify(payload));
+        const data = await chatFetch("/api/v1/newchats/init", "POST", JSON.stringify(payload));
 
         if (!data.chatid) {
             throw new Error("Chat ID missing in response.");

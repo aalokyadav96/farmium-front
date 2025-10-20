@@ -1,4 +1,5 @@
 import { dispatchZoomBoxEvent } from "../../utils/eventDispatcher.js";
+import Imagex from "../base/Imagex.js";
 
 export const createOverlay = () => {
     const el = document.createElement("div");
@@ -9,8 +10,7 @@ export const createOverlay = () => {
 };
 
 export const createImageElement = (src) => {
-    const img = document.createElement("img");
-    img.src = src;
+    const img = Imagex({ src: src, });
     img.alt = "ZoomBox Image";
     img.style.transition = "transform 0.2s ease-out";
     img.style.willChange = "transform";
@@ -41,38 +41,38 @@ export const smoothZoom = (event, img, state) => {
     const naturalW = img.naturalWidth;
     const naturalH = img.naturalHeight;
     const prevZoom = state.zoomLevel;
-  
+
     state.zoomLevel *= event.deltaY > 0 ? 0.9 : 1.1;
     state.zoomLevel = Math.max(1, Math.min(state.zoomLevel, Math.max(naturalW / img.width, naturalH / img.height, 12)));
-  
+
     const rect = img.getBoundingClientRect();
     const cursorX = event.clientX - rect.left;
     const cursorY = event.clientY - rect.top;
     const zoomFactor = state.zoomLevel / prevZoom;
-  
+
     // Adjust pan based on cursor position
     state.panX -= (cursorX - state.panX) * (zoomFactor - 1);
     state.panY -= (cursorY - state.panY) * (zoomFactor - 1);
-  
+
     // Clamp the image inside the viewport
     const viewWidth = window.innerWidth;
     const viewHeight = window.innerHeight;
-  
+
     const imgWidth = img.offsetWidth * state.zoomLevel;
     const imgHeight = img.offsetHeight * state.zoomLevel;
-  
+
     const maxPanX = (imgWidth - viewWidth) / 2;
     const maxPanY = (imgHeight - viewHeight) / 2;
-  
+
     state.panX = Math.min(maxPanX, Math.max(-maxPanX, state.panX));
     state.panY = Math.min(maxPanY, Math.max(-maxPanY, state.panY));
-  
+
     img.style.transformOrigin = `${(cursorX / rect.width) * 100}% ${(cursorY / rect.height) * 100}%`;
     updateTransform(img, state);
     dispatchZoomBoxEvent("zoom", { level: state.zoomLevel });
 
-  };
-  
+};
+
 
 export const handleMouseDown = (e, state) => {
     if (state.zoomLevel <= 1) return;

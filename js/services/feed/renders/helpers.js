@@ -124,7 +124,7 @@ export async function fetchUserMetaLikesBatch(entityType, entityIds = []) {
     }
 }
 
-// --- Update createActions to use userLikes ---
+
 export function createActions(post, isLoggedIn, isCreator, userLikes = {}, posts = [], postElement, postsContainer, i) {
     const currentUserId = getState("user");
     const entityType = "feed";
@@ -132,107 +132,109 @@ export function createActions(post, isLoggedIn, isCreator, userLikes = {}, posts
 
     const actionsContainer = createElement("div", { class: "post-actions" });
 
-    // Like Button
+    function createActionButton(iconSVG, label = "", className = "", onClick = null) {
+        const icon = svgToNode(iconSVG);
+        const labelEl = label ? createElement("span", {}, [label]) : null;
+        const btnChildren = labelEl ? [icon, labelEl] : [icon];
+        const btn = createElement("button", { class: className }, btnChildren);
+        if (onClick) btn.addEventListener("click", onClick);
+        return btn;
+    }
+
+    // --- LIKE BUTTON ---
     if (isLoggedIn) {
         const liked = Boolean(userLikes[entityId]);
-        const likeIcon = svgToNode(heartSVG);
-        const likeLabel = document.createElement("span");
-        // likeLabel.textContent = `Like (${post.likes})`;
-        likeLabel.textContent = post.likes;
+        const likeLabel = createElement("span", {}, [post.likes]);
+        const likeButton = createElement("button", { class: liked ? "like liked" : "like" }, [
+            svgToNode(heartSVG),
+            likeLabel
+        ]);
 
-        const likeButton = createElement("button", {
-            class: liked ? "like liked" : "like"
-        }, [likeIcon, likeLabel]);
-
-        const handleLikeClick = debounce(async () => {
+        likeButton.addEventListener("click", debounce(async () => {
             try {
-                const result = await toggleLike("post", post.postid);
-                if (result && typeof result.count === "number") {
-                    // likeLabel.textContent = `Like (${result.count})`;
-                    likeLabel.textContent = result.count;
+                const result = await toggleLike("post", entityId);
+                if (!result || typeof result.count !== "number") return;
 
-                    if (result.liked) likeButton.classList.add("liked");
-                    else likeButton.classList.remove("liked");
-
-                    userLikes[post.postid] = result.liked;
-                }
+                likeLabel.textContent = result.count;
+                likeButton.classList.toggle("liked", result.liked);
+                userLikes[entityId] = result.liked;
             } catch (err) {
                 console.error("Failed to toggle like", err);
             }
-        }, 500);
+        }, 500));
 
-        likeButton.addEventListener("click", handleLikeClick);
         actionsContainer.appendChild(likeButton);
     }
 
-    // Comment Button
-    const commentIcon = svgToNode(commentSVG);
-    // const commentLabel = document.createElement("span");
-    // commentLabel.textContent = "Comment";
-    const commentButton = createElement("button", { class: "comment" }, [
-        commentIcon,
-        // commentLabel
-    ]);
-
-    commentButton.addEventListener("click", () => {
+    // --- COMMENT BUTTON ---
+    const commentButton = createActionButton(commentSVG, "", "comment", () => {
         if (!post._commentSectionVisible) {
-            const commentsEl = createCommentsSection(
-                post.postid,
-                post.comments || [],
-                entityType,
-                currentUserId
-            );
+            const commentsEl = createCommentsSection(post.postid, post.comments || [], entityType, currentUserId);
             actionsContainer.parentElement.appendChild(commentsEl);
             post._commentSectionVisible = true;
         }
     });
-
     actionsContainer.appendChild(commentButton);
 
-    // More Menu (Report/Delete/Edit)
+    // --- MORE MENU ---
     const moreButton = createElement("button", { class: "more-btn" }, [svgToNode(morevSVG)]);
-    const dropdown = createElement("div", { class: "dropdown hidden" });
+    const dropdownx = createElement("div", { class: "dropxdown hidden" });
+
+    function closeDropdown() {
+        dropdownx.classList.add("hidden");
+    }
+
     const reportButton = createElement("button", { class: "report-btn" }, ["Report"]);
     reportButton.addEventListener("click", () => {
-        dropdown.classList.add("hidden");
-        reportPost(post.postid, "post");
+        closeDropdown();
+        reportPost(entityId, "post");
     });
-    dropdown.appendChild(reportButton);
+    dropdownx.appendChild(reportButton);
 
     if (isCreator) {
         const deleteButton = createElement("button", { class: "delete-btn" }, ["Delete"]);
         deleteButton.addEventListener("click", () => {
-            dropdown.classList.add("hidden");
-            deletePost(post.postid, postElement, posts);
+            closeDropdown();
+            deletePost(entityId, postElement, posts);
         });
-        dropdown.appendChild(deleteButton);
+        dropdownx.appendChild(deleteButton);
 
         const editBtn = Button("Edit", "", { click: () => openEditModal(post, postsContainer, i) }, "edit-btn");
-
-        // const editBtn = Button("Edit", "", { click: () => openEditForm(post, postElement, postsContainer, i) }, "edit-btn");
-
-        dropdown.appendChild(editBtn);
+        dropdownx.appendChild(editBtn);
     }
 
-    const moreWrapper = createElement("div", { class: "more-wrapper" }, [
-        moreButton,
-        dropdown
-    ]);
+    const moreWrapper = createElement("div", { class: "more-wrapper" }, [moreButton, dropdownx]);
+    actionsContainer.appendChild(moreWrapper);
 
     moreButton.addEventListener("click", (e) => {
         e.stopPropagation();
-        dropdown.classList.toggle("hidden");
-    });
+        dropdownx.classList.toggle("hidden");
 
-    document.addEventListener("click", () => dropdown.classList.add("hidden"));
-    document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") dropdown.classList.add("hidden");
-    });
+        if (!dropdownx.classList.contains("hidden")) {
+            const handleClickOutside = (event) => {
+                if (!moreWrapper.contains(event.target)) {
+                    closeDropdown();
+                    document.removeEventListener("click", handleClickOutside);
+                    document.removeEventListener("keydown", handleEsc);
+                }
+            };
 
-    actionsContainer.appendChild(moreWrapper);
+            const handleEsc = (event) => {
+                if (event.key === "Escape") {
+                    closeDropdown();
+                    document.removeEventListener("click", handleClickOutside);
+                    document.removeEventListener("keydown", handleEsc);
+                }
+            };
+
+            document.addEventListener("click", handleClickOutside);
+            document.addEventListener("keydown", handleEsc);
+        }
+    });
 
     return actionsContainer;
 }
+
 
 /**
  * Update timeline styles for each feed item

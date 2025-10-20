@@ -17,6 +17,8 @@ export const EntityType = {
   PLACE: "place",
   RECIPE: "recipe",
   PRODUCT: "product",
+  TOOL: "tool",
+  LIVE: "live",
   MEDIA: "media",
   MERCH: "merch",
   MENU: "menu",
@@ -56,31 +58,64 @@ const PictureSubfolders = {
   [PictureType.FILE]: "files",
 };
 
-export function resolveImagePath(entityType, pictureType, filename, fallback = "/assets/fallback.png") {
+export function resolveImagePath(entityType, pictureType, filename, fallback = "/assets/fallbacks.png") {
   if (!entityType || !pictureType || !filename || typeof filename !== "string") {
+    return fallback;
+  }
+
+  // quick reject of dangerous schemes or traversal
+  if (/^(file:|data:|javascript:)/i.test(filename) || filename.includes("..")) {
+    return fallback;
+  }
+
+  // allow safe URLs (http/https only, block localhost/private ranges)
+  try {
+    const url = new URL(filename, window.location.origin);
+
+    if (url.protocol === "http:" || url.protocol === "https:") {
+      const host = url.hostname;
+      const isBlockedHost =
+        host === "localhost" ||
+        host === "127.0.0.1" ||
+        host === "::1" ||
+        /^10\./.test(host) ||
+        /^192\.168\./.test(host) ||
+        /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(host);
+
+      if (!isBlockedHost) {
+        return filename; // safe external URL, return directly
+      }
+    }
+  } catch (_) {
+    // not a valid absolute URL → will treat as local filename
+  }
+
+  // local file: must be simple filename/path
+  if (!/^[a-zA-Z0-9._/-]+$/.test(filename)) {
     return fallback;
   }
 
   const folder = PictureSubfolders[pictureType] || "misc";
 
-  // Normalize enforced extensions
+  // normalize extensions based on type
   let finalName = filename;
-  if (pictureType === PictureType.THUMB) {
-    if (!filename.endsWith(".jpg")) {
-      finalName = filename.replace(/\.[^.]+$/, "") + ".jpg";
-    }
-  } else if (pictureType === PictureType.POSTER) {
-    if (!filename.endsWith(".jpg")) {
-      finalName = filename.replace(/\.[^.]+$/, "") + ".jpg";
+  if (pictureType === PictureType.THUMB || pictureType === PictureType.POSTER) {
+    if (!finalName.endsWith(".jpg")) {
+      finalName = finalName.replace(/\.[^.]+$/, "") + ".jpg";
     }
   } else if (isImageType(pictureType)) {
-    if (!filename.endsWith(".png")) {
-      finalName = filename.replace(/\.[^.]+$/, "") + ".png";
+    if (!finalName.endsWith(".png")) {
+      finalName = finalName.replace(/\.[^.]+$/, "") + ".png";
     }
   }
 
-  return `${SRC_URL}/uploads/${entityType}/${folder}/${finalName}`;
+return `${SRC_URL}/uploads/${entityType}/${folder}/${finalName}`;
+
+
 }
+
+
+
 
 // Helper to check if type is image (non-thumb)
 function isImageType(pictureType) {
@@ -95,28 +130,3 @@ function isImageType(pictureType) {
   ].includes(pictureType);
 }
 
-
-/******HOW TO USE******/
-/*
-
-// Banner
-const banner = Imagex(
-  resolveImagePath(EntityType.EVENT, PictureType.BANNER, `${event.id}.jpg`),
-  `Event banner`,
-  "lazy",
-  "",
-  "event-banner-image"
-);
-
-import { Imagex } from "../../components/base/Imagex.js";
-import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
-
-// Create avatar image
-const avatar = Imagex(
-  resolveImagePath(EntityType.USER, PictureType.THUMB, `${user.id}.jpg`),
-  "User Avatar",
-  "lazy",
-  "",
-  "chatavatar circle"
-);
- */

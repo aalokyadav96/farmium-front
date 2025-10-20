@@ -1,6 +1,7 @@
 // gtaMap.js
 import { createElement } from "../../components/createElement.js";
 import { apiFetch } from "../../api/api.js";
+import Imagex from "../../components/base/Imagex.js";
 
 /**
  * Display a GTA-style map: fetches config + markers for an entity and renders a responsive viewport
@@ -69,7 +70,7 @@ export async function displayGtaMap(container, isLoggedIn, entity = "ls") {
   );
 
   // Map image with native pixel size so marker coordinates align
-  const mapInner = createElement("img", {
+  const mapInner = Imagex( {
     id: "map-inner",
     src: mapImageUrl,
     width: String(mapWidth),
@@ -114,7 +115,7 @@ export async function displayGtaMap(container, isLoggedIn, entity = "ls") {
   ]);
 
   // Minimap / radar
-  const minimapImage = createElement("img", {
+  const minimapImage = Imagex( {
     src: mapImageUrl,
     style: "width:100%;height:100%;object-fit:cover;display:block;",
   });

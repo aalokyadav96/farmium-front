@@ -83,7 +83,6 @@ export async function createOrEditBaito({ mode = "create", baito = {}, isLoggedI
     { label: "Benefits", type: "text", id: "baito-benefits", value: baito.benefits || "", placeholder: "e.g. Free meals, transport allowance" },
     { label: "Phone Number", type: "text", id: "baito-phone", required: true, value: baito.phone || "", placeholder: "Enter phone number" },
     { label: "Email", type: "email", id: "baito-email", value: baito.email || "", placeholder: "Enter email address" },
-    // { label: "Banner Image", type: "file", id: "baito-banner", accept: "image/*" },
     { label: "Other Images", type: "file", id: "baito-images", accept: "image/*", multiple: true, value: (baito.images || []).map(img => resolveImagePath(EntityType.BAITO, PictureType.PHOTO, img)) }
   ];
   
@@ -152,9 +151,6 @@ export async function createOrEditBaito({ mode = "create", baito = {}, isLoggedI
 
     const email = formData.get("baito-email")?.trim();
     if (email) payload.append("email", email);
-
-    // const bannerInput = form.querySelector("#baito-banner");
-    // if (bannerInput.files[0]) payload.append("banner", bannerInput.files[0]);
 
     const imagesInput = form.querySelector("#baito-images");
     Array.from(imagesInput.files).forEach(file => payload.append("images", file));

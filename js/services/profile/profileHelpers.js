@@ -20,7 +20,7 @@ function capitalize(string) {
 }
 
 // Preview profile picture
-function previewProfilePicture(event) {
+function previewAvatar(event) {
     const file = event.target.files[0];
     const preview = document.getElementById("profile-picture-preview");
 
@@ -34,4 +34,4 @@ function previewProfilePicture(event) {
     }
 }
 
-export {formatDate, showLoadingMessage, removeLoadingMessage, capitalize, previewProfilePicture};
+export {formatDate, showLoadingMessage, removeLoadingMessage, capitalize, previewAvatar};

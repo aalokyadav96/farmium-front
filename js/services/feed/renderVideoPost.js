@@ -1,19 +1,18 @@
-import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
 import VideoPlayer from '../../components/ui/VideoPlayer.mjs';
 
-async function RenderVideoPost(mediaContainer, media, media_url = "", resolution) {
-    let subtits = [];
+async function RenderVideoPost(mediaContainer, media, media_url = "", resolutions, subtits, posterPath) {
+    // console.log(mediaContainer, media, media_url, resolutions, subtits, posterPath);
     media.forEach(videoSrc => {
-        const posterPath = resolveImagePath(EntityType.FEED, PictureType.POSTER, `${media_url}.jpg`);
-        console.log(media_url);
         const videox = VideoPlayer({
             src: videoSrc,
             className: 'post-video',
             muted: true,
             poster: posterPath,
+            loop: true,
             controls: false,
-            subtitles: subtits
-        }, media_url[0], resolution);
+            subtitles: subtits,
+            availableResolutions: resolutions
+        }, media_url);
 
         mediaContainer.appendChild(videox);
     });

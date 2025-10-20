@@ -10,7 +10,6 @@
     flex-shrink: 0;
     display: flex;
     gap: 0.4rem;
-    z-index: 1002;
   }
   
   .logo-link {

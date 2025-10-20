@@ -1,5 +1,6 @@
 import { createElement } from "../../components/createElement";
 import { apiFetch } from "../../api/api.js";
+import Imagex from "../../components/base/Imagex.js";
 
 let stl = createElement('style');
 stl.innerHTML= `.user-profile-container {
@@ -53,7 +54,7 @@ export async function othusrdata(kc, userid) {
             const postBox = createElement("div", { class: "grid-item" });
 
             // Replace "image_url" with whatever key your backend actually sends
-            const img = createElement("img", {
+            const img = Imagex({
                 src: post.image_url,
                 alt: post.caption || "Post image",
                 style: "width:100%; height:100%; object-fit:cover;",

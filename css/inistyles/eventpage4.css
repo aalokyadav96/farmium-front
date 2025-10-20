@@ -11,13 +11,22 @@
 .eventpage .eventx-card {
   display: flex;
   flex-direction: column;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  /* border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); */
   overflow: hidden;
 }
 
 /* Banner Section */
+.eventpage .event-banner {
+  width: 100%;
+  aspect-ratio: 7/3;
+  position: relative;
+  object-fit: cover;
+}
+
 .eventpage .banner-section {
+  aspect-ratio: 7/3;
+  width: 100%;
   position: relative;
   display: flex;
   justify-content: center;
@@ -155,4 +164,22 @@
   max-width: 100%;
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.seatingcon {
+  max-height: 300px;
+  position: relative;
+  margin-bottom: 2rem;
+  border: 1px solid #ddd;
+}
+
+.seatmap, .event-seating {
+  position: relative;
+  max-height: 300px;
+}
+
+.seatmap img {
+  aspect-ratio: 2/1;
+  object-fit: contain;
+  width: 100%;
 }

@@ -40,6 +40,13 @@
   cursor: pointer;
 }
 
+.user-banner {
+  width: 100%;
+  aspect-ratio: 7/3;
+  position: relative;
+  object-fit: cover;
+}
+
 .bg_img {
   display: block;
   width: 100%;

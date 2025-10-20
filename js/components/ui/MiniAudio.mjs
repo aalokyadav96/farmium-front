@@ -1,6 +1,7 @@
 import "../../../css/ui/MiniAudio.css";
 import { pauseSVG, playSVG } from "../svgs.js";
 import { createElement } from "../createElement.js";
+import Imagex from "../base/Imagex.js";
 
 function MiniAudio({ poster, audioUrl, title = "" }) {
   const player = createElement("div", { class: "mini-audio horizontal" });
@@ -55,10 +56,10 @@ function MiniAudio({ poster, audioUrl, title = "" }) {
     }
   });
 
-  const posterImg = createElement("img", {
+  const posterImg = Imagex( {
     src: poster || "",
     alt: "Poster",
-    class: "mini-poster",
+    classes: "mini-poster",
   });
 
   const titleText = createElement("span", { class: "audio-title" }, [title]);

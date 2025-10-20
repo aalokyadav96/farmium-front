@@ -112,17 +112,18 @@ export function createCommonCropForm({ crop = {}, currentFarmName = "", isEdit =
         value: crop.outOfStock || false
     });
 
-    const imageGroup = createFormGroup({
-        label: "Image",
-        type: "file",
-        id: "crop-image",
-        name: "image",
-        accept: "image/*"
-    });
+    // const imageGroup = createFormGroup({
+    //     label: "Image",
+    //     type: "file",
+    //     id: "crop-image",
+    //     name: "image",
+    //     accept: "image/*"
+    // });
 
     const fields = [
         categoryGroup, cropGroup, priceGroup, quantityGroup, unitGroup,
-        notesGroup, harvestGroup, expiryGroup, featuredGroup, outOfStockGroup, imageGroup
+        notesGroup, harvestGroup, expiryGroup, featuredGroup, outOfStockGroup, 
+        //imageGroup
     ];
 
     if (!isEdit && currentFarmName) {

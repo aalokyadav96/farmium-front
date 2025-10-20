@@ -1,4 +1,4 @@
-import { apigFetch } from "../../api/api.js";
+import { apiFetch } from "../../api/api.js";
 import { createElement } from "../../components/createElement.js";
 import { renderPost } from "./renderNewPost.js";
 
@@ -28,7 +28,7 @@ export async function fetchFeed(container) {
 
 
 async function loadFeedData() {
-    const response = await apigFetch("/feed/feed");
+    const response = await apiFetch("/feed/feed");
 
     if (!response.ok || !Array.isArray(response.data)) {
         throw new Error("Invalid feed response");

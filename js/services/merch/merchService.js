@@ -10,46 +10,79 @@ import Notify from "../../components/ui/Notify.mjs";
 import { EntityType, PictureType, resolveImagePath } from "../../utils/imagePaths.js";
 import { reportPost } from "../reporting/reporting.js";
 import { createFormGroup } from "../../components/createFormGroup.js";
+import Imagex from "../../components/base/Imagex.js";
+
+import { uploadFile } from "../media/api/mediaApi.js";
+import { uid } from "../media/ui/mediaUploadForm.js";
 
 // --- Add Merchandise ---
 async function addMerchandise(entityType, eventId, merchList) {
-    const name = document.getElementById('merch-name').value.trim();
-    const price = parseFloat(document.getElementById('merch-price').value);
-    const stock = parseInt(document.getElementById('merch-stock').value, 10);
-    const imageFile = document.getElementById('merch-image').files[0];
+    const name = document.getElementById("merch-name").value.trim();
+    const price = parseFloat(document.getElementById("merch-price").value);
+    const stock = parseInt(document.getElementById("merch-stock").value, 10);
+    const imageFile = document.getElementById("merch-image").files[0];
 
     if (!name || isNaN(price) || isNaN(stock)) {
-        alert("Please fill in all fields correctly.");
+        Notify("Please fill in all fields correctly.", { type: "error" });
         return;
     }
 
-    if (imageFile && !imageFile.type.startsWith('image/')) {
-        alert("Please upload a valid image file.");
+    if (imageFile && !imageFile.type.startsWith("image/")) {
+        Notify("Please upload a valid image file.", { type: "error" });
         return;
     }
-
-    const formData = new FormData();
-    formData.append('name', name);
-    formData.append('price', price);
-    formData.append('stock', stock);
-    if (imageFile) formData.append('image', imageFile);
 
     try {
-        const response = await apiFetch(`/merch/${entityType}/${eventId}`, 'POST', formData);
-        if (!response?.data?.merchid) throw new Error(response?.message || 'Invalid server response.');
-        Notify(response.message || "Merchandise added successfully.", { type: "success", duration: 3000, dismissible: true });
+        let uploadedImage = null;
+
+        // --- Upload image first (if provided) ---
+        if (imageFile) {
+            const uploadObj = {
+                id: uid(),
+                file: imageFile,
+                previewURL: URL.createObjectURL(imageFile),
+                progress: 0,
+                uploading: true,
+                mediaEntity: "merch",
+            };
+
+            Notify("Uploading image...", { type: "info", duration: 2000 });
+
+            uploadedImage = await uploadFile(uploadObj);
+            if (!uploadedImage?.filename && !uploadedImage?.file) {
+                throw new Error("Image upload failed.");
+            }
+        }
+
+        // --- Now send merchandise data ---
+        const payload = {
+            name,
+            price,
+            stock,
+            merch_pic: uploadedImage?.filename || uploadedImage?.file || "",
+        };
+
+        const response = await apiFetch(`/merch/${entityType}/${eventId}`, "POST", payload);
+        if (!response?.data?.merchid) throw new Error(response?.message || "Invalid server response.");
+
+        Notify(response.message || "Merchandise added successfully.", {
+            type: "success",
+            duration: 3000,
+        });
+
         displayNewMerchandise(response.data, merchList);
         clearMerchForm();
     } catch (err) {
         console.error("Error adding merchandise:", err);
-        alert(`Error adding merchandise: ${err.message}`);
+        Notify(`Error adding merchandise: ${err.message}`, { type: "error" });
     }
 }
+
 
 // --- Clear Form ---
 function clearMerchForm() {
     const formContainer = document.getElementById('edittabs');
-    if (formContainer) formContainer.innerHTML = '';
+    if (formContainer) formContainer.replaceChildren();
 }
 
 // --- Delete Merchandise ---
@@ -59,15 +92,15 @@ async function deleteMerch(entityType, merchId, eventId) {
     try {
         const response = await apiFetch(`/merch/${entityType}/${eventId}/${merchId}`, 'DELETE');
         if (response.success) {
-            alert('Merchandise deleted successfully!');
+            Notify('Merchandise deleted successfully!', { type: "success" });
             const merchItem = document.getElementById(`merch-${merchId}`);
             if (merchItem) merchItem.remove();
         } else {
-            alert(`Failed to delete merchandise: ${response.message}`);
+            Notify(`Failed to delete merchandise: ${response.message}`, { type: "error" });
         }
     } catch (err) {
         console.error('Error deleting merchandise:', err);
-        alert('An error occurred while deleting the merchandise.');
+        Notify('An error occurred while deleting the merchandise.', { type: "error" });
     }
 }
 
@@ -82,35 +115,39 @@ async function editMerchForm(entityType, merchId, eventId) {
             { label: "Price:", type: "number", id: "merchPrice", value: data.price, required: true, step: "0.01" },
             { label: "Stock:", type: "number", id: "merchStock", value: data.stock, required: true }
         ];
-
         fields.forEach(f => form.appendChild(createFormGroup(f)));
 
         const submitBtn = Button("Update Merchandise", "", { type: "submit" }, "buttonx");
         form.appendChild(submitBtn);
 
-        const modal = Modal({ title: "Edit Merchandise", content: form, onClose: () => modal.remove() });
+        const { close: closeModal } = Modal({ title: "Edit Merchandise", content: form });
 
-        form.addEventListener("submit", async (e) => {
+        form.addEventListener("submit", async e => {
             e.preventDefault();
             const merchData = {
-                name: document.getElementById("merchName").value,
-                price: parseFloat(document.getElementById("merchPrice").value),
-                stock: parseInt(document.getElementById("merchStock").value, 10)
+                name: form.querySelector("#merchName").value,
+                price: parseFloat(form.querySelector("#merchPrice").value),
+                stock: parseInt(form.querySelector("#merchStock").value, 10)
             };
             try {
-                const resp = await apiFetch(`/merch/${entityType}/${eventId}/${merchId}`, 'PUT', JSON.stringify(merchData), { 'Content-Type': 'application/json' });
+                const resp = await apiFetch(
+                    `/merch/${entityType}/${eventId}/${merchId}`,
+                    'PUT',
+                    JSON.stringify(merchData),
+                    { 'Content-Type': 'application/json' }
+                );
                 if (resp.success) {
-                    alert('Merchandise updated successfully!');
-                    modal.remove();
-                } else alert(`Failed to update merchandise: ${resp.message}`);
+                    Notify('Merchandise updated successfully!', { type: "success" });
+                    closeModal();
+                } else Notify(`Failed to update merchandise: ${resp.message}`, { type: "error" });
             } catch (err) {
                 console.error("Error updating merchandise:", err);
-                alert("An error occurred while updating the merchandise.");
+                Notify("An error occurred while updating the merchandise.", { type: "error" });
             }
         });
     } catch (err) {
         console.error("Error fetching merchandise details:", err);
-        alert('An error occurred while fetching the merchandise details.');
+        Notify('An error occurred while fetching the merchandise details.', { type: "error" });
     }
 }
 
@@ -126,28 +163,27 @@ function addMerchForm(entityType, eventId, merchList) {
     fields.forEach(f => form.appendChild(createFormGroup(f)));
 
     const addBtn = createElement("button", { type: "submit", class: "buttonx" }, ["Add Merchandise"]);
-    const cancelBtn = Button("Cancel", "", { click: () => modal.remove() }, "buttonx");
-    form.append(addBtn, cancelBtn);
+    form.appendChild(addBtn);
 
-    const modal = Modal({ title: "Add Merchandise", content: form, onClose: () => modal.remove() });
+    const { close: closeModal } = Modal({ title: "Add Merchandise", content: form });
 
     form.addEventListener("submit", async e => {
         e.preventDefault();
         await addMerchandise(entityType, eventId, merchList);
-        modal.remove();
+        closeModal();
     });
 }
 
 // --- Display New Merchandise Item ---
 function displayNewMerchandise(merchData, merchList) {
-    const item = createElement("div", { className: "merch-item", id: `merch-${merchData.merchid}` });
+    const item = createElement("div", { class: "merch-item", id: `merch-${merchData.merchid}` });
     item.append(
-        createElement("h3", { textContent: merchData.name }),
-        createElement("p", { textContent: `Price: $${(merchData.price / 100).toFixed(2)}` }),
-        createElement("p", { textContent: `Available: ${merchData.stock}` })
+        createElement("h3", {}, [merchData.name]),
+        createElement("p", {}, [`Price: $${(merchData.price / 100).toFixed(2)}`]),
+        createElement("p", {}, [`Available: ${merchData.stock}`])
     );
     if (merchData.merch_pic) {
-        const img = createElement("img", {
+        const img = Imagex({
             src: resolveImagePath(EntityType.MERCH, PictureType.THUMB, merchData.merch_pic),
             alt: merchData.name,
             loading: "lazy",
@@ -163,13 +199,13 @@ async function displayMerchandise(container, merchData, entityType, eventId, isC
     container.replaceChildren();
     container.appendChild(createElement("h2", {}, ["Merchandise"]));
 
+    const merchList = createElement("div", { class: "merchcon hvflex" });
+    container.appendChild(merchList);
+
     if (isCreator) {
         const addBtn = Button("Add Merchandise", "", { click: () => addMerchForm(entityType, eventId, merchList) });
         container.appendChild(addBtn);
     }
-
-    const merchList = createElement("div", { className: "merchcon hvflex" });
-    container.appendChild(merchList);
 
     merchList.replaceChildren();
 

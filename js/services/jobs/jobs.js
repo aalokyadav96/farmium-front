@@ -1,4 +1,4 @@
-import { createElement } from "../../components/createElement";
+import { createElement } from "../../components/createElement.js";
 import Button from "../../components/base/Button.js";
 import { apiFetch } from "../../api/api.js";
 import Modal from "../../components/ui/Modal.mjs";
@@ -22,22 +22,23 @@ export function jobsHire(container, entityType, entityId) {
   const submitBtn = Button("Create Job", "", { type: "submit" }, "buttonx btn-primary");
   form.appendChild(submitBtn);
 
-  // keep a handle so we can close the modal later
-  const modalHandle = Modal({
+  // --- Modal setup ---
+  const { close: closeModal } = Modal({
     title: "Hire a Job",
     content: form,
-    onClose: () => { }
+    size: "medium",
+    closeOnOverlayClick: true
   });
 
   form.addEventListener("submit", async e => {
     e.preventDefault();
 
     const jobData = {
-      title: document.getElementById("job-title")?.value.trim(),
-      description: document.getElementById("job-description")?.value.trim(),
-      category: document.getElementById("job-category")?.value.trim(),
-      location: document.getElementById("job-location")?.value.trim(),
-      wage: document.getElementById("job-wage")?.value.trim(),
+      title: form.querySelector("#job-title")?.value.trim(),
+      description: form.querySelector("#job-description")?.value.trim(),
+      category: form.querySelector("#job-category")?.value.trim(),
+      location: form.querySelector("#job-location")?.value.trim(),
+      wage: form.querySelector("#job-wage")?.value.trim(),
     };
 
     if (!jobData.title || !jobData.description) {
@@ -55,15 +56,10 @@ export function jobsHire(container, entityType, entityId) {
 
       if (!newJob?.baitoid) throw new Error("Failed to create job");
 
-      container.appendChild(buildCard(newJob));
+      container.querySelector(".places-wrapper")?.appendChild(buildCard(newJob));
       Notify("Job created successfully!", { type: "success", duration: 3000 });
 
-      // ✅ close modal properly
-      if (typeof modalHandle.close === "function") {
-        modalHandle.close();
-      } else {
-        modalHandle.remove();
-      }
+      closeModal(); // properly close modal
     } catch (err) {
       console.error("Error creating job:", err);
       Notify(`Error creating job: ${err.message}`, { type: "error", duration: 5000 });
@@ -73,7 +69,7 @@ export function jobsHire(container, entityType, entityId) {
 
 // --- Display Jobs ---
 export async function displayPlaceJobs(container, isCreator, isLoggedIn, entityType, entityId) {
-  container.innerHTML = "";
+  container.replaceChildren();
 
   container.appendChild(createElement("h2", {}, ["Jobs"]));
 
@@ -83,7 +79,7 @@ export async function displayPlaceJobs(container, isCreator, isLoggedIn, entityT
     );
   }
 
-  let jobsContainer = createElement("div", {class:"places-wrapper grid"}, []);
+  const jobsContainer = createElement("div", { class: "places-wrapper grid" });
   container.appendChild(jobsContainer);
 
   try {

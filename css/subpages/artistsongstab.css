@@ -138,5 +138,6 @@
     flex: 1;
     max-width: 600px;
     border-radius: 4px;
+    visibility: hidden;
   }
   

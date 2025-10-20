@@ -4,7 +4,7 @@
 :root {
   /* --font-size-base: clamp(0.95rem, 1vw + 0.5rem, 1.1rem); */
   /* --font-size-h2: clamp(1.5rem, 2vw + 1rem, 2rem); */
-  --container-width: clamp(320px, 90%, 760px);
+  --container-width: clamp(320px, 100%, 760px);
 }
 
 
@@ -59,7 +59,7 @@
 
 .postpage .image-group img {
   max-width: 100%;
-  max-height: 48ch;
+  max-height: 60ch;
   height: auto;
   border-radius: var(--radius);
   cursor: zoom-in;

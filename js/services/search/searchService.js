@@ -195,7 +195,7 @@ function createCard(entityType, item) {
     // --- Header ---
     const header = createElement("div", { class: "result-header" });
     if (item.image) {
-        header.appendChild(createElement("img", {
+        header.appendChild(Imagex({
             src: resolveImagePath(
                 EntityType[entityType.toUpperCase()] || EntityType.POST,
                 PictureType.THUMB,
@@ -204,7 +204,7 @@ function createCard(entityType, item) {
             ),
             alt: item.title || entityType,
             loading: "lazy",
-            class: "result-image"
+            classes: "result-image"
         }));
     }
 
@@ -235,6 +235,7 @@ function createCard(entityType, item) {
 
     return card;
 }
+
 
 function capitalizeFirstLetter(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);

@@ -1,5 +1,5 @@
 .artistpage {
-  max-width: 960px;
+  max-width: 720px;
   margin: auto;
   border-radius: 8px;
 }
@@ -59,9 +59,9 @@
 }
 
 /* Artist Info */
-.artist-container {
+/* .artist-container {
   padding: 12px;
-}
+} */
 
 .artist-name {
   font-size: 1.75rem;

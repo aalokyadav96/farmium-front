@@ -31,7 +31,7 @@ export async function displayCrops(content, isLoggedIn) {
       if (!categorized[category]) categorized[category] = [];
       categorized[category].push({
         ...crop,
-        imageUrl: crop.imageUrl || "placeholder.jpg",
+        banner: crop.banner || "placeholder.jpg",
         category,
         tags: Array.isArray(crop.tags) ? crop.tags : [],
         seasonMonths: Array.isArray(crop.seasonMonths) ? crop.seasonMonths : []

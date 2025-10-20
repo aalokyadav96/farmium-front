@@ -2,7 +2,7 @@ import { getState } from "../../state/state.js";
 import { apiFetch } from "../../api/api.js";
 import { createElement } from "../../components/createElement.js";
 import { renderPlaceDetails } from "./renderPlaceDetails.js";
-import { displayMedia } from "../media/mediaService.js";
+import { displayMedia } from "../media/ui/mediaGallery.js";
 import { displayReviews } from "../reviews/displayReviews.js";
 import { persistTabs } from "../../utils/persistTabs.js";
 import { displayPlaceInfo } from "./placeTabs.js";

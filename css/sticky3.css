@@ -1,5 +1,6 @@
 .plypzstp {
-    position: relative; /* Default: part of normal flow */
+    position: relative;
+    /* Default: part of normal flow */
     z-index: 10;
     display: flex;
     background-color: var(--color-bg);
@@ -22,7 +23,12 @@
     display: flex;
 }
 
-.play, .pause, .stop, .dld, .edit {
+
+.play,
+.pause,
+.stop,
+.dld,
+.edit {
     border: none;
     cursor: pointer;
     outline: none;

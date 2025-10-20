@@ -4,10 +4,10 @@ import TicketCard from '../../components/ui/TicketCard.mjs';
 import { Button } from "../../components/base/Button.js";
 import { createElement } from "../../components/createElement.js";
 import { deleteTicket, editTicket } from "./editTicket.js";
-import { verifyTicketAndShowModal } from "./verifyTicket.js";
 import { addTicketForm } from './ticketService.js';
 import { printTicket } from './printTicket.js';
 import { handlePurchase } from '../payment/pay.js';
+import { verifyTicketAndShowModal, cancelTicket, transferTicket } from "./ticketTransfer.js";
 
 export function displayNewTicket(ticketData, ticketList) {
     const ticketItem = createElement("li", {
@@ -24,7 +24,7 @@ export function displayNewTicket(ticketData, ticketList) {
     const actionsContainer = createElement("div", { class: "ticket-actions" });
 
     const editBtn = Button("Edit Ticket", "", { click: () => editTicket(ticketData.ticketid, ticketData.eventid) });
-    const deleteBtn = Button("Delete Ticket", "", { click: () => deleteTicket(ticketData.ticketid, ticketData.eventid), classes: ["delete-btn"] });
+    const deleteBtn = Button("Delete Ticket", "", { click: () => deleteTicket(ticketData.ticketid, ticketData.eventid) }, "buttonx delete-btn");
 
     actionsContainer.append(editBtn, deleteBtn);
     ticketItem.append(infoContainer, actionsContainer);
@@ -36,6 +36,9 @@ export async function displayTickets(ticketContainer, tickets, eventId, eventNam
 
     ticketContainer.appendChild(createElement('h2', {}, ["Tickets"]));
 
+    const actionsCon = createElement("div", { class: "hvflex" });
+    ticketContainer.appendChild(actionsCon);
+
     if (!isCreator && tickets?.length > 0) {
         const actions = [
             { text: "Verify Your Ticket", click: () => verifyTicketAndShowModal(eventId) },
@@ -44,7 +47,7 @@ export async function displayTickets(ticketContainer, tickets, eventId, eventNam
             { text: "Transfer Ticket", click: () => transferTicket(eventId) }
         ];
         // actions.forEach(a => ticketContainer.appendChild(Button(a.text, "", { click: a.click, classes: ["buttonx", "action-btn"] })));
-        actions.forEach(a => ticketContainer.appendChild(Button(a.text, "", { click: a.click}, "buttonx action-btn")));
+        actions.forEach(a => actionsCon.appendChild(Button(a.text, "", { click: a.click }, "buttonx action-btn")));
     }
 
     const ticketListDiv = createElement("div", { class: "hvflex gap20" });
@@ -70,18 +73,12 @@ export async function displayTickets(ticketContainer, tickets, eventId, eventNam
             });
 
             if (isCreator) {
-                let hflcon = createElement("div", {class:"hflex-sb", style:"padding: 0 0.2rem 0 0.5rem;"},[]);
+                let hflcon = createElement("div", { class: "hflex-sb", style: "padding: 0 0.2rem 0 0.5rem;" }, []);
                 const editBtn = Button("Edit", "", { click: () => editTicket(ticket.ticketid, eventId) }, "buttonx primary");
-                const deleteBtn = Button("Delete", "", { click: () => deleteTicket(ticket.ticketid, eventId), classes: ["delete-btn"] }, "buttonx secondary");
+                const deleteBtn = Button("Delete", "", { click: () => deleteTicket(ticket.ticketid, eventId) }, "buttonx delete-btn");
                 hflcon.append(editBtn, deleteBtn);
                 card.append(hflcon);
             }
-
-            // if (isCreator) {
-            //     const editBtn = Button("Edit", "", { click: () => editTicket(ticket.ticketid, eventId) }, "buttonx primary");
-            //     const deleteBtn = Button("Delete", "", { click: () => deleteTicket(ticket.ticketid, eventId), classes: ["delete-btn"] }, "buttonx secondary");
-            //     card.append(editBtn, deleteBtn);
-            // }
 
             if (!isCreator && ticket.isOwned && !ticket.isResold) {
                 const resellBtn = Button("Resell Ticket", "", {
@@ -120,7 +117,3 @@ export function showBuyTicketModal(ticketId, eventId, maxQuantity, isLoggedIn, i
 
     handlePurchase("ticket", ticketId, eventId, maxQuantity);
 }
-
-// Placeholder actions
-function cancelTicket(eventId) { alert(`Cancel ticket for event ${eventId}`); }
-function transferTicket(eventId) { alert(`Transfer ticket for event ${eventId}`); }

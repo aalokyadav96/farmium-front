@@ -1,12 +1,10 @@
-import { displayTickets } from "../tickets/ticketService.js";
+import { displayTickets } from "../tickets/displayTickets.js";
 import { createElement } from "../../components/createElement.js";
 import { apiFetch } from "../../api/api.js";
 import { getState } from "../../state/state.js";
 import Notify from "../../components/ui/Notify.mjs";
 
-// Fetch Event Data
 async function fetchEventData(eventId) {
-    // const eventData = await apiFetch(`/ticket/event/${eventId}`);
     const eventData = await apiFetch(`/events/event/${eventId}`);
     if (!eventData || !Array.isArray(eventData.tickets)) {
         throw new Error("Invalid event data received.");
@@ -14,17 +12,40 @@ async function fetchEventData(eventId) {
     return eventData;
 }
 
-// Display Full Event
 async function renderTicksPage(isLoggedIn, eventId, container) {
     try {
         container.replaceChildren();
         const eventData = await fetchEventData(eventId);
-        console.log(eventData);
         const isCreator = isLoggedIn && getState("user") === eventData.creatorid;
 
-        const tickcon = createElement("div", { class: "tickcon" }, []);
+        // === Event Header ===
+        const header = createElement("div", { class: "event-header" }, [
+            createElement("h1", { textContent: eventData.title }),
+            createElement("p", { textContent: eventData.description || "No description available." }),
+            createElement("div", { class: "event-meta" }, [
+                createElement("p", { textContent: `📅 Date: ${new Date(eventData.date).toLocaleString()}` }),
+                createElement("p", { textContent: `📍 Location: ${eventData.placename || eventData.location || "TBA"}` }),
+                createElement("p", { textContent: `🎟 Category: ${eventData.category || "Uncategorized"}` }),
+                createElement("p", { textContent: `💲 Currency: ${eventData.currency || "N/A"}` }),
+            ]),
+        ].filter(Boolean));
 
-        container.appendChild(createElement("div", { id: "edittabs" }, []));
+        // === Organizer Info ===
+        const organizer = (eventData.organizer_name || eventData.organizer_contact)
+            ? createElement("div", { class: "event-organizer" }, [
+                createElement("h3", { textContent: "Organizer" }),
+                createElement("p", { textContent: `Name: ${eventData.organizer_name || "Unknown"}` }),
+                createElement("p", { textContent: `Contact: ${eventData.organizer_contact || "Not Provided"}` }),
+            ])
+            : null;
+
+        // === Tickets Section ===
+        const tickcon = createElement("div", { class: "tickcon" }, []);
+        const editTabs = createElement("div", { id: "edittabs" }, []);
+
+        container.appendChild(header);
+        if (organizer) container.appendChild(organizer);
+        container.appendChild(editTabs);
         container.appendChild(tickcon);
 
         await displayTickets(tickcon, eventData.tickets, eventId, isCreator, isLoggedIn);
@@ -37,6 +58,5 @@ async function renderTicksPage(isLoggedIn, eventId, container) {
         Notify("Failed to load event details. Please try again later.", { type: "error", duration: 3000 });
     }
 }
-
 
 export { renderTicksPage };

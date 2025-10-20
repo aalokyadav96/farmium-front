@@ -25,15 +25,12 @@ const Sightbox = (mediaSrc, mediaType = "image") => {
       alt: "Sightbox Image",
       classes: "zoomable-image",
     })
-    // mediaEl = document.createElement("img");
-    // mediaEl.src = mediaSrc;
-    // mediaEl.alt = "Sightbox Image";
-    // mediaEl.className = "zoomable-image";
   } else if (mediaType === "video") {
     mediaEl = document.createElement("video");
     mediaEl.src = mediaSrc;
     mediaEl.controls = true;
     mediaEl.muted = true;
+    
   }
   content.appendChild(mediaEl);
 

@@ -11,10 +11,9 @@ export async function openCartModal() {
   let cart = [];
   try {
     const resp = await apiFetch("/cart", "GET");
-    // Use resp.crops array if exists
     cart = Array.isArray(resp?.crops) ? resp.crops : [];
-  } catch (e) {
-    wrapper.appendChild(createElement("p", {}, ["Failed to load cart."]));
+  } catch {
+    wrapper.appendChild(createElement("p", {}, ["❌ Failed to load cart."]));
   }
 
   if (!cart.length) {
@@ -22,17 +21,20 @@ export async function openCartModal() {
     wrapper.appendChild(createElement("p", {}, ["Add items to see them here."]));
   } else {
     const grouped = groupCart(cart);
-    const list = createElement("ul", { style: "list-style: none; padding: 0;" });
+    const list = createElement("ul", { style: "list-style: none; padding: 0; margin: 0;" });
 
     grouped.forEach(item => {
       const label = `${item.itemName} (${item.quantity} ${item.unit || "kg"})`;
       const entityInfo = item.entityName ? ` from ${item.entityName}` : "";
-      list.appendChild(createElement("li", {
-        style: "display: flex; justify-content: space-between;"
+      const price = `₹${(item.price * item.quantity).toFixed(2)}`;
+
+      const li = createElement("li", {
+        style: "display: flex; justify-content: space-between; align-items: center; padding: 0.3rem 0;"
       }, [
-        label + entityInfo,
-        `₹${(item.price * item.quantity).toFixed(2)}`
-      ]));
+        createElement("span", {}, [label + entityInfo]),
+        createElement("span", {}, [price])
+      ]);
+      list.appendChild(li);
     });
 
     const total = grouped.reduce((sum, item) => sum + item.quantity * item.price, 0);
@@ -56,15 +58,16 @@ export async function openCartModal() {
     `
   }, ["Go to Cart"]);
 
-  const modal = Modal({
+  const { close } = Modal({
     title: "Cart Preview",
     content: wrapper,
-    returnDataOnClose: true,
-    onClose: () => {}
+    size: "medium",
+    closeOnOverlayClick: true,
+    onClose: () => close()
   });
 
   goToCartButton.addEventListener("click", () => {
-    modal.close(); // triggers modal cleanup
+    close(); // Proper modal close using new API
     navigate("/cart");
   });
 

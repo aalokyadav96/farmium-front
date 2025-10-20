@@ -77,7 +77,6 @@ export function setupMessageActions(msg, socket) {
 
 export async function renderMessage(msg, container, currentUserId, socket) {
   if (!msg.id && !msg.content && !msg.files) return;
-
   const messageId = msg.id || `temp-${msg.timestamp}`;
   let wrapper = document.getElementById(`msg-${messageId}`);
 

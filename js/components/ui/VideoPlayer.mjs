@@ -4,34 +4,52 @@ import { createIconButton } from "../../utils/svgIconButton";
 import { maximizeSVG, muteSVG, vol2SVG, playSVG, pauseSVG } from "../svgs.js";
 import { setupSubtitles } from "./vidpopHelpers/subtitles.js";
 import { createElement } from "../../components/createElement";
-// import { createControls } from "./vidpopHelpers/controls.js";
 
 // ---- Video Helpers ----
-const determineInitialSource = (baseSrc, availableResolutions) => {
+const determineInitialSource = (baseSrc, availableResolutions = []) => {
+  if (!baseSrc || availableResolutions.length === 0) {
+    console.warn("Invalid baseSrc or empty availableResolutions");
+    return `${baseSrc || "video"}-360.mp4`;
+  }
+
   const stored = localStorage.getItem("videoQuality");
   const qualityNum = stored ? Number(stored) : null;
-  const lowestAvailable = Math.min(...availableResolutions);
+  const validQualities = availableResolutions.filter(
+    r => typeof r === "number" && !isNaN(r)
+  );
+
+  if (validQualities.length === 0) {
+    return `${baseSrc}-360.mp4`;
+  }
+
+  const lowestAvailable = Math.min(...validQualities);
   const fallback = `${baseSrc}-${lowestAvailable}.mp4`;
 
-  return qualityNum && availableResolutions.includes(qualityNum)
-    ? `${baseSrc}-${qualityNum}.mp4`
-    : fallback;
+  console.log("qualityNum:", qualityNum);
+
+  if (qualityNum && validQualities.includes(qualityNum)) {
+    return `${baseSrc}-${qualityNum}.mp4`;
+  }
+
+  return fallback;
 };
 
+// ---- Create Video Element ----
 const createVideoElement = (src, resolutions, poster) => {
   const video = document.createElement("video");
   video.setAttribute("class", "video-player");
-  video.crossOrigin = "anonymous";
   video.preload = "metadata";
-  video.setAttribute("playsinline", ""); // ✅ always plays inline
+  video.setAttribute("playsinline", "");
 
-  const baseSrc = src.replace(/\.mp4$/, "");
-  const defaultSrc = resolutions ? determineInitialSource(baseSrc, resolutions) : src;
+  const baseSrc = src.replace(/\.(mp4|webm)$/, "");
+  const defaultSrc = resolutions?.length
+    ? determineInitialSource(baseSrc, resolutions)
+    : src;
+
   video.src = defaultSrc;
   video.poster = poster || `${baseSrc}.jpg`;
   return video;
 };
-
 
 const applyVideoAttributes = (video, attrs = {}) => {
   Object.entries(attrs).forEach(([key, value]) => {
@@ -40,7 +58,7 @@ const applyVideoAttributes = (video, attrs = {}) => {
 };
 
 const togglePlayOnClick = (video) => {
-  const handler = () => video.paused ? video.play() : video.pause();
+  const handler = () => (video.paused ? video.play() : video.pause());
   video.addEventListener("click", handler);
   return () => video.removeEventListener("click", handler);
 };
@@ -51,8 +69,7 @@ export const createQualitySelector = (video, baseSrc, availableResolutions) => {
 
   const allQualities = [1440, 1080, 720, 480, 360, 240, 144];
   const available = allQualities.filter(q => availableResolutions.includes(q));
-
-  const stored = localStorage.getItem("videoQuality") || `${Math.min(...availableResolutions)}`;
+  const stored = localStorage.getItem("videoQuality") || `${Math.min(...available)}`;
 
   const fragment = document.createDocumentFragment();
   available.forEach((quality) => {
@@ -90,9 +107,8 @@ export const createQualitySelector = (video, baseSrc, availableResolutions) => {
 
 // ---- Main VideoPlayer Component ----
 const VideoPlayer = (
-  { src, poster, controls = true, autoplay = false, muted = true, theme = "light", loop = false, subtitles = [] },
+  { src, poster, controls = false, autoplay = false, muted = true, theme = "light", loop = false, subtitles = [], availableResolutions = [] },
   videoId,
-  availableResolutions
 ) => {
   const container = createElement("div", {
     class: `video-container theme-${theme}`,
@@ -101,11 +117,14 @@ const VideoPlayer = (
   });
 
   const controlsContainer = createElement("div", { class: "hflex-sb vcon" });
+  const controlsl = createElement("div", { class: "hflex" });
+  const controlsr = createElement("div", { class: "hflex" });
+  controlsContainer.append(controlsl, controlsr);
+
   const videocon = createElement("div", { class: "videocon" });
 
-  const baseSrc = src.replace(/\.mp4$/, "");
+  const baseSrc = src.replace(/\.(mp4|webm)$/, "");
   const video = createVideoElement(src, availableResolutions, poster);
-
 
   applyVideoAttributes(video, { controls, muted, loop });
 
@@ -114,11 +133,8 @@ const VideoPlayer = (
     observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            video.play().catch(() => { });
-          } else {
-            video.pause();
-          }
+          if (entry.isIntersecting) video.play().catch(() => {});
+          else video.pause();
         });
       },
       { threshold: 0.5 }
@@ -126,26 +142,23 @@ const VideoPlayer = (
     observer.observe(video);
   }
 
-  // // --- Play/Pause Button ---
-  // const playButton = createIconButton({
-  //   classSuffix: "playpause bonw",
-  //   svgMarkup: video.paused ? playSVG : pauseSVG, // show correct initial icon
-  //   onClick: () => {
-  //     if (video.paused) {
-  //       video.play();
-  //       playButton.innerHTML = pauseSVG;
-  //     } else {
-  //       video.pause();
-  //       playButton.innerHTML = playSVG;
-  //     }
-  //   },
-  //   label: "",
-  //   ariaLabel: "Play/Pause"
-  // });
-
-  // // Append to controls
-  // controlsContainer.appendChild(playButton);
-
+  // --- Play/Pause Button ---
+  const playButton = createIconButton({
+    classSuffix: "playpause bonw",
+    svgMarkup: video.paused ? playSVG : pauseSVG,
+    onClick: () => {
+      if (video.paused) {
+        video.play();
+        playButton.innerHTML = pauseSVG;
+      } else {
+        video.pause();
+        playButton.innerHTML = playSVG;
+      }
+    },
+    label: "",
+    ariaLabel: "Play/Pause"
+  });
+  controlsl.appendChild(playButton);
 
   const removeTogglePlay = togglePlayOnClick(video);
 
@@ -153,11 +166,10 @@ const VideoPlayer = (
   let qualityCleanup = null;
   if (availableResolutions?.length) {
     const { selector, qualities, cleanup } = createQualitySelector(video, baseSrc, availableResolutions);
-    controlsContainer.appendChild(selector);
+    controlsl.appendChild(selector);
     availableQualities = qualities;
     qualityCleanup = cleanup;
   }
-
 
   // --- Mute Button ---
   const muteButton = createIconButton({
@@ -170,10 +182,9 @@ const VideoPlayer = (
     },
     label: ""
   });
-  controlsContainer.appendChild(muteButton);
+  controlsl.appendChild(muteButton);
 
-
-  // Subtitles
+  // --- Subtitles ---
   if (subtitles.length !== 0) {
     const subtitleContainer = document.createElement("div");
     subtitleContainer.className = "subtitle-container";
@@ -181,10 +192,12 @@ const VideoPlayer = (
     setupSubtitles(video, subtitles, subtitleContainer);
   }
 
+  // --- Theater Button ---
   const theaterButton = createIconButton({
     classSuffix: "bonw",
     svgMarkup: maximizeSVG,
     onClick: () => {
+      video.pause(); // fixed bug: missing parentheses
       Vidpop(video.currentSrc, videoId, {
         poster,
         theme,
@@ -197,27 +210,17 @@ const VideoPlayer = (
     label: "",
     ariaLabel: "Activate Theater Mode"
   });
-
   theaterButton.setAttribute("title", "Activate Theater Mode");
-  controlsContainer.appendChild(theaterButton);
+  controlsr.appendChild(theaterButton);
 
-  /* */
-  // let qties = availableQualities.map(q => ({
-  //   label: `${q}p`,
-  //   src: `${baseSrc}-${q}.mp4`
-  // }));
-  // console.log(createControls(video, src, qties, videoId, controlsContainer));
-  // const controlsElement = createControls(video, src, qties, videoId, container);
-  // controlsContainer.appendChild(controlsElement);
-  /* */
-
+  // ---- Build DOM ----
   const fragment = document.createDocumentFragment();
   fragment.appendChild(video);
   fragment.appendChild(controlsContainer);
   videocon.appendChild(fragment);
   container.appendChild(videocon);
 
-  // ---- Cleanup function ----
+  // ---- Cleanup ----
   container.cleanup = () => {
     removeTogglePlay();
     if (qualityCleanup) qualityCleanup();

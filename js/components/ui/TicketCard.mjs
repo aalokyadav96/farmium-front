@@ -1,5 +1,6 @@
 import { applyButtonColors } from "../../utils/lumicolor.js";
 import "../../../css/ui/TicketCard1.css";
+import Button from "../base/Button.js";
 
 const TicketCard = ({ isl, seatstart, seatend, creator, name, price, quantity, color, attributes = {}, onClick }) => {
   const card = document.createElement('div');
@@ -56,7 +57,7 @@ const TicketCard = ({ isl, seatstart, seatend, creator, name, price, quantity, c
 
   // Buy button
   if (!creator && isl) {
-    const button = document.createElement('button');
+    const button = Button("Buy Ticket","",{},"buttonx primary");
     if (quantity > 0) {
       button.textContent = 'Buy Ticket';
       button.addEventListener('click', () => onClick(name, quantity));

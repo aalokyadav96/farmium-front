@@ -1,6 +1,6 @@
 import Button from "../../../components/base/Button.js";
 import { createElement } from "../../../components/createElement.js";
-import { apigFetch } from "../../../api/api.js";
+import { apiFetch } from "../../../api/api.js";
 import {
   renderFarmCards,
   renderFeaturedFarm,
@@ -34,7 +34,7 @@ const state = {
 let currentSidebar, isLoggedIn;
 
 async function fetchFarms(page) {
-  const res = await apigFetch(`/farms?page=${page}&limit=${PAGE_SIZE}`);
+  const res = await apiFetch(`/farms?page=${page}&limit=${PAGE_SIZE}`);
   return res?.farms || [];
 }
 

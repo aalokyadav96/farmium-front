@@ -63,7 +63,7 @@ function createSignupForm() {
   const termsLabel = createElement("label", { class: "auth-terms" }, [" I agree to the Terms & Conditions"]);
   termsLabel.insertBefore(checkbox, termsLabel.firstChild);
 
-  form.append(usernameInput, emailInput, passwordInput, termsLabel, submitButton("Signup"));
+  form.append(emailInput, usernameInput, passwordInput, termsLabel, submitButton("Signup"));
   form.addEventListener("submit", (e) => {
     if (!checkbox.checked) {
       e.preventDefault();

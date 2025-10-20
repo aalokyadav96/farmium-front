@@ -125,44 +125,44 @@ async function init() {
   }
 }
 
-// --- PWA Install Prompt ---
-let deferredPrompt = null;
+// // --- PWA Install Prompt ---
+// let deferredPrompt = null;
 
-window.addEventListener("beforeinstallprompt", (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
+// window.addEventListener("beforeinstallprompt", (e) => {
+//   e.preventDefault();
+//   deferredPrompt = e;
 
-  let installBtn = document.getElementById("install-pwa");
-  if (!installBtn) {
-    installBtn = document.createElement("button");
-    installBtn.id = "install-pwa";
-    installBtn.textContent = "Install App";
-    Object.assign(installBtn.style, {
-      position: "fixed",
-      bottom: "3rem",
-      right: "0",
-      zIndex: "10",
-      padding: "0.6rem 1rem",
-      background: "#1976d2",
-      color: "#fff",
-      border: "none",
-      borderRadius: "4px",
-      cursor: "pointer"
-    });
-    document.body.appendChild(installBtn);
-  }
+//   let installBtn = document.getElementById("install-pwa");
+//   if (!installBtn) {
+//     installBtn = document.createElement("button");
+//     installBtn.id = "install-pwa";
+//     installBtn.textContent = "Install App";
+//     Object.assign(installBtn.style, {
+//       position: "fixed",
+//       top: "3rem",
+//       right: "0",
+//       zIndex: "10",
+//       padding: "0.6rem 1rem",
+//       background: "#1976d2",
+//       color: "#fff",
+//       border: "none",
+//       borderRadius: "4px",
+//       cursor: "pointer"
+//     });
+//     document.body.appendChild(installBtn);
+//   }
 
-  installBtn.style.display = "block";
-  installBtn.addEventListener("click", () => {
-    installBtn.style.display = "none";
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then((choice) => {
-      if (choice.outcome === "accepted") {
-        console.log("PWA installed");
-      }
-      deferredPrompt = null;
-    });
-  }, { once: true });
-});
+//   installBtn.style.display = "block";
+//   installBtn.addEventListener("click", () => {
+//     installBtn.style.display = "none";
+//     deferredPrompt.prompt();
+//     deferredPrompt.userChoice.then((choice) => {
+//       if (choice.outcome === "accepted") {
+//         console.log("PWA installed");
+//       }
+//       deferredPrompt = null;
+//     });
+//   }, { once: true });
+// });
 
 init();

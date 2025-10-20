@@ -1,10 +1,11 @@
 import { createElement } from "./createElement.js";
-import { notifSVG, cartSVG, chatSVG, homeSVG, searchSVG } from "./svgs.js";
+import { notifSVG, cartSVG, chatSVG, menuSVG, searchSVG } from "./svgs.js";
 import { navigate } from "../routes/index.js";
 import { getState, subscribeDeep } from "../state/state.js";
 import { openNotificationsModal } from "../services/notifications/notifModal.js";
+import { toggleSidebar } from "./sidebar.js";
 import { createIconButton } from "../utils/svgIconButton.js";
-import { tmessaging } from "./tumblrSvgs.js";
+// import { tmessaging } from "./tumblrSvgs.js";
 // import { openCartModal } from "../services/cart/cartModal.js";
 
 // --- Update container children based on login state
@@ -15,8 +16,8 @@ function updateNav(container, divs) {
 
   container.appendChild(createIconButton({
     classSuffix: "pause",
-    svgMarkup: homeSVG,
-    onClick: () => navigate("/home"),
+    svgMarkup: menuSVG,
+    onClick: toggleSidebar,
     label: "" // ✅ no text
   }));
 
@@ -28,28 +29,30 @@ function updateNav(container, divs) {
   }));
 
   if (isLoggedIn) {
+
     container.appendChild(createIconButton({
       classSuffix: "play",
-      svgMarkup: tmessaging,
+      svgMarkup: chatSVG,
       onClick: () => navigate("/merechats"),
       // onClick: () => navigate("/discord"),
       label: ""
     }));
-
+    
     container.appendChild(createIconButton({
       classSuffix: "stop",
       svgMarkup: notifSVG,
       onClick: openNotificationsModal,
       label: ""
     }));
-
+    
     container.appendChild(createIconButton({
       classSuffix: "edit",
       svgMarkup: cartSVG,
       onClick: () => navigate("/cart"),
       label: ""
     }));
-    
+
+
     // container.appendChild(createIconButton({
     //   classSuffix: "edit",
     //   svgMarkup: "",

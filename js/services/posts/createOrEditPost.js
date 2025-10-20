@@ -1,4 +1,4 @@
-import { apiFetch } from "../../api/api";
+import { apiFetch, bannerFetch } from "../../api/api";
 import { createElement } from "../../components/createElement";
 import { createFormGroup } from "../../components/createFormGroup.js";
 import Button from "../../components/base/Button.js";
@@ -131,7 +131,7 @@ async function renderPostEditor({ isLoggedIn, postId, contentContainer, mode }) 
           formData.append("image", fileInput.files[0]);
           try {
             // upload immediately to backend, get URL
-            const res = await apiFetch("/posts/upload", "POST", formData, { isForm: true });
+            const res = await bannerFetch("/posts/upload", "POST", formData, { isForm: true });
             block.url = res.url;
             preview.setAttribute("src", resolveImagePath(EntityType.POST, PictureType.PHOTO, block.url));
             syncBlocks();

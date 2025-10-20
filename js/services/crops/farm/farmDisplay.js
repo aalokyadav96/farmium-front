@@ -95,13 +95,13 @@ export async function displayFarm(isLoggedIn, farmId, content) {
     Button("💬 Check reviews", "review-btn", {
       click: () => displayReviews(reviewPlaceholder, isCreator, isLoggedIn, "farm", farmId)
     }, "buttonx"),
-    ...(isLoggedIn ? [
-      Button("📨 Contact Farm", "contact-btn", {
-        click: () => alert(`You can reach ${farm.owner} at ${farm.contact || "N/A"}`)
-      }, "buttonx")
-    ] : [
-      Button("🔒 Log in to interact", "", { click: () => navigate("/login") }, "buttonx")
-    ])
+    // ...(isLoggedIn ? [
+    //   Button("📨 Contact Farm", "contact-btn", {
+    //     click: () => alert(`You can reach ${farm.owner} at ${farm.contact || "N/A"}`)
+    //   }, "buttonx")
+    // ] : [
+    //   Button("🔒 Log in to interact", "", { click: () => navigate("/login") }, "buttonx")
+    // ])
   ]);
 
   const farmCTA = createElement("div", { class: "cta-block" }, [

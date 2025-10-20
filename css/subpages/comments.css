@@ -3,8 +3,6 @@
   width: 100%;
   backdrop-filter: blur(12px);
   border-radius: 12px;
-  padding: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   max-width: 720px;
   margin: auto;
 }
@@ -28,10 +26,10 @@
 /* Individual comment */
 .comments-section .comment {
   display: flex;
+  align-items: flex-start;
   gap: 12px;
-  border-radius: 10px;
-  padding: 12px;
-  border: 1px solid var(--color-fg);
+  padding: 6px;
+  border-bottom: 1px solid var(--color-fg);
   transition: box-shadow 0.3s ease;
 }
 

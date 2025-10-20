@@ -4,7 +4,7 @@ import { getState } from "../../state/state.js";
 import { displayUserProfileData } from "./otherUserProfileService.js";
 // import { displayFollowSuggestions } from "./displayFollowSugg.js";
 import {  createProfileDetails, createStatistics } from "./profileGenHelpers.js";
-import { createBanner, createProfilePicture } from "./generators.js";
+import { createBanner, createAvatar } from "./generators.js";
 import { othusrdata } from "./otheruserdata.js";
 import { createElement } from "../../components/createElement.js";
 
@@ -38,7 +38,7 @@ function profilGen(profile, isLoggedIn) {
     appendChildren(
         section,
         createBanner(profile, isLoggedIn),
-        createProfilePicture(profile),
+        createAvatar(profile),
         createProfileDetails(profile, isLoggedIn),
         createStatistics(profile),
         suggs

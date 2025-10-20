@@ -24,7 +24,7 @@ a:hover {
 }
 
 p {
-  overflow: clip;
+  overflow-wrap: break-word;
 }
 
 hr {
@@ -42,20 +42,20 @@ hr {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
-.input {
+/* .input {
   width: 100%;
   padding: var(--space-sm) var(--space-md);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   font-size: var(--font-size-base);
-  background-color: var(--color-bg);
-  color: var(--color-fg);
+  background-color: var(--color-fg);
+  color: var(--color-bg);
 }
 
 .input:focus {
   border-color: var(--color-accent);
   outline: none;
-}
+} */
 
 .label {
   display: block;
@@ -87,8 +87,6 @@ hr {
 svg {
   fill: none;
   stroke-width: 1.8;
-  max-width: 3rem;
-  max-height: 3rem;
   stroke: var(--stroke-svg);
   display: block;
   /* filter: drop-shadow(1px 1px #ddd); */
@@ -186,14 +184,14 @@ textarea {
 }
 
 main {
-  padding: 1rem;
+  padding: 0.6rem;
   min-height: 100vh;
   margin-bottom: 4rem;
 }
 
 .places-main, .catalogue-main, .events-main, .baitosmain, .worker-main, .posts-main, .recipes-main, .artists-main, .cropspage {
   flex: 3;
-  padding: 0.4rem;
+  /* padding: 0.4rem; */
 }
 
 .places-main h2, .catalogue-main h2, .events-main h2, .baitosmain h2, .worker-main h2, .posts-main h2, .recipes-main h2, .artists-main h2, .cropspage h2 {
@@ -262,21 +260,51 @@ aside h3 {
   white-space: normal;          /* Ensure it wraps */
 }
 
+#modalcon input {
+  padding: 0.4rem;
+}
+
+.chipscon {
+  display: grid;
+  width: 100%;
+}
 
 .category-chips {
+  flex-wrap: nowrap;
   display: flex;
-  margin: 0.5rem 0;
   overflow-x: auto;
+  width: 100%;
+  padding: 0 3px 0 3px;
+  overflow-y: hidden;
+  padding-right: 0.4rem;
 }
 
-.category-chips .category-chip {
-  padding: 0.5rem 0.75rem;
-  border: 1px solid #ccc;
-  cursor: pointer;
-  border-radius: 16px;
+.category-chip {
+  padding: 0.2rem 4px;
+  overflow: hidden;
+  border-radius: 3px;
+  text-align: center;
 }
 
-.category-chips .category-chip.active {
-  background: #007bff;
-  color: white;
+.category-chip:hover {
+  background-color: #e0e0e0;
 }
+
+/* @media (max-width: 600px) {
+  .category-chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: flex-start;
+    scrollbar-width: none;
+  }
+
+  .category-chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .category-chip {
+    flex: 0 0 auto;
+    font-size: 13px;
+    padding: 6px 12px;
+  }
+} */

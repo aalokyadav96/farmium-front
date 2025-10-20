@@ -1,15 +1,13 @@
 import { getState, isAdmin, subscribeDeep } from "../state/state.js";
 import { navigate } from "../routes/index.js";
 import { logout } from "../services/auth/authService.js";
-import { settingsSVG, moonSVG, menuSVG, profileSVG, shopBagSVG, logoutSVG, cardSVG } from "./svgs.js";
+import { settingsSVG, moonSVG, profileSVG, shopBagSVG, logoutSVG, cardSVG } from "./svgs.js";
 import { createElement } from "../components/createElement.js";
-import { sticky } from "./sticky.js";
-import { toggleSidebar } from "./sidebar.js";
 import { resolveImagePath, EntityType, PictureType } from "../utils/imagePaths.js";
 import Imagex from "./base/Imagex.js";
-// import {decodeJWT} from "../services/auth/authService.js";
+import { sticky } from "./sticky.js";
 
-// Theme logic
+// --- Theme logic ---
 const themes = ["light", "dark", "solarized", "dimmed"];
 let currentThemeIndex = 0;
 
@@ -46,10 +44,11 @@ function createDropdownMenu(id, labelText, items) {
   const menu = createElement("div", { class: "menu-content", "aria-label": labelText });
 
   items.forEach(({ href, text }) => {
-    const link = createElement("a", { class: "menu-item", href }, [text]);
+    const link = createElement("a", { class: "menu-item" }, [text]);
     link.addEventListener("click", (e) => {
       e.preventDefault();
       navigate(href);
+      menu.classList.toggle("open");
     });
     menu.appendChild(link);
   });
@@ -59,7 +58,7 @@ function createDropdownMenu(id, labelText, items) {
     menu.classList.toggle("open");
   });
 
-  return createElement("div", { class: "dropdown" }, [toggle, menu]);
+  return createElement("div", { class: "logoicon dropdown" }, [toggle, menu]);
 }
 
 // --- Profile Section ---
@@ -69,10 +68,6 @@ export function createProfileSection(userId, username) {
     alt: "Profile",
     classes: "profile-pic"
   });
-
-  // img.onerror = () => {
-  //   img.src = resolveImagePath(EntityType.DEFAULT, PictureType.STATIC, "placeholder.png");
-  // };
 
   const toggle = createElement("div", { class: "profile-toggle", tabIndex: 0 }, [img]);
 
@@ -91,7 +86,7 @@ export function createProfileSection(userId, username) {
     const iconSpan = createElement("span", {});
     if (icon) iconSpan.innerHTML = icon;
 
-    const link = createElement("a", { class: "menu-item", href }, [iconSpan, label]);
+    const link = createElement("a", { class: "menu-item" }, [iconSpan, label]);
     link.addEventListener("click", (e) => {
       e.preventDefault();
       navigate(href);
@@ -104,7 +99,6 @@ export function createProfileSection(userId, username) {
   logoutBtn.innerHTML = logoutSVG;
   logoutBtn.appendChild(createElement("span", {}, ["Logout"]));
   logoutBtn.addEventListener("click", logout);
-
   menu.appendChild(logoutBtn);
 
   toggle.addEventListener("click", (e) => {
@@ -119,7 +113,7 @@ export function createProfileSection(userId, username) {
     }
   });
 
-  document.addEventListener("click", () => menu.classList.remove("open"));
+  document.addEventListener("click", () => menu.classList.remove("open"), { once: false });
 
   return createElement("div", { class: "dropdown" }, [toggle, menu]);
 }
@@ -129,11 +123,9 @@ function renderUserSection() {
   const container = createElement("div", { class: "user-area" });
 
   function update() {
-    container.innerHTML = "";
+    container.replaceChildren();
     const token = getState("token");
     const userId = getState("user");
-    // const decoded = decodeJWT(token);
-    // const username = decoded.username;
     const username = getState("username");
 
     if (token && userId) {
@@ -145,7 +137,6 @@ function renderUserSection() {
     }
   }
 
-  // --- Subscribe to deep state changes
   subscribeDeep("token", update);
   subscribeDeep("userProfile.role", update);
 
@@ -157,13 +148,12 @@ function renderUserSection() {
 // --- Header Builder ---
 function createHeader() {
   const header = document.getElementById("pageheader");
-  if (!header) return;
+  if (!header || header.hasChildNodes()) return; // Render only once
 
   header.className = "main-header";
 
   const logo = createElement("div", { class: "logo" }, [
-    createIconButton(menuSVG, null, toggleSidebar),
-    createElement("a", { href: "/home", class: "logo-link" }, ["Itanium"])
+    createElement("a", { href: "/home", class: "logo-link" }, ["Farmium"])
   ]);
 
   const sky = createElement("div", { class: "hflexcen" }, []);
@@ -176,25 +166,26 @@ function createHeader() {
   }));
 
   const nav = createElement("div", { class: "header-content" }, []);
-  
+
   const token = getState("token");
   if (token) {
-  const createLinks = [
-    { href: "/create-event", text: "Event" },
-    { href: "/create-place", text: "Place" },
-    { href: "/create-artist", text: "Artist" },
-    { href: "/create-post", text: "Post" },
-    { href: "/create-baito", text: "Baito" },
-    { href: "/create-farm", text: "Farm" },
-    { href: "/create-itinerary", text: "Itinerary" }
-  ];
-  nav.appendChild(createDropdownMenu("create-menu", "Create", createLinks));
-}
+    const createLinks = [
+      // { href: "/create-event", text: "Event" },
+      // { href: "/create-place", text: "Place" },
+      // { href: "/create-artist", text: "Artist" },
+      // { href: "/create-post", text: "Post" },
+      // { href: "/create-baito", text: "Baito" },
+      { href: "/create-farm", text: "Farm" },
+      // { href: "/create-itinerary", text: "Itinerary" }
+    ];
+    nav.appendChild(createDropdownMenu("create-menu", "Create", createLinks));
+  }
 
   nav.appendChild(createIconButton(moonSVG, null, toggleTheme));
   nav.appendChild(renderUserSection());
 
-  header.replaceChildren(logo, sky, nav);
+  header.append(logo, sky, nav);
+
   loadTheme();
 }
 

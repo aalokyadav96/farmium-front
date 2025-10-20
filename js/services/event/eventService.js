@@ -8,11 +8,12 @@ import Notify from "../../components/ui/Notify.mjs";
 import { displayEventDetails } from "./displayEventDetails.js";
 import { displayEventVenue, displayEventFAQ, displayEventReviews, displayLostAndFound, displayContactDetails } from "./eventTabs.js";
 import { editEvent } from "./creadit.js";
-import { displayTickets } from "../tickets/ticketService.js";
+import { displayTickets } from "../tickets/displayTickets.js";
 import { displayMerchandise } from "../merch/merchService.js";
-import { displayMedia } from "../media/mediaService.js";
+import { displayMedia } from "../media/ui/mediaGallery.js";
 // import { persistTabs } from "../../utils/persistTabs.js";
 import { createTabs } from "../../components/ui/createTabs.js";
+import {showSeatingBanner} from "../tickets/seatingBanner.js";
 
 
 // --- Helpers ---
@@ -75,8 +76,8 @@ const setupTabs = (eventData, eventId, isCreator, isLoggedIn) => {
 
     if (status === "active") {
         tabs.push(
-            { title: "FAQ", id: "faq-tab", render: (c) => displayEventFAQ(c, isCreator, eventId, eventData.faqs) },
             { title: "Tickets", id: "tickets-tab", render: (c) => displayTickets(c, eventData.tickets, eventId, eventData.title, isCreator, isLoggedIn) },
+            { title: "FAQ", id: "faq-tab", render: (c) => displayEventFAQ(c, isCreator, eventId, eventData.faqs) },
             { title: "Merchandise", id: "merch-tab", render: (c) => displayMerchandise(c, eventData.merch, "event", eventId, isCreator, isLoggedIn) },
         );
     } else {
@@ -101,6 +102,8 @@ async function displayEvent(isLoggedIn, eventId, content) {
         const isCreator = isLoggedIn && getState("user") === eventData.creatorid;
 
         await displayEventDetails(container, eventData, isCreator, isLoggedIn);
+
+        container.appendChild(showSeatingBanner(eventData, isCreator));
 
         const tabs = setupTabs(eventData, eventId, isCreator, isLoggedIn);
 
@@ -127,34 +130,11 @@ async function displayEvent(isLoggedIn, eventId, content) {
 }
 
 
-// Display Sections (direct sections instead of tabs)
-async function displayEventSections(wrapper, eventData, isCreator, isLoggedIn) {
-    wrapper.replaceChildren();
-
-    await displayEventDetails(wrapper, eventData, isCreator, isLoggedIn);
-
-    const tabsContainer = createElement("div", { class: "tabs-container" });
-    wrapper.appendChild(tabsContainer);
-
-    const sections = [
-        { check: eventData.tickets?.length, render: () => displayTickets(createSection(tabsContainer), eventData.tickets, eventData.eventid, eventData.title, isCreator, isLoggedIn) },
-        { check: eventData.faqs?.length, render: () => displayEventFAQ(createSection(tabsContainer), isCreator, eventData.eventid, eventData.faqs) },
-        { check: eventData.merch?.length, render: () => displayMerchandise(createSection(tabsContainer), eventData.merch, eventData.eventid, isCreator, isLoggedIn) },
-        { check: eventData.reviews?.length, render: () => displayEventReviews(createSection(tabsContainer), eventData.eventid, isCreator, isLoggedIn) },
-        { check: eventData.media?.length, render: () => displayMedia(createSection(tabsContainer), "event", eventData.eventid, isLoggedIn) },
-        { check: eventData.lostandfound?.length, render: () => displayLostAndFound(createSection(tabsContainer), eventData.lostandfound) },
-        { check: eventData.contactInfo, render: () => displayContactDetails(createSection(tabsContainer), eventData.contactInfo) }
-    ];
-
-    sections.forEach(({ check, render }) => check && render());
-}
-
 // --- Exports ---
 export {
     editEvent,
     fetchEventData,
     displayEvent,
-    displayEventSections,
     deleteEvent,
 };
 

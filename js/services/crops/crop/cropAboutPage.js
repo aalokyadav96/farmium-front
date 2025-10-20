@@ -1,3 +1,4 @@
+import Imagex from "../../../components/base/Imagex.js";
 import { createElement } from "../../../components/createElement.js";
 
 export async function displayAboutCrop(contentContainer, cropID, isLoggedIn) {
@@ -27,10 +28,10 @@ function createHeaderSection(common, scientific) {
 }
 
 function createImageSection(src, alt) {
-    const img = createElement("img", {
+    const img = Imagex( {
         src,
         alt,
-        class: "crop-main-image",
+        clasess: "crop-main-image",
         loading: "lazy"
     });
     return createElement("section", { class: "crop-image-section" }, [img]);

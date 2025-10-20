@@ -62,11 +62,11 @@ async function createChatContent(post, media, isOwn = false) {
       }
   }
 
-  // optional <figcaption> for assistive context
-  const caption = createElement("figcaption", { class: "visually-hidden" }, [
-    `${post.type} attachment`
-  ]);
-  mediaContainer.appendChild(caption);
+  // // optional <figcaption> for assistive context
+  // const caption = createElement("figcaption", { class: "visually-hidden" }, [
+  //   `${post.type} attachment`
+  // ]);
+  // mediaContainer.appendChild(caption);
 
   bubble.appendChild(mediaContainer);
   return bubble;

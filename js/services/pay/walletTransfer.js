@@ -1,4 +1,4 @@
-import { apipFetch } from "../../api/api.js";
+import { apiFetch } from "../../api/api.js";
 import { createElement } from "../../components/createElement.js";
 import { Button } from "../../components/base/Button.js";
 import { v4 as uuidv4 } from "https://jspm.dev/uuid";
@@ -31,7 +31,7 @@ export function WalletTransfer({ onBalanceChange }) {
             transferBtn.disabled = true;
             try {
                 const idempotencyKey = uuidv4();
-                const res = await apipFetch("/wallet/transfer", "POST", {
+                const res = await apiFetch("/wallet/transfer", "POST", {
                     recipient,
                     amount
                 }, { headers: { "Idempotency-Key": idempotencyKey } });

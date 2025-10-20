@@ -8,13 +8,13 @@
   background-color: var(--color-bg);
   color: var(--color-fg);
 }
-
+/* 
 .artists-main {
   flex: 1 1 70%;
-}
+} */
 
 .artists-aside {
-  flex: 1 1 25%;
+  /* flex: 1 1 25%; */
   background-color: var(--color-surface);
   padding: var(--space-md);
   border-radius: var(--radius-md);
@@ -42,7 +42,11 @@
   font-size: var(--font-size-base);
 }
 
-.artists-controls {
+.artists-controls input {
+  padding: 0.4rem;
+}
+
+  .artists-controls {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-sm);

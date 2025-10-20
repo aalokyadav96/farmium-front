@@ -37,9 +37,8 @@ async function signup(event) {
 
   try {
     const res = await apiFetch("/auth/register", "POST", { username, email, password });
-    if (res?.status === 200) {
+    if (res?.status === 200 || res?.status === 201) {
       Notify("Signup successful! You can now log in.", { type: "success", duration: 3000, dismissible: true });
-      // After signup, redirect user to login page
       localStorage.setItem("redirectAfterLogin", "/home");
       navigate("/login");
     } else {
@@ -65,11 +64,11 @@ async function login(event) {
   try {
     const res = await apiFetch("/auth/login", "POST", { username, password });
 
-    if (res?.status === 200) {
-      const { token, refreshToken, userid } = res.data;
+    if (res?.status === 200 && res?.data?.token) {
+      const { token, userid } = res.data;
 
-      // Persist token and user
-      setState({ token, refreshToken, user: userid }, true);
+      // Persist token and user (refresh token is stored in HttpOnly cookie by backend)
+      setState({ token, user: userid }, true);
 
       const decoded = decodeJWT(token);
       if (decoded?.username) setState({ username: decoded.username }, true);
@@ -110,6 +109,7 @@ async function logout() {
   }
 
   try {
+    // apiFetch will include cookies by default (see api wrapper)
     await apiFetch("/auth/logout", "POST");
   } catch (err) {
     console.error("Backend logout failed:", err);
@@ -121,8 +121,7 @@ async function logout() {
 
 // --- Example reactive subscriptions ---
 subscribeDeep("token", (t) => {
-  // if (t) console.log("User logged in:", t);
-  // else console.log("User logged out");
+  // reactive hook left intentionally minimal
 });
 
 subscribeDeep("userProfile.role", (role) => {

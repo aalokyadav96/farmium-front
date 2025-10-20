@@ -41,7 +41,7 @@ export function renderCropCard(crop, mode = "catalogue") {
   const card = createElement("div", { class: "crop-card" });
 
   const img = Imagex({
-    src: resolveImagePath(EntityType.CROP, PictureType.THUMB, crop.imageUrl),
+    src: resolveImagePath(EntityType.CROP, PictureType.THUMB, crop.banner),
     alt: crop.name,
     class: "crop-card-image",
     loading: "lazy"
@@ -94,11 +94,12 @@ export function renderCropInterface(container, cropData) {
 
   const searchBox = createElement("input", {
     type: "text",
+    name: "search",
     placeholder: "Search crops…",
     class: "search-box"
   });
 
-  const sortSelect = createElement("select", { class: "sort-box" }, [
+  const sortSelect = createElement("select", { class: "sort-box", name:"sortby" }, [
     createElement("option", { value: "az" }, ["A → Z"]),
     createElement("option", { value: "za" }, ["Z → A"])
   ]);
