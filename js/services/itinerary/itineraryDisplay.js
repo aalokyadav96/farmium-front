@@ -1,4 +1,4 @@
-import { apiFetch, apiFetch } from "../../api/api.js";
+import { apiFetch } from "../../api/api.js";
 import Button from "../../components/base/Button.js";
 import { createElement } from "../../components/createElement.js";
 import Modal from "../../components/ui/Modal.mjs";

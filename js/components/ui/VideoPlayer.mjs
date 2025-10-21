@@ -45,9 +45,8 @@ const createVideoElement = (src, resolutions, poster) => {
   const defaultSrc = resolutions?.length
     ? determineInitialSource(baseSrc, resolutions)
     : src;
-
   video.src = defaultSrc;
-  video.poster = poster || `${baseSrc}.jpg`;
+  video.poster = poster || `${baseSrc}.png`;
   return video;
 };
 

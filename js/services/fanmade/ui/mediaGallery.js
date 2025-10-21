@@ -1,96 +1,100 @@
 import { createElement } from "../../../components/createElement.js";
-import Button from "../../../components/base/Button.js";
-import Imagex from "../../../components/base/Imagex.js";
-import Notify from "../../../components/ui/Notify.mjs";
-import { getState } from "../../../state/state.js";
-import { resolveImagePath, PictureType, EntityType } from "../../../utils/imagePaths.js";
-import { reportPost } from "../../reporting/reporting.js";
-import Sightbox from "../../../components/ui/SightBox.mjs";
-import { fetchMedia, deleteMedia } from "../api/mediaApi.js";
+import { fetchMedia } from "../api/mediaApi.js";
 import { showMediaUploadForm } from "./mediaUploadForm.js";
+import Notify from "../../../components/ui/Notify.mjs";
+import {
+  lazyMediaObserver,
+  clear,
+  groupMedia,
+  createAddMediaButton,
+  createMediaActions,
+  confirmDelete
+} from "../../media/mediaCommon.js";
+import { resolveImagePath, PictureType, EntityType } from "../../../utils/imagePaths.js";
 import VideoPlayer from "../../../components/ui/VideoPlayer.mjs";
+import Imagex from "../../../components/base/Imagex.js";
+import {translateText} from "../translate.js";
 
 /* ------------------------------------------------------
-   LAZY MEDIA OBSERVER (shared)
+   BUILD FRAGMENT WITH MEDIA
 ------------------------------------------------------ */
-const lazyMediaObserver = new IntersectionObserver(entries => {
-  for (const { target, isIntersecting } of entries) {
-    if (!target.dataset.src) continue;
-    if (isIntersecting) {
-      target.src = target.dataset.src;
-      delete target.dataset.src;
-      if (target.tagName === "VIDEO") target.load();
-      lazyMediaObserver.unobserve(target);
-    } else if (target.tagName === "VIDEO") {
-      target.pause();
+function buildMediaFragment(mediaData, entityType, entityId, isLoggedIn, prefix = "media") {
+  const frag = document.createDocumentFragment();
+
+  for (const group of groupMedia(mediaData)) {
+    const wrapper = createElement("div", { class: `${prefix}-group` });
+
+    for (const [i, media] of group.entries()) {
+      if (!media.url) continue;
+
+      const figure = createElement("figure", { class: `${prefix}-item`, "data-id": media.mediaid });
+      const thumbSrc = resolveImagePath(EntityType.MEDIA, PictureType.THUMB, `${media.url}.jpg`);
+      let mediaEl;
+
+      if (media.type === "image") {
+        mediaEl = Imagex({
+          "data-src": thumbSrc,
+          classes: `${prefix}-img`,
+          "data-index": i
+        });
+        lazyMediaObserver.observe(mediaEl);
+      } else if (media.type === "video") {
+        const videoSrc = resolveImagePath(EntityType.MEDIA, PictureType.VIDEO, `${media.url}${media.extn || ".mp4"}`);
+        mediaEl = VideoPlayer({
+          src: videoSrc,
+          poster: thumbSrc,
+          controls: false,
+          autoplay: false,
+          muted: true,
+          loop: false,
+          theme: "light",
+          subtitles: [],
+          availableResolutions: []
+        }, `video-${i}`);
+      } else {
+        mediaEl = createElement("div", { class: `${prefix}-unsupported` }, [`Unsupported media type: ${media.type}`]);
+      }
+
+      const captionText = media.caption || "";
+      const caption = createElement("figcaption", { class: `${prefix}-caption` }, [captionText]);
+      const translationBox = createElement("div", { class: "translation-container", style: "display:none;" });
+      const toggle = captionText
+        ? createElement("span", {
+            class: "translate-toggle",
+            "data-state": "original",
+            events: {
+              click: async (e) => {
+                e.stopPropagation();
+                await handleTranslationToggle(toggle, captionText, translationBox);
+              }
+            }
+          }, ["See Translation"])
+        : null;
+
+      const actions = createMediaActions(media, entityType, entityId, isLoggedIn, confirmDelete, prefix);
+
+      figure.append(mediaEl, caption);
+      if (toggle) figure.append(toggle, translationBox);
+      figure.append(actions);
+      wrapper.append(figure);
     }
+
+    frag.append(wrapper);
   }
-}, { rootMargin: "150px 0px", threshold: 0.05 });
 
-/* ------------------------------------------------------
-   HELPERS
------------------------------------------------------- */
-const clear = el => { while (el.firstChild) el.removeChild(el.firstChild); };
-
-const groupMedia = mediaData =>
-  Object.values(mediaData.reduce((acc, m) => {
-    const key = m.mediaGroupId || "ungrouped";
-    (acc[key] ??= []).push(m);
-    return acc;
-  }, {}));
-
-const createAddMediaButton = (isLoggedIn, entityType, entityId, list) => {
-  if (!isLoggedIn) return null;
-  return Button("Add Media", "", {
-    click: () => showMediaUploadForm(isLoggedIn, entityType, entityId, list)
-  }, "button-primary");
-};
-
-/* ------------------------------------------------------
-   TRANSLATION LOGIC
------------------------------------------------------- */
-async function translateText(text) {
-  await new Promise(r => setTimeout(r, 300)); // simulate delay
-  return text ? `[Translated] ${text}` : "";
+  return frag;
 }
 
-async function handleTranslationToggle(toggleEl, originalText, container) {
-  const showing = toggleEl.dataset.state === "translated";
-
-  if (showing) {
-    container.style.display = "none";
-    toggleEl.dataset.state = "original";
-    toggleEl.firstChild.nodeValue = "See Translation";
-    return;
-  }
-
-  if (!container.firstChild) {
-    toggleEl.firstChild.nodeValue = "Translating...";
-    try {
-      const translated = await translateText(originalText);
-      const translatedEl = createElement("p", { class: "translated-text" }, [translated]);
-      container.append(translatedEl);
-    } catch (err) {
-      Notify("Translation failed", { type: "error" });
-      toggleEl.firstChild.nodeValue = "See Translation";
-      return;
-    }
-  }
-
-  container.style.display = "block";
-  toggleEl.dataset.state = "translated";
-  toggleEl.firstChild.nodeValue = "Hide Translation";
-}
-
 /* ------------------------------------------------------
-   MAIN ENTRY
+   DISPLAY GALLERY
 ------------------------------------------------------ */
-export async function displayMedia(content, entityType, entityId, isLoggedIn) {
+
+export async function displayFanMedia(content, entityType, entityId, isLoggedIn) {
   clear(content);
 
-  const title = createElement("h2", { class: "fanmade-title" }, ["Media Gallery"]);
-  const list = createElement("div", { class: "fanmade-list" });
+  const title = createElement("h2", { class: "fanmade-title" }, ["Fanmade Gallery"]);
   const loader = createElement("p", { class: "loading" }, ["Loading media..."]);
+  const list = createElement("div", { class: "fanmade-list" });
   content.append(title, loader);
 
   try {
@@ -99,209 +103,189 @@ export async function displayMedia(content, entityType, entityId, isLoggedIn) {
 
     if (!Array.isArray(mediaData) || mediaData.length === 0) {
       content.append(createElement("p", {}, ["No media available."]));
-      const addBtn = createAddMediaButton(isLoggedIn, entityType, entityId, list);
+      const addBtn = createAddMediaButton(isLoggedIn, entityType, entityId, list, showMediaUploadForm);
       if (addBtn) content.append(addBtn);
       return;
     }
 
-    const addBtn = createAddMediaButton(isLoggedIn, entityType, entityId, list);
+    const frag = buildMediaFragment(mediaData, entityType, entityId, isLoggedIn, "fanmade");
+    list.append(frag);
+
+    const addBtn = createAddMediaButton(isLoggedIn, entityType, entityId, list, showMediaUploadForm);
     if (addBtn) content.append(addBtn);
 
-    const grouped = groupMedia(mediaData);
-    const frag = document.createDocumentFragment();
-
-    grouped
-      .map(group => renderMediaGroup(group, isLoggedIn, entityType, entityId))
-      .forEach(g => frag.append(g));
-
-    list.append(frag);
-    bindMediaInteractions(list);
     content.append(list);
+
+    list.addEventListener("click", e => {
+      const img = e.target.closest(".fanmade-img");
+      if (img) return;
+    });
   } catch (err) {
-    console.error("Media fetch error:", err);
-    loader.replaceWith(createElement("p", { class: "error" }, ["Failed to load media."]));
+    console.error("Fan media fetch error:", err);
+    loader.replaceWith(createElement("p", { class: "error" }, ["Failed to load fan media."]));
   }
 }
 
-/* ------------------------------------------------------
-   RENDER GROUP
------------------------------------------------------- */
-function renderMediaGroup(group, isLoggedIn, entityType, entityId) {
-  const wrapper = createElement("div", { class: "fanmade-group" });
-  const frag = document.createDocumentFragment();
+// import { createElement } from "../../../components/createElement.js";
+// import { fetchMedia } from "../api/mediaApi.js";
+// import { showMediaUploadForm } from "./mediaUploadForm.js";
+// import Notify from "../../../components/ui/Notify.mjs";
+// import {
+//   lazyMediaObserver,
+//   clear,
+//   groupMedia,
+//   createAddMediaButton,
+//   createMediaActions,
+//   confirmDelete
+// } from "../../media/mediaCommon.js";
+// import { resolveImagePath, PictureType, EntityType } from "../../../utils/imagePaths.js";
+// import VideoPlayer from "../../../components/ui/VideoPlayer.mjs";
+// import Imagex from "../../../components/base/Imagex.js";
 
-  group
-    .map((m, i) => renderMediaItem(m, i, isLoggedIn, entityType, entityId))
-    .filter(Boolean)
-    .forEach(el => frag.append(el));
+// /* ------------------------------------------------------
+//    TRANSLATION HELPERS
+// ------------------------------------------------------ */
+// async function translateText(text) {
+//   await new Promise(r => setTimeout(r, 300)); // simulate delay
+//   return `[Translated] ${text}`;
+// }
 
-  wrapper.append(frag);
-  return wrapper;
-}
+// async function handleTranslationToggle(toggle, originalText, container) {
+//   const showing = toggle.dataset.state === "translated";
 
-/* ------------------------------------------------------
-   RENDER MEDIA ITEM
------------------------------------------------------- */
-function renderMediaItem(media, index, isLoggedIn, entityType, entityId) {
-  if (!media.url) return null;
+//   if (showing) {
+//     container.style.display = "none";
+//     toggle.dataset.state = "original";
+//     toggle.firstChild.nodeValue = "See Translation";
+//     return;
+//   }
 
-  const figure = createElement("figure", { class: "fanmade-item", "data-id": media.mediaid });
-  const mediaEl = createMediaElement(media, index);
+//   if (!container.firstChild) {
+//     toggle.firstChild.nodeValue = "Translating...";
+//     try {
+//       const translated = await translateText(originalText);
+//       container.append(createElement("p", { class: "translated-text" }, [translated]));
+//     } catch {
+//       Notify("Translation failed", { type: "error" });
+//     }
+//   }
 
-  if (media.type === "image" && mediaEl.tagName === "IMG") {
-    lazyMediaObserver.observe(mediaEl);
-  }
+//   container.style.display = "block";
+//   toggle.dataset.state = "translated";
+//   toggle.firstChild.nodeValue = "Hide Translation";
+// }
 
-  const captionText = media.caption || "";
-  const caption = createElement("figcaption", { class: "fanmade-caption" }, [captionText]);
-  const translationContainer = createElement("div", { class: "translation-container", style: "display:none;" });
-  const translateToggle = captionText
-    ? createElement("span", {
-        class: "translate-toggle",
-        "data-state": "original",
-        events: {
-          click: async (e) => {
-            e.stopPropagation();
-            await handleTranslationToggle(translateToggle, captionText, translationContainer);
-          }
-        }
-      }, ["See Translation"])
-    : null;
+// /* ------------------------------------------------------
+//    BUILD FRAGMENT WITH VIDEO PLAYER INSIDE
+// ------------------------------------------------------ */
+// function buildFanMediaFragment(mediaData, entityType, entityId, isLoggedIn) {
+//   const frag = document.createDocumentFragment();
 
-  const actions = createMediaActions(media, entityType, entityId, isLoggedIn);
+//   for (const group of groupMedia(mediaData)) {
+//     const wrapper = createElement("div", { class: "fanmade-group" });
 
-  figure.append(mediaEl, caption);
-  if (translateToggle) figure.append(translateToggle, translationContainer);
-  figure.append(actions);
-  return figure;
-}
+//     for (const [i, media] of group.entries()) {
+//       if (!media.url) continue;
 
-/* ------------------------------------------------------
-   CREATE MEDIA ELEMENT
------------------------------------------------------- */
-function createMediaElement(media, index) {
-  const type = media.type;
-  const thumbSrc = resolveImagePath(EntityType.MEDIA, PictureType.THUMB, `${media.url}.jpg`);
+//       const figure = createElement("figure", { class: "fanmade-item", "data-id": media.mediaid });
+//       const classPrefix = "fanmade";
+//       const thumbSrc = resolveImagePath(EntityType.MEDIA, PictureType.THUMB, `${media.url}.jpg`);
+//       let mediaEl;
 
-  if (type === "image") {
-    return Imagex({ "data-src": thumbSrc, classes: "fanmade-img", "data-index": index });
-  }
+//       if (media.type === "image") {
+//         mediaEl = Imagex({
+//           "data-src": thumbSrc,
+//           classes: `${classPrefix}-img`,
+//           "data-index": i
+//         });
+//         lazyMediaObserver.observe(mediaEl);
+//       } else if (media.type === "video") {
+//         const videoSrc = resolveImagePath(EntityType.MEDIA, PictureType.VIDEO, `${media.url}${media.extn || ".mp4"}`);
+//         mediaEl = VideoPlayer({
+//           src: videoSrc,
+//           poster: thumbSrc,
+//           controls: false,
+//           autoplay: false,
+//           muted: true,
+//           loop: false,
+//           theme: "light",
+//           subtitles: [],
+//           availableResolutions: []
+//         }, `video-${i}`);
+//       } else {
+//         mediaEl = createElement("div", { class: `${classPrefix}-unsupported` }, [`Unsupported media type: ${media.type}`]);
+//       }
 
-  if (type === "video") {
-    const videoSrc = resolveImagePath(EntityType.MEDIA, PictureType.VIDEO, `${media.url}${media.extn || ".mp4"}`);
-    const overlay = createElement("div", { class: "video-play-overlay" }, ["▶"]);
-    const thumb = Imagex({ src: thumbSrc, classes: "fanmade-video-thumb", "data-index": index });
-    const wrapper = createElement("div", { class: "video-wrapper" }, [thumb, overlay]);
-    Object.assign(wrapper.dataset, { src: videoSrc, thumb: thumbSrc, index, type });
-    return wrapper;
-  }
+//       const captionText = media.caption || "";
+//       const caption = createElement("figcaption", { class: "fanmade-caption" }, [captionText]);
+//       const translationBox = createElement("div", { class: "translation-container", style: "display:none;" });
+//       const toggle = captionText
+//         ? createElement("span", {
+//             class: "translate-toggle",
+//             "data-state": "original",
+//             events: {
+//               click: async (e) => {
+//                 e.stopPropagation();
+//                 await handleTranslationToggle(toggle, captionText, translationBox);
+//               }
+//             }
+//           }, ["See Translation"])
+//         : null;
 
-  return createElement("div", { class: "fanmade-unsupported" }, [`Unsupported media type: ${type}`]);
-}
+//       const actions = createMediaActions(media, entityType, entityId, isLoggedIn, confirmDelete, classPrefix);
 
-/* ------------------------------------------------------
-   MEDIA ACTIONS
------------------------------------------------------- */
-function createMediaActions(media, entityType, entityId, isLoggedIn) {
-  const actions = createElement("div", { class: "fanmade-actions" });
-  const currentUser = getState("user");
+//       figure.append(mediaEl, caption);
+//       if (toggle) figure.append(toggle, translationBox);
+//       figure.append(actions);
+//       wrapper.append(figure);
+//     }
 
-  if (isLoggedIn && currentUser === media.creatorid) {
-    actions.append(Button("Delete", "", {
-      click: () => confirmDelete(media.mediaid, entityType, entityId)
-    }, "delete-fanmade-btn"));
-  }
+//     frag.append(wrapper);
+//   }
 
-  actions.append(Button("Report", "", {
-    click: () => reportPost(media.mediaid, "media")
-  }, "report-btn"));
+//   return frag;
+// }
 
-  return actions;
-}
+// /* ------------------------------------------------------
+//    MAIN ENTRY
+// ------------------------------------------------------ */
+// export async function displayFanMedia(content, entityType, entityId, isLoggedIn) {
+//   clear(content);
 
-/* ------------------------------------------------------
-   DELETE HANDLER
------------------------------------------------------- */
-async function confirmDelete(mediaId, entityType, entityId) {
-  if (!confirm("Delete this media?")) return;
+//   const title = createElement("h2", { class: "fanmade-title" }, ["Fanmade Gallery"]);
+//   const loader = createElement("p", { class: "loading" }, ["Loading media..."]);
+//   const list = createElement("div", { class: "fanmade-list" });
+//   content.append(title, loader);
 
-  try {
-    const res = await deleteMedia(mediaId, entityType, entityId);
-    if (res.status === 204) {
-      const item = document.querySelector(`.fanmade-item[data-id="${mediaId}"]`);
-      const parent = item?.parentElement;
-      if (item) {
-        item.classList.add("fade-out");
-        setTimeout(() => {
-          item.remove();
-          if (parent && !parent.querySelector(".fanmade-item")) parent.remove();
-        }, 300);
-      }
-      Notify("Media deleted.", { type: "success" });
-    } else {
-      Notify("Failed to delete media.", { type: "error" });
-    }
-  } catch (err) {
-    console.error(err);
-    Notify("Error deleting media.", { type: "error" });
-  }
-}
+//   try {
+//     const mediaData = await fetchMedia(entityType, entityId);
+//     loader.remove();
 
-/* ------------------------------------------------------
-   MEDIA INTERACTIONS (delegated)
------------------------------------------------------- */
-function bindMediaInteractions(container) {
-  container.addEventListener("click", (e) => {
-    const img = e.target.closest(".fanmade-img");
-    const vid = e.target.closest(".video-wrapper");
+//     if (!Array.isArray(mediaData) || mediaData.length === 0) {
+//       content.append(createElement("p", {}, ["No media available."]));
+//       const addBtn = createAddMediaButton(isLoggedIn, entityType, entityId, list, showMediaUploadForm);
+//       if (addBtn) content.append(addBtn);
+//       return;
+//     }
 
-    if (img) {
-      const src = img.src || img.dataset.src;
-      Sightbox(src, "image");
-      return;
-    }
+//     const frag = buildFanMediaFragment(mediaData, entityType, entityId, isLoggedIn);
+//     list.append(frag);
 
-    if (vid) handleVideoClick(vid, container);
-  });
-}
+//     const addBtn = createAddMediaButton(isLoggedIn, entityType, entityId, list, showMediaUploadForm);
+//     if (addBtn) content.append(addBtn);
 
-function handleVideoClick(wrapper, container) {
-  const { src: videoSrc, thumb, index } = wrapper.dataset;
-  const existing = wrapper.querySelector("video");
+//     content.append(list);
 
-  if (existing) {
-    existing.pause();
-    existing.remove();
-    Sightbox(videoSrc, "video", index);
-    return;
-  }
-
-  container.querySelectorAll(".video-wrapper video").forEach(v => v.remove());
-
-  const player = VideoPlayer({
-    src: videoSrc,
-    poster: thumb,
-    controls: true,
-    autoplay: true,
-    muted: true,
-    loop: false,
-    theme: "light",
-    subtitles: [],
-    availableResolutions: []
-  }, `video-${index}`);
-
-  wrapper.innerHTML = "";
-  wrapper.append(player);
-
-  const videoEl = player.querySelector("video");
-  if (videoEl) {
-    videoEl.addEventListener("ended", () => restoreVideoThumb(wrapper, thumb));
-  }
-}
-
-function restoreVideoThumb(wrapper, thumb) {
-  wrapper.innerHTML = "";
-  const thumbImg = Imagex({ src: thumb, classes: "fanmade-video-thumb" });
-  const overlay = createElement("div", { class: "video-play-overlay" }, ["▶"]);
-  wrapper.append(thumbImg, overlay);
-}
+//     // Inline media interactions (images only; videos already handled inside VideoPlayer)
+//     list.addEventListener("click", e => {
+//       const img = e.target.closest(".fanmade-img");
+//       if (img) {
+//         // Optional: implement inline modal for fanmade images if desired
+//         return;
+//       }
+//     });
+//   } catch (err) {
+//     console.error("Fan media fetch error:", err);
+//     loader.replaceWith(createElement("p", { class: "error" }, ["Failed to load fan media."]));
+//   }
+// }

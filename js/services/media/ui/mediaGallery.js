@@ -1,55 +1,91 @@
-
-
 import { createElement } from "../../../components/createElement.js";
-import Button from "../../../components/base/Button.js";
-import Imagex from "../../../components/base/Imagex.js";
-import Notify from "../../../components/ui/Notify.mjs";
-import { getState } from "../../../state/state.js";
-import { resolveImagePath, PictureType, EntityType } from "../../../utils/imagePaths.js";
-import { reportPost } from "../../reporting/reporting.js";
-import Sightbox from "../../../components/ui/SightBox.mjs";
-import { fetchMedia, deleteMedia } from "../api/mediaApi.js";
+import { fetchMedia } from "../api/mediaApi.js";
 import { showMediaUploadForm } from "./mediaUploadForm.js";
+import Notify from "../../../components/ui/Notify.mjs";
+import {
+  lazyMediaObserver,
+  clear,
+  groupMedia,
+  createAddMediaButton,
+  createMediaActions,
+  confirmDelete
+} from "../mediaCommon.js";
+import { resolveImagePath, PictureType, EntityType } from "../../../utils/imagePaths.js";
 import VideoPlayer from "../../../components/ui/VideoPlayer.mjs";
+import Imagex from "../../../components/base/Imagex.js";
 
 /* ------------------------------------------------------
-   LAZY LOADING
+   BUILD FRAGMENT WITH MEDIA
 ------------------------------------------------------ */
-const lazyObserver = new IntersectionObserver(entries => {
-  for (const { target, isIntersecting } of entries) {
-    if (!target.dataset.src) continue;
-    if (isIntersecting) {
-      target.src = target.dataset.src;
-      delete target.dataset.src;
-      if (target.tagName === "VIDEO") target.load();
-      lazyObserver.unobserve(target);
-    } else if (target.tagName === "VIDEO") {
-      target.pause();
+function buildMediaFragment(mediaData, entityType, entityId, isLoggedIn, prefix = "media") {
+  const frag = document.createDocumentFragment();
+
+  for (const group of groupMedia(mediaData)) {
+    const wrapper = createElement("div", { class: `${prefix}-group` });
+
+    for (const [i, media] of group.entries()) {
+      if (!media.url) continue;
+
+      const figure = createElement("figure", { class: `${prefix}-item`, "data-id": media.mediaid });
+      const thumbSrc = resolveImagePath(EntityType.MEDIA, PictureType.THUMB, `${media.url}.jpg`);
+      let mediaEl;
+
+      if (media.type === "image") {
+        mediaEl = Imagex({
+          "data-src": thumbSrc,
+          classes: `${prefix}-img`,
+          "data-index": i
+        });
+        lazyMediaObserver.observe(mediaEl);
+      } else if (media.type === "video") {
+        const videoSrc = resolveImagePath(EntityType.MEDIA, PictureType.VIDEO, `${media.url}${media.extn || ".mp4"}`);
+        mediaEl = VideoPlayer({
+          src: videoSrc,
+          poster: thumbSrc,
+          controls: false,
+          autoplay: false,
+          muted: true,
+          loop: false,
+          theme: "light",
+          subtitles: [],
+          availableResolutions: []
+        }, `video-${i}`);
+      } else {
+        mediaEl = createElement("div", { class: `${prefix}-unsupported` }, [`Unsupported media type: ${media.type}`]);
+      }
+
+      const captionText = media.caption || "";
+      const caption = createElement("figcaption", { class: `${prefix}-caption` }, [captionText]);
+      const translationBox = createElement("div", { class: "translation-container", style: "display:none;" });
+      const toggle = captionText
+        ? createElement("span", {
+            class: "translate-toggle",
+            "data-state": "original",
+            events: {
+              click: async (e) => {
+                e.stopPropagation();
+                await handleTranslationToggle(toggle, captionText, translationBox);
+              }
+            }
+          }, ["See Translation"])
+        : null;
+
+      const actions = createMediaActions(media, entityType, entityId, isLoggedIn, confirmDelete, prefix);
+
+      figure.append(mediaEl, caption);
+      if (toggle) figure.append(toggle, translationBox);
+      figure.append(actions);
+      wrapper.append(figure);
     }
+
+    frag.append(wrapper);
   }
-}, { rootMargin: "150px 0px", threshold: 0.05 });
+
+  return frag;
+}
 
 /* ------------------------------------------------------
-   HELPERS
------------------------------------------------------- */
-const clear = el => { while (el.firstChild) el.removeChild(el.firstChild); };
-
-const groupMedia = media =>
-  Object.values(media.reduce((acc, m) => {
-    const key = m.mediaGroupId || "ungrouped";
-    (acc[key] ??= []).push(m);
-    return acc;
-  }, {}));
-
-const createAddMediaButton = (isLoggedIn, entityType, entityId, list) =>
-  isLoggedIn
-    ? Button("Add Media", "", {
-        click: () => showMediaUploadForm(isLoggedIn, entityType, entityId, list)
-      }, "button-primary")
-    : null;
-
-/* ------------------------------------------------------
-   MAIN ENTRY
+   DISPLAY GALLERY
 ------------------------------------------------------ */
 export async function displayMedia(content, entityType, entityId, isLoggedIn) {
   clear(content);
@@ -57,195 +93,312 @@ export async function displayMedia(content, entityType, entityId, isLoggedIn) {
   const title = createElement("h2", {}, ["Media Gallery"]);
   const loader = createElement("p", { class: "loading" }, ["Loading media..."]);
   const list = createElement("div", { class: "media-list" });
-
   content.append(title, loader);
 
   try {
     const mediaData = await fetchMedia(entityType, entityId);
     loader.remove();
 
-    if (!mediaData?.length) {
-      content.append(
-        createElement("p", {}, ["No media available."]),
-        ...(isLoggedIn ? [createAddMediaButton(isLoggedIn, entityType, entityId, list)] : [])
-      );
+    if (!Array.isArray(mediaData) || mediaData.length === 0) {
+      content.append(createElement("p", {}, ["No media available."]));
+      const addBtn = createAddMediaButton(isLoggedIn, entityType, entityId, list, showMediaUploadForm);
+      if (addBtn) content.append(addBtn);
       return;
     }
 
-    const fragment = document.createDocumentFragment();
-    for (const group of groupMedia(mediaData)) {
-      fragment.append(renderMediaGroup(group, isLoggedIn, entityType, entityId));
-    }
+    const frag = buildMediaFragment(mediaData, entityType, entityId, isLoggedIn, "media");
+    list.append(frag);
 
-    const addBtn = createAddMediaButton(isLoggedIn, entityType, entityId, list);
+    const addBtn = createAddMediaButton(isLoggedIn, entityType, entityId, list, showMediaUploadForm);
     if (addBtn) content.append(addBtn);
 
-    list.append(fragment);
     content.append(list);
 
-    bindMediaInteractions(list);
+    list.addEventListener("click", e => {
+      const img = e.target.closest(".media-img");
+      if (img) return;
+    });
   } catch (err) {
     console.error("Media fetch error:", err);
     loader.replaceWith(createElement("p", { class: "error" }, ["Failed to load media."]));
   }
 }
 
-/* ------------------------------------------------------
-   RENDER GROUP
------------------------------------------------------- */
-function renderMediaGroup(group, isLoggedIn, entityType, entityId) {
-  const wrapper = createElement("div", { class: "media-group" });
-  const fragment = document.createDocumentFragment();
-  for (const [index, media] of group.entries()) {
-    const item = renderMediaItem(media, index, isLoggedIn, entityType, entityId);
-    if (item) fragment.append(item);
-  }
-  wrapper.append(fragment);
-  return wrapper;
-}
+// import { createElement } from "../../../components/createElement.js";
+// import { fetchMedia } from "../api/mediaApi.js";
+// import { showMediaUploadForm } from "./mediaUploadForm.js";
+// import Notify from "../../../components/ui/Notify.mjs";
+// import {
+//   lazyMediaObserver,
+//   clear,
+//   groupMedia,
+//   createAddMediaButton,
+//   createMediaActions,
+//   confirmDelete
+// } from "../../media/mediaCommon.js";
+// import { resolveImagePath, PictureType, EntityType } from "../../../utils/imagePaths.js";
+// import VideoPlayer from "../../../components/ui/VideoPlayer.mjs";
+// import Imagex from "../../../components/base/Imagex.js";
 
-/* ------------------------------------------------------
-   RENDER MEDIA ITEM
------------------------------------------------------- */
-function renderMediaItem(media, index, isLoggedIn, entityType, entityId) {
-  if (!media.url) return null;
+// /* ------------------------------------------------------
+//    TRANSLATION HELPERS
+// ------------------------------------------------------ */
+// async function translateText(text) {
+//   await new Promise(r => setTimeout(r, 300)); // simulate delay
+//   return `[Translated] ${text}`;
+// }
 
-  const figure = createElement("figure", { class: "media-item", "data-id": media.mediaid });
-  const mediaEl = createMediaElement(media, index);
+// async function handleTranslationToggle(toggle, originalText, container) {
+//   const showing = toggle.dataset.state === "translated";
 
-  if (mediaEl.tagName === "img" || mediaEl.dataset.type === "video") {
-    lazyObserver.observe(mediaEl.tagName === "img" ? mediaEl : mediaEl.querySelector("img"));
-  }
+//   if (showing) {
+//     container.style.display = "none";
+//     toggle.dataset.state = "original";
+//     toggle.firstChild.nodeValue = "See Translation";
+//     return;
+//   }
 
-  const caption = createElement("figcaption", {}, [media.caption || ""]);
-  const actions = createMediaActions(media, entityType, entityId, isLoggedIn);
+//   if (!container.firstChild) {
+//     toggle.firstChild.nodeValue = "Translating...";
+//     try {
+//       const translated = await translateText(originalText);
+//       container.append(createElement("p", { class: "translated-text" }, [translated]));
+//     } catch {
+//       Notify("Translation failed", { type: "error" });
+//     }
+//   }
 
-  figure.append(mediaEl, caption, actions);
-  return figure;
-}
+//   container.style.display = "block";
+//   toggle.dataset.state = "translated";
+//   toggle.firstChild.nodeValue = "Hide Translation";
+// }
 
-/* ------------------------------------------------------
-   CREATE MEDIA ELEMENT
------------------------------------------------------- */
-function createMediaElement(media, index) {
-  const thumbSrc = resolveImagePath(EntityType.MEDIA, PictureType.THUMB, `${media.url}${media.extn}`);
-  const isImage = media.type === "image";
-console.log(thumbSrc);
-  if (isImage) {
-    const img = Imagex({
-      src: thumbSrc,
-      "data-src": thumbSrc,
-      classes: "media-img",
-      "data-index": index
-    });
-    // img.onerror = () => { img.src = "/assets/img/placeholder.jpg"; };
-    return img;
-  }
+// /* ------------------------------------------------------
+//    BUILD FRAGMENT WITH VIDEO PLAYER INSIDE
+// ------------------------------------------------------ */
+// function buildFanMediaFragment(mediaData, entityType, entityId, isLoggedIn) {
+//   const frag = document.createDocumentFragment();
 
-  const videoSrc = resolveImagePath(EntityType.MEDIA, PictureType.VIDEO, `${media.url}${media.extn || ".mp4"}`);
-  const thumb = Imagex({ src: thumbSrc, classes: "media-video-thumb", "data-index": index });
-  const overlay = createElement("div", { class: "video-play-overlay" }, ["▶"]);
-  const wrapper = createElement("div", {
-    class: "video-wrapper",
-    "data-src": videoSrc,
-    "data-thumb": thumbSrc,
-    "data-index": index,
-    "data-type": "video"
-  }, [thumb, overlay]);
+//   for (const group of groupMedia(mediaData)) {
+//     const wrapper = createElement("div", { class: "fanmade-group" });
 
-  return wrapper;
-}
+//     for (const [i, media] of group.entries()) {
+//       if (!media.url) continue;
 
-/* ------------------------------------------------------
-   MEDIA ACTIONS
------------------------------------------------------- */
-function createMediaActions(media, entityType, entityId, isLoggedIn) {
-  const actions = createElement("div", { class: "media-actions" });
-  const user = getState("user");
+//       const figure = createElement("figure", { class: "fanmade-item", "data-id": media.mediaid });
+//       const classPrefix = "fanmade";
+//       const thumbSrc = resolveImagePath(EntityType.MEDIA, PictureType.THUMB, `${media.url}.jpg`);
+//       let mediaEl;
 
-  if (isLoggedIn && user === media.creatorid) {
-    actions.append(Button("Delete", "", { click: () => confirmDelete(media.mediaid, entityType, entityId) }, "delete-media-btn"));
-  }
+//       if (media.type === "image") {
+//         mediaEl = Imagex({
+//           "data-src": thumbSrc,
+//           classes: `${classPrefix}-img`,
+//           "data-index": i
+//         });
+//         lazyMediaObserver.observe(mediaEl);
+//       } else if (media.type === "video") {
+//         const videoSrc = resolveImagePath(EntityType.MEDIA, PictureType.VIDEO, `${media.url}${media.extn || ".mp4"}`);
+//         mediaEl = VideoPlayer({
+//           src: videoSrc,
+//           poster: thumbSrc,
+//           controls: false,
+//           autoplay: false,
+//           muted: true,
+//           loop: false,
+//           theme: "light",
+//           subtitles: [],
+//           availableResolutions: []
+//         }, `video-${i}`);
+//       } else {
+//         mediaEl = createElement("div", { class: `${classPrefix}-unsupported` }, [`Unsupported media type: ${media.type}`]);
+//       }
 
-  actions.append(Button("Report", "", { click: () => reportPost(media.mediaid, "media") }, "report-btn"));
-  return actions;
-}
+//       const captionText = media.caption || "";
+//       const caption = createElement("figcaption", { class: "fanmade-caption" }, [captionText]);
+//       const translationBox = createElement("div", { class: "translation-container", style: "display:none;" });
+//       const toggle = captionText
+//         ? createElement("span", {
+//             class: "translate-toggle",
+//             "data-state": "original",
+//             events: {
+//               click: async (e) => {
+//                 e.stopPropagation();
+//                 await handleTranslationToggle(toggle, captionText, translationBox);
+//               }
+//             }
+//           }, ["See Translation"])
+//         : null;
 
-/* ------------------------------------------------------
-   DELETE HANDLER
------------------------------------------------------- */
-async function confirmDelete(mediaId, entityType, entityId) {
-  if (!confirm("Delete this media?")) return;
-  try {
-    const res = await deleteMedia(mediaId, entityType, entityId);
-    if (res.status === 204) {
-      const item = document.querySelector(`.media-item[data-id="${mediaId}"]`);
-      const parent = item?.parentElement;
-      item?.remove();
-      if (parent && !parent.querySelector(".media-item")) parent.remove();
-      Notify("Media deleted.", { type: "success" });
-    } else {
-      Notify("Failed to delete media.", { type: "error" });
-    }
-  } catch (err) {
-    console.error(err);
-    Notify("Error deleting media.", { type: "error" });
-  }
-}
+//       const actions = createMediaActions(media, entityType, entityId, isLoggedIn, confirmDelete, classPrefix);
 
-/* ------------------------------------------------------
-   INTERACTIONS
------------------------------------------------------- */
-function bindMediaInteractions(container) {
-  // --- Image click ---
-  container.querySelectorAll(".media-img").forEach(img => {
-    img.addEventListener("click", () => Sightbox(img.src || img.dataset.src, "image"));
-  });
+//       figure.append(mediaEl, caption);
+//       if (toggle) figure.append(toggle, translationBox);
+//       figure.append(actions);
+//       wrapper.append(figure);
+//     }
 
-  // --- Video click ---
-  container.querySelectorAll(".video-wrapper").forEach(wrapper => {
-    const { src: videoSrc, thumb, index } = wrapper.dataset;
-    wrapper.addEventListener("click", () => handleVideoClick(wrapper, videoSrc, thumb, index, container));
-  });
-}
+//     frag.append(wrapper);
+//   }
 
-/* ------------------------------------------------------
-   VIDEO CLICK HANDLER
------------------------------------------------------- */
-function handleVideoClick(wrapper, videoSrc, thumb, index, container) {
-  const existingVideo = wrapper.querySelector("video");
-  if (existingVideo) {
-    existingVideo.pause();
-    existingVideo.remove();
-    Sightbox(videoSrc, "video", index);
-    return;
-  }
+//   return frag;
+// }
 
-  // Remove any other videos in play
-  container.querySelectorAll(".video-wrapper video").forEach(v => v.remove());
+// /* ------------------------------------------------------
+//    MAIN ENTRY
+// ------------------------------------------------------ */
+// export async function displayFanMedia(content, entityType, entityId, isLoggedIn) {
+//   clear(content);
 
-  const player = VideoPlayer({
-    src: videoSrc,
-    poster: thumb,
-    controls: false,
-    autoplay: true,
-    muted: true,
-    loop: false,
-    theme: "light",
-    subtitles: [],
-    availableResolutions: []
-  }, `video-${index}`);
+//   const title = createElement("h2", { class: "fanmade-title" }, ["Fanmade Gallery"]);
+//   const loader = createElement("p", { class: "loading" }, ["Loading media..."]);
+//   const list = createElement("div", { class: "fanmade-list" });
+//   content.append(title, loader);
 
-  clear(wrapper);
-  wrapper.append(player);
+//   try {
+//     const mediaData = await fetchMedia(entityType, entityId);
+//     loader.remove();
 
-  const videoEl = player.querySelector("video");
-  videoEl?.addEventListener("ended", () => restoreVideoThumb(wrapper, thumb));
-}
+//     if (!Array.isArray(mediaData) || mediaData.length === 0) {
+//       content.append(createElement("p", {}, ["No media available."]));
+//       const addBtn = createAddMediaButton(isLoggedIn, entityType, entityId, list, showMediaUploadForm);
+//       if (addBtn) content.append(addBtn);
+//       return;
+//     }
 
-function restoreVideoThumb(wrapper, thumb) {
-  clear(wrapper);
-  const thumbImg = Imagex({ src: thumb, classes: "media-video-thumb" });
-  const overlay = createElement("div", { class: "video-play-overlay" }, ["▶"]);
-  wrapper.append(thumbImg, overlay);
-}
+//     const frag = buildFanMediaFragment(mediaData, entityType, entityId, isLoggedIn);
+//     list.append(frag);
+
+//     const addBtn = createAddMediaButton(isLoggedIn, entityType, entityId, list, showMediaUploadForm);
+//     if (addBtn) content.append(addBtn);
+
+//     content.append(list);
+
+//     // Inline media interactions (images only; videos already handled inside VideoPlayer)
+//     list.addEventListener("click", e => {
+//       const img = e.target.closest(".fanmade-img");
+//       if (img) {
+//         // Optional: implement inline modal for fanmade images if desired
+//         return;
+//       }
+//     });
+//   } catch (err) {
+//     console.error("Fan media fetch error:", err);
+//     loader.replaceWith(createElement("p", { class: "error" }, ["Failed to load fan media."]));
+//   }
+// }
+
+// import { createElement } from "../../../components/createElement.js";
+// import { fetchMedia } from "../api/mediaApi.js";
+// import { showMediaUploadForm } from "./mediaUploadForm.js";
+// import {
+//   lazyMediaObserver,
+//   clear,
+//   groupMedia,
+//   createAddMediaButton,
+//   createMediaActions,
+//   confirmDelete
+// } from "../mediaCommon.js";
+// import { resolveImagePath, PictureType, EntityType } from "../../../utils/imagePaths.js";
+// import VideoPlayer from "../../../components/ui/VideoPlayer.mjs";
+// import Imagex from "../../../components/base/Imagex.js";
+
+// /* ------------------------------------------------------
+//    BUILD FRAGMENT WITH VIDEO PLAYER INSIDE
+// ------------------------------------------------------ */
+// export function buildMediaFragment(mediaData, entityType, entityId, isLoggedIn) {
+//   const frag = document.createDocumentFragment();
+
+//   for (const group of groupMedia(mediaData)) {
+//     const wrapper = createElement("div", { class: "media-group" });
+
+//     for (const [i, media] of group.entries()) {
+//       const figure = createElement("figure", { class: "media-item", "data-id": media.mediaid });
+//       const classPrefix = "media";
+//       const thumbSrc = resolveImagePath(EntityType.MEDIA, PictureType.THUMB, `${media.url}.jpg`);
+//       let mediaEl;
+
+//       if (media.type === "image") {
+//         mediaEl = Imagex({
+//           "data-src": thumbSrc,
+//           classes: `${classPrefix}-img`,
+//           "data-index": i
+//         });
+//         lazyMediaObserver.observe(mediaEl);
+//       } else if (media.type === "video") {
+//         const videoSrc = resolveImagePath(EntityType.MEDIA, PictureType.VIDEO, `${media.url}${media.extn || ".mp4"}`);
+//         mediaEl = VideoPlayer({
+//           src: videoSrc,
+//           poster: thumbSrc,
+//           controls: false,
+//           autoplay: false,
+//           muted: true,
+//           loop: false,
+//           theme: "light",
+//           subtitles: [],
+//           availableResolutions: []
+//         }, `video-${i}`);
+//       } else {
+//         mediaEl = createElement("div", { class: `${classPrefix}-unsupported` }, [`Unsupported media type: ${media.type}`]);
+//       }
+
+//       const caption = createElement("figcaption", {}, [media.caption || ""]);
+//       const actions = createMediaActions(media, entityType, entityId, isLoggedIn, confirmDelete, classPrefix);
+
+//       figure.append(mediaEl, caption, actions);
+//       wrapper.append(figure);
+//     }
+
+//     frag.append(wrapper);
+//   }
+
+//   return frag;
+// }
+
+// /* ------------------------------------------------------
+//    MAIN ENTRY
+// ------------------------------------------------------ */
+// export async function displayMedia(content, entityType, entityId, isLoggedIn) {
+//   clear(content);
+
+//   const title = createElement("h2", {}, ["Media Gallery"]);
+//   const loader = createElement("p", { class: "loading" }, ["Loading media..."]);
+//   const list = createElement("div", { class: "media-list" });
+//   content.append(title, loader);
+
+//   try {
+//     const mediaData = await fetchMedia(entityType, entityId);
+//     loader.remove();
+
+//     if (!Array.isArray(mediaData) || mediaData.length === 0) {
+//       content.append(createElement("p", {}, ["No media available."]));
+//       const addBtn = createAddMediaButton(isLoggedIn, entityType, entityId, list, showMediaUploadForm);
+//       if (addBtn) content.append(addBtn);
+//       return;
+//     }
+
+//     const frag = buildMediaFragment(mediaData, entityType, entityId, isLoggedIn);
+//     list.append(frag);
+
+//     const addBtn = createAddMediaButton(isLoggedIn, entityType, entityId, list, showMediaUploadForm);
+//     if (addBtn) content.append(addBtn);
+
+//     content.append(list);
+
+//     // -------------------------------
+//     // Inline media interactions for images (optional video toggle if needed)
+//     // -------------------------------
+//     list.addEventListener("click", e => {
+//       const img = e.target.closest(".media-img");
+//       if (img) {
+//         // Can replace Sightbox with inline modal if desired
+//         // For now, keep original behavior
+//         // Sightbox(img.src || img.dataset.src, "image");
+//         return;
+//       }
+//     });
+//   } catch (err) {
+//     console.error("Media fetch error:", err);
+//     loader.replaceWith(createElement("p", { class: "error" }, ["Failed to load media."]));
+//   }
+// }

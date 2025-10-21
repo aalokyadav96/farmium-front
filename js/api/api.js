@@ -198,6 +198,7 @@ async function liveFetch(endpoint, method = "GET", body = null, options = {}) {
 async function bannerFetch(endpoint, method = "GET", body = null, options = {}) {
     const controller = options.controller || new AbortController();
     const signal = controller.signal;
+    options.credentials = 'omit';
     const fullUrl = `${BANNERDROP_URL}${endpoint}`;
     return apixFetch(fullUrl, method, body, { ...options, signal });
 }

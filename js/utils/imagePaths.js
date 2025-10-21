@@ -99,7 +99,8 @@ export function resolveImagePath(entityType, pictureType, filename, fallback = "
 
   // normalize extensions based on type
   let finalName = filename;
-  if (pictureType === PictureType.THUMB || pictureType === PictureType.POSTER) {
+  // if (pictureType === PictureType.THUMB || pictureType === PictureType.POSTER) {
+  if (pictureType === PictureType.THUMB) {
     if (!finalName.endsWith(".jpg")) {
       finalName = finalName.replace(/\.[^.]+$/, "") + ".jpg";
     }

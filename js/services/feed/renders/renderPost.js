@@ -39,8 +39,12 @@ export async function renderPost(posts, postsContainer) {
             image: () => RenderImagePost(mediaContainer, mediaUrls),
             video: () => {
                 let subtits = [];
-                // const posterPath = resolveImagePath(EntityType.FEED, PictureType.POSTER, post.thumbnail);
-                const posterPath = resolveImagePath(EntityType.FEED, PictureType.POSTER, `${post.media_url}.jpg`);
+                // // const posterPath = resolveImagePath(EntityType.FEED, PictureType.POSTER, post.thumbnail);
+                // const posterPath = resolveImagePath(EntityType.FEED, PictureType.POSTER, `${post.media_url}.jpg`);
+                const mediaBase = Array.isArray(post.media_url) ? post.media_url[0] : post.media_url;
+                const posterSource = post?.thumbnail ? post.thumbnail : mediaBase;
+                const posterPath = resolveImagePath(EntityType.FEED, PictureType.POSTER, `${posterSource}.png`);
+console.log(posterPath);                
                 const resolutions = post?.resolution || [];
                 // const media = mediaUrls.map(m => resolveImagePath(EntityType.FEED, PictureType.VIDEO, `${m}.mp4`));
                 const media = post.media.map(m => resolveImagePath(EntityType.FEED, PictureType.VIDEO, m));

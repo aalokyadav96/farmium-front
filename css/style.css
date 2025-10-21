@@ -17,8 +17,8 @@
 @import url(newchat2.css);
 /* @import url(mapcon.css); */
 /* @import url(subpages/seatMap.css); */
-/* @import url(temp.css); */
-/* @import url(temp1.css); */
+@import url(temp.css);
+@import url(temp1.css);
 
 @import url(inistyles/tumblr3.css);
 @import url(inistyles/feedimages.css); 
@@ -40,7 +40,7 @@
 @import url(inistyles/shop2.css);
 @import url(inistyles/wallet1.css);
 @import url(inistyles/hashtags1.css);
-@import url(inistyles/fanmade1.css);
+@import url(inistyles/fanmade2.css);
 
 @import url(subpages/nearby1.css);
 @import url(subpages/livcon.css);
@@ -50,6 +50,7 @@
 @import url(subpages/rolling1.css);
 @import url(subpages/booking1.css);
 @import url(subpages/artistsongstab.css);
-@import url(subpages/media4.css);
+@import url(subpages/mediaup.css);
+@import url(subpages/media2.css);
 @import url(subpages/vlive.css);
 @import url(subpages/livpage.css);

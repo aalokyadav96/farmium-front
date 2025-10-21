@@ -1,5 +1,5 @@
 import { createElement } from "../../../components/createElement.js";
-import { SRC_URL, apiFetch, apiFetch } from "../../../api/api.js";
+import { SRC_URL, apiFetch } from "../../../api/api.js";
 import { getState } from "../../../state/state.js";
 import { navigate } from "../../../routes/index.js";
 import { createOrEditBaito } from "../create/createOrEditBaito.js";

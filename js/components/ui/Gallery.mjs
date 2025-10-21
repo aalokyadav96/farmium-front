@@ -11,7 +11,7 @@ const Gallery = (imagesArray) => {
         img.alt = image.alt || 'Gallery Image';
         img.className = 'gallery-image';
         img.addEventListener('click', () => {
-            SightBox(image.src); // Pass the full array and clicked index
+            SightBox(image.src, "image"); // Pass the full array and clicked index
         });
 
         galleryContainer.appendChild(img);

@@ -1,9 +1,9 @@
 /* === Media Gallery Container === */
-#artist-fanmade {
-  background-color: var(--color-bg);
-  color: var(--color-fg);
-  font-family: var(--font-body);
-  padding: var(--space-md);
+#artist-fanmade, #artist-posts {
+  /* background-color: var(--color-bg); */
+  /* color: var(--color-fg); */
+  /* font-family: var(--font-body); */
+  /* padding: var(--space-md); */
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-card);
   max-width: var(--max-width);
@@ -11,32 +11,16 @@
 }
 
 /* === Title === */
-.fanmade-title {
+.fanmade-title .media-title {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
   margin-bottom: var(--space-md);
   line-height: var(--line-height-heading);
 }
 
-/* === Add Media Button === */
-.button-primary {
-  background-color: var(--color-btn-bg);
-  color: var(--color-btn-fg);
-  border: none;
-  padding: var(--space-sm) var(--space-md);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-medium);
-  cursor: pointer;
-  transition: background-color var(--transition-fast);
-}
-
-.button-primary:hover {
-  background-color: var(--color-btn-hover-bg);
-}
 
 /* === Media List Layout === */
-.fanmade-list {
+.fanmade-list, .media-list {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-md);
@@ -44,7 +28,7 @@
 }
 
 /* === Individual Media Group === */
-.fanmade-group {
+.fanmade-group, .media-group {
   background-color: var(--color-card-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-card);
@@ -55,7 +39,7 @@
 }
 
 /* === Media Item === */
-.fanmade-item {
+.fanmade-item, .media-item {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -91,7 +75,7 @@
 }
 
 /* === Caption === */
-.fanmade-caption {
+.fanmade-caption, .media-caption {
   margin-top: var(--space-sm);
   font-size: var(--font-size-sm);
   color: var(--color-muted);
@@ -115,7 +99,7 @@
 }
 
 /* === Action Buttons === */
-.fanmade-actions {
+.fanmade-actions, .media-actions {
   display: flex;
   justify-content: center;
   gap: var(--space-sm);
