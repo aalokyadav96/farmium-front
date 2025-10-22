@@ -110,8 +110,8 @@ export function resolveImagePath(entityType, pictureType, filename, fallback = "
     }
   }
 
+  console.log(SRC_URL);
 return `${SRC_URL}/uploads/${entityType}/${folder}/${finalName}`;
-
 
 }
 

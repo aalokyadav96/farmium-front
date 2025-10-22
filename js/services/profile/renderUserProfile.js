@@ -25,6 +25,8 @@ function appendChildren(parent, ...children) {
 
 
 function profilGen(profile, isLoggedIn) {
+    let isCreator = profile.userid === getState("user");
+
     const profileContainer = document.createElement("div");
     profileContainer.className = "profile-container hflex";
 
@@ -37,7 +39,7 @@ function profilGen(profile, isLoggedIn) {
 
     appendChildren(
         section,
-        createBanner(profile, isLoggedIn),
+        createBanner(profile, isCreator),
         createAvatar(profile),
         createProfileDetails(profile, isLoggedIn),
         createStatistics(profile),

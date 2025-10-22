@@ -163,7 +163,7 @@ async function startLiveStream(videoEl, statusEl, viewerEl, liveData) {
             await liveFetch(`/live/watch/${liveData.id}/webrtc-answer`, "POST", { sdp: answer.sdp });
 
             updateStatus("LIVE (WebRTC)", "red");
-            stopPolling = startViewerPolling(viewerEl, liveData.id);
+            stopPolling = startViewerPolling(viewerEl, liveData.liveid);
         } catch {
             handleConnectionFailure();
         }
@@ -193,7 +193,7 @@ async function startLiveStream(videoEl, statusEl, viewerEl, liveData) {
         } else {
             videoEl.src = liveData.streamUrl;
         }
-        stopPolling = startViewerPolling(viewerEl, liveData.id);
+        stopPolling = startViewerPolling(viewerEl, liveData.liveid);
     }
 
     await connectWebRTC();
@@ -212,7 +212,7 @@ async function startLiveStream(videoEl, statusEl, viewerEl, liveData) {
 function startViewerPolling(viewerEl, liveid) {
     const interval = setInterval(async () => {
         try {
-            const res = await liveFetch(`/live/${liveid}/viewers`, "GET");
+            const res = await liveFetch(`/vlive/${liveid}/viewers`, "GET");
             viewerEl.firstChild.data = `👀 ${res?.count || 0} watching`;
         } catch {}
     }, 5000);

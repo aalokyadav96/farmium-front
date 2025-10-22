@@ -1,4 +1,4 @@
-import "../../../css/ui/Vidpop.css";
+// import "../../../css/ui/Vidpop.css";
 import { createIconButton } from "../../utils/svgIconButton";
 import { xSVG } from "../svgs";
 import { generateVideoPlayer } from "./vidpopHelpers";

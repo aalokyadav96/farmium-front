@@ -37,7 +37,7 @@ export async function displayCreateOrEditBaitoProfile(isLoggedIn, contentContain
         { label: "Expected Wage (Yen/hour)", type: "number", id: "profile-wage", placeholder: "e.g. 1200", additionalProps: { min: 1 } },
         { label: "Languages Spoken", type: "text", id: "profile-languages", placeholder: "e.g. Japanese, English" },
         { label: "Bio", type: "textarea", id: "profile-bio", placeholder: "Brief intro...", additionalNodes: [bioCounter] },
-        { label: "Profile Picture", type: "file", id: "profile-picture", accept: "image/*" },
+        // { label: "Profile Picture", type: "file", id: "profile-picture", accept: "image/*" },
         { label: "Additional Documents / Certificates", type: "file", id: "profile-documents", accept: ".pdf,.jpg,.png", multiple: true }
     ];
 
@@ -120,8 +120,8 @@ export async function displayCreateOrEditBaitoProfile(isLoggedIn, contentContain
             else payload.append(k, v);
         });
 
-        const profilePic = form.querySelector("#profile-picture")?.files?.[0];
-        if (profilePic) payload.append("picture", profilePic);
+        // const profilePic = form.querySelector("#profile-picture")?.files?.[0];
+        // if (profilePic) payload.append("picture", profilePic);
 
         try {
             if (mode === "create") {

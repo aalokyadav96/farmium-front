@@ -3,6 +3,9 @@ import Notify from "../../components/ui/Notify.mjs";
 import { createTabs } from "../../components/ui/createTabs.js";
 import { createElement } from "../../components/createElement.js";
 import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
+import { createIconButton } from "../../utils/svgIconButton.js";
+import { searchSVG } from "../../components/svgs.js";
+
 
 let currentTab = "all"; // Tracks active tab
 let searchQuery = "";   // Tracks current query
@@ -22,12 +25,10 @@ export async function displaySearchForm(container) {
         class: "search-field"
     });
 
-    const searchButton = createElement("button", { id: "search-button", class: "search-btn" }, [
-        createElement("svg", { class: "srchicon", viewBox: "0 0 24 24", width: "100%", height: "100%", role: "img", stroke: "#000000" }, [
-            createElement("circle", { cx: "11", cy: "11", r: "8" }),
-            createElement("line", { x1: "21", y1: "21", x2: "16.65", y2: "16.65" })
-        ])
-    ]);
+    const searchButton = createIconButton({
+        svgMarkup:searchSVG,
+        classSuffix:"search-btn",
+    });
 
     const autocompleteList = createElement("ul", { id: "autocomplete-list", class: "autocomplete-list" });
 

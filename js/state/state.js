@@ -1,14 +1,14 @@
 // --- API URLs ---
 
-const MAIN_URL = "https://gallium.onrender.com";
-const BANNERDROP_URL = `https://bannerdrop.onrender.com`;
-const LIVE_URL = "https://newchat-4b20.onrender.com";
-const CHAT_URL = "http://localhost:3810";
-
-// const MAIN_URL = "http://localhost:4000";
-// const BANNERDROP_URL = `http://localhost:6925`;
-// const LIVE_URL = "http://localhost:7143";
+// const MAIN_URL = "https://gallium.onrender.com";
+// const BANNERDROP_URL = `https://bannerdrop.onrender.com`;
+// const LIVE_URL = "https://newchat-4b20.onrender.com";
 // const CHAT_URL = "http://localhost:3810";
+
+const MAIN_URL = "http://localhost:4000";
+const BANNERDROP_URL = `http://localhost:6925`;
+const LIVE_URL = "http://localhost:7143";
+const CHAT_URL = "http://localhost:3810";
 
 const API_URL = `${MAIN_URL}/api/v1`;
 const AD_URL = `${MAIN_URL}/api/sda`;

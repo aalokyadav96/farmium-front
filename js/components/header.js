@@ -170,13 +170,14 @@ function createHeader() {
   const token = getState("token");
   if (token) {
     const createLinks = [
-      // { href: "/create-event", text: "Event" },
-      // { href: "/create-place", text: "Place" },
-      // { href: "/create-artist", text: "Artist" },
-      // { href: "/create-post", text: "Post" },
-      // { href: "/create-baito", text: "Baito" },
+      { href: "/create-event", text: "Event" },
+      { href: "/create-place", text: "Place" },
+      { href: "/create-artist", text: "Artist" },
+      { href: "/create-post", text: "Post" },
+      { href: "/create-baito", text: "Baito" },
       { href: "/create-farm", text: "Farm" },
-      // { href: "/create-itinerary", text: "Itinerary" }
+      { href: "/create-itinerary", text: "Itinerary" },
+      { href: "/create-recipe", text: "Recipe" }
     ];
     nav.appendChild(createDropdownMenu("create-menu", "Create", createLinks));
   }
