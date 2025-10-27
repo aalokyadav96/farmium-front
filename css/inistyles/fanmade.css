@@ -1,0 +1,28 @@
+.media-caption {
+  padding: 0.5rem 1rem;
+  font-size: var(--font-size-sm);
+  color: var(--text-color);
+}
+
+.translate-toggle {
+  display: inline-block;
+  margin: 0.25rem 1rem;
+  font-size: var(--font-size-xs);
+  color: var(--accent-color, blue);
+  cursor: pointer;
+  user-select: none;
+}
+
+.translate-toggle:hover {
+  text-decoration: underline;
+}
+
+.translation-container {
+  padding: 0 1rem 0.5rem;
+}
+
+.translated-text {
+  color: var(--muted-color, #555);
+  font-style: italic;
+  font-size: var(--font-size-xs);
+}

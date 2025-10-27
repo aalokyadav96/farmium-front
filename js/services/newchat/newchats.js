@@ -3,6 +3,7 @@ import { getState } from "../../state/state.js";
 import { navigate } from "../../routes/index.js";
 import { displayOneChat } from "./displayNewchat.js";
 import { createElement } from "../../components/createElement.js";
+import { makeDraggableScroll } from "../../components/dragnav.js";
 
 export async function displayChats(contentContainer, isLoggedIn) {
     // Clear previous content
@@ -14,7 +15,7 @@ export async function displayChats(contentContainer, isLoggedIn) {
     const sidebar = createElement("div", { class: "chat-topbar" });
     const list = createElement("ul", { class: "chat-list" });
     sidebar.appendChild(list);
-
+    makeDraggableScroll(list);
     // Chat view
     const chatView = createElement("div", { class: "chat-view" });
 

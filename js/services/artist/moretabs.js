@@ -3,25 +3,11 @@ import { displayLive } from "../vlive/displayLive.js";
 import { displayMedia } from "../media/ui/mediaGallery.js";
 import { persistTabs } from "../../utils/persistTabs.js";
 
-// export function renderFanMadeTab(containter, artistid, isL) {
-//     try {
-//         displayMedia(containter, "fanmade", artistid, isL);
-//     } catch (err) {
-//         containter.appendChild("p",{},["Error loading posts."]);
-//     }
-// }
 
 export function renderLiveTab(containter, artistid, isL, isCreator) {
     displayLive(containter, "artist", artistid, isL, isCreator);
 }
 
-// export async function renderPostsTab(container, artistID, isLoggedIn) {
-//     try {
-//         displayMediaFeed(container, "artist", artistID, isLoggedIn);
-//     } catch (err) {
-//         container.appendChild("p",{},["Error loading posts."]);
-//     }
-// }
 
 export async function renderPostsTab(container, artistID, isLoggedIn) {
     const tabs = [

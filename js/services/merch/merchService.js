@@ -199,18 +199,19 @@ async function displayMerchandise(container, merchData, entityType, eventId, isC
     container.replaceChildren();
     container.appendChild(createElement("h2", {}, ["Merchandise"]));
 
-    const merchList = createElement("div", { class: "merchcon hvflex" });
-    container.appendChild(merchList);
-
     if (isCreator) {
         const addBtn = Button("Add Merchandise", "", { click: () => addMerchForm(entityType, eventId, merchList) });
         container.appendChild(addBtn);
     }
+    
+    const merchList = createElement("div", { class: "merchcon hvflex" });
+    container.appendChild(merchList);
+
 
     merchList.replaceChildren();
 
     if (!Array.isArray(merchData) || merchData.length === 0) {
-        merchList.appendChild(createElement("p", {}, ["No merchandise available for this event."]));
+        merchList.appendChild(createElement("p", {}, ["No merchandise available."]));
         return;
     }
 

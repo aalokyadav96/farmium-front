@@ -14,34 +14,76 @@ export async function postMedia(entityType, entityId, payload) {
   return await apiFetch(`/media/${entityType}/${entityId}`, "POST", payload, { json: true });
 }
 
-export function uploadFile(u) {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    UploadStore.controllers[u.id] = xhr;
-    const formData = new FormData();
-    formData.append(u.mediaEntity, u.file);
-    formData.append("postType", u.fileType);
-
-    xhr.upload.onprogress = e => {
-      if (e.lengthComputable)
-        UploadStore.update(u.id, { progress: Math.round((e.loaded / e.total) * 100) });
-    };
-
-    xhr.onload = () => {
-      delete UploadStore.controllers[u.id];
-      if (xhr.status >= 200 && xhr.status < 300) {
-        try {
-          const data = JSON.parse(xhr.responseText);
-          resolve(Array.isArray(data) ? data[0] : data);
-        } catch {
-          reject(new Error("Invalid FILEDROP response"));
+/* -------------------------
+   FileDrop Upload
+   -------------------------*/
+   export function uploadFile(u) {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      UploadStore.controllers[u.id] = xhr;
+  
+      const formData = new FormData();
+      formData.append(u.mediaEntity, u.file);
+      formData.append("postType", u.fileType);
+  
+      xhr.upload.onprogress = e => {
+        if (e.lengthComputable) {
+          const pct = Math.round((e.loaded / e.total) * 100);
+          UploadStore.update(u.id, { progress: pct });
         }
-      } else reject(new Error(xhr.statusText));
-    };
+      };
+  
+      xhr.onload = () => {
+        delete UploadStore.controllers[u.id];
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const data = JSON.parse(xhr.responseText);
+            // Expect backend to return at least { savedname, contenttype }
+            resolve(Array.isArray(data) ? data[0] : data);
+          } catch {
+            reject(new Error("Invalid FILEDROP response"));
+          }
+        } else {
+          reject(new Error(xhr.statusText));
+        }
+      };
+  
+      xhr.onerror = () => reject(new Error("Network error"));
+      xhr.onabort = () => reject(new Error("Upload canceled"));
+  
+      xhr.open("POST", FILEDROP_URL);
+      xhr.send(formData);
+    });
+  }
+  
+// export function uploadFile(u) {
+//   return new Promise((resolve, reject) => {
+//     const xhr = new XMLHttpRequest();
+//     UploadStore.controllers[u.id] = xhr;
+//     const formData = new FormData();
+//     formData.append(u.mediaEntity, u.file);
+//     formData.append("postType", u.fileType);
 
-    xhr.onerror = () => reject(new Error("Network error"));
-    xhr.onabort = () => reject(new Error("Upload canceled"));
-    xhr.open("POST", FILEDROP_URL);
-    xhr.send(formData);
-  });
-}
+//     xhr.upload.onprogress = e => {
+//       if (e.lengthComputable)
+//         UploadStore.update(u.id, { progress: Math.round((e.loaded / e.total) * 100) });
+//     };
+
+//     xhr.onload = () => {
+//       delete UploadStore.controllers[u.id];
+//       if (xhr.status >= 200 && xhr.status < 300) {
+//         try {
+//           const data = JSON.parse(xhr.responseText);
+//           resolve(Array.isArray(data) ? data[0] : data);
+//         } catch {
+//           reject(new Error("Invalid FILEDROP response"));
+//         }
+//       } else reject(new Error(xhr.statusText));
+//     };
+
+//     xhr.onerror = () => reject(new Error("Network error"));
+//     xhr.onabort = () => reject(new Error("Upload canceled"));
+//     xhr.open("POST", FILEDROP_URL);
+//     xhr.send(formData);
+//   });
+// }

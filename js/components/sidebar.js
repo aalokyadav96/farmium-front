@@ -55,6 +55,7 @@ function buildControlCenter() {
     { href: "/recipes", label: "Recipes" },
     { href: "/products", label: "Products" },
     { href: "/tools", label: "Tools" },
+    { href: "/music", label: "Music" },
     // { href: "/artists", label: "Artists" },
   ];
 

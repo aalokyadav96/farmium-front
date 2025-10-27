@@ -1,6 +1,6 @@
 // chomponents/renderAvatar.js
 import Imagex from "../../../components/base/Imagex.js";
-import { createElement } from "../../../components/createElement";
+import { createElement } from "../../../components/createElement.js";
 import { resolveImagePath, EntityType, PictureType } from "../../../utils/imagePaths.js";
 
 export function renderAvatar(msg, { isMine }) {

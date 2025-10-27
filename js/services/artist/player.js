@@ -1,8 +1,9 @@
 // player.js
+import Button from "../../components/base/Button.js";
 import { createElement } from "../../components/createElement.js";
 import { playSVG, pauseSVG } from "../../components/svgs.js";
 
-// Local state encapsulated in closure (no globals)
+// ------------------------ State ------------------------
 let state = {
     currentAudio: null,
     currentPlayBtn: null,
@@ -10,30 +11,38 @@ let state = {
     songQueue: [],
     isShuffle: false,
     isAutoplay: true,
+    container: null
 };
 
-// 🎵 Footer Player
-function createPlayerFooter(container) {
+// ------------------------ DOM Helpers ------------------------
+function updatePlayButtonIcon(btn, isPlaying) {
+    if (!btn) return;
+    btn.replaceChildren(isPlaying ? pauseSVG : playSVG);
+}
+
+export function createPlayerFooter(container) {
     let footer = container.querySelector(".songs-footer");
     if (footer) return footer;
 
     footer = createElement("footer", { class: "songs-footer" });
     const audio = createElement("audio", { id: "songs-audio", controls: true });
 
-    const shuffleBtn = createElement("button", { class: "shuffle-btn" }, ["Shuffle"]);
-    shuffleBtn.addEventListener("click", () => {
-        state.isShuffle = !state.isShuffle;
-        shuffleBtn.classList.toggle("active", state.isShuffle);
-    });
+    const shuffleBtn = Button("Shuffle", "button", {
+        "click": () => {
+            state.isShuffle = !state.isShuffle;
+            shuffleBtn.classList.toggle("active", state.isShuffle);
+        }
+    }, "shuffle-btn");
 
-    const autoplayBtn = createElement("button", { class: "autoplay-btn" }, ["Autoplay"]);
-    autoplayBtn.addEventListener("click", () => {
-        state.isAutoplay = !state.isAutoplay;
-        autoplayBtn.classList.toggle("active", state.isAutoplay);
-    });
+    const autoplayBtn = Button("Autoplay", "button", {
+        "click": () => {
+            state.isAutoplay = !state.isAutoplay;
+            autoplayBtn.classList.toggle("active", state.isAutoplay);
+        }
+    }, "autoplay-btn");
 
     footer.append(shuffleBtn, autoplayBtn, audio);
-    container.appendChild(footer);
+    container.append(footer);
 
     audio.addEventListener("ended", () => {
         if (state.isAutoplay) playNextSong(container);
@@ -42,37 +51,31 @@ function createPlayerFooter(container) {
     return footer;
 }
 
-// 🎵 Core Play Logic
+// ------------------------ Playback Logic ------------------------
 function playSong(song, container) {
-    console.log("song::::::",song);
     const footer = createPlayerFooter(container);
     const audio = footer.querySelector("#songs-audio");
-
     if (!song.audioUrl) return;
 
     // Pause if same song already playing
-    if (state.currentAudio && state.currentAudio.src === song.audioUrl && !audio.paused) {
+    if (state.currentAudio && state.currentAudio.src === `${song.audioUrl}${song.audioextn}` && !audio.paused) {
         audio.pause();
-        if (state.currentPlayBtn) state.currentPlayBtn.innerHTML = playSVG;
+        updatePlayButtonIcon(state.currentPlayBtn, false);
         return;
     }
 
-    // Reset play icon on previous song
-    if (state.currentPlayBtn) state.currentPlayBtn.innerHTML = playSVG;
+    // Reset icon on previous button
+    updatePlayButtonIcon(state.currentPlayBtn, false);
 
-    // Play new song
+    // Load new song
     audio.src = `${song.audioUrl}${song.audioextn}`;
-    console.log("audio.src", audio.src);
     audio.play();
-    state.currentAudio = audio;
 
-    if (song._playBtn) {
-        song._playBtn.innerHTML = pauseSVG;
-        state.currentPlayBtn = song._playBtn;
-    }
+    state.currentAudio = audio;
+    updatePlayButtonIcon(song._playBtn, true);
+    state.currentPlayBtn = song._playBtn;
 }
 
-// 🎵 Play Next Song
 function playNextSong(container) {
     const { songQueue } = state;
     if (!songQueue.length) return;
@@ -83,25 +86,52 @@ function playNextSong(container) {
         state.currentIndex = (state.currentIndex + 1) % songQueue.length;
     }
 
-    const song = songQueue[state.currentIndex];
-    if (song) playSong(song, container);
+    const nextSong = songQueue[state.currentIndex];
+    if (nextSong) playSong(nextSong, container);
 }
 
-// 🧱 Utility to initialize queue
+// ------------------------ State Control ------------------------
 function setSongQueue(songs) {
-    state.songQueue = songs;
+    state.songQueue = songs || [];
     state.currentIndex = -1;
 }
 
-// 🧱 Utility to set current index
 function setCurrentIndex(index) {
     state.currentIndex = index;
 }
 
+function resetPlayer() {
+    if (state.currentAudio) state.currentAudio.pause();
+    state = {
+        currentAudio: null,
+        currentPlayBtn: null,
+        currentIndex: -1,
+        songQueue: [],
+        isShuffle: false,
+        isAutoplay: true,
+        container: null
+    };
+}
+
+// ------------------------ Public Interface ------------------------
+function initPlayer(container) {
+    state.container = container;
+    createPlayerFooter(container);
+
+    return {
+        container,
+        play: (song, idx) => {
+            setCurrentIndex(idx);
+            playSong(song, container);
+        }
+    };
+}
+
 export {
-    createPlayerFooter,
+    initPlayer,
     playSong,
     playNextSong,
     setSongQueue,
-    setCurrentIndex
+    setCurrentIndex,
+    resetPlayer
 };

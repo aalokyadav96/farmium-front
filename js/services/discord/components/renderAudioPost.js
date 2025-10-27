@@ -13,8 +13,8 @@ const lyrics = [
 ];
 
 async function RenderAudioPost(mediaContainer, media_url = "", resolution) {
-    const audioSrc = resolveImagePath(EntityType.FEED, PictureType.AUDIO, `${media_url}.mp3`);
-    const posterPath = resolveImagePath(EntityType.FEED, PictureType.THUMB, `${media_url}.jpg`);
+    const audioSrc = resolveImagePath(EntityType.CHAT, PictureType.AUDIO, `${media_url}.mp3`);
+    const posterPath = resolveImagePath(EntityType.CHAT, PictureType.THUMB, `${media_url}.jpg`);
 
     const audiox = AudioPlayer({
         src: audioSrc,

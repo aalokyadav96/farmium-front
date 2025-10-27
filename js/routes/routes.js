@@ -51,9 +51,10 @@ export const staticRoutes = {
   "/grocery": { moduleImport: () => import("../pages/crop/crops.js"), functionName: "Crops" },
 
   "/recipes": { moduleImport: () => import("../pages/recipe/recipes.js"), functionName: "Recipes" },
+  "/music": { moduleImport: () => import("../pages/music/musiv.js"), functionName: "Music" },
 
   "/merechats": { moduleImport: () => import("../pages/merechats/merechats.js"), functionName: "Mechat", protected: true },
-  "/discord": { moduleImport: () => import("../pages/discord/discord.js"), functionName: "Discord", protected: true },
+  "/discord": { moduleImport: () => import("../pages/discord/discord.js"), functionName: "Discord", protected: true }
 };
 
 export const dynamicRoutes = [
@@ -109,6 +110,13 @@ export const dynamicRoutes = [
   {
     pattern: /^\/merechats\/([\w-]+)$/,
     moduleImport: () => import("../pages/merechats/merePage.js"),
+    functionName: "OneChatPage",
+    protected: true,
+    argBuilder: safeArgBuilder
+  },
+  {
+    pattern: /^\/discord\/([\w-]+)$/,
+    moduleImport: () => import("../pages/discord/discordPage.js"),
     functionName: "OneChatPage",
     protected: true,
     argBuilder: safeArgBuilder

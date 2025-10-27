@@ -1,4 +1,4 @@
-import { API_URL, SRC_URL, setState, getState, CHAT_URL, BANNERDROP_URL, LIVE_URL } from "../state/state.js";
+import { API_URL, SRC_URL, setState, getState, MERE_URL, CHAT_URL, BANNERDROP_URL, LIVE_URL, MUSIC_URL } from "../state/state.js";
 import { logout } from "../services/auth/authService.js";
 import Notify from "../components/ui/Notify.mjs";
 
@@ -207,6 +207,23 @@ export async function chatFetch(endpoint, method = "GET", body = null, options =
     const controller = options.controller || new AbortController();
     const signal = controller.signal;
     const fullUrl = `${CHAT_URL}${endpoint}`;
+    return apixFetch(fullUrl, method, body, { ...options, signal });
+}
+
+
+export async function mereFetch(endpoint, method = "GET", body = null, options = {}) {
+    const controller = options.controller || new AbortController();
+    const signal = controller.signal;
+    const fullUrl = `${MERE_URL}${endpoint}`;
+    options.credentials = 'omit';
+    return apixFetch(fullUrl, method, body, { ...options, signal });
+}
+
+export async function musicFetch(endpoint, method = "GET", body = null, options = {}) {
+    const controller = options.controller || new AbortController();
+    const signal = controller.signal;
+    const fullUrl = `${MUSIC_URL}${endpoint}`;
+    options.credentials = 'omit';
     return apixFetch(fullUrl, method, body, { ...options, signal });
 }
 

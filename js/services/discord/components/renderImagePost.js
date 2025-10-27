@@ -19,13 +19,13 @@ async function RenderImagePost(mediaContainer, media) {
     const imageList = document.createElement('ul');
     imageList.className = `preview_image_wrap__Q29V8 PostPreviewImageView_-artist__WkyUA PostPreviewImageView_-bottom_radius__Mmn-- ${assignedClass}`;
 
-    const fullImagePaths = media.map(img => resolveImagePath(EntityType.FEED, PictureType.PHOTO, img));
+    const fullImagePaths = media.map(img => resolveImagePath(EntityType.CHAT, PictureType.PHOTO, `${img}.png`));
 
     media.forEach((img, index) => {
         const listItem = document.createElement('li');
         listItem.className = 'PostPreviewImageView_image_item__dzD2P';
 
-        const thumbPath = resolveImagePath(EntityType.FEED, PictureType.THUMB, img);
+        const thumbPath = resolveImagePath(EntityType.CHAT, PictureType.THUMB, img);
 
         const image = Imagex({
             src : thumbPath,

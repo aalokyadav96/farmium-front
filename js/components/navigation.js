@@ -97,15 +97,16 @@ const createNav = () => {
         // { href: "/products", label: "Products" },
         // { href: "/recipes", label: "Recipes" },
         { href: "/baitos", label: "Baito" },
-        { href: "/grocery", label: "Grocery" },
         { href: "/baitos/hire", label: "Hire" },
+        { href: "/grocery", label: "Grocery" },
+        { href: "/recipes", label: "Recipes" },
         { href: "/places", label: "Places" },
+        { href: "/itinerary", label: "Itinerary" },
         { href: "/events", label: "Events" },
+        { href: "/music", label: "Music" },
+        { href: "/artists", label: "Artists" },
         { href: "/social", label: "Social" },
         { href: "/posts", label: "Posts" },
-        { href: "/itinerary", label: "Itinerary" },
-        { href: "/recipes", label: "Recipes" },
-        { href: "/artists", label: "Artists" },
     ];
 
     const savedOrder = getNavOrder();

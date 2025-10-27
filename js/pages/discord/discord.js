@@ -1,8 +1,8 @@
-import { displayChat } from "../../services/mechat/merechat";
+import { displayChats } from "../../services/discord/merechat";
 
 async function Discord(isLoggedIn, contentContainer) {
     contentContainer.innerHTML = '';
-    displayChat(contentContainer, isLoggedIn);
+    displayChats(contentContainer, isLoggedIn);
 }
 
 export { Discord };

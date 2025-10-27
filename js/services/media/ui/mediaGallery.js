@@ -85,6 +85,18 @@ function buildMediaElement(media, thumbSrc, index, prefix) {
     vidEl.appendChild(videoPlayer);
   });
 
+    // const vidEl = VideoPlayer({
+    //   src: videoSrc,
+    //   poster: thumbSrc,
+    //   controls: false,
+    //   autoplay: false,
+    //   muted: true,
+    //   loop: false,
+    //   theme: "light",
+    //   subtitles: [],
+    //   availableResolutions: []
+    // }, `video-${index}`);
+
     img.addEventListener("click", () => {
       const container = createElement("div", { class: "lightbox-video-container" }, [vidEl]);
       LightBox(container);

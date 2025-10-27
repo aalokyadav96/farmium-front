@@ -31,20 +31,6 @@ async function renderAlbumsTab(container, artistID, isCreator) {
     }
 }
 
-// async function renderPostsTab(container, artistID, isLoggedIn) {
-//     // try {
-//     //     displayMedia(container, "artist", artistID, isLoggedIn);
-//     // } catch (err) {
-//     //     container.innerHTML = "<p>Error loading posts.</p>";
-//     // }
-
-//     try {
-//         displayMediaFeed(container, "artist", artistID, isLoggedIn);
-//     } catch (err) {
-//         container.innerHTML = "<p>Error loading posts.</p>";
-//     }
-// }
-
 async function renderMerchTab(container, artistID, isCreator, isLoggedIn) {
     try {
         const merchItems = await apiFetch(`/artists/${artistID}/merch`);

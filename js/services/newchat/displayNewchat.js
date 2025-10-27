@@ -50,7 +50,8 @@ function createInputRow() {
 function createUploadElements() {
   const fileInput = createElement("input", {
     type: "file",
-    accept: "image/*,video/*,audio/mp3",
+    // accept: "image/*,video/*,audio/mp3",
+    accept: "image/*",
     class: "file-input",
     multiple: true
   });

@@ -109,7 +109,7 @@ export async function displayFarm(isLoggedIn, farmId, content) {
       Button("Schedule a visit", "cta-visit-btn", { click: () => alert("Scheduled") }, "buttonx"),
       Button("Pre-order", "cta-pre-btn", { click: () => alert("Pre-ordered") }, "buttonx"),
       ...(isCreator ? [] : [
-        Button("Chat", "cta-chat-btn", { click: () => farmChat(farm.createdBy, farm.farmId) }, "buttonx")
+        Button("Chat", "cta-chat-btn", { click: () => farmChat(farm.createdBy, farmId) }, "buttonx")
       ])
     ] : [])
   ]);

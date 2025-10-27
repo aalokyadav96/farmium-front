@@ -10,7 +10,8 @@ const dict = {
     "chat.typing":        "typing…",
     "chat.online":        "Online",
     "chat.offline":       "Offline",
-    "chat.upload":        "📎"
+    "chat.upload":        "📎",
+    "chat.no_chats":        "No chats found"
   };
   
   export function t(key) {

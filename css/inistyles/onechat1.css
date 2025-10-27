@@ -1,0 +1,228 @@
+/* === Chat Container === */
+.onechatcon {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  max-width: var(--max-width);
+  margin: var(--space-md) auto;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* === Chat Header === */
+.chat-header {
+  background-color: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-heading);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* === Chat Messages === */
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-md);
+  background-color: var(--color-space);
+}
+
+/* === Message Item === */
+.message-item {
+  margin-bottom: var(--space-md);
+  border-radius: var(--radius-md);
+  background-color: var(--color-card-bg);
+  padding: var(--space-sm);
+  box-shadow: var(--shadow-elev-1);
+}
+
+.message-item.mine {
+  background-color: var(--color-accent);
+  color: var(--color-btn-fg);
+}
+
+/* === Message Body === */
+.msg-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+/* === Message Header === */
+.msg-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--font-size-sm);
+  color: var(--color-muted);
+}
+
+.msg-sender {
+  font-weight: var(--font-weight-medium);
+}
+
+.msg-time,
+.msg-status {
+  margin-left: var(--space-sm);
+}
+
+/* === Message Menu === */
+.msg-menu {
+  position: relative;
+}
+
+.menu-btn {
+  background: none;
+  border: none;
+  color: var(--color-muted);
+  cursor: pointer;
+  font-size: var(--font-size-base);
+}
+
+.menu-btn:focus + .dropdown,
+.menu-btn:hover + .dropdown {
+  display: block;
+}
+
+.menu-btn .dropdown {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-elev-2);
+  z-index: 10;
+}
+
+.menu-btn .dropdown .button {
+  display: block;
+  width: 100%;
+  padding: var(--space-sm);
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: var(--font-size-sm);
+  color: var(--color-fg);
+  cursor: pointer;
+}
+
+.menu-btn .dropdown .button:hover {
+  background-color: var(--color-highlight);
+}
+
+/* === Message Content === */
+.msg-content {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+}
+
+/* === Chat Footer === */
+.chat-footer {
+  display: flex;
+  padding: var(--space-sm) var(--space-md);
+  border-top: 1px solid var(--color-border);
+  background-color: var(--color-bg);
+}
+
+.chat-footer input[type="text"] {
+  flex: 1;
+  padding: var(--space-sm);
+  border: 1px solid var(--color-input-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-input-bg);
+  font-size: var(--font-size-base);
+  margin-right: var(--space-sm);
+}
+
+.send-btn-class {
+  background-color: var(--color-btn-bg);
+  color: var(--color-btn-fg);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: var(--space-sm) var(--space-md);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.send-btn-class:hover {
+  background-color: var(--color-btn-hover-bg);
+}
+
+/* === Sidebar === */
+.chat-sidebar {
+  width: 240px;
+  background-color: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  padding: var(--space-md);
+}
+
+.chat-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.chat-item-button {
+  background-color: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-sm);
+  font-size: var(--font-size-base);
+  color: var(--color-fg);
+  cursor: pointer;
+  text-align: left;
+  transition: background-color var(--transition-fast);
+}
+
+.chat-item-button:hover {
+  background-color: var(--color-highlight);
+}
+
+/* === Chat Main === */
+.chat-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* === Search Bar === */
+.search-bar {
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-bg);
+}
+
+.chat-search {
+  width: 100%;
+  padding: var(--space-sm);
+  border: 1px solid var(--color-input-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+}
+
+/* === Chat View === */
+.chat-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-back-button {
+  background: none;
+  border: none;
+  color: var(--color-link);
+  font-size: var(--font-size-sm);
+  padding: var(--space-sm) var(--space-md);
+  cursor: pointer;
+}
+
+.chat-body {
+  flex: 1;
+  overflow-y: auto;
+}

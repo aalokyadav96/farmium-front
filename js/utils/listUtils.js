@@ -1,4 +1,5 @@
 
+import Button from "../components/base/Button.js";
 import { createElement } from "../components/createElement.js";
 
 // --- sort options by type ---
@@ -53,6 +54,17 @@ export function createFilterControls({ type, items, onRender }) {
     }, [cat]);
     chipContainer.appendChild(chip);
   });
+  
+  // categories.forEach(cat => {
+  //   const chip = createElement("button", {
+  //     class: "category-chip buttonx secondary",
+  //     onclick: () => {
+  //       selectedCategory.value = selectedCategory.value === cat ? null : cat;
+  //       renderFiltered();
+  //     }
+  //   }, [cat]);
+  //   chipContainer.appendChild(chip);
+  // });
 
   wrapper.append(searchInput, sortSelect);
 
