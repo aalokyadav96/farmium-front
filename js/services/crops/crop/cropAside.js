@@ -13,6 +13,9 @@ export function cropAside(cropData) {
             Button("See Recipes","recipes-crp-btn",{
                 click: () => {navigate('/recipes')}
             }, "buttonx secondary"),
+            Button("List Your Farm","newfrm-btn",{
+                click: () => {navigate('/create-farm')}
+            }, "buttonx secondary", {"margin-right":"4px"}),
         ]),
 
         createElement("h3", {}, ["🌟 Featured Crops"]),

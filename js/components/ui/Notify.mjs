@@ -3,7 +3,7 @@ import "../../../css/ui/Notify.css";
 const Notify = (message, {
   type = 'info',
   duration = 0,              // 0 = auto based on message length
-  dismissible = false,
+  dismissible = true,
 } = {}) => {
   const notify = document.createElement('div');
   notify.className = `notify ${type}`;

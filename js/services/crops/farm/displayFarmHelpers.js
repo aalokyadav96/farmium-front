@@ -6,8 +6,6 @@ import { navigate } from "../../../routes/index.js";
 import { addToCart } from "../../cart/addToCart.js";
 import { resolveImagePath, EntityType, PictureType } from "../../../utils/imagePaths.js";
 import { editFarm } from "./editFarm.js";
-import Imagex from "../../../components/base/Imagex.js";
-import { updateImageWithCrop } from "../../../utils/bannerEditor.js";
 import Bannerx from "../../../components/base/Bannerx.js";
 // import { renderListingCard } from "../crop/renderListingCard.js";
 
@@ -134,7 +132,6 @@ function createCropBannerSection(crop, isCreator) {
 // ─────────── Individual crop card ───────────
 function createCropCard(crop, farmName, farmId, mainCon, editcon, isLoggedIn, isCreator) {
   const card = createElement("div", { class: "crop-card" });
-console.log(crop);
 
 const banner = createCropBannerSection(crop, isCreator); 
   // const img = Imagex({
@@ -225,7 +222,6 @@ function createCreatorControls(crop, farmId, mainCon, editcon) {
 
 // ─────────── User controls (quantity + add to cart) ───────────
 export function createUserControls(crop, farmName, farmId, isLoggedIn) {
-  console.log(crop);
   let quantity = 1;
   const qtyDisplay = createElement("span", { class: "quantity-value" }, [String(quantity)]);
   const inc = createElement("button", {}, ["+"]);

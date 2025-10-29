@@ -1,0 +1,79 @@
+#notices-container {
+    padding: 16px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    max-width: 600px;
+    margin: 0 auto;
+    font-family: system-ui, sans-serif;
+}
+
+#notice-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+#notice-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.notice-item {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 10px 14px;
+    background-color: #fafafa;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.notice-item:hover {
+    background-color: #f3f3f3;
+}
+
+.notice-item h4 {
+    margin: 0 0 6px 0;
+    font-size: 1.1em;
+    color: #333;
+}
+
+.notice-item p {
+    margin: 0 0 8px 0;
+    color: #444;
+}
+
+.notice-item small {
+    color: #777;
+    font-size: 0.8em;
+}
+
+.notice-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.notice-add-btn,
+.notice-edit-btn,
+.notice-delete-btn {
+    cursor: pointer;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.notice-add-btn {
+    background-color: #28a745;
+    color: white;
+}
+
+.notice-edit-btn {
+    background-color: #007bff;
+    color: white;
+}
+
+.notice-delete-btn {
+    background-color: #dc3545;
+    color: white;
+}

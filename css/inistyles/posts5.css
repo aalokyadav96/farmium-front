@@ -9,12 +9,13 @@
   color: var(--color-fg);
 }
 
-.posts-main {
+/* .posts-main {
   flex: 1 1 70%;
-}
+} */
 
 .posts-aside {
-  flex: 1 1 25%;
+  /* flex: 1 1 25%; */
+  flex: 1;
   background-color: var(--color-surface);
   padding: var(--space-md);
   border-radius: var(--radius-md);

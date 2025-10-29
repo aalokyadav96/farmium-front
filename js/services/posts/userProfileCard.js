@@ -3,8 +3,9 @@ import { Button } from "../../components/base/Button.js";
 import { showPaymentModal } from "../pay/pay.js";
 import { getState } from "../../state/state.js";
 import Imagex from "../../components/base/Imagex.js";
+import { fetchUserMeta } from "../../utils/usersMeta.js";
 
-export function userProfileCard(profile = {
+export async function userProfileCard(profile = {
     username: "Anonymous",
     bio: "This user hasn't added a bio yet.",
     avatarUrl: "default-avatar.png",
@@ -15,7 +16,8 @@ export function userProfileCard(profile = {
     entityName: "Anonymous" // username or post title
 }) {
     const card = createElement("div", { class: "user-profile-card" });
-
+    const userx =  await fetchUserMeta([profile.username]);
+    profile.username = userx[profile.username]?.username || "Anonymous"
     const avatar = Imagex({
         src: profile.avatarUrl,
         alt: `${profile.username}'s avatar`,

@@ -5,6 +5,7 @@ import { SRC_URL } from "../state/state";
 // Entity types
 export const EntityType = {
   ARTIST: "artist",
+  MEMBER: "member",
   USER: "user",
   BAITO: "baito",
   WORKER: "worker",
@@ -89,7 +90,7 @@ export function resolveImagePath(entityType, pictureType, filename, fallback = "
   } catch (_) {
     // not a valid absolute URL → will treat as local filename
   }
-
+console.log("jo");
   // local file: must be simple filename/path
   if (!/^[a-zA-Z0-9._/-]+$/.test(filename)) {
     return fallback;
@@ -110,7 +111,6 @@ export function resolveImagePath(entityType, pictureType, filename, fallback = "
     }
   }
 
-  console.log(SRC_URL);
 return `${SRC_URL}/uploads/${entityType}/${folder}/${finalName}`;
 
 }

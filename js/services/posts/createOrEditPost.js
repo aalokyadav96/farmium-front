@@ -210,7 +210,7 @@ async function renderPostEditor({ isLoggedIn, postId, contentContainer, mode }) 
     formData.append("title", titleGroup.querySelector("input").value);
     formData.append("category", categoryGroup.querySelector("select").value);
     formData.append("subcategory", subcategoryGroup.querySelector("select").value);
-
+  
     const needsReference =
       categoryGroup.querySelector("select").value === "Review" &&
       ["Product", "Place", "Event"].includes(subcategoryGroup.querySelector("select").value);
@@ -220,12 +220,19 @@ async function renderPostEditor({ isLoggedIn, postId, contentContainer, mode }) 
         formData.append("referenceId", refVal.trim());
       }
     }
-
-    formData.append("blocks", blocksTextarea.querySelector("textarea").value);
-
+  
+    // 🧱 Filter out empty blocks before sending
+    const filteredBlocks = blocks.filter(b => {
+      if (b.type === "text") return b.content && b.content.trim() !== "";
+      if (b.type === "image") return b.url && b.url.trim() !== "";
+      return false;
+    });
+  
+    formData.append("blocks", JSON.stringify(filteredBlocks, null, 2));
+  
     const endpoint = mode === "create" ? "/posts/post" : `/posts/post/${postId}`;
     const method = mode === "create" ? "POST" : "PATCH";
-    alert(method);
+  
     try {
       const res = await apiFetch(endpoint, method, formData, { isForm: true });
       messageBox.replaceChildren(
@@ -242,6 +249,45 @@ async function renderPostEditor({ isLoggedIn, postId, contentContainer, mode }) 
       );
     }
   }
+  
+
+  // async function handleSubmit() {
+  //   const formData = new FormData();
+  //   formData.append("title", titleGroup.querySelector("input").value);
+  //   formData.append("category", categoryGroup.querySelector("select").value);
+  //   formData.append("subcategory", subcategoryGroup.querySelector("select").value);
+
+  //   const needsReference =
+  //     categoryGroup.querySelector("select").value === "Review" &&
+  //     ["Product", "Place", "Event"].includes(subcategoryGroup.querySelector("select").value);
+  //   if (needsReference) {
+  //     const refVal = referenceIdGroup.querySelector("input").value;
+  //     if (refVal.trim()) {
+  //       formData.append("referenceId", refVal.trim());
+  //     }
+  //   }
+
+  //   formData.append("blocks", blocksTextarea.querySelector("textarea").value);
+
+  //   const endpoint = mode === "create" ? "/posts/post" : `/posts/post/${postId}`;
+  //   const method = mode === "create" ? "POST" : "PATCH";
+  //   alert(method);
+  //   try {
+  //     const res = await apiFetch(endpoint, method, formData, { isForm: true });
+  //     messageBox.replaceChildren(
+  //       createElement("span", {}, [
+  //         mode === "create"
+  //           ? "Post created with ID " + res.postid
+  //           : "Post updated successfully"
+  //       ])
+  //     );
+  //     navigate(`/post/${res.postid}`);
+  //   } catch (err) {
+  //     messageBox.replaceChildren(
+  //       createElement("span", {}, ["Error: " + (err.message || "Unknown error")])
+  //     );
+  //   }
+  // }
 
   const submitBtn = Button(
     mode === "create" ? "Create Post" : "Update Post",

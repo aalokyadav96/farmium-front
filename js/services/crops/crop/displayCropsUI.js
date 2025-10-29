@@ -4,6 +4,7 @@ import { cropAside } from "./cropAside.js";
 import { resolveImagePath, PictureType, EntityType } from "../../../utils/imagePaths.js";
 import Imagex from "../../../components/base/Imagex.js";
 import { debounce } from "../../../utils/deutils.js";
+import Button from "../../../components/base/Button.js";
 
 function filterAndSortCrops(crops, { term, tags, sortBy }) {
   return crops
@@ -64,8 +65,14 @@ export function renderCropCard(crop, mode = "catalogue") {
       (crop.tags || []).map(tag => createElement("span", { class: "tag-pill" }, [tag]))
     );
 
-    const btn = createElement("button", {}, ["View Farms"]);
-    btn.onclick = () => navigate(`/crop/${crop.name.toLowerCase().replace(/\s+/g, "_")}`);
+    // const btn = createElement("button", {}, ["View Farms"]);
+    // btn.onclick = () => navigate(`/crop/${crop.name.toLowerCase().replace(/\s+/g, "_")}`);
+
+    const btn = Button("View Farms", "button", {
+      click: ()=> {
+        navigate(`/crop/${crop.name.toLowerCase().replace(/\s+/g, "_")}`);
+      }
+    }, "buttonx");
 
     card.append(img, title, info, season, tags, btn);
   }

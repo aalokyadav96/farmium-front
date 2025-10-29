@@ -107,7 +107,8 @@ function createFilterControls({ type, items, onRender }) {
   let selectedCategory = null;
 
   categories.forEach(cat => {
-    const chip = createElement("span", { class: "category-chip" }, [cat]);
+    const chipper = createElement("span", { class: "chipper" }, [cat]);
+    const chip = createElement("div", { class: "category-chip" }, [chipper]);
     chip.addEventListener("click", () => {
       selectedCategory = selectedCategory === cat ? null : cat;
       renderFiltered();

@@ -18,6 +18,20 @@ import LightBox from "../../../components/ui/Lightbox.mjs";
 import { generateVideoPlayer } from "../../../components/ui/vidpopHelpers.js";
 
 /* ------------------------------------------------------
+   Helper: Determine media type
+------------------------------------------------------ */
+function getFileType(media) {
+  if (!media || !media.type) {
+    if (media.url && /\.(mp4|webm|ogg)$/i.test(media.url)) return "video";
+    if (media.url && /\.(jpg|jpeg|png|gif|webp)$/i.test(media.url)) return "image";
+    return "unknown";
+  }
+  if (media.type.startsWith("image")) return "image";
+  if (media.type.startsWith("video")) return "video";
+  return "unknown";
+}
+
+/* ------------------------------------------------------
    BUILD MEDIA FRAGMENT
 ------------------------------------------------------ */
 function buildMediaFragment(mediaData, entityType, entityId, isLoggedIn, prefix = "media") {
@@ -30,6 +44,7 @@ function buildMediaFragment(mediaData, entityType, entityId, isLoggedIn, prefix 
     group.forEach((media, i) => {
       if (!media.url) return;
 
+      const mediaType = getFileType(media);
       const figure = createElement("figure", {
         class: `${prefix}-item`,
         "data-id": media.mediaid
@@ -37,7 +52,7 @@ function buildMediaFragment(mediaData, entityType, entityId, isLoggedIn, prefix 
 
       const thumbSrc = resolveImagePath(EntityType.MEDIA, PictureType.THUMB, `${media.url}.jpg`);
       const captionText = media.caption || "";
-      const mediaEl = buildMediaElement(media, thumbSrc, i, prefix);
+      const mediaEl = buildMediaElement(media, thumbSrc, i, prefix, mediaType);
       const caption = createElement("figcaption", { class: `${prefix}-caption` }, [captionText]);
 
       const translation = buildTranslationSection(captionText);
@@ -59,8 +74,8 @@ function buildMediaFragment(mediaData, entityType, entityId, isLoggedIn, prefix 
 /* ------------------------------------------------------
    MEDIA ELEMENT BUILDER
 ------------------------------------------------------ */
-function buildMediaElement(media, thumbSrc, index, prefix) {
-  if (media.type === "image") {
+function buildMediaElement(media, thumbSrc, index, prefix, type) {
+  if (type === "image") {
     const img = Imagex({
       "data-src": thumbSrc,
       classes: `${prefix}-img`,
@@ -71,31 +86,32 @@ function buildMediaElement(media, thumbSrc, index, prefix) {
     return img;
   }
 
-  if (media.type === "video") {
-    const videoSrc = resolveImagePath(EntityType.MEDIA, PictureType.VIDEO, `${media.url}${media.extn || ".mp4"}`);
+  if (type === "video") {
+    const videoSrc = resolveImagePath(
+      EntityType.MEDIA,
+      PictureType.VIDEO,
+      `${media.url}${media.extn || ".mp4"}`
+    );
+
     const img = Imagex({
       src: thumbSrc,
       classes: `${prefix}-img`,
       "data-index": index
     });
 
-    let vidEl = createElement("div",{},[]);
-    
-  generateVideoPlayer(videoSrc, thumbSrc, [], [], media.url).then(videoPlayer => {
-    vidEl.appendChild(videoPlayer);
-  });
+    const vidEl = createElement("div", { class: `${prefix}-video-wrapper` }, []);
 
-    // const vidEl = VideoPlayer({
-    //   src: videoSrc,
-    //   poster: thumbSrc,
-    //   controls: false,
-    //   autoplay: false,
-    //   muted: true,
-    //   loop: false,
-    //   theme: "light",
-    //   subtitles: [],
-    //   availableResolutions: []
-    // }, `video-${index}`);
+    // Load video player lazily
+    generateVideoPlayer(videoSrc, thumbSrc, [], [], media.url)
+      .then(videoPlayer => {
+        if (videoPlayer) vidEl.append(videoPlayer);
+      })
+      .catch(err => {
+        console.error("Video load error:", err);
+        vidEl.append(
+          createElement("p", { class: "video-error" }, ["Failed to load video."])
+        );
+      });
 
     img.addEventListener("click", () => {
       const container = createElement("div", { class: "lightbox-video-container" }, [vidEl]);
@@ -105,7 +121,9 @@ function buildMediaElement(media, thumbSrc, index, prefix) {
     return img;
   }
 
-  return createElement("div", { class: `${prefix}-unsupported` }, [`Unsupported media type: ${media.type}`]);
+  return createElement("div", { class: `${prefix}-unsupported` }, [
+    `Unsupported media type: ${type}`
+  ]);
 }
 
 /* ------------------------------------------------------
@@ -119,10 +137,14 @@ function buildTranslationSection(captionText) {
     style: "display:none;"
   });
 
-  const toggle = createElement("span", {
-    class: "translate-toggle",
-    "data-state": "original"
-  }, ["See Translation"]);
+  const toggle = createElement(
+    "span",
+    {
+      class: "translate-toggle",
+      "data-state": "original"
+    },
+    ["See Translation"]
+  );
 
   toggle.addEventListener("click", async (e) => {
     e.stopPropagation();
@@ -142,8 +164,8 @@ export async function displayMedia(content, entityType, entityId, isLoggedIn) {
   const loader = createElement("p", { class: "loading" }, ["Loading media..."]);
   const list = createElement("div", { class: "media-list" });
 
-    const addBtn = createAddMediaButton(isLoggedIn, entityType, entityId, list, showMediaUploadForm);
-    if (addBtn) content.append(addBtn);
+  const addBtn = createAddMediaButton(isLoggedIn, entityType, entityId, list, showMediaUploadForm);
+  if (addBtn) content.append(addBtn);
 
   // Append upfront to minimize layout shifts
   content.append(title, loader, list);
@@ -154,20 +176,17 @@ export async function displayMedia(content, entityType, entityId, isLoggedIn) {
 
     if (!Array.isArray(mediaData) || mediaData.length === 0) {
       content.append(createElement("p", {}, ["No media available."]));
-      const addBtn = createAddMediaButton(isLoggedIn, entityType, entityId, list, showMediaUploadForm);
-      if (addBtn) content.append(addBtn);
       return;
     }
 
     const frag = buildMediaFragment(mediaData, entityType, entityId, isLoggedIn, "media");
     list.append(frag);
 
-    // Reserved for delegated interactions (context menu, etc.)
+    // Reserved for delegated interactions
     list.addEventListener("click", e => {
       const img = e.target.closest(".media-img");
       if (img) return;
     });
-
   } catch (err) {
     console.error("Media fetch error:", err);
     loader.replaceWith(

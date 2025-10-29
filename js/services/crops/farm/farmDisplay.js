@@ -5,18 +5,18 @@ import Gallery from "../../../components/ui/Gallery.mjs";
 import { navigate } from "../../../routes/index.js";
 import { getState } from "../../../state/state.js";
 import { resolveImagePath, EntityType, PictureType } from "../../../utils/imagePaths.js";
-
-import { updateImageWithCrop } from "../../../utils/bannerEditor.js"; // adjust path
-import {
-  renderFarmDetails,
-  renderCropSummary,
-  renderCropEmojiMap,
-  renderCrops,createSortDropdown,
-} from "./displayFarmHelpers.js";
+import { updateImageWithCrop } from "../../../utils/bannerEditor.js";
+import { renderFarmDetails, renderCropSummary, renderCropEmojiMap, renderCrops, createSortDropdown } from "./displayFarmHelpers.js";
 import { displayReviews } from "../../reviews/displayReviews.js";
 import { farmChat } from "./farmchat.js";
 import Imagex from "../../../components/base/Imagex.js";
 import NoLink from "../../../components/base/NoLink.js";
+import { persistTabs } from "../../../utils/persistTabs.js";
+import { displayNotices } from "../../notices/notices.js";
+import { displayFanMedia } from "../../fanmade/ui/mediaGallery.js";
+import { renderWeatherDetails } from "../weather/weather.js";
+// import { persistTabs } from "../../../components/ui/createTabs.js"; // your reference file
+
 
 export async function displayFarm(isLoggedIn, farmId, content) {
   const container = createElement("div", { class: "farmpage" }, []);
@@ -67,89 +67,304 @@ export async function displayFarm(isLoggedIn, farmId, content) {
     banner.appendChild(bannerEditButton);
   }
 
-  // ——— Farm Info ———
-  const farmDetails = renderFarmDetails(farm, isCreator);
-
-  // ——— Crop Section ———
-  const cropsContainer = createElement("div", { class: "crop-list grid-view" });
-  const cropHeader = createElement("div", { class: "crop-header" }, [
-    createElement("h3", {}, ["🌾 Available Crops"]),
-    createSortDropdown(sortBy => renderCrops(farm, cropsContainer, farmId, mainColumn, editcon, isLoggedIn, sortBy, isCreator))
-  ]);
-
-  const addCropButton = isCreator
-    ? Button("Add Crop", "add-crop-btn", {
-        click: () => {
-          container.textContent = "";
-          import("../crop/createCrop.js").then(m => m.createCrop(farmId, container));
-        }
-      }, "buttonx")
-    : null;
-
   // ——— Aside Column ———
   const summaryStats = renderCropSummary(farm.crops || []);
   const cropDistribution = renderCropEmojiMap(farm.crops || []);
-
   const reviewPlaceholder = createElement("div", { class: "review-block" }, [
     createElement("p", {}, ["⭐️⭐️⭐️⭐️☆ (4.2 avg based on 17 reviews)"]),
     Button("💬 Check reviews", "review-btn", {
       click: () => displayReviews(reviewPlaceholder, isCreator, isLoggedIn, "farm", farmId)
     }, "buttonx"),
-    // ...(isLoggedIn ? [
-    //   Button("📨 Contact Farm", "contact-btn", {
-    //     click: () => alert(`You can reach ${farm.owner} at ${farm.contact || "N/A"}`)
-    //   }, "buttonx")
-    // ] : [
-    //   Button("🔒 Log in to interact", "", { click: () => navigate("/login") }, "buttonx")
-    // ])
   ]);
 
   const farmCTA = createElement("div", { class: "cta-block" }, [
-    ...(isLoggedIn ? [
+    ...(isLoggedIn && !isCreator ? [
       Button("Schedule a visit", "cta-visit-btn", { click: () => alert("Scheduled") }, "buttonx"),
       Button("Pre-order", "cta-pre-btn", { click: () => alert("Pre-ordered") }, "buttonx"),
-      ...(isCreator ? [] : [
-        Button("Chat", "cta-chat-btn", { click: () => farmChat(farm.createdBy, farmId) }, "buttonx")
-      ])
+      Button("Chat", "cta-chat-btn", { click: () => farmChat(farm.createdBy, farmId) }, "buttonx")
+    ] : []),
+    ...(isCreator ? [
+      Button("Button For Creator", "cta-creator-btn", { click: () => alert("add more features here") }, "buttonx")
     ] : [])
   ]);
 
+  // const farmDetails = renderFarmDetails(farm, isCreator);
+  const weatherWidget = renderWeatherDetails(farm, isCreator);
   const asideColumn = createElement("aside", { class: "farm-aside" }, [
+    weatherWidget,
     farmCTA,
     summaryStats,
     cropDistribution,
     reviewPlaceholder
   ]);
 
-  // ——— Main Column ———
-  const mainColumn = createElement("div", { class: "farm-main" }, [
-    banner,
-    farmDetails,
-    ...(addCropButton ? [addCropButton] : []),
-    cropHeader,
-    cropsContainer
-  ]);
-
-  const layoutWrapper = createElement("div", { class: "farm-layout" }, [mainColumn, asideColumn]);
-
-  // ——— Gallery ———
-  const gallery = createElement("div", { class: "gallery-block" }, []);
-  if (farm.gallery?.length) {
-    const imgs = farm.gallery.map(img => ({
-      src: resolveImagePath(EntityType.FARM, PictureType.GALLERY, img),
-      alt: farm.name
-    }));
-    gallery.appendChild(Gallery(imgs));
-  }
-
-  // ——— Final Assembly ———
-  container.append(header, layoutWrapper, gallery, createElement("div", { class: "onechatcon" }));
-
+  // ——— Tabs Setup ———
+  const mainColumn = createElement("div", { class: "farm-main" });
   const editcon = createElement("div", {}, []);
+  mainColumn.appendChild(banner);
   mainColumn.appendChild(editcon);
 
-  // Render Crops
-  await renderCrops(farm, cropsContainer, farmId, mainColumn, editcon, isLoggedIn, "name", isCreator);
+  const tabs = [];
+
+  tabs.push({
+    title: "Info",
+    id: "info-tab",
+    render: (tabContainer) => {
+      const farmDetails = renderFarmDetails(farm, isCreator);
+      tabContainer.appendChild(farmDetails);
+    },
+  });
+
+  tabs.push({
+    title: "Crops",
+    id: "crops-tab",
+    render: async (tabContainer) => {
+      const cropsContainer = createElement("div", { class: "crop-list grid-view" });
+      const cropHeader = createElement("div", { class: "crop-header" }, [
+        createElement("h3", {}, ["🌾 Available Crops"]),
+        createSortDropdown(sortBy => renderCrops(farm, cropsContainer, farmId, mainColumn, editcon, isLoggedIn, sortBy, isCreator))
+      ]);
+
+      if (isCreator) {
+        const addCropButton = Button("Add Crop", "add-crop-btn", {
+          click: () => {
+            container.textContent = "";
+            import("../crop/createCrop.js").then(m => m.createCrop(farmId, container));
+          }
+        }, "buttonx");
+        tabContainer.append(addCropButton);
+      }
+
+      tabContainer.append(cropHeader, cropsContainer);
+      await renderCrops(farm, cropsContainer, farmId, mainColumn, editcon, isLoggedIn, "name", isCreator);
+    }
+  });
+
+  // Inside tabs[]
+  tabs.push({
+    title: "Notices",
+    id: "notices-tab",
+    render: (tabContainer) => {
+      displayNotices("farm", farmId, tabContainer, isCreator);
+    }
+  });
+  // tabs.push({
+  //   title: "Notices",
+  //   id: "notices-tab",
+  //   render: async (tabContainer) => {
+  //     const notices = farm.notices || [];
+  //     if (isCreator) {
+  //       const addNoticeBtn = Button("Post Update", "add-notice-btn", {
+  //         click: () => displayNotices("farm", farmId),
+  //       }, "buttonx");
+  //       tabContainer.appendChild(addNoticeBtn);
+  //     }
+
+  //     if (!notices.length) {
+  //       tabContainer.appendChild(createElement("p", {}, ["No notices yet."]));
+  //     } else {
+  //       notices.forEach(n => {
+  //         tabContainer.appendChild(
+  //           createElement("div", { class: "notice-item" }, [
+  //             createElement("h4", {}, [n.title]),
+  //             createElement("p", {}, [n.content]),
+  //             createElement("small", {}, [`Posted ${new Date(n.date).toLocaleDateString()}`])
+  //           ])
+  //         );
+  //       });
+  //     }
+  //   }
+  // });
+
+  tabs.push({
+    title: "Gallery",
+    id: "gallery-tab",
+    render: (tabContainer) => {
+      displayFanMedia(tabContainer, "farm", farmId, isCreator);
+    }
+  });
+  // tabs.push({
+  //   title: "Gallery",
+  //   id: "gallery-tab",
+  //   render: (tabContainer) => {
+  //     if (farm.gallery?.length) {
+  //       const imgs = farm.gallery.map(img => ({
+  //         src: resolveImagePath(EntityType.FARM, PictureType.GALLERY, img),
+  //         alt: farm.name
+  //       }));
+  //       tabContainer.appendChild(Gallery(imgs));
+  //     } else {
+  //       tabContainer.textContent = "No gallery images yet.";
+  //     }
+  //   }
+  // });
+
+  tabs.push({
+    title: "Reviews",
+    id: "reviews-tab",
+    render: (tabContainer) => {
+      displayReviews(tabContainer, isCreator, isLoggedIn, "farm", farmId);
+    }
+  });
+
+  // Persist tabs in localStorage so user's last opened tab stays active
+  persistTabs(mainColumn, tabs, `farm-tabs:${farmId}`);
+
+  // ——— Final Assembly ———
+  const layoutWrapper = createElement("div", { class: "farm-layout" }, [mainColumn, asideColumn]);
+  container.append(header, layoutWrapper, createElement("div", { class: "onechatcon" }));
 }
+
+// import { SRC_URL, apiFetch } from "../../../api/api.js";
+// import { createElement } from "../../../components/createElement.js";
+// import Button from "../../../components/base/Button.js";
+// import Gallery from "../../../components/ui/Gallery.mjs";
+// import { navigate } from "../../../routes/index.js";
+// import { getState } from "../../../state/state.js";
+// import { resolveImagePath, EntityType, PictureType } from "../../../utils/imagePaths.js";
+
+// import { updateImageWithCrop } from "../../../utils/bannerEditor.js"; // adjust path
+// import {
+//   renderFarmDetails,
+//   renderCropSummary,
+//   renderCropEmojiMap,
+//   renderCrops, createSortDropdown,
+// } from "./displayFarmHelpers.js";
+// import { displayReviews } from "../../reviews/displayReviews.js";
+// import { farmChat } from "./farmchat.js";
+// import Imagex from "../../../components/base/Imagex.js";
+// import NoLink from "../../../components/base/NoLink.js";
+
+// export async function displayFarm(isLoggedIn, farmId, content) {
+//   const container = createElement("div", { class: "farmpage" }, []);
+//   content.replaceChildren(container);
+
+//   const res = await apiFetch(`/farms/${farmId}`);
+//   const farm = res?.farm;
+//   if (!res?.success || !farm) {
+//     container.textContent = "Farm not found.";
+//     return;
+//   }
+
+//   const isCreator = getState("user") === farm.createdBy;
+
+//   // ——— Header ———
+//   const header = createElement("div", { class: "farm-header" }, [
+//     createElement("div", { class: "breadcrumbs" }, [
+//       NoLink("🏠 Home", "", { click: () => navigate("/") }),
+//       " / ",
+//       NoLink("🌾 Farms", "", { click: () => navigate("/farms") }),
+//       " / ",
+//       createElement("span", {}, [farm.name])
+//     ])
+//   ]);
+
+//   // ——— Banner ———
+//   const banner = createElement("div", { class: "farm-banner" }, [
+//     Imagex({
+//       src: resolveImagePath(EntityType.FARM, PictureType.BANNER, farm.photo),
+//       alt: farm.name,
+//       id: "farm-banner-img"
+//     })
+//   ]);
+
+//   if (isCreator) {
+//     const bannerEditButton = createElement("button", { class: "edit-banner-pic" }, ["Edit Banner"]);
+//     bannerEditButton.addEventListener("click", () => {
+//       updateImageWithCrop({
+//         entityType: EntityType.FARM,
+//         imageType: "banner",
+//         stateKey: "banner",
+//         stateEntityKey: "farm",
+//         previewElementId: "farm-banner-img",
+//         pictureType: PictureType.BANNER,
+//         entityId: farmId
+//       });
+//     });
+//     banner.appendChild(bannerEditButton);
+//   }
+
+//   // ——— Farm Info ———
+//   const farmDetails = renderFarmDetails(farm, isCreator);
+
+//   // ——— Crop Section ———
+//   const cropsContainer = createElement("div", { class: "crop-list grid-view" });
+//   const cropHeader = createElement("div", { class: "crop-header" }, [
+//     createElement("h3", {}, ["🌾 Available Crops"]),
+//     createSortDropdown(sortBy => renderCrops(farm, cropsContainer, farmId, mainColumn, editcon, isLoggedIn, sortBy, isCreator))
+//   ]);
+
+//   const addCropButton = isCreator
+//     ? Button("Add Crop", "add-crop-btn", {
+//       click: () => {
+//         container.textContent = "";
+//         import("../crop/createCrop.js").then(m => m.createCrop(farmId, container));
+//       }
+//     }, "buttonx")
+//     : null;
+
+//   // ——— Aside Column ———
+//   const summaryStats = renderCropSummary(farm.crops || []);
+//   const cropDistribution = renderCropEmojiMap(farm.crops || []);
+
+//   const reviewPlaceholder = createElement("div", { class: "review-block" }, [
+//     createElement("p", {}, ["⭐️⭐️⭐️⭐️☆ (4.2 avg based on 17 reviews)"]),
+//     Button("💬 Check reviews", "review-btn", {
+//       click: () => displayReviews(reviewPlaceholder, isCreator, isLoggedIn, "farm", farmId)
+//     }, "buttonx"),
+//   ]);
+
+//   const farmCTA = createElement("div", { class: "cta-block" }, [
+//     // Only show these if logged in and NOT creator
+//     ...(isLoggedIn && !isCreator ? [
+//         Button("Schedule a visit", "cta-visit-btn", { click: () => alert("Scheduled") }, "buttonx"),
+//         Button("Pre-order", "cta-pre-btn", { click: () => alert("Pre-ordered") }, "buttonx"),
+//         Button("Chat", "cta-chat-btn", { click: () => farmChat(farm.createdBy, farmId) }, "buttonx")
+//     ] : []),
+
+//     // Only show this if creator
+//     ...(isCreator ? [
+//         Button("Button For Creator", "cta-creator-btn", { click: () => alert("what should we add here?") }, "buttonx")
+//     ] : [])
+// ]);
+
+
+//   const asideColumn = createElement("aside", { class: "farm-aside" }, [
+//     farmCTA,
+//     summaryStats,
+//     cropDistribution,
+//     reviewPlaceholder
+//   ]);
+
+//   // ——— Main Column ———
+//   const mainColumn = createElement("div", { class: "farm-main" }, [
+//     banner,
+//     farmDetails,
+//     ...(addCropButton ? [addCropButton] : []),
+//     cropHeader,
+//     cropsContainer
+//   ]);
+
+//   const layoutWrapper = createElement("div", { class: "farm-layout" }, [mainColumn, asideColumn]);
+
+//   // ——— Gallery ———
+//   const gallery = createElement("div", { class: "gallery-block" }, []);
+//   if (farm.gallery?.length) {
+//     const imgs = farm.gallery.map(img => ({
+//       src: resolveImagePath(EntityType.FARM, PictureType.GALLERY, img),
+//       alt: farm.name
+//     }));
+//     gallery.appendChild(Gallery(imgs));
+//   }
+
+//   // ——— Final Assembly ———
+//   container.append(header, layoutWrapper, gallery, createElement("div", { class: "onechatcon" }));
+
+//   const editcon = createElement("div", {}, []);
+//   mainColumn.appendChild(editcon);
+
+//   // Render Crops
+//   await renderCrops(farm, cropsContainer, farmId, mainColumn, editcon, isLoggedIn, "name", isCreator);
+// }
 
 

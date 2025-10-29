@@ -8,13 +8,15 @@
   background-color: var(--color-bg);
   color: var(--color-fg);
 }
-
+/* 
 .baitos-main {
   flex: 1 1 70%;
-}
+  flex: 4;
+} */
 
 .baitos-aside {
-  flex: 1 1 25%;
+  /* flex: 1 1 25%; */
+  flex: 1;
   background-color: var(--color-surface);
   padding: var(--space-md);
   border-radius: var(--radius-md);

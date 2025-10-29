@@ -3,7 +3,7 @@ import { navigate } from "../../../routes";
 
 const normalizedCategoryMap = new Map([
   // Fruits
-  ["mango", "fruits"], ["banana", "fruits"], ["apple", "fruits"], ["guava", "fruits"], ["papaya", "fruits"], ["orange", "fruits"], ["grapes", "fruits"], ["pineapple", "fruits"], ["litchi", "fruits"], ["watermelon", "fruits"], ["muskmelon", "fruits"], ["lemon", "fruits"], ["strawberry", "fruits"],
+  ["mango", "fruits"], ["banana", "fruits"], ["apple", "fruits"], ["guava", "fruits"], ["papaya", "fruits"], ["orange", "fruits"], ["grapes", "fruits"], ["pineapple", "fruits"], ["litchi", "fruits"], ["watermelon", "fruits"], ["melon", "fruits"], ["lemon", "fruits"], ["strawberry", "fruits"],
 
   // Vegetables
   ["tomato", "vegetables"], ["onion", "vegetables"], ["potato", "vegetables"], ["spinach", "vegetables"], ["carrot", "vegetables"], ["cabbage", "vegetables"], ["cauliflower", "vegetables"], ["garlic", "vegetables"], ["radish", "vegetables"], ["cucumber", "vegetables"], ["pumpkin", "vegetables"], ["okra", "vegetables"], ["beetroot", "vegetables"], ["zucchini", "vegetables"],

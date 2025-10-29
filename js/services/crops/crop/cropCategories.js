@@ -6,7 +6,7 @@ export const cropCategoryMap = {
     ],
     Fruits: [
       "Mango", "Banana", "Guava", "Papaya", "Apple", "Orange", "Pomegranate",
-      "Grapes", "Pineapple", "Litchi", "Watermelon", "Muskmelon", "Lemon", "Strawberry"
+      "Grapes", "Pineapple", "Litchi", "Watermelon", "Melon", "Lemon", "Strawberry"
     ],
     Grains: [
       "Wheat", "Rice", "Corn", "Barley", "Oats", "Sorghum", "Millet", "Quinoa",

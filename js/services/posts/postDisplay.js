@@ -63,7 +63,7 @@ export async function displayPost(isLoggedIn, postId, container) {
   frag.append(renderHeader(post));
   frag.append(renderBody(post));
   if (post.tags?.length) frag.append(renderTags(post.tags));
-  frag.append(renderProfile(post));
+  frag.append(await renderProfile(post));
   if (isLoggedIn && post.createdBy == getState("user")) frag.append(renderPostActions(post.postid, isLoggedIn, page));
   frag.append(renderComments(post));
 
@@ -121,7 +121,7 @@ function renderImageGroup(images) {
   const group = createElement("div", { class: "image-group" });
 
   images.forEach(img => {
-    const realSrc = resolveImagePath(EntityType.POST, PictureType.PHOTO, img.url);
+    const realSrc = resolveImagePath(EntityType.POST, PictureType.THUMB, img.url);
     console.log(realSrc);
     const imgEl = Imagex({
       src: realSrc,
@@ -150,9 +150,9 @@ function renderTags(tags) {
   );
 }
 
-function renderProfile(post) {
+async function renderProfile(post) {
   const avatarUrl = getAvatar(post.createdBy);
-  return userProfileCard({
+  return await userProfileCard({
     username: post.createdBy || "anonymous",
     bio: "",
     avatarUrl,

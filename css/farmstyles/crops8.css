@@ -78,7 +78,7 @@
   }
   
   /* Crop card */
-  .crop-card {
+  .catalogue-main .crop-card {
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     padding: 16px;
@@ -87,11 +87,11 @@
     transition: transform 0.2s ease;
   }
   
-  .crop-card:hover {
+  .catalogue-main .crop-card:hover {
     transform: translateY(-4px);
   }
   
-  .crop-card img {
+  .catalogue-main .crop-card img {
     width: 100%;
     border-radius: 8px;
     margin-bottom: 12px;
@@ -99,7 +99,7 @@
     aspect-ratio: 4 / 3;
   }
   
-  .crop-card h4 {
+  .catalogue-main .crop-card h4 {
     font-size: 18px;
     margin-bottom: 8px;
   }
@@ -139,6 +139,7 @@
   /* Aside buttons */
   .cta-list {
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
     margin-bottom: 16px;
   }

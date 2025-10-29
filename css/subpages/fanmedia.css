@@ -9,7 +9,7 @@
   /* === Gallery Groups === */
   .fanmade-group,
   .media-group {
-    flex: 1 1 calc(50% - var(--space-md));
+    margin-top: 1rem;
     display: flex;
     justify-content: center;
   }

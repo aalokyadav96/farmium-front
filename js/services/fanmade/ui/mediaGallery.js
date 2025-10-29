@@ -14,7 +14,7 @@ import { resolveImagePath, PictureType, EntityType } from "../../../utils/imageP
 import Imagex from "../../../components/base/Imagex.js";
 import { generateVideoPlayer } from "../../../components/ui/vidpopHelpers.js";
 import LightBox from "../../../components/ui/Lightbox.mjs";
-
+import Sightbox from "../../../components/ui/Sightbox_zoom.mjs";
 
 function buildMediaFragment(mediaData, entityType, entityId, isLoggedIn, prefix = "media") {
   const frag = document.createDocumentFragment();
@@ -33,14 +33,18 @@ function buildMediaFragment(mediaData, entityType, entityId, isLoggedIn, prefix 
 
       const thumbSrc = resolveImagePath(EntityType.MEDIA, PictureType.THUMB, `${media.url}.jpg`);
       const mediaEl = buildMediaElement(media, thumbSrc, i, prefix);
-      const captionText = media.caption || "";
-      const caption = createElement("figcaption", { class: `${prefix}-caption` }, [captionText]);
 
-      const translation = buildTranslationSection(captionText);
+      figure.append(mediaEl);
+
+      // ✅ Only add caption + translation if caption exists
+      if (media.caption && media.caption.trim() !== "") {
+        const caption = createElement("figcaption", { class: `${prefix}-caption` }, [media.caption]);
+        const translation = buildTranslationSection(media.caption);
+        figure.append(caption);
+        if (translation) figure.append(...translation);
+      }
+
       const actions = createMediaActions(media, entityType, entityId, isLoggedIn, confirmDelete, prefix);
-
-      figure.append(mediaEl, caption);
-      if (translation) figure.append(...translation);
       figure.append(actions);
 
       wrapper.append(figure);
@@ -51,6 +55,42 @@ function buildMediaFragment(mediaData, entityType, entityId, isLoggedIn, prefix 
 
   return frag;
 }
+
+// function buildMediaFragment(mediaData, entityType, entityId, isLoggedIn, prefix = "media") {
+//   const frag = document.createDocumentFragment();
+//   const grouped = groupMedia(mediaData);
+
+//   for (const group of grouped) {
+//     const wrapper = createElement("div", { class: `${prefix}-group` });
+
+//     group.forEach((media, i) => {
+//       if (!media.url) return;
+
+//       const figure = createElement("figure", {
+//         class: `${prefix}-item`,
+//         "data-id": media.mediaid
+//       });
+
+//       const thumbSrc = resolveImagePath(EntityType.MEDIA, PictureType.THUMB, `${media.url}.jpg`);
+//       const mediaEl = buildMediaElement(media, thumbSrc, i, prefix);
+//       const captionText = media.caption || "";
+//       const caption = createElement("figcaption", { class: `${prefix}-caption` }, [captionText]);
+
+//       const translation = buildTranslationSection(captionText);
+//       const actions = createMediaActions(media, entityType, entityId, isLoggedIn, confirmDelete, prefix);
+
+//       figure.append(mediaEl, caption);
+//       if (translation) figure.append(...translation);
+//       figure.append(actions);
+
+//       wrapper.append(figure);
+//     });
+
+//     frag.append(wrapper);
+//   }
+
+//   return frag;
+// }
 
 /* ------------------------------------------------------
    MEDIA ELEMENT BUILDER
@@ -122,10 +162,11 @@ function buildTranslationSection(captionText) {
 export async function displayFanMedia(content, entityType, entityId, isLoggedIn) {
   clear(content);
 
-  const title = createElement("h2", { class: "fanmade-title" }, ["Fanmade Gallery"]);
+  // const title = createElement("h2", { class: "fanmade-title" }, ["Fanmade Gallery"]);
   const loader = createElement("p", { class: "loading" }, ["Loading media..."]);
   const list = createElement("div", { class: "fanmade-list" });
-  content.append(title, loader);
+  // content.append(title, loader);
+  content.append(loader);
 
   try {
     const mediaData = await fetchMedia(entityType, entityId);

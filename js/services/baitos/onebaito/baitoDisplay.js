@@ -267,12 +267,12 @@ export async function displayBaito(isLoggedIn, baitoid, contentContainer) {
     // section.appendChild(createBannerSection(baito, isOwner));
 
     const cleanImageNames = baito.images?.filter(Boolean) || [];
-    if (cleanImageNames.length) {
-      const fullURLs = cleanImageNames.map(name => resolveImagePath(EntityType.BAITO, PictureType.PHOTO, name));
-      section.appendChild(ImageGallery(fullURLs));
       section.appendChild(Button("Add images", "", {
         click: () => { baitoAddImages({ isLoggedIn, contentContainer, baito, mode: "edit" }) }
       }));
+    if (cleanImageNames.length) {
+      const fullURLs = cleanImageNames.map(name => resolveImagePath(EntityType.BAITO, PictureType.PHOTO, name));
+      section.appendChild(ImageGallery(fullURLs));
     }
 
     // Review container

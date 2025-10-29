@@ -9,7 +9,6 @@
 
 .media-group,
 .fanmade-group {
-  flex: 1 1 300px;
   max-width: 480px;
   background-color: var(--color-card-bg);
   border-radius: var(--radius-card);

@@ -1,5 +1,6 @@
 /* === Media Gallery Container === */
-#artist-fanmade, #artist-posts {
+#artist-fanmade,
+#artist-posts {
   /* background-color: var(--color-bg); */
   /* color: var(--color-fg); */
   /* font-family: var(--font-body); */
@@ -20,7 +21,8 @@
 
 
 /* === Media List Layout === */
-.fanmade-list, .media-list {
+.fanmade-list,
+.media-list {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-md);
@@ -28,7 +30,8 @@
 }
 
 /* === Individual Media Group === */
-.fanmade-group, .media-group {
+.fanmade-group,
+.media-group {
   background-color: var(--color-card-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-card);
@@ -39,7 +42,8 @@
 }
 
 /* === Media Item === */
-.fanmade-item, .media-item {
+.fanmade-item,
+.media-item {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -75,7 +79,8 @@
 }
 
 /* === Caption === */
-.fanmade-caption, .media-caption {
+.fanmade-caption,
+.media-caption {
   margin-top: var(--space-sm);
   font-size: var(--font-size-sm);
   color: var(--color-muted);
@@ -99,7 +104,8 @@
 }
 
 /* === Action Buttons === */
-.fanmade-actions, .media-actions {
+.fanmade-actions,
+.media-actions {
   display: flex;
   justify-content: center;
   gap: var(--space-sm);

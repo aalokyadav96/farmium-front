@@ -64,6 +64,7 @@ export async function fetchUserMeta(userIds = []) {
             console.error("Failed to fetch user meta", err);
         }
     }
+    console.log(result);
 
     return result;
 }

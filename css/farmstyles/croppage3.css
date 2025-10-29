@@ -31,7 +31,7 @@
 }
 
 /* Crop Card */
-.crop-card {
+.croppage .crop-card {
   border: 1px solid #ddd;
   border-radius: 6px;
   padding: 1rem;
@@ -42,24 +42,24 @@
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.crop-card:hover {
+.croppage .crop-card:hover {
   transform: translateY(-3px);
   box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
 /* Farm name link */
-.crop-card h3 a {
+.croppage .crop-card h3 a {
   text-decoration: none;
   font-weight: 600;
   cursor: pointer;
 }
 
-.crop-card h3 a:hover {
+.croppage .crop-card h3 a:hover {
   color: #27ae60;
 }
 
 /* Crop image */
-.crop-card img {
+.croppage .crop-card img {
   width: 100%;
   border-radius: 4px;
   object-fit: cover;

@@ -52,7 +52,6 @@ async function createPlaceForm(isLoggedIn, createSection) {
         { label: "Zip Code", type: "text", id: "place-zipcode", placeholder: "Zip Code", required: true },
         { label: "Capacity", type: "number", id: "capacity", placeholder: "Capacity", required: true, additionalProps: { min: 1 } },
         { label: "Phone Number", type: "text", id: "phone", placeholder: "Phone Number" },
-        // { label: "Place Banner", type: "file", id: "place-banner", additionalProps: { accept: "image/*" } }
     ];
     fields.forEach(field => form.appendChild(createFormGroup(field)));
 
@@ -119,7 +118,6 @@ async function createPlaceForm(isLoggedIn, createSection) {
             "capacity": "capacity",
             "phone": "phone",
             "category": "category",
-            // "place-banner": "banner"
         };
 
         for (const [id, key] of Object.entries(fieldMap)) {
