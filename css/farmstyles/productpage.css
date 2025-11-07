@@ -38,11 +38,11 @@
     align-items: center;
   }
   
-  .quantity-control {
+  /* .quantity-control {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-  }
+  } */
   
   .quantity-btn {
     padding: 0.3rem 0.8rem;

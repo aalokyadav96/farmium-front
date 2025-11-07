@@ -192,8 +192,11 @@
   /* Info Widget */
   .info-widget {
     font-size: 1rem;
-    margin-bottom: 2rem;
-  }
+    margin: 0 auto 2rem auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
   
   .weather, .location, .date {
     margin-bottom: 0.5rem;

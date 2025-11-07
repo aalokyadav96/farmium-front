@@ -103,7 +103,7 @@ const createNav = () => {
         { href: "/places", label: "Places" },
         { href: "/itinerary", label: "Itinerary" },
         { href: "/events", label: "Events" },
-        { href: "/music", label: "Music" },
+        // { href: "/music", label: "Music" },
         { href: "/artists", label: "Artists" },
         { href: "/social", label: "Social" },
         { href: "/posts", label: "Posts" },

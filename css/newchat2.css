@@ -177,6 +177,7 @@
 
 .msg-actions-trigger {
   background: none;
+  color: var(--color-fg);
   border: none;
   font-size: 18px;
   cursor: pointer;

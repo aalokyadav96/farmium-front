@@ -1,6 +1,7 @@
 import { apiFetch } from "../../api/api.js";
 import { createElement } from "../../components/createElement.js";
 import { createGroupedCard } from "./modPage.js";
+import { loadModeratorApplications } from "./modapprovals.js";
 
 export async function fetchAndRenderReports(listContainer, entityPreview, summaryContainer, filters, state, undoBtn, prevBtn, pageIndicator, nextBtn) {
     if (state.isLoading) return;
@@ -143,6 +144,7 @@ function renderNotModerator(container) {
     form.append(userIdInput, reasonInput, submitBtn);
     wrapper.append(form, note);
     container.appendChild(wrapper);
+    // loadModeratorApplications(container);
 }
 
 export function createUndoButton(state, refreshFn) {

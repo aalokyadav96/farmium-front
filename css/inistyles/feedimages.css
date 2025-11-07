@@ -61,6 +61,7 @@
 .preview_image_wrap__Q29V8 .PostPreviewImageView_image_item__dzD2P {
     min-height: 0;
     position: relative;
+    max-height: 84vh;
 }
 
 .preview_image_wrap__Q29V8 .PostPreviewImageView_post_image__zLzXH {

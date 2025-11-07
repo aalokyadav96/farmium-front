@@ -51,7 +51,7 @@ export async function displayCrop(content, cropID, isLoggedIn) {
       // Right side: details
       const detailsSection = createElement('div', { class: 'listing-details' }, [
         createElement('h3', { class: 'farm-link' }, [
-          createElement('a', { events: { click: () => navigate(`/farm/${listing.farmId}`) } }, [farmName])
+          createElement('a', { events: { click: () => navigate(`/farm/${listing.farmid}`) } }, [farmName])
         ]),
         createElement('p', {}, [`Breed: ${listing.breed || 'Not specified'}`]),
         createElement('p', {}, [`Location: ${listing.location || 'Unknown'}`]),
@@ -72,7 +72,7 @@ export async function displayCrop(content, cropID, isLoggedIn) {
       const controls = createUserControls(
         cropData,
         farmName,
-        listing.farmId,
+        listing.farmid,
         isLoggedIn,
         listing.availableQtyKg,
         listing.cropid
@@ -81,7 +81,7 @@ export async function displayCrop(content, cropID, isLoggedIn) {
       const controlsSection = createElement('div', { class: 'listing-controls' }, controls);
 
       // Combine
-      const card = createElement('div', { class: 'listing-card', id: `farm-${listing.farmId}-${listing.cropid}` }, [
+      const card = createElement('div', { class: 'listing-card', id: `farm-${listing.farmid}-${listing.cropid}` }, [
         imageSection,
         createElement('div', { class: 'listing-content' }, [
           detailsSection,

@@ -40,7 +40,7 @@ function isSeasonal(crop) {
 // --- card ---
 export function renderCropCard(crop, mode = "catalogue") {
   const card = createElement("div", { class: "crop-card" });
-
+  card.addEventListener('click', ()=>navigate(`/crop/${crop.name.toLowerCase().replace(/\s+/g, "_")}`));
   const img = Imagex({
     src: resolveImagePath(EntityType.CROP, PictureType.THUMB, crop.banner),
     alt: crop.name,
@@ -69,12 +69,15 @@ export function renderCropCard(crop, mode = "catalogue") {
     // btn.onclick = () => navigate(`/crop/${crop.name.toLowerCase().replace(/\s+/g, "_")}`);
 
     const btn = Button("View Farms", "button", {
-      click: ()=> {
+      click: () => {
         navigate(`/crop/${crop.name.toLowerCase().replace(/\s+/g, "_")}`);
       }
     }, "buttonx");
 
-    card.append(img, title, info, season, tags, btn);
+    let ccon = createElement("div", { "class": "nimgcon" }, []);
+    // card.append(img, title, info, season, tags, btn);
+    ccon.append(title, info, season, tags, btn);
+    card.append(img, ccon);
   }
 
   // listing mode = one farm’s crop
@@ -106,7 +109,7 @@ export function renderCropInterface(container, cropData) {
     class: "search-box"
   });
 
-  const sortSelect = createElement("select", { class: "sort-box", name:"sortby" }, [
+  const sortSelect = createElement("select", { class: "sort-box", name: "sortby" }, [
     createElement("option", { value: "az" }, ["A → Z"]),
     createElement("option", { value: "za" }, ["Z → A"])
   ]);
@@ -137,7 +140,7 @@ export function renderCropInterface(container, cropData) {
   };
 
   categories.forEach((cat, i) => {
-    const btn = createElement("button", {class:"buttonx"}, [
+    const btn = createElement("button", { class: "buttonx" }, [
       `${cat.charAt(0).toUpperCase() + cat.slice(1)} (${cropData[cat].length})`
     ]);
 

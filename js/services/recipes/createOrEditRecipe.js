@@ -6,6 +6,7 @@ import { apiFetch } from "../../api/api.js";
 // import { navigate } from "../../routes/index.js";
 // import Imagex from "../../components/base/Imagex.js";
 import { displayRecipe } from "./recipePage.js";
+import { navigate } from "../../routes/index.js";
 
 export function createRecipe(container) {
   renderRecipeForm(container, "create", null);
@@ -206,14 +207,15 @@ function renderRecipeForm(container, mode = "create", recipe = null) {
 
     try {
       const result = await apiFetch(endpoint, method, formData);
-      console.log("Recipe saved:", result);
+      // console.log("Recipe saved:", result);
       if (mode === "create") {
         form.reset();
         // previewContainer.replaceChildren();
       }
       alert("Recipe saved successfully!");
-      // navigate(`/recipe/${recipe?.recipeid}`);
-      displayRecipe(container, true, recipe?.recipeid);
+      // console.log(result);
+      // navigate(`/recipe/${result?.recipeid}`);
+      displayRecipe(container, true, result?.recipeid);
     } catch (err) {
       console.error("Upload failed:", err);
       alert("Failed to save recipe.");

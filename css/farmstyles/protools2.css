@@ -115,7 +115,7 @@
   padding: var(--space-xs) var(--space-sm);
   font-size: var(--font-size-base);
   border-radius: var(--radius-sm);
-  background-color: var(--color-space);
+  /* background-color: var(--color-space); */
   border: 1px solid var(--color-border);
   cursor: pointer;
 }
@@ -205,7 +205,7 @@
   padding: var(--space-xs) var(--space-sm);
   font-size: var(--font-size-base);
   border-radius: var(--radius-sm);
-  background-color: var(--color-space);
+  /* background-color: var(--color-space); */
   border: 1px solid var(--color-border);
   cursor: pointer;
 }

@@ -46,11 +46,11 @@
     background-color: #f0f0f0;
     border-radius: 50%;
   } */
-  
-  .dropdown {
+ 
+  .header-content .dropdown {
     position: relative;
   }
-  
+   
   .menu-toggle {
     background-color: var(--color-fg);
     color: var(--color-bg);

@@ -1,4 +1,5 @@
-import { createActions, createPostHeader, fetchUserMetaLikesBatch } from "./helpers.js";
+import { createPostHeader } from "./helpers.js";
+import { createActions } from "./actions.js";
 import { createElement } from "../../../components/createElement.js";
 import { RenderImagePost } from "../renderImagePost.js";
 import { RenderVideoPost } from "../renderVideoPost.js";
@@ -6,101 +7,156 @@ import { resolveImagePath, EntityType, PictureType } from "../../../utils/imageP
 import { getState } from "../../../state/state.js";
 import { navigate } from "../../../routes/index.js";
 
-export async function renderPost(posts, postsContainer) {
-    // Ensure posts is always an array
-    if (!Array.isArray(posts)) {
-        posts = [posts];
+let activeVideoPlayers = [];
+
+export async function renderPost(posts, postsContainer, postmetadata) {
+    // ---- Cleanup existing players before re-render ----
+    if (activeVideoPlayers.length > 0) {
+        activeVideoPlayers.forEach(v => {
+            if (v && typeof v.cleanup === "function") v.cleanup();
+        });
+        activeVideoPlayers = [];
     }
+
+    if (!Array.isArray(posts)) posts = [posts];
 
     const isLoggedIn = Boolean(getState("token"));
     const user = getState("user");
 
-    // Fetch user likes once if logged in
-    let userLikes = {};
-    if (isLoggedIn && posts.length) {
-        const postIds = posts.map(p => p.postid);
-        userLikes = await fetchUserMetaLikesBatch("feed", postIds);
-    }
-
-    const postElements = posts.map((post, i) => {
+    for (const post of posts) {
         const isCreator = isLoggedIn && user === post.userid;
 
         const postElement = createElement("article", {
             class: ["feed-item"],
             id: `post-${post.postid}`,
-            href: `./feedpost/${post.postid}`,
             "date-is": new Date(post.timestamp).toLocaleString()
         }, [createPostHeader(post)]);
 
-        // Media
+        // --- MEDIA ---
         const mediaContainer = createElement("div", { class: ["post-media"] });
-        const mediaUrls = Array.isArray(post.media_url) ? post.media_url : (post.media_url ? [post.media_url] : []);
-        const renderers = {
-            image: () => RenderImagePost(mediaContainer, mediaUrls),
-            video: () => {
-                let subtits = [];
-                // // const posterPath = resolveImagePath(EntityType.FEED, PictureType.POSTER, post.thumbnail);
-                // const posterPath = resolveImagePath(EntityType.FEED, PictureType.POSTER, `${post.media_url}.jpg`);
-                const mediaBase = Array.isArray(post.media_url) ? post.media_url[0] : post.media_url;
-                const posterSource = post?.thumbnail ? post.thumbnail : mediaBase;
-                const posterPath = resolveImagePath(EntityType.FEED, PictureType.POSTER, `${posterSource}.png`);
-console.log(posterPath);                
-                const resolutions = post?.resolution || [];
-                // const media = mediaUrls.map(m => resolveImagePath(EntityType.FEED, PictureType.VIDEO, `${m}.mp4`));
-                const media = post.media.map(m => resolveImagePath(EntityType.FEED, PictureType.VIDEO, m));
-                RenderVideoPost(mediaContainer, media, mediaUrls, resolutions, subtits, posterPath);
-            },
-            text: () => mediaContainer.appendChild(createElement("p", {}, [post.text || ""]))
-        };
-        (renderers[post.type] || (() => mediaContainer.appendChild(createElement("p", {}, ["Unknown post type."]))))();
+        const mediaUrls = Array.isArray(post.media_url)
+            ? post.media_url
+            : post.media_url ? [post.media_url] : [];
+
+        if (post.type === "image") {
+            RenderImagePost(mediaContainer, mediaUrls);
+        } else if (post.type === "video") {
+            const media = post.media.map(m => resolveImagePath(EntityType.FEED, PictureType.VIDEO, m));
+            const posterPath = resolveImagePath(EntityType.FEED, PictureType.POSTER, `${post.thumbnail || mediaUrls[0]}.png`);
+            const players = await RenderVideoPost(mediaContainer, media, mediaUrls, post.resolutions || [], [], posterPath);
+            activeVideoPlayers.push(...players);
+        } else if (post.text) {
+            mediaContainer.appendChild(createElement("p", {}, [post.text]));
+        } else {
+            mediaContainer.appendChild(createElement("p", {}, ["Unknown post type."]));
+        }
+
+        // // click on media navigates to full post
+        // mediaContainer.addEventListener("click", () => navigate(`/feedpost/${post.postid}`));
         postElement.appendChild(mediaContainer);
 
-        // Meta
-        if (post.title || post.description || (post.tags?.length)) {
-            const metaSection = createElement("div", { class: ["post-meta"] }, []);
-
+        // --- META ---
+        if (post.title || (post.tags?.length)) {
+            const metaSection = createElement("div", { class: ["post-meta"] });
             if (post.title) {
-                metaSection.appendChild(
-                    createElement("h3", { class: ["post-title"] }, [post.title])
-                );
+                metaSection.appendChild(createElement("h3", { class: ["post-title"] }, [post.title]));
             }
-
-            // if (post.description) {
-            //     metaSection.appendChild(
-            //         createElement("p", { class: ["post-description"] }, [post.description])
-            //     );
-            // }
-
             if (post.tags?.length) {
-                const tagsContainer = createElement("div", { class: "tags" },
-                    post.tags.map(tag => {
-                        const link = createElement("a", { href: `/hashtag/${tag}` }, [
-                            createElement("span", { class: "tag" }, [tag])
-                        ]);
-                        // prevent metaSection click handler when clicking on tag
-                        link.addEventListener("click", e => e.stopPropagation());
-                        return link;
-                    })
+                const tagsContainer = createElement("nav", { class: ["tags"], "aria-label": "Tags" },
+                    post.tags.map(tag =>
+                        createElement("a", { href: `/hashtag/${tag}` }, [
+                            createElement("span", { class: ["tag"] }, [tag])
+                        ])
+                    )
                 );
                 metaSection.appendChild(tagsContainer);
             }
-
+            metaSection.addEventListener("click", () => navigate(`/feedpost/${post.postid}`));
             postElement.appendChild(metaSection);
-
-            // Navigate when meta area is clicked
-            metaSection.addEventListener("click", () => {
-                navigate(`/feedpost/${post.postid}`);
-            });
         }
 
-
-        // Actions
-        const actionsContainer = createActions(post, isLoggedIn, isCreator, userLikes, posts, postElement);
+        // --- ACTIONS ---
+        const meta = postmetadata[post.postid] || { likes: 0, comments: 0, likedByUser: false };
+        const actionsContainer = await createActions(meta, isCreator, postElement);
         postElement.appendChild(actionsContainer);
 
-        i ? postsContainer.appendChild(postElement) : postsContainer.prepend(postElement);
-
-        return { post, postElement, actionsContainer };
-    });
-
+        postsContainer.appendChild(postElement);
+    }
 }
+
+// Expose cleanup if you need it elsewhere
+export function cleanupRenderPost() {
+    activeVideoPlayers.forEach(v => {
+        if (v && typeof v.cleanup === "function") v.cleanup();
+    });
+    activeVideoPlayers = [];
+}
+
+// import { createPostHeader } from "./helpers.js";
+// import { createActions } from "./actions.js";
+// import { createElement } from "../../../components/createElement.js";
+// import { RenderImagePost } from "../renderImagePost.js";
+// import { RenderVideoPost } from "../renderVideoPost.js";
+// import { resolveImagePath, EntityType, PictureType } from "../../../utils/imagePaths.js";
+// import { getState } from "../../../state/state.js";
+// import { navigate } from "../../../routes/index.js";
+
+// export async function renderPost(posts, postsContainer, postmetadata) {
+//     if (!Array.isArray(posts)) posts = [posts];
+
+//     const isLoggedIn = Boolean(getState("token"));
+//     const user = getState("user");
+
+//     for (const [i, post] of posts.entries()) {
+//         const isCreator = isLoggedIn && user === post.userid;
+
+//         const postElement = createElement("article", {
+//             class: ["feed-item"],
+//             id: `post-${post.postid}`,
+//             "date-is": new Date(post.timestamp).toLocaleString()
+//         }, [createPostHeader(post)]);
+
+//         // --- MEDIA ---
+//         const mediaContainer = createElement("div", { class: ["post-media"] });
+//         const mediaUrls = Array.isArray(post.media_url) ? post.media_url : (post.media_url ? [post.media_url] : []);
+
+//         if (post.type === "image") {
+//             RenderImagePost(mediaContainer, mediaUrls);
+//         } else if (post.type === "video") {
+//             const media = post.media.map(m => resolveImagePath(EntityType.FEED, PictureType.VIDEO, m));
+//             const posterPath = resolveImagePath(EntityType.FEED, PictureType.POSTER, `${post.thumbnail || mediaUrls[0]}.png`);
+//             RenderVideoPost(mediaContainer, media, mediaUrls, post.resolutions || [], [], posterPath);
+//         } else if (post.text) {
+//             mediaContainer.appendChild(createElement("p", {}, [post.text]));
+//         } else {
+//             mediaContainer.appendChild(createElement("p", {}, ["Unknown post type."]));
+//         }
+
+//         postElement.appendChild(mediaContainer);
+
+//         // --- META ---
+//         if (post.title || (post.tags?.length)) {
+//             const metaSection = createElement("div", { class: ["post-meta"] });
+//             if (post.title) metaSection.appendChild(createElement("h3", { class: ["post-title"] }, [post.title]));
+//             if (post.tags?.length) {
+//                 const tagsContainer = createElement("div", { class: "tags" },
+//                     post.tags.map(tag =>
+//                         createElement("a", { href: `/hashtag/${tag}` }, [
+//                             createElement("span", { class: "tag" }, [tag])
+//                         ])
+//                     )
+//                 );
+//                 metaSection.appendChild(tagsContainer);
+//             }
+//             metaSection.addEventListener("click", () => navigate(`/feedpost/${post.postid}`));
+//             postElement.appendChild(metaSection);
+//         }
+
+//         // --- ACTIONS ---
+//         const meta = postmetadata[post.postid] || { likes: 0, comments: 0, likedByUser: false };
+//         const actionsContainer = await createActions(meta, isCreator, postElement);
+//         postElement.appendChild(actionsContainer);
+
+//         postsContainer.appendChild(postElement);
+//     }
+// }

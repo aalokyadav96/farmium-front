@@ -216,26 +216,10 @@ export async function displayListingPage(container, {
 
   main.insertBefore(filterToggle, listSection);
   main.insertBefore(filterControls.chipConContainer, listSection);
-  // function renderPage(filtered) {
-  //   listSection.replaceChildren();
-  //   const paged = paginate(filtered, currentPage, pageSize);
-
-  //   if (!paged.length) {
-  //     listSection.appendChild(
-  //       createElement("div", { class: "empty-state" }, [
-  //         createElement("p", {}, [`No ${type} found.`]),
-  //         Button("Clear Filters", "", { click: () => filterControls.reset() }, "buttonx btn-secondary")
-  //       ])
-  //     );
-  //     return;
-  //   }
-
-  //   paged.forEach(item => listSection.appendChild(cardBuilder(item)));
-  // }
   function renderPage(filtered) {
     listSection.replaceChildren();
     const paged = paginate(filtered, currentPage, pageSize);
-  
+
     if (!paged.length) {
       listSection.appendChild(
         createElement("div", { class: "empty-state" }, [
@@ -245,19 +229,92 @@ export async function displayListingPage(container, {
       );
       return;
     }
-  
-    const adInterval = 5; // insert ad after every 5 items
-    paged.forEach((item, index) => {
-      listSection.appendChild(cardBuilder(item));
-  
-      // insert adspace every N items, but not after the last one
-      if ((index + 1) % adInterval === 0 && index + 1 < paged.length) {
-        listSection.appendChild(adspace("inlist"));
-      }
-    });
+
+    paged.forEach(item => listSection.appendChild(cardBuilder(item)));
   }
-  
+
   // --- Initial Render ---
   renderPage(items);
 }
 
+
+
+// // ---- Listing Page ----
+// export async function displayListingPage(container, {
+//   title = "",
+//   apiEndpoint,
+//   cardBuilder,
+//   type = "generic",
+//   pageSize = 10,
+//   sidebarActions
+// }) {
+//   container.replaceChildren();
+//   const layout = createElement("div", { class: `${type}-page` });
+//   const aside = createElement("aside", { class: `${type}-aside` });
+//   const main = createElement("div", { class: `${type}-main` });
+//   layout.append(main, aside);
+//   container.appendChild(layout);
+
+//   if (sidebarActions) sidebarActions(aside);
+//   if (title) main.appendChild(createElement("h1", {}, [title]));
+
+//   const listSection = createElement("div", { class: `${type}-list` });
+//   main.appendChild(listSection);
+
+//   let items = [];
+//   let currentPage = 1;
+
+//   // --- Fetch data from API ---
+//   const data = await apiFetch(apiEndpoint);
+
+//   // handle different backend structures
+//   if (Array.isArray(data)) {
+//     items = data;
+//   } else if (data?.data) {
+//     items = data.data;
+//   } else if (data?.[type]) {
+//     // e.g. { posts: [...] }
+//     items = data[type];
+//   } else {
+//     items = [];
+//   }
+
+//   // --- Create filters and pagination ---
+//   const filterControls = createFilterControls({
+//     type,
+//     items,
+//     onRender: filtered => {
+//       currentPage = 1;
+//       renderPage(filtered);
+//     }
+//   });
+
+//   const filterToggle = createElement(
+//     "details",
+//     { open: true, class: `${type}-filter-toggle` },
+//     [createElement("summary", {}, ["🔍 Filters"]), filterControls.controls]
+//   );
+
+//   main.insertBefore(filterToggle, listSection);
+//   main.insertBefore(filterControls.chipConContainer, listSection);
+
+//   function renderPage(filtered) {
+//     listSection.replaceChildren();
+//     const paged = paginate(filtered, currentPage, pageSize);
+
+//     if (!paged.length) {
+//       listSection.appendChild(
+//         createElement("div", { class: "empty-state" }, [
+//           createElement("p", {}, [`No ${type} found.`]),
+//           Button("Clear Filters", "", { click: () => filterControls.reset() }, "buttonx btn-secondary")
+//         ])
+//       );
+//       return;
+//     }
+
+//     paged.forEach(item => listSection.appendChild(cardBuilder(item)));
+//   }
+
+//   // --- Initial Render ---
+//   renderPage(items);
+// }

@@ -1,6 +1,7 @@
 import { createElement } from "../components/createElement.js";
 
 export function openCropperWithCropperJSBoundedFixedBox({ file, type = "avatar" }) {
+  console.log(file, type);
   return new Promise((resolve) => {
     const CROP_PERF_VERSION = "1.5.13";
     const JS_SRC = `https://unpkg.com/cropperjs@${CROP_PERF_VERSION}/dist/cropper.min.js`;

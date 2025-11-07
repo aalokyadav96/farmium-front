@@ -56,6 +56,7 @@ function buildControlCenter() {
     { href: "/products", label: "Products" },
     { href: "/tools", label: "Tools" },
     { href: "/music", label: "Music" },
+    { href: "/discord", label: "TextChat" },
     // { href: "/artists", label: "Artists" },
   ];
 

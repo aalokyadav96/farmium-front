@@ -106,7 +106,7 @@ export function createNavWrapper() {
 
 // --- AUTH FORMS ---
 export function createAuthForms() {
-  const loginForm = createElement("form", { id: "login-form", class: "create-section" }, [
+  const loginForm = createElement("form", { id: "login-form", class: "create-section auth-form" }, [
     createElement("h3", {}, ["Login"]),
     inputField("login-username", "text", "Username"),
     inputField("login-password", "password", "Password"),
@@ -114,7 +114,7 @@ export function createAuthForms() {
   ]);
   loginForm.addEventListener("submit", login);
 
-  const signupForm = createElement("form", { id: "signup-form", class: "create-section" }, [
+  const signupForm = createElement("form", { id: "signup-form", class: "create-section auth-form" }, [
     createElement("h3", {}, ["Signup"]),
     inputField("signup-username", "text", "Username"),
     inputField("signup-email", "email", "Email"),

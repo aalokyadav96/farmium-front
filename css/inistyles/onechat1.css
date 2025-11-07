@@ -44,76 +44,93 @@
   color: var(--color-btn-fg);
 }
 
-/* === Message Body === */
 .msg-body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-}
-
-/* === Message Header === */
-.msg-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: var(--font-size-sm);
-  color: var(--color-muted);
-}
-
-.msg-sender {
-  font-weight: var(--font-weight-medium);
-}
-
-.msg-time,
-.msg-status {
-  margin-left: var(--space-sm);
-}
-
-/* === Message Menu === */
-.msg-menu {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 10px;
+  max-width: 400px;
   position: relative;
 }
 
-.menu-btn {
+.msg-body .msg-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.msg-body .msg-sender {
+  font-weight: 600;
+}
+
+.msg-body .msg-time {
+  font-size: 0.85em;
+  margin-left: 8px;
+}
+
+.msg-body .msg-menu {
+  position: relative;
+}
+
+.msg-body .menu-btn {
   background: none;
   border: none;
-  color: var(--color-muted);
   cursor: pointer;
-  font-size: var(--font-size-base);
+  font-size: 18px;
+  padding: 2px 6px;
 }
 
-.menu-btn:focus + .dropdown,
-.menu-btn:hover + .dropdown {
-  display: block;
+.msg-body .menu-btn:hover {
+  background: #eee;
+  border-radius: 3px;
 }
 
-.menu-btn .dropdown {
+.msg-body .dropdown {
   display: none;
   position: absolute;
   right: 0;
-  top: 100%;
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-elev-2);
-  z-index: 10;
+  top: 22px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  z-index: 5;
 }
 
-.menu-btn .dropdown .button {
-  display: block;
-  width: 100%;
-  padding: var(--space-sm);
+.msg-body .dropdown.open {
+  display: flex;
+  flex-direction: column;
+}
+
+.msg-body .dropdown .button {
   background: none;
   border: none;
   text-align: left;
-  font-size: var(--font-size-sm);
-  color: var(--color-fg);
+  padding: 6px 10px;
+  font-size: 14px;
   cursor: pointer;
 }
 
-.menu-btn .dropdown .button:hover {
-  background-color: var(--color-highlight);
+.msg-body .dropdown .button:hover {
+  background: #f0f0f0;
 }
+
+.msg-body .msg-content {
+  background: var(--color-bg);
+  border-radius: 4px;
+  padding: 8px;
+  color: var(--color-fg);
+  font-size: 15px;
+  word-break: break-word;
+}
+
+.msg-body .msg-status {
+  font-size: 0.8em;
+  color: #888;
+  margin-left: 6px;
+}
+
 
 /* === Message Content === */
 .msg-content {

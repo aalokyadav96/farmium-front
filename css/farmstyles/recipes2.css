@@ -106,6 +106,8 @@
 .recipe-card .thumbnail {
   width: 100%;
   height: auto;
+  object-fit: cover;
+  aspect-ratio: 1/1;
   border-radius: var(--radius-sm);
   margin-bottom: var(--space-sm);
 }

@@ -4,7 +4,6 @@
     border-radius: 6px;
     max-width: 600px;
     margin: 0 auto;
-    font-family: system-ui, sans-serif;
 }
 
 #notice-header {
@@ -21,30 +20,30 @@
 }
 
 .notice-item {
-    border: 1px solid #ccc;
+    border: 1px solid var(--color-fg);
     border-radius: 6px;
     padding: 10px 14px;
-    background-color: #fafafa;
+    background-color: var(--color-bg);
     transition: background-color 0.2s ease-in-out;
 }
 
 .notice-item:hover {
-    background-color: #f3f3f3;
+    background-color: var(--color-accent);
 }
 
 .notice-item h4 {
     margin: 0 0 6px 0;
     font-size: 1.1em;
-    color: #333;
+    color: var(--color-fg);
 }
 
 .notice-item p {
     margin: 0 0 8px 0;
-    color: #444;
+    color: var(--color-fg);
 }
 
 .notice-item small {
-    color: #777;
+    color: var(--color-muted);;
     font-size: 0.8em;
 }
 

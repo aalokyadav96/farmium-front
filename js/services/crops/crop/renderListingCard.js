@@ -30,7 +30,7 @@ export function renderListingCard(listing, cropName, isLoggedIn) {
   const farmLink = createElement("a", { href: "#" }, [listing.farmName]);
   farmLink.onclick = e => {
     e.preventDefault();
-    navigate(`/farm/${listing.farmId}`);
+    navigate(`/farm/${listing.farmid}`);
   };
 
   const handleAddToCart = () => {
@@ -41,7 +41,7 @@ export function renderListingCard(listing, cropName, isLoggedIn) {
       itemId: listing.cropid,
       itemType: listing.breed,
       entityName: listing.farmName,
-      entityId: listing.farmId,
+      entityId: listing.farmid,
       entityType: "farm",
       quantity,
       price: listing.pricePerKg,

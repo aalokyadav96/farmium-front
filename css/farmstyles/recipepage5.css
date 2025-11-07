@@ -25,7 +25,7 @@
 
 .recipe-banner {
   position: relative;
-  margin-bottom: var(--space-md);
+  margin-bottom: var(--space-sm);
 }
 
 .recipe-banner img {

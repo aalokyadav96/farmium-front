@@ -15,11 +15,12 @@ export function YoHome(isLoggedIn, container) {
   clearElement(container);
 
   const aside = createElement("aside", { class: "homesidebar" }, [
-    createWeatherInfoWidget(),
     createSearchBar(),
+    adspace("aside"),
   ]);
 
   const mainContent = createElement("div", { class: "main-content" }, [
+    createWeatherInfoWidget(),
     adspace("top"),
     createNavWrapper(),
     adspace("bottom"),
