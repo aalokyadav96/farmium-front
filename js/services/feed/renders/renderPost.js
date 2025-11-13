@@ -6,10 +6,11 @@ import { RenderVideoPost } from "../renderVideoPost.js";
 import { resolveImagePath, EntityType, PictureType } from "../../../utils/imagePaths.js";
 import { getState } from "../../../state/state.js";
 import { navigate } from "../../../routes/index.js";
+import Datex from "../../../components/base/Datex.js";
 
 let activeVideoPlayers = [];
 
-export async function renderPost(posts, postsContainer, postmetadata) {
+export async function renderPost(posts, postsContainer, postmetadata, isNew) {
     // ---- Cleanup existing players before re-render ----
     if (activeVideoPlayers.length > 0) {
         activeVideoPlayers.forEach(v => {
@@ -29,7 +30,8 @@ export async function renderPost(posts, postsContainer, postmetadata) {
         const postElement = createElement("article", {
             class: ["feed-item"],
             id: `post-${post.postid}`,
-            "date-is": new Date(post.timestamp).toLocaleString()
+            // "date-is": new Date(post.timestamp).toLocaleString()
+            "date-is": Datex(post.timestamp)
         }, [createPostHeader(post)]);
 
         // --- MEDIA ---
@@ -80,7 +82,11 @@ export async function renderPost(posts, postsContainer, postmetadata) {
         const actionsContainer = await createActions(meta, isCreator, postElement);
         postElement.appendChild(actionsContainer);
 
-        postsContainer.appendChild(postElement);
+        if (isNew == 1) {
+            postsContainer.prepend(postElement);
+        } else {
+            postsContainer.appendChild(postElement);
+        }
     }
 }
 

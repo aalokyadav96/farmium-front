@@ -3,6 +3,7 @@ import { createElement } from "../../components/createElement.js";
 import { apiFetch } from "../../api/api.js";
 import { handleAddReview, handleEditReview, handleDeleteReview } from "./createReview.js";
 import { fetchUserMeta } from "../../utils/usersMeta.js";
+import Datex from "../../components/base/Datex.js";
 
 function clearElement(el) {
     while (el.firstChild) el.removeChild(el.firstChild);
@@ -62,7 +63,8 @@ async function displayReviews(reviewsContainer, isCreator, isLoggedIn, entityTyp
                         reviewerName,
                         rating: review.rating,
                         comment: review.comment,
-                        date: review.date ? new Date(review.date).toLocaleString() : "",
+                        // date: review.date ? new Date(review.date).toLocaleString() : "",
+                        date: review.date ? Datex(review.date) : "",
                         onEdit: () => handleEditReview(review.reviewid, entityType, entityId),
                         onDelete: () => handleDeleteReview(review.reviewid, entityType, entityId)
                     })

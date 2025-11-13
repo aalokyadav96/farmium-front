@@ -4,6 +4,7 @@ import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePath
 import { renderItemForm } from "../crops/products/createOrEdit.js";
 import { displayProduct } from "./productPage.js";
 import { ImageGallery } from "../../components/ui/IMageGallery.mjs";
+import { addToCart } from "../cart/addToCart.js";
 
 export function renderProduct(product, isLoggedIn, productType, productId, container) {
   let quantity = 1;
@@ -33,8 +34,10 @@ export function renderProduct(product, isLoggedIn, productType, productId, conta
   // --- Add-to-cart handler ---
   const handleAdd = () => {
     addToCart({
-      category: productType,
-      item: product.name,
+      category: product.type,
+      itemName: product.name,
+      itemId: product.productid,
+      itemType: product.type,
       quantity,
       price: product.price,
       unit: product.unit || "unit",

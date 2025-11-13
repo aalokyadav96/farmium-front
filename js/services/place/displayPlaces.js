@@ -7,7 +7,7 @@ import Imagex from "../../components/base/Imagex.js";
 
 export function displayPlaces(isLoggedIn, container) {
   container.replaceChildren();
-
+  
   displayListingPage(container, {
     title: "All Places",
     apiEndpoint: "/places/places?page=1&limit=10",
@@ -71,10 +71,10 @@ function createPlaceCard(place) {
     }, [
       image,
       createElement("div", { class: "place-info" }, [
+        metaRow,
         createElement("h2", {}, [place.name || "Unnamed Place"]),
         createElement("p", {}, [place.address || "-"]),
         createElement("p", {}, [place.short_desc || "-"]),
-        metaRow
       ])
     ])
   ]);

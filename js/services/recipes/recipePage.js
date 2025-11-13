@@ -11,6 +11,7 @@ import Galleryx from "../../components/base/Galleryx.js";
 import { createCommentsSection } from "../comments/comments.js";
 import Notify from "../../components/ui/Notify.mjs";
 import { ImageGallery } from "../../components/ui/IMageGallery.mjs";
+import { fetchUserMeta } from "../../utils/usersMeta.js";
 // import Sightbox from "../../components/ui/Sightbox_zoom.mjs";
 // import { updateImageWithCrop } from "../../utils/bannerEditor.js";
 
@@ -42,16 +43,35 @@ function makeInlineEditable(container, currentText, onSave) {
   });
 }
 
+// // --- Section Renderers ---
+// function renderAuthor(recipe, currentUser) {
+//   if (currentUser?.id === recipe.userId) {
+//     return createElement("p", { class: "author-info" }, ["By You"]);
+//   }
+//   return createElement("p", { class: "author-info" }, [
+//     "By ",
+//     createElement("a", { href: `/user/${recipe.userId}` }, [recipe.userName || recipe.userId])
+//   ]);
+// }
+
+
 // --- Section Renderers ---
 function renderAuthor(recipe, currentUser) {
-  if (currentUser?.id === recipe.userId) {
-    return createElement("p", { class: "author-info" }, ["By You"]);
-  }
-  return createElement("p", { class: "author-info" }, [
-    "By ",
-    createElement("a", { href: `/user/${recipe.userId}` }, [recipe.userName || recipe.userId])
-  ]);
+  const container = createElement("p", { class: "author-info" }, ["Loading author..."]);
+
+  fetchUserMeta([recipe.userId]).then(userx => {
+    recipe.username = userx[recipe.userId]?.username || "Anonymous";
+
+    container.replaceChildren(
+      ...(currentUser?.id === recipe.userId
+        ? ["By You"]
+        : ["By ", createElement("a", { href: `/user/${recipe.username}` }, [recipe.username])])
+    );
+  });
+
+  return container;
 }
+
 
 
 function createRecipeBannerSection(recipe, currentUser) {

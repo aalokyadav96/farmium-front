@@ -6,6 +6,7 @@ import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePath
 import Imagex from "../../components/base/Imagex.js";
 import { navigate } from "../../routes/index.js";
 import { debounce } from "../../utils/deutils.js";
+import Datex from "../../components/base/Datex.js";
 
 /**
  * Internal store for per-post comment state
@@ -70,7 +71,8 @@ function renderComment(comment) {
         avatar,
         usernameEl,
         createElement("span", { class: "comment-timestamp" }, [
-            comment.createdAt ? new Date(comment.createdAt).toLocaleString() : ""
+            // comment.createdAt ? new Date(comment.createdAt).toLocaleString() : ""
+            comment.createdAt ? Datex(comment.createdAt) : ""
         ])
     ]);
 

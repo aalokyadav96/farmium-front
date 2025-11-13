@@ -24,6 +24,7 @@ import { displayPlaceJobs } from "../jobs/jobs.js";
 import Notify from "../../components/ui/Notify.mjs";
 import { displayBooking } from "../booking/booking.js";
 import Button from "../../components/base/Button.js";
+import { displayPlacesMap } from "./placeRemap.js";
 
 export default async function displayPlace(isLoggedIn, placeId, contentContainer) {
   if (!placeId || !contentContainer || !(contentContainer instanceof HTMLElement)) {
@@ -95,6 +96,19 @@ export default async function displayPlace(isLoggedIn, placeId, contentContainer
     try {
       renderPlaceDetails(isLoggedIn, editSection, placeData, isCreator);
       contentContainer.appendChild(editSection);
+
+      let maparea = createElement("div", {}, []);
+      const mapButton = Button("Show Map", "showMapBtn", {
+        click: () => {
+          const mapElement = displayPlacesMap();
+          maparea.appendChild(mapElement);
+          mapButton.remove(); // optional: remove button after loading map
+        }
+      });
+
+      contentContainer.appendChild(mapButton);
+      contentContainer.appendChild(maparea);
+      // contentContainer.appendChild(displayPlacesMap());
     } catch (err) {
       console.warn("Failed to render edit section:", err);
     }
@@ -186,13 +200,13 @@ export default async function displayPlace(isLoggedIn, placeId, contentContainer
     );
 
     // if (placeData.jobs) {
-      tabs.push(
-        {
-          title: "Jobs",
-          id: "jobs-tab",
-          render: (container) => { try { displayPlaceJobs(container, isCreator, isLoggedIn, "place", placeId); } catch { container.textContent = "No jobs available."; } },
-        },
-      );
+    tabs.push(
+      {
+        title: "Jobs",
+        id: "jobs-tab",
+        render: (container) => { try { displayPlaceJobs(container, isCreator, isLoggedIn, "place", placeId); } catch { container.textContent = "No jobs available."; } },
+      },
+    );
     // }
 
     persistTabs(contentContainer, tabs, `place-tabs:${placeId}`);

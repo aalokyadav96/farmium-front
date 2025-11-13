@@ -78,7 +78,7 @@
 }
 
 .place-card {
-  background-color: var(--color-surface);
+  /* background-color: var(--color-surface); */
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-elev-1);
@@ -99,7 +99,7 @@
 }
 
 .place-info {
-  padding: var(--space-md);
+  padding: var(--space-sm);
 }
 
 .place-info h2 {

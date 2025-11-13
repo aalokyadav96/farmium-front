@@ -2,84 +2,56 @@ import { createElement } from "../../components/createElement.js";
 import { apiFetch } from "../../api/api.js";
 import { Button } from "../../components/base/Button.js";
 import { adspace } from "../home/homeHelpers.js";
+import { LIST_CONFIG } from "./configList.js";
 
-// ---- Centralized Type Configuration ----
-const LIST_CONFIG = {
-  events: {
-    searchable: item =>
-      [item.title, item.placename, ...(item.tags || [])].join(" ").toLowerCase(),
-    categories: items => [...new Set(items.map(i => i.category).filter(Boolean))],
-    sorters: {
-      date: (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
-      price: (a, b) => Math.min(...(a.prices || [0])) - Math.min(...(b.prices || [0])),
-      title: (a, b) => (a.title || "").localeCompare(b.title || "")
-    }
-  },
-
-  recipes: {
-    searchable: item =>
-      [item.title, ...(item.ingredients || []).map(i => i.name)].join(" ").toLowerCase(),
-    categories: items => [...new Set(items.map(i => i.category).filter(Boolean))],
-    sorters: {
-      title: (a, b) => (a.title || "").localeCompare(b.title || ""),
-      date: (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
-      views: (a, b) => (b.views || 0) - (a.views || 0)
-    }
-  },
-
-  places: {
-    searchable: item => (item.name || "").toLowerCase(),
-    categories: items => [...new Set(items.map(i => i.type || i.category).filter(Boolean))],
-    sorters: {
-      name: (a, b) => (a.name || "").localeCompare(b.name || ""),
-      capacity: (a, b) => (a.capacity || 0) - (b.capacity || 0),
-      recent: (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-    }
-  },
-
-  posts: {
-    searchable: item =>
-      [item.title, item.category, item.subcategory, item.createdBy]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase(),
-    categories: items => [...new Set(items.map(i => i.category).filter(Boolean))],
-    sorters: {
-      date: (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
-      subcategory: (a, b) => (a.subcategory || "").localeCompare(b.subcategory || ""),
-      title: (a, b) => (a.title || "").localeCompare(b.title || "")
-    }
-  },
-
-  default: {
-    searchable: item =>
-      [item.title, item.name, item.description].filter(Boolean).join(" ").toLowerCase(),
-    categories: items => [...new Set(items.map(i => i.category).filter(Boolean))],
-    sorters: {
-      date: (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
-      title: (a, b) => (a.title || "").localeCompare(b.title || ""),
-      views: (a, b) => (b.views || 0) - (a.views || 0)
-    }
-  }
-};
-
+// ---- Utility: Distance between coordinates (Haversine) ----
+function distanceKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+    Math.cos((lat2 * Math.PI) / 180) *
+    Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
 
 // ---- Filtering & Sorting ----
-function applyFilters({ items, keyword, category, sortBy, type }) {
+function applyFilters({ items, keyword, category, location, userCoords, sortBy, type }) {
   const cfg = LIST_CONFIG[type] || LIST_CONFIG.default;
   const kw = (keyword || "").toLowerCase();
 
-  const filtered = items.filter(item => {
+  let filtered = items.filter(item => {
     const text = cfg.searchable(item);
     const matchesKeyword = kw ? text.includes(kw) : true;
-    const matchesCategory = category ? item.category === category : true;
-    return matchesKeyword && matchesCategory;
+    const matchesCategory = category ? item.category === category || item.type === category : true;
+
+    let matchesLocation = true;
+    if (location && location !== "current") {
+      matchesLocation =
+        item.location?.city === location || item.location?.region === location;
+    }
+
+    return matchesKeyword && matchesCategory && matchesLocation;
   });
+
+  // proximity filter when using "current location"
+  if (userCoords && location === "current") {
+    const radius = cfg.radius || 10;
+    filtered = filtered.filter(item => {
+      const { lat, lng } = item.location || {};
+      if (typeof lat === "number" && typeof lng === "number") {
+        const dist = distanceKm(userCoords.lat, userCoords.lng, lat, lng);
+        return dist <= radius;
+      }
+      return false;
+    });
+  }
 
   const sorter = cfg.sorters[sortBy] || cfg.sorters.date || (() => 0);
   return filtered.sort(sorter);
 }
-
 
 // ---- UI Filter Controls ----
 function createFilterControls({ type, items, onRender }) {
@@ -101,11 +73,16 @@ function createFilterControls({ type, items, onRender }) {
   );
 
   const categories = cfg.categories(items);
+  const locations = cfg.locations ? cfg.locations(items) : [];
+
+  // category chips
   const chipConContainer = createElement("div", { class: "chipscon" }, []);
   const chipContainer = createElement("div", { class: "category-chips" }, []);
   chipConContainer.appendChild(chipContainer);
 
   let selectedCategory = null;
+  let selectedLocation = null;
+  let userCoords = null;
 
   categories.forEach(cat => {
     const chipper = createElement("span", { class: "chipper" }, [cat]);
@@ -117,13 +94,57 @@ function createFilterControls({ type, items, onRender }) {
     chipContainer.appendChild(chip);
   });
 
+  // location selector (with "current location")
+  const locationOptions = [
+    createElement("option", { value: "" }, ["All Locations"]),
+    createElement("option", { value: "current" }, ["📍 Current Location"])
+  ].concat(
+    locations.map(loc => createElement("option", { value: loc }, [loc]))
+  );
+
+  const locationSelect = createElement("select", { name: `location-${Date.now()}` }, locationOptions);
+
   wrapper.append(searchInput, sortSelect);
+  wrapper.appendChild(locationSelect);
+
+  locationSelect.addEventListener("change", () => {
+    const value = locationSelect.value;
+    if (value === "current" && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          userCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          renderFiltered();
+        },
+        () => {
+          userCoords = null;
+          alert("Location access denied or unavailable.");
+          renderFiltered();
+        }
+      );
+    } else {
+      userCoords = null;
+      renderFiltered();
+    }
+  });
+
+  // // get user's geolocation (if allowed)
+  // if (navigator.geolocation) {
+  //   navigator.geolocation.getCurrentPosition(
+  //     pos => {
+  //       userCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+  //       if (locationSelect && locationSelect.value === "current") renderFiltered();
+  //     },
+  //     () => {} // silent fail
+  //   );
+  // }
 
   function renderFiltered() {
     const filtered = applyFilters({
       items,
       keyword: searchInput.value,
       category: selectedCategory,
+      location: locationSelect ? locationSelect.value : null,
+      userCoords,
       sortBy: sortSelect.value,
       type
     });
@@ -132,6 +153,7 @@ function createFilterControls({ type, items, onRender }) {
 
   searchInput.addEventListener("input", renderFiltered);
   sortSelect.addEventListener("change", renderFiltered);
+  locationSelect.addEventListener("change", renderFiltered);
 
   renderFiltered();
 
@@ -141,11 +163,11 @@ function createFilterControls({ type, items, onRender }) {
     reset: () => {
       searchInput.value = "";
       selectedCategory = null;
+      if (locationSelect) locationSelect.value = "";
       renderFiltered();
     }
   };
 }
-
 
 // ---- Pagination ----
 function paginate(items, page, size) {
@@ -173,7 +195,6 @@ export async function displayListingPage(container, {
   if (title) main.appendChild(createElement("h1", {}, [title]));
 
   const listSection = createElement("div", { class: `${type}-list` });
-  
   aside.appendChild(adspace("aside"));
   main.appendChild(adspace("inbody"));
   main.appendChild(listSection);
@@ -181,20 +202,9 @@ export async function displayListingPage(container, {
   let items = [];
   let currentPage = 1;
 
-  // --- Fetch data from API ---
   const data = await apiFetch(apiEndpoint);
+  items = Array.isArray(data) ? data : data?.data || data?.[type] || [];
 
-  if (Array.isArray(data)) {
-    items = data;
-  } else if (data?.data) {
-    items = data.data;
-  } else if (data?.[type]) {
-    items = data[type];
-  } else {
-    items = [];
-  }
-
-  // --- Create filters and pagination ---
   const filterControls = createFilterControls({
     type,
     items,
@@ -206,36 +216,20 @@ export async function displayListingPage(container, {
 
   const filterToggle = createElement(
     "details",
-    { open: true, class: `listing-filter-toggle ${type}-filter-toggle` },
+    { open: false, class: `listing-filter-toggle ${type}-filter-toggle` },
     [createElement("summary", {}, ["🔍 Filters"]), filterControls.controls]
   );
 
-  // Add shared class to controls container
   filterControls.controls.classList.add("listing-controls");
   filterControls.controls.classList.add(`${type}-controls`);
 
   main.insertBefore(filterToggle, listSection);
   main.insertBefore(filterControls.chipConContainer, listSection);
-  // function renderPage(filtered) {
-  //   listSection.replaceChildren();
-  //   const paged = paginate(filtered, currentPage, pageSize);
 
-  //   if (!paged.length) {
-  //     listSection.appendChild(
-  //       createElement("div", { class: "empty-state" }, [
-  //         createElement("p", {}, [`No ${type} found.`]),
-  //         Button("Clear Filters", "", { click: () => filterControls.reset() }, "buttonx btn-secondary")
-  //       ])
-  //     );
-  //     return;
-  //   }
-
-  //   paged.forEach(item => listSection.appendChild(cardBuilder(item)));
-  // }
   function renderPage(filtered) {
     listSection.replaceChildren();
     const paged = paginate(filtered, currentPage, pageSize);
-  
+
     if (!paged.length) {
       listSection.appendChild(
         createElement("div", { class: "empty-state" }, [
@@ -245,19 +239,16 @@ export async function displayListingPage(container, {
       );
       return;
     }
-  
-    const adInterval = 5; // insert ad after every 5 items
+
+    const adInterval = 5;
     paged.forEach((item, index) => {
+      console.log("paged:", item);
       listSection.appendChild(cardBuilder(item));
-  
-      // insert adspace every N items, but not after the last one
       if ((index + 1) % adInterval === 0 && index + 1 < paged.length) {
         listSection.appendChild(adspace("inlist"));
       }
     });
   }
-  
-  // --- Initial Render ---
+
   renderPage(items);
 }
-

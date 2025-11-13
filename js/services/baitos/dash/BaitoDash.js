@@ -5,6 +5,7 @@ import { navigate } from "../../../routes/index.js";
 import Notify from "../../../components/ui/Notify.mjs";
 import Modal from "../../../components/ui/Modal.mjs";
 import Button from "../../../components/base/Button.js";
+import Datex from "../../../components/base/Datex.js";
 
 // ---------------- Applicant Dashboard ----------------
 export async function baitoApplicantDash(container) {
@@ -190,7 +191,8 @@ export async function showApplicantsModal(job) {
           title: `Applicant: ${app.username}`,
           content: createElement("div", {}, [
             createElement("p", {}, [`📩 ${app.pitch}`]),
-            createElement("p", {}, [`📅 Applied: ${new Date(app.submittedAt).toLocaleString()}`])
+            // createElement("p", {}, [`📅 Applied: ${new Date(app.submittedAt).toLocaleString()}`])
+            createElement("p", {}, [`📅 Applied: ${Datex(app.submittedAt)}`])
           ]),
           buttons: [
             Button("Close", "", { click: close => close() }, "buttonx btn-secondary")

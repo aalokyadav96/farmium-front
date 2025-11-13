@@ -8,7 +8,8 @@ const printTicketPDF = async (eventId, uniqueCode) => {
     // Use apiFetch with blob response type
     const response = await apiFetch(endpoint, 'GET', null, { responseType: 'blob' });
 
-    const blob = await response.blob();
+    // const blob = await response.blob();
+    const blob = response;
 
     const downloadUrl = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -87,4 +88,4 @@ const printTicket = async (eventId) => {
   });
 };
 
-export { printTicket };
+export { printTicket, printTicketPDF };

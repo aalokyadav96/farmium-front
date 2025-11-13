@@ -62,5 +62,12 @@
   "testimonial1": "“Found my first job in Japan through Baito within a week!” – Sara",
   "testimonial2": "“Posting jobs and finding applicants is super quick.” – Kenji",
   "jobCount.one": "1 job available",
-  "jobCount.other": "{count} jobs available"
+  "jobCount.other": "{count} jobs available",
+  
+  "recipes": "Recipes",
+  "actions": "Actions",
+  "createNewRecipe": "Create New Recipe",
+  "filterByTags": "Filter by Tags",
+  "prepTime": "Prep Time: {cookTime}",
+  "viewRecipe": "View Recipe"
 }

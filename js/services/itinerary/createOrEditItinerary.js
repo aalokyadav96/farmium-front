@@ -259,10 +259,17 @@ export async function renderItineraryForm(container, isLoggedIn, mode = "create"
   daysContainer.id = "daysContainer";
   form.appendChild(daysContainer);
 
-  const addDayBtn = document.createElement("button");
-  addDayBtn.type = "button";
-  addDayBtn.textContent = "Add Day";
-  addDayBtn.addEventListener("click", () => daysContainer.appendChild(createDaySection()));
+  // const addDayBtn = document.createElement("button");
+  // addDayBtn.type = "button";
+  // addDayBtn.textContent = "Add Day";
+  // addDayBtn.addEventListener("click", () => daysContainer.appendChild(createDaySection()));
+
+  const addDayBtn = Button("Add Day","add-day-btn",{
+    click: ()=> {
+      daysContainer.appendChild(createDaySection());
+    }
+  },"buttonx primary");
+  
   form.appendChild(addDayBtn);
 
   if (Array.isArray(itinerary?.days) && itinerary.days.length) {

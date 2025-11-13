@@ -4,7 +4,7 @@ import Notify from "../components/ui/Notify.mjs";
 
 const MAX_CACHE_ENTRIES = 100;
 const DEFAULT_TTL = 5 * 60 * 1000; // 5 minutes
-const NO_CACHE_ENDPOINTS = ["/auth/login", "/auth/register", "/auth/logout"];
+const NO_CACHE_ENDPOINTS = ["/auth/login", "/auth/register", "/auth/logout", "/events/event"];
 
 const apiCache = new Map(); // key -> { data, timestamp }
 

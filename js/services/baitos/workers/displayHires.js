@@ -4,6 +4,7 @@ import { displayListingPage } from "../../../utils/displayListingPage.js";
 import { navigate } from "../../../routes/index.js";
 import { renderWorkerList } from "./WorkerList.js";
 import { HireWorkerCard } from "./WorkerCard.js";
+import Datex from "../../../components/base/Datex.js";
 
 export function displayHireWorkers(isLoggedIn, container) {
   container.replaceChildren();
@@ -47,7 +48,8 @@ function createWorkerCard(worker) {
     ]),
     createElement("p", {}, [
       createElement("strong", {}, ["Joined: "]),
-      new Date(worker.created_at).toLocaleString()
+      // new Date(worker.created_at).toLocaleString()
+      Datex(worker.created_at)
     ]), 
     Button("View Profile"),
   ]);

@@ -1,19 +1,13 @@
-
 import { createElement } from "../../components/createElement.js";
 import { apiFetch } from "../../api/api.js";
 import Notify from "../../components/ui/Notify.mjs";
+import Datex from "../../components/base/Datex.js";
 
-/**
- * Renders the analytics page for any entity type
- * @param {Object} options
- * @param {HTMLElement} options.container - DOM element to render analytics into
- * @param {boolean} options.isLoggedIn - Whether the user is logged in
- * @param {string} options.entityType - "events", "places", "blog", "product", etc.
- * @param {string|null} options.entityId - Specific entity ID, or null for overall analytics
- */
+// --- MAIN RENDER FUNCTION ---
 export async function renderAnalyticsPage({ container, isLoggedIn, entityType = "events", entityId = null }) {
     if (!container) return;
-    container.innerHTML = ""; // Clear previous content
+
+    while (container.firstChild) container.removeChild(container.firstChild);
 
     if (!isLoggedIn) {
         Notify("Please log in to view analytics.", { type: "warning", duration: 3000, dismissible: true });
@@ -28,21 +22,35 @@ export async function renderAnalyticsPage({ container, isLoggedIn, entityType = 
         const data = await apiFetch(endpoint);
 
         if (!data || !data.metrics) {
-            Notify("Analytics data is empty.", { type: "warning", dismissible: true });
+            Notify("No analytics data found.", { type: "warning", dismissible: true });
             return;
         }
 
         container.appendChild(renderAnalytics(data));
+
     } catch (err) {
         Notify("Failed to load analytics data.", { type: "error", dismissible: true });
         console.error(err);
     }
 
+    // --- RENDER SECTION ---
     function renderAnalytics(data) {
-        // Safely extract metrics
         const metrics = data.metrics || {};
+        const trend = data.trend || [];
+        const engagement = data.engagement || {};
+        const insights = data.insights || {};
+        const topLocations = data.topLocations || [];
+        // const lastUpdated = data.lastUpdated ? new Date(data.lastUpdated).toLocaleString() : "";
+        const lastUpdated = data.lastUpdated ? Datex(data.lastUpdated) : "";
 
-        // Summary cards
+        // Header
+        const header = createElement("div", { class: "analytics-header" }, [
+            createElement("h2", {}, [`Analytics for ${data.name || "Unknown"}`]),
+            createElement("p", {}, [`Entity Type: ${data.type}`]),
+            lastUpdated ? createElement("small", {}, [`Last Updated: ${lastUpdated}`]) : null
+        ].filter(Boolean));
+
+        // Metrics summary
         const summaryCards = createElement(
             "div",
             { class: "analytics-summary-cards" },
@@ -54,13 +62,112 @@ export async function renderAnalyticsPage({ container, isLoggedIn, entityType = 
             )
         );
 
-        // Trend placeholder
-        const trend = createElement(
-            "div",
-            { class: "analytics-trend" },
-            createElement("p", {}, ["[Trend chart placeholder: last 7 days]"])
-        );
+        // Trend section (simple inline visualization)
+        const trendSection = createElement("div", { class: "analytics-trend" }, [
+            createElement("h3", {}, ["7-Day Trend"]),
+            createElement("div", { class: "trend-bars" },
+                trend.map(v => createElement("div", { class: "trend-bar", style: `height:${v * 2}px` }, []))
+            )
+        ]);
 
-        return createElement("div", { class: "analytics-page" }, [summaryCards, trend]);
+        // Engagement details
+        const engagementSection = Object.keys(engagement).length
+            ? createElement("div", { class: "analytics-engagement" }, [
+                createElement("h3", {}, ["Engagement Metrics"]),
+                createElement("ul", {}, Object.entries(engagement).map(([k, v]) =>
+                    createElement("li", {}, [`${k}: ${v}`])
+                ))
+            ])
+            : null;
+
+        // Insights
+        const insightsSection = Object.keys(insights).length
+            ? createElement("div", { class: "analytics-insights" }, [
+                createElement("h3", {}, ["Insights"]),
+                createElement("ul", {}, Object.entries(insights).map(([k, v]) =>
+                    createElement("li", {}, [`${k}: ${v}`])
+                ))
+            ])
+            : null;
+
+        // Top Locations (if available)
+        const topLocationsSection = topLocations.length
+            ? createElement("div", { class: "analytics-top-locations" }, [
+                createElement("h3", {}, ["Top Locations"]),
+                createElement("ul", {}, topLocations.map(loc => createElement("li", {}, [loc])))
+            ])
+            : null;
+
+        return createElement("div", { class: "analytics-page" }, [
+            header,
+            summaryCards,
+            trendSection,
+            engagementSection,
+            insightsSection,
+            topLocationsSection
+        ].filter(Boolean));
     }
 }
+
+
+// /**
+//  * Renders the analytics page for any entity type
+//  * @param {Object} options
+//  * @param {HTMLElement} options.container - DOM element to render analytics into
+//  * @param {boolean} options.isLoggedIn - Whether the user is logged in
+//  * @param {string} options.entityType - "events", "places", "blog", "product", etc.
+//  * @param {string|null} options.entityId - Specific entity ID, or null for overall analytics
+//  */
+// export async function renderAnalyticsPage({ container, isLoggedIn, entityType = "events", entityId = null }) {
+//     if (!container) return;
+//     container.innerHTML = ""; // Clear previous content
+
+//     if (!isLoggedIn) {
+//         Notify("Please log in to view analytics.", { type: "warning", duration: 3000, dismissible: true });
+//         return;
+//     }
+
+//     try {
+//         const endpoint = entityId
+//             ? `/antics/${entityType}/${entityId}`
+//             : `/antics/${entityType}/all`;
+
+//         const data = await apiFetch(endpoint);
+
+//         if (!data || !data.metrics) {
+//             Notify("Analytics data is empty.", { type: "warning", dismissible: true });
+//             return;
+//         }
+
+//         container.appendChild(renderAnalytics(data));
+//     } catch (err) {
+//         Notify("Failed to load analytics data.", { type: "error", dismissible: true });
+//         console.error(err);
+//     }
+
+//     function renderAnalytics(data) {
+//         // Safely extract metrics
+//         const metrics = data.metrics || {};
+
+//         // Summary cards
+//         const summaryCards = createElement(
+//             "div",
+//             { class: "analytics-summary-cards" },
+//             Object.keys(metrics).map(k =>
+//                 createElement("div", { class: "analytics-card" }, [
+//                     createElement("h4", {}, [k]),
+//                     createElement("p", {}, [String(metrics[k])])
+//                 ])
+//             )
+//         );
+
+//         // Trend placeholder
+//         const trend = createElement(
+//             "div",
+//             { class: "analytics-trend" },
+//             createElement("p", {}, ["[Trend chart placeholder: last 7 days]"])
+//         );
+
+//         return createElement("div", { class: "analytics-page" }, [summaryCards, trend]);
+//     }
+// }

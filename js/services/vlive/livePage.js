@@ -2,7 +2,7 @@ import { createElement } from "../../components/createElement.js";
 import { liveFetch } from "../../api/api.js";
 import { getState } from "../../state/state.js";
 import Button from "../../components/base/Button.js";
-import Hls from "hls.js";
+// import Hls from "hls.js";
 
 // ========================================
 // MAIN ENTRY
@@ -186,13 +186,13 @@ async function startLiveStream(videoEl, statusEl, viewerEl, liveData) {
             return;
         }
 
-        if (Hls.isSupported() && liveData.streamUrl.endsWith(".m3u8")) {
-            const hls = new Hls();
-            hls.loadSource(liveData.streamUrl);
-            hls.attachMedia(videoEl);
-        } else {
+        // if (Hls.isSupported() && liveData.streamUrl.endsWith(".m3u8")) {
+        //     const hls = new Hls();
+        //     hls.loadSource(liveData.streamUrl);
+        //     hls.attachMedia(videoEl);
+        // } else {
             videoEl.src = liveData.streamUrl;
-        }
+        // }
         stopPolling = startViewerPolling(viewerEl, liveData.liveid);
     }
 

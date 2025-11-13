@@ -11,13 +11,15 @@ import { createIconButton } from "../../utils/svgIconButton.js";
 import { hireVendors } from "../jobs/vendors/vendors.js";
 // import Imagex from "../../components/base/Imagex.js";
 import Bannerx from "../../components/base/Bannerx.js";
+import Datex from "../../components/base/Datex.js";
 
 
 // Config for displaying event details
 const fieldConfig = [
     { key: 'title', tag: 'h1', classes: ['event-title'] },
     { key: 'status', tag: 'p', classes: ['event-status'] },
-    { key: 'date', tag: 'p', classes: ['event-date'], formatter: d => new Date(d).toLocaleString() },
+    { key: 'date', tag: 'p', classes: ['event-date'], formatter: d => Datex(d) },
+    // { key: 'date', tag: 'p', classes: ['event-date'], formatter: d => new Date(d).toLocaleString() },
     { key: 'description', tag: 'p', classes: ['event-description'] },
 ];
 

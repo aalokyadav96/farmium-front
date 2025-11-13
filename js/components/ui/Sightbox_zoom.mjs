@@ -1,23 +1,34 @@
 import "../../../css/ui/SightboxZoom.css";
 import { createZoomableMedia } from "./createZoomableMedia";
 import { createElement } from "../../components/createElement";
+import { createIconButton } from "../../utils/svgIconButton";
+import { xSVG } from "../svgs";
 
 const Sightbox = (mediaSrc, mediaType = "image") => {
   if (document.getElementById("sightbox")) return;
 
   const overlay = createElement("div", { 
-    id: "", 
     class: "sightboxz-overlay", 
     events: { click: () => closeSightbox() } 
   });
 
   const { container, mediaEl, resetZoomBtn } = createZoomableMedia(mediaSrc, mediaType);
 
-  const closeButton = createElement("button", { 
-    class: "sightboxz-close", 
-    "aria-label": "Close", 
-    events: { click: () => closeSightbox() } 
-  }, [document.createTextNode("×")]);
+  
+  // --- close Buttons ---
+  const closeButton = createIconButton({
+    classSuffix: "sightboxz-close",
+    svgMarkup: xSVG,
+    onClick: closeSightbox ,
+    label: "",
+    ariaLabel: "Close"
+  });
+
+  // const closeButton = createElement("button", { 
+  //   class: "sightboxz-close", 
+  //   "aria-label": "Close", 
+  //   events: { click: () => closeSightbox() } 
+  // }, [document.createTextNode("×")]);
 
   const content = createElement("div", { 
     class: "sightboxz-content", 
@@ -32,7 +43,6 @@ const Sightbox = (mediaSrc, mediaType = "image") => {
   document.getElementById("app").appendChild(sightbox);
 
   content.focus();
-  history.pushState({ sightboxOpen: true }, "");
 
   function onKeyDown(e) {
     if (e.key === "Escape") {
@@ -51,22 +61,13 @@ const Sightbox = (mediaSrc, mediaType = "image") => {
     }
   }
 
-  function onPopState() {
-    if (document.getElementById("sightbox")) {
-      closeSightbox(true);
-    }
-  }
-
-  function closeSightbox(fromPop = false) {
+  function closeSightbox() {
     if (!document.body.contains(sightbox)) return;
     sightbox.remove();
     window.removeEventListener("keydown", onKeyDown);
-    window.removeEventListener("popstate", onPopState);
-    if (!fromPop) history.back();
   }
 
   window.addEventListener("keydown", onKeyDown);
-  window.addEventListener("popstate", onPopState);
 
   return sightbox;
 };

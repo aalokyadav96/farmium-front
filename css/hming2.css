@@ -196,6 +196,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    height: 80px;
 }
   
   .weather, .location, .date {
@@ -254,7 +255,7 @@
   align-self: flex-start;
   margin-top: 8px;
   padding: 6px 12px;
-  background: #007aff;
+  background: #0056b3;
   color: #fff;
   border: none;
   border-radius: 4px;

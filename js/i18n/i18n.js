@@ -3,37 +3,57 @@ import { setState, getState } from "../state/state.js";
 let translations = {};
 let currentLang = "en";
 
-export async function setLanguage(lang) {
+/**
+ * Load translations from a JSON file and store in memory.
+ */
+async function loadTranslations(lang) {
   try {
-    // const module = await import(`./lang/${lang}.json`, { assert: { type: "json" } });
-    const module = await fetch(`/static/i18n/${lang}.json`);
-    translations = module.default || module;
+    const res = await fetch(`/static/i18n/${lang}.json`);
+    translations = await res.json();
     currentLang = lang;
     localStorage.setItem("lang", lang);
+    setState("lang", lang);
   } catch (err) {
-    console.error(`Failed to load language "${lang}"`, err);
+    console.error(`Failed to load translations for "${lang}"`, err);
     translations = {};
   }
 }
 
-export function detectLanguage() {
-  const saved = localStorage.getItem("lang");
-  if (saved) return saved;
-  return navigator.language.startsWith("ja") ? "jp" : "en";
+/**
+ * Set the current language and load its translations.
+ */
+export async function setLanguage(lang) {
+  await loadTranslations(lang);
 }
 
 /**
- * Translate key with optional variables and fallback
+ * Detect the preferred language from localStorage or browser.
+ */
+export function detectLanguage() {
+  const saved = localStorage.getItem("lang");
+  if (saved) return saved;
+  return navigator.language.startsWith("ja") ? "ja" : "en"; // use "ja" for Japanese
+}
+
+/**
+ * Get the current language code.
+ */
+export function getCurrentLanguage() {
+  return currentLang;
+}
+
+/**
+ * Translate a key with optional variables and fallback.
  * Supports:
- * - fallback key if missing
  * - pluralization (key.one / key.other)
  * - {var} interpolation
+ * - fallback key if missing
  */
 export function t(key, vars = {}, fallback = "") {
-  const count = vars.count;
   let template = translations[key];
 
-  // Pluralization: prefer "key.one" or "key.other"
+  // Handle pluralization
+  const count = vars.count;
   if (typeof count === "number") {
     const pluralKey = `${key}.${count === 1 ? "one" : "other"}`;
     template = translations[pluralKey] || template;
@@ -47,22 +67,10 @@ export function t(key, vars = {}, fallback = "") {
   );
 }
 
-export function getCurrentLanguage() {
-  return currentLang;
-}
-
 /**
- * Load and store translations into memory.
+ * Initialize i18n on page load.
  */
-export async function loadTranslations(lang = "en") {
-  try {
-    const res = await fetch(`/static/i18n/${lang}.json`);
-    translations = await res.json();
-    currentLang = lang;
-    localStorage.setItem("lang", lang);
-    setState("lang", lang);
-  } catch (err) {
-    console.error("Failed to load translations for", lang, err);
-    translations = {}; // fallback to empty
-  }
+export async function initI18n() {
+  const lang = detectLanguage();
+  await setLanguage(lang);
 }

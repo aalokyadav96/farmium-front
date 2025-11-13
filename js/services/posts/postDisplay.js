@@ -11,24 +11,27 @@ import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePath
 import Notify from "../../components/ui/Notify.mjs";
 import Imagex from "../../components/base/Imagex.js";
 import Sightbox from "../../components/ui/Sightbox_zoom.mjs";
+import { fetchUserMeta } from "../../utils/usersMeta.js";
+import ZoomBox from "../../components/ui/ZoomBox.mjs";
+import { renderRelatedPosts } from "./relatedPosts.js";
 
 // --- Shared constants ---
 const PLACEHOLDER = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
 const lazyObserver = ('loading' in HTMLImageElement.prototype || typeof IntersectionObserver === 'undefined')
   ? null
   : new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (!entry.isIntersecting) return;
-        const img = entry.target;
-        const real = img.dataset.src;
-        if (real) {
-          img.src = real;
-          img.removeAttribute("data-src");
-          img.addEventListener("load", () => img.style.opacity = "1", { once: true });
-        }
-        lazyObserver.unobserve(img);
-      });
-    }, { rootMargin: "200px 0px" });
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const img = entry.target;
+      const real = img.dataset.src;
+      if (real) {
+        img.src = real;
+        img.removeAttribute("data-src");
+        img.addEventListener("load", () => img.style.opacity = "1", { once: true });
+      }
+      lazyObserver.unobserve(img);
+    });
+  }, { rootMargin: "200px 0px" });
 
 const avatarCache = new Map();
 function getAvatar(userId) {
@@ -59,6 +62,11 @@ export async function displayPost(isLoggedIn, postId, container) {
     return;
   }
 
+
+  const userx = await fetchUserMeta([post.createdBy]);
+  // post.username = userx[post.username]?.username || "Anonymous"
+  post.username = userx[post.createdBy]?.username || "Anonymous";
+  console.log(post);
   const frag = document.createDocumentFragment();
   frag.append(renderHeader(post));
   frag.append(renderBody(post));
@@ -69,6 +77,9 @@ export async function displayPost(isLoggedIn, postId, container) {
 
   page.appendChild(frag);
   container.appendChild(page);
+  const relatedEl = await renderRelatedPosts(post);
+  container.appendChild(relatedEl);
+
 }
 
 // --- Renderers ---
@@ -81,7 +92,7 @@ function renderHeader(post) {
     createElement("h2", {}, [post.title || "Untitled"]),
     createElement("p", { class: "post-meta" }, [
       `📁 ${post.category || "Uncategorized"} › ${post.subcategory || "General"} • `,
-      `👤 ${post.createdBy || "Anonymous"} • `,
+      `👤 ${post.username || "Anonymous"} • `,
       post.createdAt ? `🕒 ${formatRelativeTime(post.createdAt)}` : ""
     ])
   ]);
@@ -120,29 +131,69 @@ function renderBody(post) {
 function renderImageGroup(images) {
   const group = createElement("div", { class: "image-group" });
 
-  images.forEach(img => {
-    const realSrc = resolveImagePath(EntityType.POST, PictureType.THUMB, img.url);
-    console.log(realSrc);
-    const imgEl = Imagex({
-      src: realSrc,
-      alt: img.alt || "Post Image",
-      classes: "post-image"
-    });
+  // Convert image blocks into actual URL array for ZoomBox
+  // const mediaItems = images.map(img =>
+  //   resolveImagePath(EntityType.POST, PictureType.FULL, img.url)
+  // );
+  const mediaItems = images.map(img => resolveImagePath(EntityType.POST, PictureType.THUMB, img.url));
+  // console.log("mediaItems : ",mediaItems);
+  // // Render thumbnails
+  // mediaItems.forEach((img, index) => {
+  //   console.log("foreach :",img);
+  // });
 
-    // Delegate click later
+  // Render thumbnails
+  images.forEach((img, index) => {
+    const thumbSrc = resolveImagePath(EntityType.POST, PictureType.THUMB, img.url);
+    const imgEl = Imagex({
+      src: thumbSrc,
+      alt: img.alt || `Post Image ${index + 1}`,
+      classes: "post-image",
+      dataset: { index }
+    });
     group.appendChild(imgEl);
   });
 
-  // Delegate Sightbox click to the group
+  // Click → open ZoomBox starting at clicked image
   group.addEventListener("click", e => {
     const img = e.target.closest(".post-image");
     if (!img) return;
-    const src = img.dataset.src || img.src;
-    Sightbox(src, "image");
+    const index = parseInt(img.dataset.index, 10);
+    ZoomBox(mediaItems, index);
   });
 
   return group;
 }
+
+
+// function renderImageGroup(images) {
+//   const group = createElement("div", { class: "image-group" });
+
+//   images.forEach(img => {
+//     const realSrc = resolveImagePath(EntityType.POST, PictureType.THUMB, img.url);
+//     console.log(realSrc);
+//     const imgEl = Imagex({
+//       src: realSrc,
+//       alt: img.alt || "Post Image",
+//       classes: "post-image"
+//     });
+
+//     // Delegate click later
+//     group.appendChild(imgEl);
+//   });
+
+
+//   // Delegate Sightbox click to the group
+//   group.addEventListener("click", e => {
+//     const img = e.target.closest(".post-image");
+//     if (!img) return;
+//     const src = img.dataset.src || img.src;
+//     // Sightbox(src, "image");
+//     ZoomBox(images, 1);
+//   });
+
+//   return group;
+// }
 
 function renderTags(tags) {
   return createElement("div", { class: "post-tags" },
@@ -153,7 +204,7 @@ function renderTags(tags) {
 async function renderProfile(post) {
   const avatarUrl = getAvatar(post.createdBy);
   return await userProfileCard({
-    username: post.createdBy || "anonymous",
+    username: post.username || "anonymous",
     bio: "",
     avatarUrl,
     postCount: 0,

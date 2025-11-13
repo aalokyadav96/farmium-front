@@ -15,6 +15,7 @@ import { resolveImagePath, EntityType, PictureType } from "../../../utils/imageP
 import Imagex from "../../../components/base/Imagex.js";
 import Bannerx from "../../../components/base/Bannerx.js";
 import { baitoAddImages } from "../create/AddBaitoImages.js";
+import Datex from "../../../components/base/Datex.js";
 
 /** Open chat with employer */
 function startChatWithEmployer(userId, baitoId) {
@@ -157,6 +158,40 @@ function createEmployerSection(employer, baito) {
   return createElement("div", { class: "baito-employer" }, [avatar, name, verifiedBadge].filter(Boolean));
 }
 
+// // /** Job meta info */
+// function createMetaSection(baito) {
+//   const wageText = isNaN(Number(baito.wage)) ? baito.wage : `¥${Number(baito.wage).toLocaleString()}/hour`;
+
+//   const metaLines = [
+//     baito.category && baito.subcategory
+//       ? `📂 ${baito.category} › ${baito.subcategory}`
+//       : baito.category
+//       ? `📂 ${baito.category}`
+//       : null,
+//     baito.wage ? `💴 Wage: ${wageText}` : null,
+//     baito.workHours ? `⏰ Hours: ${baito.workHours}` : null,
+//     baito.location ? `📍 Location: ${baito.location}` : null,
+//     baito.phone ? `📞 Contact: ${baito.phone}` : null,
+//     baito.lastdate ? Datex(baito.lastdate) : null,  // returns a DOM element
+//     baito.createdAt ? Datex(baito.createdAt) : null, // returns a DOM element
+//     typeof baito.applicationcount === "number" ? `👥 Applications: ${baito.applicationcount}` : null,
+//   ].filter(Boolean);
+
+//   return createElement(
+//     "div",
+//     { class: "baito-meta" },
+//     metaLines.map(line => {
+//       if (line instanceof Node) {
+//         // line is a DOM element (like Datex), append directly inside <p>
+//         return createElement("p", {}, [line]);
+//       } else {
+//         // line is a string
+//         return createElement("p", {}, [document.createTextNode(line)]);
+//       }
+//     })
+//   );
+// }
+
 /** Job meta info */
 function createMetaSection(baito) {
   const wageText = isNaN(Number(baito.wage)) ? baito.wage : `¥${Number(baito.wage).toLocaleString()}/hour`;
@@ -167,8 +202,10 @@ function createMetaSection(baito) {
     baito.workHours ? `⏰ Hours: ${baito.workHours}` : null,
     baito.location ? `📍 Location: ${baito.location}` : null,
     baito.phone ? `📞 Contact: ${baito.phone}` : null,
-    baito.lastdate ? `⏳ Apply by: ${new Date(baito.lastdate).toLocaleDateString()}` : null,
-    baito.createdAt ? `📅 Posted: ${new Date(baito.createdAt).toLocaleDateString()}` : null,
+    // baito.lastdate ? `⏳ Apply by: ${new Date(baito.lastdate).toLocaleDateString()}` : null,
+    baito.lastdate ? `⏳ Apply by: ${Datex(baito.lastdate, true)}` : null,
+    // baito.createdAt ? `📅 Posted: ${new Date(baito.createdAt).toLocaleDateString()}` : null,
+    baito.createdAt ? `📅 Posted: ${Datex(baito.createdAt, true)}` : null,
     typeof baito.applicationcount === "number" ? `👥 Applications: ${baito.applicationcount}` : null,
   ].filter(Boolean);
 

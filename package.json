@@ -3,14 +3,18 @@
   "version": "1.0.0",
   "description": "Gallium",
   "main": "js/inapp.js",
+  "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prebuild": "node scripts/generate-manifest.mjs",
+    "build": "npm run generate-sitemap && vite build",
+    "generate-sitemap": "node scripts/generate-sitemap.mjs"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "hls.js": "^1.6.10",
     "terser": "^5.43.1",
     "uuid": "^11.1.0",
     "vite": "^7.1.3"

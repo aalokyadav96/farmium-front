@@ -8,6 +8,7 @@ import { addTicketForm } from './ticketService.js';
 import { printTicket } from './printTicket.js';
 import { handlePurchase } from '../payment/pay.js';
 import { verifyTicketAndShowModal, cancelTicket, transferTicket } from "./ticketTransfer.js";
+import { listMyTickets } from './listmyTickets.js';
 
 export function displayNewTicket(ticketData, ticketList) {
     const ticketItem = createElement("li", {
@@ -44,7 +45,8 @@ export async function displayTickets(ticketContainer, tickets, eventId, eventNam
             { text: "Verify Your Ticket", click: () => verifyTicketAndShowModal(eventId) },
             { text: "Print Your Ticket", click: () => printTicket(eventId) },
             { text: "Cancel Ticket", click: () => cancelTicket(eventId) },
-            { text: "Transfer Ticket", click: () => transferTicket(eventId) }
+            { text: "Transfer Ticket", click: () => transferTicket(eventId) },
+            { text: "My Tickets", click: () => listMyTickets(eventId) }
         ];
         // actions.forEach(a => ticketContainer.appendChild(Button(a.text, "", { click: a.click, classes: ["buttonx", "action-btn"] })));
         actions.forEach(a => actionsCon.appendChild(Button(a.text, "", { click: a.click }, "buttonx action-btn")));

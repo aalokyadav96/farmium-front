@@ -107,7 +107,7 @@
   transform: scale(1.05);
 }
 
-.button {
+/* .button {
   background-color: var(--color-btn-bg);
   color: var(--color-btn-fg);
   border: none;
@@ -119,7 +119,7 @@
 
 .button:hover {
   background-color: var(--color-btn-hover-bg);
-}
+} */
 
 .steps-section {
   margin-bottom: var(--space-md);

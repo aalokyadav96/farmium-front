@@ -72,7 +72,7 @@
 
 .workers-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: var(--space-md);
 }
 
@@ -83,6 +83,7 @@
   box-shadow: var(--shadow-elev-1);
   padding: var(--space-md);
   transition: box-shadow var(--transition-fast);
+  text-align: center;
 }
 
 .worker-card:hover {

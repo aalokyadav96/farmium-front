@@ -8,18 +8,6 @@ import Modal from "../../components/ui/Modal.mjs";
 import { uploadFile } from "../media/api/mediaApi.js";
 // import { startCreatorWebRTC } from "./creatorLive.js";
 
-/*
-  Exports:
-   - goLiveWithTitle(entityType, entityId, visibility = "public")
-   - initLivestream(entityType, entityId, title, visibility, bannerFile, videoEl, statusEl)
-   - scheduleLivestream(entityType, entityId)
-
-  Improvements:
-   - prevents double clicks / double starts
-   - uploads banner only once and passes bannerUrl
-   - validates scheduled time (no past)
-   - returns session handles where appropriate
-*/
 export function goLiveWithTitle(entityType, entityId, visibility = "public") {
     const bannerPreview = createElement("img", { id: "live-banner-preview", class: "live-banner-preview" });
 

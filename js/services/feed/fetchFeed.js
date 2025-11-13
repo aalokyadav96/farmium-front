@@ -17,7 +17,7 @@ export async function fetchFeed(container) {
         const postmetadata = await fetchBulkPostMetadata(postIds);
 
         // Render all posts with metadata
-        await renderPost(posts, container, postmetadata);
+        await renderPost(posts, container, postmetadata, 0);
 
     } catch (err) {
         console.error("Feed error:", err);

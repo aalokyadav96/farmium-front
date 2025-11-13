@@ -1,5 +1,6 @@
-import { setLanguage } from "../i18n.js";
+import { setLanguage } from "../i18n/i18n.js";
 import { navigate } from "../routes/index.js";
+import { webSiteName } from "../state/state.js";
 import Button from "./base/Button.js";
 
 const handleNavigation = (event, href) => {
@@ -12,9 +13,9 @@ const handleNavigation = (event, href) => {
 /** Footer Bar */
 const Footer = () => {
     // Create Elements
-    const footer = document.createElement("footer");
-    footer.className = "footer";
-    footer.id = "footer";
+    // const footer = document.createElement("footer");
+    // footer.className = "footer";
+    // footer.id = "footer";
 
     const container = document.createElement("div");
     container.className = "footer-container";
@@ -48,7 +49,8 @@ const Footer = () => {
     // Language Selector
     const langSelect = document.createElement("select");
     langSelect.className = "lang-select";
-    langSelect.setAttribute('aria-label','Select Page Language');
+    langSelect.setAttribute('name', 'lang-select');
+    langSelect.setAttribute('aria-label', 'Select Page Language');
     langSelect.innerHTML = `
         <option value="en">English</option>
         <option value="fr">Français</option>
@@ -68,14 +70,14 @@ const Footer = () => {
         }
     });
 
-    var reportButt = Button("Feedback",'feedback-btn', {}, "action-btn", {});
+    var reportButt = Button("Feedback", 'feedback-btn', {}, "buttonx", {});
 
     // Footer Bottom
     const footerBottom = document.createElement("div");
     footerBottom.className = "footer-bottom";
 
     const copyright = document.createElement("p");
-    copyright.textContent = `© ${new Date().getFullYear()} Your Company. All rights reserved.`;
+    copyright.textContent = `© ${new Date().getFullYear()} ${webSiteName}. All rights reserved.`;
 
     footerBottom.appendChild(langSelect);
     footerBottom.appendChild(copyright);
@@ -84,9 +86,10 @@ const Footer = () => {
     // Append elements
     container.appendChild(nav);
     container.appendChild(footerBottom);
-    footer.appendChild(container);
+    // footer.appendChild(container);
 
-    return footer;
+    // return footer;
+    return container;
 };
 
 export { Footer };

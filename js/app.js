@@ -1,18 +1,21 @@
 import { loadContent } from "./routes/index.js";
 import { setState } from "./state/state.js";
-import { detectLanguage, loadTranslations } from "./i18n/i18n.js";
+import { detectLanguage, setLanguage } from "./i18n/i18n.js";
 
-// // --- Register Service Worker ---
-// if ("serviceWorker" in navigator) {
-//   window.addEventListener("load", () => {
-//     navigator.serviceWorker.register("/service-worker.js")
-//       .then((reg) => console.log("🔌 Service worker registered:", reg.scope))
-//       .catch((err) => console.error("❌ Service worker registration failed:", err));
-//   });
-// }
+// --- Register Service Worker ---
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/service-worker.js")
+      .then(async (reg) => {
+        await navigator.serviceWorker.ready;
+        console.log("🔌 Service worker active:", reg.scope);
+      })
+      .catch((err) => console.error("❌ Service worker registration failed:", err));
+  });
+}
 
 // --- Environment Profiling ---
-(async function profileEnvironment() {
+async function measureEnvironment() {
   const measurePerformance = async () => {
     const t0 = performance.now();
     for (let i = 0; i < 100000; i++) Math.sqrt(i);
@@ -22,37 +25,54 @@ import { detectLanguage, loadTranslations } from "./i18n/i18n.js";
 
   const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
-  const environment = {
+  return {
     deviceType: /Mobi|Android/i.test(navigator.userAgent) ? "mobile" : "desktop",
-    browser: isSafari ? "safari" :
-      navigator.userAgent.includes("Firefox") ? "firefox" :
-      navigator.userAgent.includes("Chrome") ? "chrome" : "unknown",
+    browser: isSafari
+      ? "safari"
+      : navigator.userAgent.includes("Firefox")
+      ? "firefox"
+      : navigator.userAgent.includes("Chrome")
+      ? "chrome"
+      : "unknown",
     networkSpeed: navigator.connection?.effectiveType || "unknown",
     theme: window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light",
     online: navigator.onLine,
-    performanceScore: await measurePerformance()
+    performanceScore: await measurePerformance(),
   };
+}
 
-  // console.log("🌐 Environment profile:", environment);
-  setState("environment", environment); // store in app state
-  window.__env = environment; // still keep for debugging
+async function profileEnvironment() {
+  const cachedEnv = localStorage.getItem("env-profile");
+  if (cachedEnv) {
+    const parsed = JSON.parse(cachedEnv);
+    if (Date.now() - parsed.ts < 86400000) { // cache 24h
+      setState("environment", parsed.data);
+      window.__env = parsed.data;
+      return;
+    }
+  }
 
-  // UI tier selection
+  const envData = await measureEnvironment();
+  setState("environment", envData);
+  window.__env = envData;
+  localStorage.setItem("env-profile", JSON.stringify({ ts: Date.now(), data: envData }));
+
+  // Determine UI tier
   let uiTier = localStorage.getItem("ui-tier-v1");
   if (!uiTier) {
-    if (environment.deviceType === "mobile" || environment.networkSpeed.includes("2g")) {
+    if (envData.deviceType === "mobile" || envData.networkSpeed.includes("2g")) {
       uiTier = "light";
-    } else if (environment.performanceScore < 50) {
+    } else if (envData.performanceScore < 50) {
       uiTier = "medium";
     } else {
       uiTier = "full";
     }
     localStorage.setItem("ui-tier-v1", uiTier);
   }
-})();
+}
 
 // --- Offline Banner ---
-let offlineTimeout = null;
+let offlineTimer = null;
 
 function showOfflineBanner() {
   if (document.getElementById("offline-banner")) return;
@@ -68,34 +88,38 @@ function showOfflineBanner() {
     textAlign: "center",
     padding: "0.5rem",
     zIndex: "9999",
-    fontSize: "0.9rem"
+    fontSize: "0.9rem",
   });
   banner.textContent = "📴 You're offline. Some features may not work.";
   document.body.appendChild(banner);
 }
 
 function removeOfflineBanner() {
-  clearTimeout(offlineTimeout);
-  offlineTimeout = setTimeout(() => {
-    const banner = document.getElementById("offline-banner");
-    if (banner) banner.remove();
-  }, 500); // debounce flicker
+  const banner = document.getElementById("offline-banner");
+  if (banner) banner.remove();
 }
 
-window.addEventListener("offline", showOfflineBanner);
-window.addEventListener("online", removeOfflineBanner);
+window.addEventListener("offline", () => {
+  clearTimeout(offlineTimer);
+  offlineTimer = setTimeout(showOfflineBanner, 1000);
+});
+
+window.addEventListener("online", () => {
+  clearTimeout(offlineTimer);
+  offlineTimer = setTimeout(removeOfflineBanner, 1000);
+});
 
 // --- App Init ---
 async function init() {
   try {
+    await profileEnvironment();
+
     const lang = detectLanguage();
-    await loadTranslations(lang);
+    await setLanguage(lang);
     await loadContent(window.location.pathname);
 
     window.addEventListener("popstate", async () => {
-      if (!document.hidden) {
-        await loadContent(window.location.pathname);
-      }
+      if (!document.hidden) await loadContent(window.location.pathname);
     });
 
     window.addEventListener("pageshow", async (event) => {
@@ -108,11 +132,7 @@ async function init() {
     });
 
     window.addEventListener("pagehide", (event) => {
-      if (event.persisted) {
-        console.log("Page *may* be cached by bfcache.");
-      } else {
-        console.log("Page will unload normally.");
-      }
+      if (event.persisted) console.log("Page *may* be cached by bfcache.");
     });
 
     if (!navigator.onLine) {
@@ -121,48 +141,55 @@ async function init() {
     }
   } catch (error) {
     console.error("App init failed:", error);
-    document.body.innerHTML = "<h1>⚠️ Something went wrong. Please reload.</h1>";
+    const errEl = document.createElement("h1");
+    errEl.textContent = "⚠️ Something went wrong. Please reload.";
+    document.body.replaceChildren(errEl);
   }
 }
 
-// // --- PWA Install Prompt ---
-// let deferredPrompt = null;
+// --- PWA Install Prompt ---
+let deferredPrompt = null;
 
-// window.addEventListener("beforeinstallprompt", (e) => {
-//   e.preventDefault();
-//   deferredPrompt = e;
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
 
-//   let installBtn = document.getElementById("install-pwa");
-//   if (!installBtn) {
-//     installBtn = document.createElement("button");
-//     installBtn.id = "install-pwa";
-//     installBtn.textContent = "Install App";
-//     Object.assign(installBtn.style, {
-//       position: "fixed",
-//       top: "3rem",
-//       right: "0",
-//       zIndex: "10",
-//       padding: "0.6rem 1rem",
-//       background: "#1976d2",
-//       color: "#fff",
-//       border: "none",
-//       borderRadius: "4px",
-//       cursor: "pointer"
-//     });
-//     document.body.appendChild(installBtn);
-//   }
+  if (localStorage.getItem("pwa-dismissed")) return;
 
-//   installBtn.style.display = "block";
-//   installBtn.addEventListener("click", () => {
-//     installBtn.style.display = "none";
-//     deferredPrompt.prompt();
-//     deferredPrompt.userChoice.then((choice) => {
-//       if (choice.outcome === "accepted") {
-//         console.log("PWA installed");
-//       }
-//       deferredPrompt = null;
-//     });
-//   }, { once: true });
-// });
+  let installBtn = document.getElementById("install-pwa");
+  if (!installBtn) {
+    installBtn = document.createElement("button");
+    installBtn.id = "install-pwa";
+    installBtn.textContent = "Install App";
+    Object.assign(installBtn.style, {
+      position: "fixed",
+      top: "3rem",
+      right: "0",
+      zIndex: "10",
+      padding: "0.6rem 1rem",
+      background: "#1976d2",
+      color: "#fff",
+      border: "none",
+      borderRadius: "4px",
+      cursor: "pointer",
+    });
+    document.body.appendChild(installBtn);
+  }
 
-init();
+  installBtn.style.display = "block";
+  installBtn.addEventListener(
+    "click",
+    () => {
+      installBtn.style.display = "none";
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(({ outcome }) => {
+        if (outcome !== "accepted") localStorage.setItem("pwa-dismissed", "1");
+        deferredPrompt = null;
+      });
+    },
+    { once: true }
+  );
+});
+
+// --- Start App ---
+window.addEventListener("DOMContentLoaded", init);

@@ -5,6 +5,7 @@ import { addToCart } from "../cart/addToCart.js";
 import { getState } from "../../state/state.js";
 import { EntityType, PictureType, resolveImagePath } from "../../utils/imagePaths.js";
 import Imagex from "../../components/base/Imagex.js";
+import Datex from "../../components/base/Datex.js";
 
 export async function displayMerch(contentContainer, merchID, isLoggedIn) {
   // Clear existing content
@@ -142,7 +143,8 @@ export async function displayMerch(contentContainer, merchID, isLoggedIn) {
       metaInfo.appendChild(entityLink);
     }
     if (data.created_at) metaInfo.appendChild(createElement("p", {}, [`Created At: ${new Date(data.created_at).toLocaleString()}`]));
-    if (data.updatedAt) metaInfo.appendChild(createElement("p", {}, [`Last Updated: ${new Date(data.updatedAt).toLocaleString()}`]));
+    // if (data.updatedAt) metaInfo.appendChild(createElement("p", {}, [`Last Updated: ${new Date(data.updatedAt).toLocaleString()}`]));
+    if (data.updatedAt) metaInfo.appendChild(createElement("p", {}, [`Last Updated: ${Datex(data.updatedAt)}`]));
     if (data.merchid) metaInfo.appendChild(createElement("p", {}, [`Merch ID: ${data.merchid}`]));
 
     merchContainer.appendChild(metaInfo);

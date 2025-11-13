@@ -3,6 +3,7 @@ import { createElement } from "../../components/createElement.js";
 import { apiFetch } from "../../api/api.js";
 import { getState } from "../../state/state.js";
 import Notify from "../../components/ui/Notify.mjs";
+import Datex from "../../components/base/Datex.js";
 
 async function fetchEventData(eventId) {
     const eventData = await apiFetch(`/events/event/${eventId}`);
@@ -23,7 +24,8 @@ async function renderTicksPage(isLoggedIn, eventId, container) {
             createElement("h1", { textContent: eventData.title }),
             createElement("p", { textContent: eventData.description || "No description available." }),
             createElement("div", { class: "event-meta" }, [
-                createElement("p", { textContent: `📅 Date: ${new Date(eventData.date).toLocaleString()}` }),
+                // createElement("p", { textContent: `📅 Date: ${new Date(eventData.date).toLocaleString()}` }),
+                createElement("p", { textContent: `📅 Date: ${Datex(eventData.date)}` }),
                 createElement("p", { textContent: `📍 Location: ${eventData.placename || eventData.location || "TBA"}` }),
                 createElement("p", { textContent: `🎟 Category: ${eventData.category || "Uncategorized"}` }),
                 createElement("p", { textContent: `💲 Currency: ${eventData.currency || "N/A"}` }),

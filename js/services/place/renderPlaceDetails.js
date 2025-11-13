@@ -4,10 +4,8 @@ import { analyticsPlace } from "./placeAnanlytics.js";
 import Button from "../../components/base/Button.js";
 import { reportPost } from "../reporting/reporting.js";
 import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
-import { updateImageWithCrop } from "../../utils/bannerEditor.js"; // adjust path
-import Imagex from "../../components/base/Imagex.js";
+import Datex from "../../components/base/Datex.js";
 import Bannerx from "../../components/base/Bannerx.js";
-// import { jobsHire } from "../jobs/jobs.js"; // adjust path
 
 /** Banner section */
 function createEventBannerSection(place, isCreator) {
@@ -24,8 +22,10 @@ function createEventBannerSection(place, isCreator) {
 function renderPlaceDetails(isLoggedIn, content, place, isCreator) {
   content.replaceChildren();
 console.log(place);
-  const createdDate = new Date(place.created_at).toLocaleString();
-  const updatedDate = new Date(place.updated_at).toLocaleString();
+  // const createdDate = new Date(place.created_at).toLocaleString();
+  const createdDate = Datex(place.created_at);
+  // const updatedDate = new Date(place.updated_at).toLocaleString();
+  const updatedDate = Datex(place.updated_at);
   const latitude = place.coordinates?.lat || "N/A";
   const longitude = place.coordinates?.lng || "N/A";
 

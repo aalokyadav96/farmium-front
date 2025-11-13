@@ -1,4 +1,5 @@
 import { apiFetch } from "../../api/api.js";
+import Datex from "../../components/base/Datex.js";
 import { createElement } from "../../components/createElement.js";
 import { debounce } from "../../utils/deutils.js";
 
@@ -202,7 +203,8 @@ export function createGroupedCard(reports, entityPreview, state, undoBtn, refres
         , reports[0]);
 
     const dateSpan = createElement("span", { class: "report-date" }, [
-        `First Reported: ${new Date(earliest.createdAt).toLocaleString()}`
+        // `First Reported: ${new Date(earliest.createdAt).toLocaleString()}`
+        `First Reported: ${Datex(earliest.createdAt)}`
     ]);
     const countSpan = createElement("span", { class: "report-count" }, [`Reports: ${reports.length}`]);
 
@@ -257,7 +259,8 @@ function createReportItem(report, state, undoBtn, refreshFn) {
         ["Status", report.status, { class: `status-text status-${report.status}` }],
         ["Reviewed By", report.reviewedBy || "(none)"],
         ["Moderator Notes", report.reviewNotes || "(none)"],
-        ["Reported At", new Date(report.createdAt).toLocaleString()],
+        // ["Reported At", new Date(report.createdAt).toLocaleString()],
+        ["Reported At", Datex(report.createdAt)],
     ];
 
     fields.forEach(([label, value, attrs]) => {

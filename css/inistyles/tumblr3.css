@@ -535,6 +535,8 @@
   fill: red;
 }
 
+.video-error {padding: 8px;font-family: monospace;}
+
 /* Responsive adjustments */
 @media (max-width: 600px) {
   .tumblr-layout .feed-item {

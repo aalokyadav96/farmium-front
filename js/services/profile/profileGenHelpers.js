@@ -126,23 +126,35 @@ function createProfileActions(profile, isLoggedIn) {
 function createProfileInfo(profile) {
     const profileInfo = document.createElement("div");
     profileInfo.className = "profile-info";
-
+  
     const infoItems = [
-        { label: "Last Login", value: formatDate(profile.last_login) || "Never logged in" },
-        // { label: "Status", value: profile.online ? "Active" : "Inactive" },
-        { label: "Verification Status", value: profile.is_verified ? "Verified" : "Not Verified" },
+      { label: "Last Login", value: formatDate(profile.last_login) || "Never logged in" },
+      { label: "Verification Status", value: profile.is_verified ? "Verified" : "Not Verified" },
     ];
-
+  
     infoItems.forEach(({ label, value }) => {
-        const infoItem = document.createElement("div");
-        infoItem.className = "info-item";
-        infoItem.innerHTML = `<strong>${label}:</strong> ${value}`;
-        profileInfo.appendChild(infoItem);
+      const infoItem = document.createElement("div");
+      infoItem.className = "info-item";
+  
+      const strongLabel = document.createElement("strong");
+      strongLabel.textContent = label + ":";
+      infoItem.appendChild(strongLabel);
+  
+      // If value is a DOM element, append it; otherwise, append text
+      if (value instanceof Node) {
+        infoItem.appendChild(document.createTextNode(" "));
+        infoItem.appendChild(value);
+      } else {
+        infoItem.appendChild(document.createTextNode(" " + value));
+      }
+  
+      profileInfo.appendChild(infoItem);
     });
-
+  
     return profileInfo;
-}
-
+  }
+  
+  
 function createStatistics(profile) {
     const statistics = document.createElement("div");
     statistics.className = "statistics";

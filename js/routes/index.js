@@ -7,9 +7,13 @@ import {
   saveScroll,
   restoreScroll,
 } from "../state/state.js";
+import { Footer } from "../components/footer.js";
+
+// import {startPerfMonitoring} from "../services/activity/perfMonitor.js";
 
 let isNavigating = false;
 let isHeaderRendered = false;
+let isFooterRendered = false;
 let isNavRendered = false;
 
 /**
@@ -61,9 +65,16 @@ async function loadContent(url) {
   // Update active nav link for current route
   highlightActiveNav(url);
 
+  // Render footer only once
+  if (!isFooterRendered) {
+    const footerContent = Footer();
+    if (footerContent) footer.appendChild(footerContent);
+    isFooterRendered = true;
+  }
+  
   // Render main page module
   await render(url, main);
-
+  // startPerfMonitoring();
   // Restore scroll position
   restoreScroll(main, getRouteState(url));
 }

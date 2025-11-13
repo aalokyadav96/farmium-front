@@ -15,10 +15,11 @@
 @import url(udata.css);
 @import url(misc.css);
 @import url(newchat2.css);
-/* @import url(mapcon.css); */
+@import url(mapcon.css);
 /* @import url(subpages/seatMap.css); */
 @import url(temp.css);
 @import url(temp1.css);
+@import url(footer.css);
 
 @import url(inistyles/tumblr3.css);
 @import url(inistyles/feedimages.css); 
@@ -45,6 +46,7 @@
 @import url(inistyles/mecaht.css);
 @import url(inistyles/musicon.css);
 /* @import url(inistyles/fanmade2.css); */
+/* @import url(inistyles/maps.css); */
 
 @import url(subpages/nearby1.css);
 @import url(subpages/livcon.css);

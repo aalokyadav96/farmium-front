@@ -1,7 +1,8 @@
+@import url(croppageform.css);
 .croppage {
     max-width: 1100px;
-    margin: 40px auto;
-    padding: 0 16px;
+    margin: 10px auto;
+    padding: 0;
   }
   
   .crop-header {
@@ -102,42 +103,9 @@
     border: 1px solid #ccc;
     border-radius: 5px;
     overflow: hidden;
-  }
-/*   
-  .quantity-control button {
-    border: none;
-    padding: 6px 10px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background 0.15s;
-  }
-  
-  .quantity-control button:hover {
-    background: #e0e0e0;
-  }
-  
-  .quantity-value {
-    min-width: 30px;
-    text-align: center;
-    font-size: 0.95rem;
-    padding: 0 6px;
-  }
-  
-  .buttonx.button {
-    background: #007a3d;
-    color: #fff;
-    border: none;
-    padding: 7px 14px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: background 0.15s;
-  }
-  
-  .buttonx.button:hover {
-    background: #005e2f;
-  } */
-  
+    width: fit-content;
+  } 
+
   @media (max-width: 600px) {
     .crop-header {
       flex-direction: column;

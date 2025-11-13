@@ -4,6 +4,7 @@ import Imagex from "../../components/base/Imagex.js";
 import { navigate } from "../../routes/index.js";
 import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
 import { displayListingPage } from "../../utils/displayListingPage.js"; // generic listing page
+import Datex from "../../components/base/Datex.js";
 
 export function displayEvents(isLoggedIn, container) {
   container.replaceChildren();
@@ -35,18 +36,18 @@ function createEventCard(ev) {
   const savedEvents = getSavedEvents();
   let isSaved = savedEvents.includes(ev.eventid);
 
-  // const saveToggle = createElement("span", {
-  //   title: "Save Event",
-  //   style: `cursor:pointer;font-size:18px;color:${isSaved ? "gold" : "gray"};margin-left:auto;`,
-  //   onclick: e => {
-  //     e.preventDefault();
-  //     e.stopPropagation();
-  //     toggleSaveEvent(ev.eventid);
-  //     isSaved = !isSaved;
-  //     saveToggle.textContent = isSaved ? "★" : "☆";
-  //     saveToggle.style.color = isSaved ? "gold" : "gray";
-  //   }
-  // }, [isSaved ? "★" : "☆"]);
+  const saveToggle = createElement("span", {
+    title: "Save Event",
+    style: `cursor:pointer;font-size:18px;color:${isSaved ? "gold" : "gray"};margin-left:auto;`,
+    onclick: e => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleSaveEvent(ev.eventid);
+      isSaved = !isSaved;
+      saveToggle.textContent = isSaved ? "★" : "☆";
+      saveToggle.style.color = isSaved ? "gold" : "gray";
+    }
+  }, [isSaved ? "★" : "☆"]);
 
   const shareBtn = createElement("button", {
     type: "button",
@@ -59,9 +60,9 @@ function createEventCard(ev) {
     }
   }, ["Share"]);
 
-  // const statusLabel = createElement("span", {
-  //   style: `font-size:0.75rem;padding:2px 6px;border-radius:4px;background:${isPast ? "#888" : "#28a745"};color:white;margin-left:8px;`
-  // }, [isPast ? "Past" : "Upcoming"]);
+  const statusLabel = createElement("span", {
+    style: `font-size:0.75rem;padding:2px 6px;border-radius:4px;background:${isPast ? "#888" : "#28a745"};color:white;margin-left:8px;`
+  }, [isPast ? "Past" : "Upcoming"]);
 
   const bannerUrl = resolveImagePath(EntityType.EVENT, PictureType.THUMB, ev.banner);
   const bannerImg = Imagex({ src: bannerUrl, alt: `${ev.title || "Event"} Banner`, loading: "lazy", style: "width:100%;aspect-ratio:16/9;object-fit:cover;" });
@@ -73,10 +74,23 @@ function createEventCard(ev) {
   const eventInfo = createElement("div", { class: "event-info" }, [
     createElement("div", { style: "display:flex;align-items:center;gap:8px;" }, [
       createElement("h2", {}, [ev.title || "Untitled"]),
-      // statusLabel,
-      // saveToggle
+      statusLabel,
+      saveToggle
     ]),
-    createElement("p", {}, [createElement("strong", {}, ["Date: "]), new Date(ev.date).toLocaleString()]),
+    // createElement("p", {}, [
+    //   createElement("strong", {}, ["Date: "]),
+    //   new Date(ev.date).toLocaleString("en-GB", {
+    //     day: "2-digit",
+    //     month: "2-digit",
+    //     year: "numeric",
+    //     hour: "2-digit",
+    //     minute: "2-digit",
+    //     second: "2-digit",
+    //     hour12: true
+    //   })
+    // ]),    
+    // // createElement("p", {}, [createElement("strong", {}, ["Date: "]), new Date(ev.date).toLocaleString()]),
+    createElement("p", {}, [createElement("strong", {}, ["Date: "]), Datex(ev.date)]),
     createElement("p", {}, [createElement("strong", {}, ["Place: "]), ev.placename || "-"]),
     createElement("p", {}, [createElement("strong", {}, ["Category: "]), ev.category || "-"]),
     createElement("p", {}, [createElement("strong", {}, ["Price: "]), priceDisplay]),

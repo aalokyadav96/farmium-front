@@ -1,20 +1,21 @@
 // --- API URLs ---
+export const webSiteName = "Farmium";
 
-const MAIN_URL = "https://gallium.onrender.com";
-const EMBED_URL = "https://gallium.onrender.com/embed";
-const BANNERDROP_URL = `https://bannerdrop.onrender.com`;
-const LIVE_URL = "https://vlive.onrender.com";
-const CHAT_URL = "https://newchat-4b20.onrender.com";
-const MERE_URL = "https://merechat.onrender.com";
-const MUSIC_URL = "https://musicon.onrender.com";
+// const MAIN_URL = "https://gallium.onrender.com";
+// const EMBED_URL = "https://gallium.onrender.com/embed";
+// const BANNERDROP_URL = `https://bannerdrop.onrender.com`;
+// const LIVE_URL = "https://vlive.onrender.com";
+// const CHAT_URL = "https://newchat-4b20.onrender.com";
+// const MERE_URL = "https://merechat.onrender.com";
+// const MUSIC_URL = "https://musicon.onrender.com";
 
-// const MAIN_URL = "http://localhost:4000";
-// const EMBED_URL = "http://localhost:4000/embed";
-// const BANNERDROP_URL = `http://localhost:6925`;
-// const LIVE_URL = "http://localhost:7143";
-// const CHAT_URL = "http://localhost:3810";
-// const MERE_URL = "http://localhost:3343";
-// const MUSIC_URL = "http://localhost:3051/api/v1";
+const MAIN_URL = "http://localhost:4000";
+const EMBED_URL = "http://localhost:4000/embed";
+const BANNERDROP_URL = `http://localhost:6925`;
+const LIVE_URL = "http://localhost:7143";
+const CHAT_URL = "http://localhost:3810";
+const MERE_URL = "http://localhost:3343";
+const MUSIC_URL = "http://localhost:3051/api/v1";
 
 const API_URL = `${MAIN_URL}/api/v1`;
 const AD_URL = `${MAIN_URL}/api/sda`;

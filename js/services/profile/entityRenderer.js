@@ -1,3 +1,5 @@
+import Datex from "../../components/base/Datex";
+
 /** Render fetched data inside the tab container. */
 function renderEntityData(container, data, entityType) {
     container.replaceChildren(); // Clear previous content
@@ -64,9 +66,8 @@ function createEntityLink(item, entityType) {
 
     // Create paragraph for card content
     const cardContent = document.createElement("p");
-    cardContent.textContent = `${label}: ${item.entity_id} - Created At: ${new Date(
-        item.created_at
-    ).toLocaleString()}`;
+    // cardContent.textContent = `${label}: ${item.entity_id} - Created At: ${new Date(item.created_at).toLocaleString()}`;
+    cardContent.textContent = `${label}: ${item.entity_id} - Created At: ${Datex(item.created_at)}`;
     cardContent.onclick = () => {
         navigator.clipboard.writeText(item.entity_id)
             .then(() => {

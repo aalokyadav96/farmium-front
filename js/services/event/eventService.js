@@ -13,7 +13,9 @@ import { displayMerchandise } from "../merch/merchService.js";
 import { displayMedia } from "../media/ui/mediaGallery.js";
 // import { persistTabs } from "../../utils/persistTabs.js";
 import { createTabs } from "../../components/ui/createTabs.js";
-import {showSeatingBanner} from "../tickets/seatingBanner.js";
+import { showSeatingBanner } from "../tickets/seatingBanner.js";
+import { displayEventChat } from "./eventChat.js";
+import { displayEventNews, displayEventPolls } from "./eventMoreTabs.js";
 
 
 // --- Helpers ---
@@ -37,9 +39,9 @@ const createSection = (parent) => {
     return section;
 };
 
-const createVenue = async (container, eventId, seatingplan, isLoggedIn) => {
+const createVenue = async (container, eventId, seating, isLoggedIn) => {
     const venueContainer = createElement('div', { id: 'event-venue', class: 'venue-container' });
-    await displayEventVenue(venueContainer, isLoggedIn, eventId, seatingplan);
+    await displayEventVenue(venueContainer, isLoggedIn, eventId, seating);
     container.appendChild(venueContainer);
 };
 
@@ -79,6 +81,9 @@ const setupTabs = (eventData, eventId, isCreator, isLoggedIn) => {
             { title: "Tickets", id: "tickets-tab", render: (c) => displayTickets(c, eventData.tickets, eventId, eventData.title, isCreator, isLoggedIn) },
             { title: "FAQ", id: "faq-tab", render: (c) => displayEventFAQ(c, isCreator, eventId, eventData.faqs) },
             { title: "Merchandise", id: "merch-tab", render: (c) => displayMerchandise(c, eventData.merch, "event", eventId, isCreator, isLoggedIn) },
+            { title: "Chat", id: "chat-tab", render: (c) => displayEventChat(c, eventId, isLoggedIn) },
+            { title: "News", id: "news-tab", render: (c) => displayEventNews(c, eventId, isLoggedIn) },
+            { title: "Polls", id: "polls-tab", render: (c) => displayEventPolls(c, eventId, isLoggedIn) },
         );
     } else {
         tabs.push(
@@ -92,6 +97,29 @@ const setupTabs = (eventData, eventId, isCreator, isLoggedIn) => {
     return tabs;
 };
 
+// Setup Event Tabs
+// const setupTabs = (eventData, eventId, isCreator, isLoggedIn) => {
+//     const tabs = [];
+//     const status = getEventStatus(eventData.date);
+
+//     if (status === "active") {
+//         tabs.push(
+//             { title: "Tickets", id: "tickets-tab", render: (c) => displayTickets(c, eventData.tickets, eventId, eventData.title, isCreator, isLoggedIn) },
+//             { title: "FAQ", id: "faq-tab", render: (c) => displayEventFAQ(c, isCreator, eventId, eventData.faqs) },
+//             { title: "Merchandise", id: "merch-tab", render: (c) => displayMerchandise(c, eventData.merch, "event", eventId, isCreator, isLoggedIn) },
+//         );
+//     } else {
+//         tabs.push(
+//             { title: "Reviews", id: "reviews-tab", render: (c) => displayEventReviews(c, eventId, isCreator, isLoggedIn) },
+//             { title: "Media", id: "media-tab", render: (c) => displayMedia(c, "event", eventId, isLoggedIn) },
+//             { title: "Lost & Found", id: "lnf-tab", render: (c) => displayLostAndFound(c, isCreator, eventId) },
+//             { title: "Contact", id: "contact-tab", render: (c) => displayContactDetails(c, eventData.contactInfo) }
+//         );
+//     }
+
+//     return tabs;
+// };
+
 async function displayEvent(isLoggedIn, eventId, content) {
     content.replaceChildren();
     const container = createElement('div', { class: "eventpage" }, []);
@@ -103,7 +131,9 @@ async function displayEvent(isLoggedIn, eventId, content) {
 
         await displayEventDetails(container, eventData, isCreator, isLoggedIn);
 
-        container.appendChild(showSeatingBanner(eventData, isCreator));
+        if (eventData?.seating) {
+            container.appendChild(showSeatingBanner(eventData, isCreator));
+        }
 
         const tabs = setupTabs(eventData, eventId, isCreator, isLoggedIn);
 
@@ -116,8 +146,8 @@ async function displayEvent(isLoggedIn, eventId, content) {
         );
         container.appendChild(tabUI);
 
-        if (eventData.seatingplan) {
-            await createVenue(container, eventData.eventid, eventData.seatingplan, isLoggedIn);
+        if (eventData?.seating) {
+            await createVenue(container, eventData.eventid, eventData.seating, isLoggedIn);
         }
 
     } catch (error) {

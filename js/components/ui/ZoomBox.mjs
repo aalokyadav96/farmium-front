@@ -1,5 +1,5 @@
 import "../../../css/ui/ZoomBox.css";
-import { 
+import {
     createOverlay,
     createImageElement,
     createVideoElement,
@@ -8,8 +8,6 @@ import {
     updateTransform,
     smoothZoom,
     handleMouseDown,
-    handleMouseMove,
-    handleMouseUp,
     createNavigationButtons,
     createCloseButton,
     createZoomButtons,
@@ -17,14 +15,16 @@ import {
 } from "./zoomboxHelpers.js";
 import { dispatchZoomBoxEvent } from "../../utils/eventDispatcher.js";
 
-// detect type by extension
+// Detect media type by file extension
 function getMediaType(src) {
     const lower = src.toLowerCase();
     if (/\.(mp4|webm|ogg|mov|avi|mkv)$/.test(lower)) return "video";
-    return "image"; // fallback for now
+    return "image";
 }
 
-const createZoomBox = (mediaItems, initialIndex = 0) => {
+// Main ZoomBox factory
+const ZoomBox = (mediaItems, initialIndex = 0) => {
+    if (!Array.isArray(mediaItems) || mediaItems.length === 0) return;
     if (document.getElementById("zoombox")) return;
 
     const state = {
@@ -39,63 +39,90 @@ const createZoomBox = (mediaItems, initialIndex = 0) => {
         velocityX: 0,
         velocityY: 0,
         lastTap: 0,
-        currentIndex: initialIndex
+        currentIndex: Math.max(0, Math.min(initialIndex, mediaItems.length - 1)),
+        currentMedia: null,
+        mediaType: null
     };
 
     const zoombox = createOverlay();
     zoombox.id = "zoombox";
+    zoombox.setAttribute("role", "dialog");
+    zoombox.setAttribute("aria-modal", "true");
     applyDarkMode(zoombox);
 
     const content = document.createElement("div");
-    content.className = "zoombox-content";
+    content.setAttribute("data-zoombox-content", "");
     content.setAttribute("tabindex", "-1");
+    content.style.outline = "none";
 
     // --- Media renderer ---
     const renderMedia = (index) => {
-        content.querySelectorAll("img, video").forEach(el => el.remove());
+        // Cleanup previous listeners
+        if (state.currentMedia && state.currentMedia._cleanupListeners) {
+            state.currentMedia._cleanupListeners();
+        }
+        if (state.currentMedia) state.currentMedia.remove();
 
         const src = mediaItems[index];
         const type = getMediaType(src);
+        state.mediaType = type;
 
-        let element;
-        if (type === "video") {
-            element = createVideoElement(src);
-        } else {
-            element = createImageElement(src);
+        const element = type === "video"
+            ? createVideoElement(src)
+            : createImageElement(src);
 
-            // zoom & pan only for images
-            element.addEventListener("wheel", (e) => smoothZoom(e, element, state, zoombox), { passive: false });
-            element.addEventListener("mousedown", (e) => handleMouseDown(e, state));
-            document.addEventListener("mousemove", (e) => handleMouseMove(e, state, element));
-            document.addEventListener("mouseup", () => handleMouseUp(state, element));
+        // Setup image-specific interactions
+        if (type === "image") {
+            const onWheel = (e) => smoothZoom(e, element, state, zoombox);
+            const onDown = (e) => handleMouseDown(e, state, element);
+
+            element.addEventListener("wheel", onWheel, { passive: false });
+            element.addEventListener("mousedown", onDown);
+
+            // Cleanup helper
+            element._cleanupListeners = () => {
+                element.removeEventListener("wheel", onWheel);
+                element.removeEventListener("mousedown", onDown);
+            };
+
+            preloadImages(mediaItems, index);
         }
 
-        content.insertBefore(element, content.querySelector(".zoombox-close"));
-        dispatchZoomBoxEvent("imagechange", { index, src });
+        content.insertBefore(element, closeBtn);
+        state.currentMedia = element;
+
+        dispatchZoomBoxEvent("mediachange", { index, src, type });
     };
 
-    // initial media
+    // --- Initial render ---
     const initialSrc = mediaItems[state.currentIndex];
     const initialType = getMediaType(initialSrc);
-    let mediaElement = initialType === "video"
+    const media = initialType === "video"
         ? createVideoElement(initialSrc)
         : createImageElement(initialSrc);
 
+    state.mediaType = initialType;
+    state.currentMedia = media;
+
     if (initialType === "image") {
-        mediaElement.addEventListener("wheel", (e) => smoothZoom(e, mediaElement, state, zoombox), { passive: false });
-        mediaElement.addEventListener("mousedown", (e) => handleMouseDown(e, state));
-        document.addEventListener("mousemove", (e) => handleMouseMove(e, state, mediaElement));
-        document.addEventListener("mouseup", () => handleMouseUp(state, mediaElement));
+        const onWheel = (e) => smoothZoom(e, media, state, zoombox);
+        const onDown = (e) => handleMouseDown(e, state, media);
+        media.addEventListener("wheel", onWheel, { passive: false });
+        media.addEventListener("mousedown", onDown);
+        media._cleanupListeners = () => {
+            media.removeEventListener("wheel", onWheel);
+            media.removeEventListener("mousedown", onDown);
+        };
         preloadImages(mediaItems, state.currentIndex);
     }
 
-    content.appendChild(mediaElement);
+    content.appendChild(media);
 
-    // navigation
+    // --- Navigation buttons ---
     if (mediaItems.length > 1) {
         const [prevBtn, nextBtn] = createNavigationButtons(
             mediaItems,
-            mediaElement,
+            media,
             state,
             preloadImages,
             updateTransform,
@@ -105,49 +132,63 @@ const createZoomBox = (mediaItems, initialIndex = 0) => {
         content.appendChild(nextBtn);
     }
 
-    // zoom buttons (images only)
-    if (initialType === "image") {
-        const zoomButtons = createZoomButtons(mediaElement, state, zoombox);
-        zoombox.appendChild(zoomButtons);
-    }
-
-    // ---- Closing logic ----
+    // --- Close button ---
     const closeZoomBox = () => {
         const box = document.getElementById("zoombox");
         if (!box) return;
 
+        const transitionDuration =
+            parseFloat(getComputedStyle(box).transitionDuration || "0.3") * 1000;
+
         box.style.opacity = "0";
         setTimeout(() => {
-            if (box.parentNode) {
-                box.remove();
+            if (state.currentMedia && state.currentMedia._cleanupListeners) {
+                state.currentMedia._cleanupListeners();
             }
+            box.remove();
             document.removeEventListener("keydown", onKeyDown);
             dispatchZoomBoxEvent("close");
-        }, 300);
+        }, transitionDuration);
     };
 
-    // close button
     const closeBtn = createCloseButton(closeZoomBox);
     content.appendChild(closeBtn);
 
+    // --- Zoom buttons (only for images) ---
+    if (initialType === "image") {
+        const zoomButtons = createZoomButtons(media, state, zoombox);
+        zoombox.appendChild(zoomButtons);
+    }
+
+    // --- Assemble DOM ---
     zoombox.appendChild(content);
     document.getElementById("app").appendChild(zoombox);
 
-    // keyboard
+    // --- Keyboard handling ---
     const onKeyDown = (e) => {
         if (e.key === "Escape") {
             closeZoomBox();
         } else {
-            handleKeyboard(e, mediaItems, mediaElement, state, preloadImages, updateTransform, closeZoomBox, renderMedia);
+            handleKeyboard(
+                e,
+                mediaItems,
+                state.currentMedia,
+                state,
+                preloadImages,
+                updateTransform,
+                closeZoomBox,
+                renderMedia
+            );
         }
     };
     document.addEventListener("keydown", onKeyDown);
 
+    // --- Show box ---
     requestAnimationFrame(() => {
         zoombox.style.opacity = "1";
-        content.focus();
+        closeBtn.focus();
         dispatchZoomBoxEvent("open", { index: state.currentIndex });
     });
 };
 
-export default createZoomBox;
+export default ZoomBox;

@@ -1,4 +1,4 @@
-const CACHE_NAME = "app-cache-v11";
+const CACHE_NAME = "app-cache-v12";
 const OFFLINE_URL = "/offline.html";
 
 const STATIC_ASSETS = [
@@ -11,12 +11,9 @@ const STATIC_ASSETS = [
   "/assets/icon-128.png",
   "/assets/icon-192.png",
   "/assets/icon-512.png",
-  "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",
-  "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
-  "https://unpkg.com/leaflet.vectorgrid/dist/Leaflet.VectorGrid.bundled.js"
 ];
 
-// Precache on install
+// -------- Install: Precache core assets --------
 self.addEventListener("install", (event) => {
   self.skipWaiting();
   event.waitUntil(
@@ -24,18 +21,20 @@ self.addEventListener("install", (event) => {
   );
 });
 
-// Clean old caches on activate
+// -------- Activate: Cleanup old caches --------
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.map((key) => {
-        if (key !== CACHE_NAME) return caches.delete(key);
-      }))
+      Promise.all(
+        keys.map((key) => {
+          if (key !== CACHE_NAME) return caches.delete(key);
+        })
+      )
     ).then(() => self.clients.claim())
   );
 });
 
-// Fetch handling
+// -------- Fetch handling --------
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   const url = new URL(req.url);
@@ -43,90 +42,86 @@ self.addEventListener("fetch", (event) => {
 
   if (req.method !== "GET") return;
 
-  // Map tiles (OSM raster or your backend vector .pbf)
-  if (
-    url.hostname.includes("tile.openstreetmap.org") ||
-    url.pathname.startsWith("/tiles/")
-  ) {
-    event.respondWith(staleWhileRevalidate(req));
-    return;
-  }
-  
-  // HTML pages
+  // HTML navigation (pages)
   if (accept.includes("text/html")) {
-    event.respondWith(
-      fetch(req)
-        .then((res) => {
-          const clone = res.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(req, clone));
-          return res;
-        })
-        .catch(() => {
-          // sendTelemetry("html-fetch-failed", url.pathname);
-          return caches.match(req).then((cached) => cached || caches.match(OFFLINE_URL));
-        })
-    );
+    event.respondWith(networkFirst(req));
     return;
   }
 
-  // Static JS/CSS/assets
-  if (url.pathname.endsWith(".js") || url.pathname.endsWith(".css") || url.pathname.includes("/assets/")) {
-    event.respondWith(
-      caches.match(req).then((cached) => {
-        if (cached) {
-          // sendTelemetry("cache-hit", url.pathname);
-          return cached;
-        }
-        return fetch(req).then((res) => {
-          const clone = res.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(req, clone));
-          return res;
-        });
-      })
-    );
+  // Static assets (JS, CSS, icons, etc.)
+  if (
+    url.pathname.endsWith(".js") ||
+    url.pathname.endsWith(".css") ||
+    url.pathname.includes("/assets/")
+  ) {
+    event.respondWith(cacheFirst(req));
     return;
   }
 
-  // Image requests
+  // Images
   if (req.destination === "image") {
     event.respondWith(staleWhileRevalidate(req));
     return;
   }
 
-  // API calls
+  // API calls (fallback to cache if offline)
   if (url.pathname.startsWith("/api/")) {
-    event.respondWith(
-      fetch(req)
-        .then((res) => {
-          const clone = res.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(req, clone));
-          return res;
-        })
-        .catch(() => caches.match(req))
-    );
+    event.respondWith(networkFirst(req, true));
     return;
   }
 });
 
-// Stale-while-revalidate for images
+// -------- Caching Strategies --------
+
+// Network-first: try network, fallback to cache/offline page
+async function networkFirst(req, isAPI = false) {
+  try {
+    const fresh = await fetch(req);
+    const cache = await caches.open(CACHE_NAME);
+    cache.put(req, fresh.clone());
+    return fresh;
+  } catch {
+    if (isAPI) {
+      const cache = await caches.open(CACHE_NAME);
+      const cached = await cache.match(req);
+      return cached || new Response(JSON.stringify({ error: "offline" }), {
+        headers: { "Content-Type": "application/json" },
+      });
+    } else {
+      const cache = await caches.open(CACHE_NAME);
+      const cached = await cache.match(req);
+      return cached || cache.match(OFFLINE_URL);
+    }
+  }
+}
+
+// Cache-first: return cache if available, else fetch and cache
+async function cacheFirst(req) {
+  const cache = await caches.open(CACHE_NAME);
+  const cached = await cache.match(req);
+  if (cached) return cached;
+
+  const fresh = await fetch(req);
+  cache.put(req, fresh.clone());
+  return fresh;
+}
+
+// Stale-while-revalidate: show cached quickly, update in background
 async function staleWhileRevalidate(req) {
   const cache = await caches.open(CACHE_NAME);
   const cached = await cache.match(req);
+
   const fetchPromise = fetch(req)
     .then((res) => {
-      if (res && res.status === 200) {
-        cache.put(req, res.clone());
-      }
+      if (res && res.status === 200) cache.put(req, res.clone());
       return res;
     })
-    .catch(() => {
-      // sendTelemetry("image-fetch-failed", req.url);
-      return cached;
-    });
+    .catch(() => cached);
+
   return cached || fetchPromise;
 }
 
-// Push notification
+// -------- Push Notifications --------
 self.addEventListener("push", (event) => {
   if (!event.data) return;
   const { title, message, url } = event.data.json();
@@ -137,7 +132,7 @@ self.addEventListener("push", (event) => {
       icon: "/assets/icon-128.png",
       badge: "/assets/icon-128.png",
       data: { url },
-      actions: [{ action: "open", title: "Open" }]
+      actions: [{ action: "open", title: "Open" }],
     })
   );
 });
@@ -147,12 +142,3 @@ self.addEventListener("notificationclick", (event) => {
   const url = event.notification.data?.url || "/";
   event.waitUntil(clients.openWindow(url));
 });
-
-// Basic telemetry reporting
-function sendTelemetry(type, url) {
-  fetch("http://localhost:4000/api/v1/telemetry/sw-event", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ type, url, ts: Date.now() })
-  }).catch(() => {});
-}

@@ -22,6 +22,7 @@ export function renderSearchAndSortUI(type, sort, search, onChange) {
       )
     )
   );
+  sortSelect.setAttribute("name","sortproducts");
 
   const searchInput = createElement("input", {
     type: "text",
@@ -31,6 +32,7 @@ export function renderSearchAndSortUI(type, sort, search, onChange) {
       input: (e) => onChange(sort, e.target.value),
     },
   });
+  searchInput.setAttribute("name","searchproducts");
 
   return { sortSelect, searchInput };
 }

@@ -128,5 +128,5 @@ export function createAuthForms() {
 
 // --- AD SPACE ---
 export function adspace(position = "") {
-  return createElement("section", { class: `advert advert-${position}` }, [advertEmbed("home")]);
+  return createElement("section", { class: `advert advert-${position}` }, [advertEmbed("home", position)]);
 }

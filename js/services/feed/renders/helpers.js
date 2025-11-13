@@ -5,6 +5,7 @@ import { resolveImagePath, EntityType, PictureType } from "../../../utils/imageP
 import Notify from "../../../components/ui/Notify.mjs";
 import Imagex from "../../../components/base/Imagex.js";
 import { toggleAction } from "../../beats/toggleFollows.js";
+import Datex from "../../../components/base/Datex.js";
 
 // Helper to turn an SVG string into a Node
 export const svgToNode = (svgString) => {
@@ -31,19 +32,23 @@ export function createPostHeader(post) {
     // Format timestamp
     let formattedTime = "";
     if (post.timestamp) {
-        try {
-            const date = new Date(post.timestamp);
-            formattedTime = date.toLocaleString(undefined, {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit"
-            });
-        } catch {
-            formattedTime = post.timestamp;
-        }
+        formattedTime = Datex(post.timestamp);
     }
+
+    // if (post.timestamp) {
+    //     try {
+    //         const date = new Date(post.timestamp);
+    //         formattedTime = date.toLocaleString(undefined, {
+    //             year: "numeric",
+    //             month: "short",
+    //             day: "numeric",
+    //             hour: "2-digit",
+    //             minute: "2-digit"
+    //         });
+    //     } catch {
+    //         formattedTime = post.timestamp;
+    //     }
+    // }
 
     const usernameDiv = createElement("div", { class: "username" }, [post.username]);
     const timestampDiv = createElement("div", { class: "timestamp" }, [formattedTime]);

@@ -5,7 +5,6 @@ import Imagex from "../base/Imagex.js";
    Basic UI Creation Functions
    ========================= */
 
-// Create overlay with fade-in/out support
 export const createOverlay = () => {
     const el = document.createElement("div");
     el.className = "zoombox-overlay";
@@ -14,15 +13,11 @@ export const createOverlay = () => {
     return el;
 };
 
-// Create the primary image element
 export const createImageElement = (src) => {
-    const img = Imagex({
-        src: src,
-    });
+    const img = Imagex({ src });
     img.alt = "ZoomBox Image";
     img.style.transition = "transform 0.2s ease-out";
     img.style.willChange = "transform";
-    // ← here’s the key:
     img.style.transformOrigin = "50% 50%";
     return img;
 };
@@ -38,20 +33,17 @@ export function createVideoElement(src) {
     return video;
 }
 
-
-// Apply dark mode if needed
 export const applyDarkMode = (el) => {
     if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
         el.classList.add("dark-mode");
     }
 };
 
-// Preload images: current, next, previous
 export const preloadImages = (images, index) => {
     const preloadIndexes = [
         index,
         (index + 1) % images.length,
-        (index - 1 + images.length) % images.length
+        (index - 1 + images.length) % images.length,
     ];
     preloadIndexes.forEach((i) => {
         const img = new Image();
@@ -63,25 +55,18 @@ export const preloadImages = (images, index) => {
    Transformation & Zoom Logic
    ========================= */
 
-// Update the image transformation (translation, zoom, rotation, flip)
 export const updateTransform = (img, state) => {
-    // make 100% sure we’re scaling & rotating around the center:
     img.style.transformOrigin = "50% 50%";
-
-    // build the transform string
     const transformStr = [
         `translate(${state.panX}px, ${state.panY}px)`,
         `scale(${state.zoomLevel})`,
         `rotate(${state.angle}deg)`,
-        state.flip ? "scaleX(-1)" : ""
+        state.flip ? "scaleX(-1)" : "",
     ].join(" ");
-
     img.style.transform = transformStr;
     updateCursor(img, state);
 };
 
-
-// Update cursor style based on zoom status
 export const updateCursor = (img, state) => {
     if (state.zoomLevel > 1) {
         img.style.cursor = state.isDragging ? "grabbing" : "grab";
@@ -90,22 +75,20 @@ export const updateCursor = (img, state) => {
     }
 };
 
-// Show a temporary zoom indicator overlay displaying the current zoom percentage
 let zoomIndicatorTimeout;
 export const showZoomIndicator = (container, zoomLevel) => {
     let indicator = container.querySelector(".zoombox-zoom-indicator");
     if (!indicator) {
         indicator = document.createElement("div");
         indicator.className = "zoombox-zoom-indicator";
-        // Style in your CSS or inline here:
-        indicator.style.position = "absolute";
-        indicator.style.bottom = "10px";
-        indicator.style.right = "10px";
-        indicator.style.padding = "5px 10px";
-        indicator.style.background = "rgba(0,0,0,0.6)";
-        indicator.style.color = "#fff";
-        indicator.style.borderRadius = "3px";
-        indicator.style.fontSize = "14px";
+        // indicator.style.position = "absolute";
+        // indicator.style.bottom = "10px";
+        // indicator.style.right = "10px";
+        // indicator.style.padding = "5px 10px";
+        // indicator.style.background = "rgba(0,0,0,0.6)";
+        // indicator.style.color = "#fff";
+        // indicator.style.borderRadius = "3px";
+        // indicator.style.fontSize = "14px";
         container.appendChild(indicator);
     }
     indicator.textContent = `${Math.round(zoomLevel * 100)}%`;
@@ -116,11 +99,9 @@ export const showZoomIndicator = (container, zoomLevel) => {
     }, 1000);
 };
 
-// Show zoom limit feedback (min or max reached)
 export const showZoomLimitFeedback = (container, limitType) => {
     const feedback = document.createElement("div");
     feedback.className = "zoombox-zoom-limit-feedback";
-    // Style via CSS or inline:
     feedback.style.position = "absolute";
     feedback.style.top = "50%";
     feedback.style.left = "50%";
@@ -130,13 +111,11 @@ export const showZoomLimitFeedback = (container, limitType) => {
     feedback.style.color = "#fff";
     feedback.style.borderRadius = "5px";
     feedback.style.fontSize = "16px";
-    feedback.textContent = limitType === "min" ? "Minimum Zoom Reached" : "Maximum Zoom Reached";
+    feedback.textContent =
+        limitType === "min" ? "Minimum Zoom Reached" : "Maximum Zoom Reached";
     container.appendChild(feedback);
-    setTimeout(() => {
-        feedback.remove();
-    }, 1000);
+    setTimeout(() => feedback.remove(), 1000);
 };
-
 
 export const smoothZoom = (event, img, state, container) => {
     event.preventDefault();
@@ -145,127 +124,121 @@ export const smoothZoom = (event, img, state, container) => {
     const naturalH = img.naturalHeight;
     const prevZoom = state.zoomLevel;
 
-    // Update zoom level
     state.zoomLevel *= event.deltaY > 0 ? 0.9 : 1.1;
     const maxZoom = Math.max(naturalW / img.width, naturalH / img.height, 16);
     const clampedZoom = Math.max(1, Math.min(state.zoomLevel, maxZoom));
 
     if (clampedZoom !== state.zoomLevel) {
-        showZoomLimitFeedback(container, (clampedZoom === 1 ? "min" : "max"));
+        showZoomLimitFeedback(
+            container,
+            clampedZoom === 1 ? "min" : "max"
+        );
     }
     state.zoomLevel = clampedZoom;
 
-    // Get image position and cursor coordinates
     const rect = img.getBoundingClientRect();
     const cursorX = event.clientX;
     const cursorY = event.clientY;
-
-    // Get image center
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
-
-    // Get cursor offset from center
     const offsetX = cursorX - centerX;
     const offsetY = cursorY - centerY;
-
-    // Adjust pan so that the image zooms into the cursor position
     const zoomFactor = state.zoomLevel / prevZoom;
+
     state.panX -= offsetX * (zoomFactor - 1);
     state.panY -= offsetY * (zoomFactor - 1);
 
-    // Clamp pan to ensure the image stays within the viewport
     const viewWidth = window.innerWidth;
     const viewHeight = window.innerHeight;
     const imgWidth = img.offsetWidth * state.zoomLevel;
     const imgHeight = img.offsetHeight * state.zoomLevel;
-
     const maxPanX = Math.max(0, (imgWidth - viewWidth) / 2);
     const maxPanY = Math.max(0, (imgHeight - viewHeight) / 2);
 
-    if (imgWidth <= viewWidth) {
-        state.panX = 0;
-    } else {
-        state.panX = Math.min(maxPanX, Math.max(-maxPanX, state.panX));
-    }
+    if (imgWidth <= viewWidth) state.panX = 0;
+    else state.panX = Math.min(maxPanX, Math.max(-maxPanX, state.panX));
 
-    if (imgHeight <= viewHeight) {
-        state.panY = 0;
-    } else {
-        state.panY = Math.min(maxPanY, Math.max(-maxPanY, state.panY));
-    }
+    if (imgHeight <= viewHeight) state.panY = 0;
+    else state.panY = Math.min(maxPanY, Math.max(-maxPanY, state.panY));
 
-    // Use center origin for consistent zoom behavior
-    img.style.transformOrigin = `50% 50%`;
+    img.style.transformOrigin = "50% 50%";
     updateTransform(img, state);
-
-    // Show zoom indicator overlay update
     showZoomIndicator(container, state.zoomLevel);
-
     dispatchZoomBoxEvent("zoom", { level: state.zoomLevel });
 };
 
 /* =========================
-   Pan (Mouse & Touch) Handling
+   Mouse & Touch Handling
    ========================= */
 
-// Mouse event handling for panning
-export const handleMouseDown = (e, state) => {
+export const handleMouseDown = (e, state, img) => {
     if (state.zoomLevel <= 1) return;
+    e.preventDefault();
+
     state.isDragging = true;
     state.startX = e.clientX - state.panX;
     state.startY = e.clientY - state.panY;
     state.velocityX = 0;
     state.velocityY = 0;
-};
+    img.style.cursor = "grabbing";
 
-export const handleMouseMove = (e, state, img) => {
-    if (!state.isDragging) return;
-    e.preventDefault();
-    const dx = e.clientX - state.startX;
-    const dy = e.clientY - state.startY;
-    state.velocityX = dx - state.panX;
-    state.velocityY = dy - state.panY;
-    state.panX = dx;
-    state.panY = dy;
-    updateTransform(img, state);
-};
-
-export const handleMouseUp = (state, img) => {
-    state.isDragging = false;
-    const animate = () => {
-        // Compute view constraints for additional friction if beyond limits
-        const viewWidth = window.innerWidth;
-        const viewHeight = window.innerHeight;
-        const imgWidth = img.offsetWidth * state.zoomLevel;
-        const imgHeight = img.offsetHeight * state.zoomLevel;
-        const maxPanX = (imgWidth - viewWidth) / 2;
-        const maxPanY = (imgHeight - viewHeight) / 2;
-
-        // Apply momentum with extra friction at the edges
-        state.panX += state.velocityX * 0.95;
-        state.panY += state.velocityY * 0.95;
-
-        if (Math.abs(state.panX) > maxPanX) {
-            state.velocityX *= 0.8;
-        }
-        if (Math.abs(state.panY) > maxPanY) {
-            state.velocityY *= 0.8;
-        }
-        state.velocityX *= 0.9;
-        state.velocityY *= 0.9;
+    const onMove = (moveEvent) => {
+        if (!state.isDragging) return;
+        moveEvent.preventDefault();
+        const dx = moveEvent.clientX - state.startX;
+        const dy = moveEvent.clientY - state.startY;
+        state.velocityX = dx - state.panX;
+        state.velocityY = dy - state.panY;
+        state.panX = dx;
+        state.panY = dy;
         updateTransform(img, state);
-
-        if (Math.abs(state.velocityX) > 0.1 || Math.abs(state.velocityY) > 0.1) {
-            requestAnimationFrame(animate);
-        } else {
-            // Dispatch pan-end event when momentum stops
-            dispatchZoomBoxEvent("pan-end", { panX: state.panX, panY: state.panY });
-        }
     };
-    animate();
+
+    const onUp = () => {
+        state.isDragging = false;
+        img.style.cursor = state.zoomLevel > 1 ? "grab" : "auto";
+        document.removeEventListener("mousemove", onMove);
+        document.removeEventListener("mouseup", onUp);
+
+        const animate = () => {
+            const viewWidth = window.innerWidth;
+            const viewHeight = window.innerHeight;
+            const imgWidth = img.offsetWidth * state.zoomLevel;
+            const imgHeight = img.offsetHeight * state.zoomLevel;
+            const maxPanX = (imgWidth - viewWidth) / 2;
+            const maxPanY = (imgHeight - viewHeight) / 2;
+
+            state.panX += state.velocityX * 0.95;
+            state.panY += state.velocityY * 0.95;
+
+            if (Math.abs(state.panX) > maxPanX) state.velocityX *= 0.8;
+            if (Math.abs(state.panY) > maxPanY) state.velocityY *= 0.8;
+
+            state.velocityX *= 0.9;
+            state.velocityY *= 0.9;
+            updateTransform(img, state);
+
+            if (
+                Math.abs(state.velocityX) > 0.1 ||
+                Math.abs(state.velocityY) > 0.1
+            ) {
+                requestAnimationFrame(animate);
+            } else {
+                dispatchZoomBoxEvent("pan-end", {
+                    panX: state.panX,
+                    panY: state.panY,
+                });
+            }
+        };
+        animate();
+    };
+
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
 };
 
-// Touch event handling for pinch-to-zoom & double tap
+/* ======= Touch support (pinch + drag + double tap) ======= */
+
 export const handleTouchStart = (e, state, img, container) => {
     if (e.touches.length === 2) {
         state.initialPinchDistance = Math.hypot(
@@ -277,12 +250,9 @@ export const handleTouchStart = (e, state, img, container) => {
         const now = Date.now();
         const tapLength = now - state.lastTap;
         if (tapLength < 300 && tapLength > 0) {
-            // Toggle double-tap zoom between 1x and 2x
             state.zoomLevel = state.zoomLevel === 1 ? 2 : 1;
-            if (state.zoomLevel === 1) {
-                // Auto center if zoom resets to default
-                autoCenterImage(img, state);
-            } else {
+            if (state.zoomLevel === 1) autoCenterImage(img, state);
+            else {
                 state.panX = 0;
                 state.panY = 0;
                 updateTransform(img, state);
@@ -308,8 +278,10 @@ export const handleTouchMove = (e, state, img, container) => {
         state.zoomLevel = Math.max(1, Math.min(3, state.initialZoom * scaleFactor));
 
         const rect = img.getBoundingClientRect();
-        const midX = ((e.touches[0].clientX + e.touches[1].clientX) / 2) - rect.left;
-        const midY = ((e.touches[0].clientY + e.touches[1].clientY) / 2) - rect.top;
+        const midX =
+            (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+        const midY =
+            (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
         const zoomFactor = state.zoomLevel / prevZoom;
 
         state.panX -= (midX - state.panX) * (zoomFactor - 1);
@@ -323,14 +295,13 @@ export const handleTouchMove = (e, state, img, container) => {
 
 export const handleTouchEnd = (e, state, img) => {
     if (e.touches.length < 2) state.initialPinchDistance = null;
-    if (!e.touches.length) handleMouseUp(state, img);
+    if (!e.touches.length) state.isDragging = false;
 };
 
 /* =========================
    Navigation & Control Buttons
    ========================= */
 
-// Create navigation (prev/next) buttons with event dispatching for image change
 export const createNavigationButtons = (images, img, state, preload, update) => {
     const prev = document.createElement("button");
     prev.className = "zoombox-prev-btn";
@@ -343,7 +314,7 @@ export const createNavigationButtons = (images, img, state, preload, update) => 
         state.panX = 0;
         state.panY = 0;
         update(img, state);
-        dispatchZoomBoxEvent("imagechange", { index: state.currentIndex, src: images[state.currentIndex] });
+        dispatchZoomBoxEvent("mediachange", { index: state.currentIndex, src: images[state.currentIndex] });
     };
 
     const next = document.createElement("button");
@@ -357,13 +328,12 @@ export const createNavigationButtons = (images, img, state, preload, update) => 
         state.panX = 0;
         state.panY = 0;
         update(img, state);
-        dispatchZoomBoxEvent("imagechange", { index: state.currentIndex, src: images[state.currentIndex] });
+        dispatchZoomBoxEvent("mediachange", { index: state.currentIndex, src: images[state.currentIndex] });
     };
 
     return [prev, next];
 };
 
-// Create a close button for the ZoomBox
 export const createCloseButton = (closeFn) => {
     const btn = document.createElement("button");
     btn.className = "zoombox-close-btn";
@@ -375,11 +345,9 @@ export const createCloseButton = (closeFn) => {
     return btn;
 };
 
-// Create zoom in/out buttons for manual zoom control
 export const createZoomButtons = (img, state, container) => {
     const zoomContainer = document.createElement("div");
     zoomContainer.className = "zoombox-zoom-buttons";
-    // Style via CSS or inline styles:
     zoomContainer.style.position = "absolute";
     zoomContainer.style.bottom = "8vh";
     zoomContainer.style.right = "20px";
@@ -390,27 +358,30 @@ export const createZoomButtons = (img, state, container) => {
 
     const zoomInBtn = document.createElement("button");
     zoomInBtn.textContent = "+";
-    zoomInBtn.className = "zoombox-zoom-in-btn";
     zoomInBtn.onclick = () => {
-        // Simulate a positive delta for zoom in
-        const fakeEvent = { deltaY: -1, clientX: window.innerWidth / 2, clientY: window.innerHeight / 2, preventDefault: () => { } };
+        const fakeEvent = {
+            deltaY: -1,
+            clientX: window.innerWidth / 2,
+            clientY: window.innerHeight / 2,
+            preventDefault: () => {},
+        };
         smoothZoom(fakeEvent, img, state, container);
     };
 
     const zoomOutBtn = document.createElement("button");
     zoomOutBtn.textContent = "–";
-    zoomOutBtn.className = "zoombox-zoom-out-btn";
     zoomOutBtn.onclick = () => {
-        // Simulate a negative delta for zoom out
-        const fakeEvent = { deltaY: 1, clientX: window.innerWidth / 2, clientY: window.innerHeight / 2, preventDefault: () => { } };
+        const fakeEvent = {
+            deltaY: 1,
+            clientX: window.innerWidth / 2,
+            clientY: window.innerHeight / 2,
+            preventDefault: () => {},
+        };
         smoothZoom(fakeEvent, img, state, container);
     };
 
     zoomContainer.appendChild(zoomInBtn);
     zoomContainer.appendChild(zoomOutBtn);
-
-    // Append the zoom buttons container to the main container
-    // container.appendChild(zoomContainer);
     return zoomContainer;
 };
 
@@ -418,10 +389,8 @@ export const createZoomButtons = (img, state, container) => {
    Utility Functions
    ========================= */
 
-// Auto center image when resetting zoom (animate panX and panY to 0)
 export const autoCenterImage = (img, state) => {
     const animateCenter = () => {
-        // Smoothly move panX and panY toward 0
         state.panX *= 0.85;
         state.panY *= 0.85;
         updateTransform(img, state);
@@ -436,8 +405,6 @@ export const autoCenterImage = (img, state) => {
     animateCenter();
 };
 
-
-// Handle keyboard events for navigation, zooming, rotation, flipping, and closing
 export const handleKeyboard = (e, images, img, state, preload, update, close) => {
     const prevZoom = state.zoomLevel;
     switch (e.key) {
@@ -449,7 +416,7 @@ export const handleKeyboard = (e, images, img, state, preload, update, close) =>
             state.panX = 0;
             state.panY = 0;
             update(img, state);
-            dispatchZoomBoxEvent("imagechange", { index: state.currentIndex, src: images[state.currentIndex] });
+            dispatchZoomBoxEvent("mediachange", { index: state.currentIndex, src: images[state.currentIndex] });
             break;
         case "ArrowLeft":
             state.currentIndex = (state.currentIndex - 1 + images.length) % images.length;
@@ -459,7 +426,7 @@ export const handleKeyboard = (e, images, img, state, preload, update, close) =>
             state.panX = 0;
             state.panY = 0;
             update(img, state);
-            dispatchZoomBoxEvent("imagechange", { index: state.currentIndex, src: images[state.currentIndex] });
+            dispatchZoomBoxEvent("mediachange", { index: state.currentIndex, src: images[state.currentIndex] });
             break;
         case "+":
             state.zoomLevel = Math.min(3, state.zoomLevel * 1.1);

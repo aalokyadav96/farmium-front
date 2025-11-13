@@ -5,6 +5,7 @@ import { RenderImagePost } from "../renderImagePost.js";
 import { RenderVideoPost } from "../renderVideoPost.js";
 import { resolveImagePath, EntityType, PictureType } from "../../../utils/imagePaths.js";
 import { getState } from "../../../state/state.js";
+import Datex from "../../../components/base/Datex.js";
 
 /**
  * Renders a single post (or an array of posts) for a separate page.
@@ -25,7 +26,8 @@ export async function renderPost(posts, postsContainer, metadataMap = {}) {
         const postElement = createElement("article", {
             class: "feed-item",
             id: `post-${post.postid}`,
-            "date-is": new Date(post.timestamp).toLocaleString()
+            // "date-is": new Date(post.timestamp).toLocaleString()
+            "date-is": Datex(post.timestamp)
         }, []);
 
         // --- 1. Media ---

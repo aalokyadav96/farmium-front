@@ -1,5 +1,6 @@
 import { createElement } from "../../components/createElement.js";
 import Button from "../../components/base/Button.js";
+import Datex from "../../components/base/Datex.js";
 
 // Dummy apiFetch
 export async function apiFetch(endpoint, method = "GET") {
@@ -150,7 +151,8 @@ function renderEventsDashboard(main, events) {
   clearMain(main);
   main.append(createElement("h2", {}, ["Your Events"]));
   events.forEach(e => {
-    const date = new Date(e.date).toLocaleString();
+    // const date = new Date(e.date).toLocaleString();
+    const date = Datex(e.date);
     const row = createElement("div", { className: "event-row" });
     row.append(
       createElement("strong", {}, [e.name]),

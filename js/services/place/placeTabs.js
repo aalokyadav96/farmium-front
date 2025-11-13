@@ -1,5 +1,6 @@
 import { createElement } from "../../components/createElement.js";
 import Button from "../../components/base/Button.js";
+import Datex from "../../components/base/Datex.js";
 import Modal from "../../components/ui/Modal.mjs";
 
 function displayPlaceHome(container, placeData, isCreator, isLoggedIn) {
@@ -18,8 +19,8 @@ function displayPlaceInfo(container, placeData, isCreator) {
         category: placeData.category || "N/A",
         description: placeData.description || "N/A",
         capacity: placeData.capacity || "N/A",
-        createdDate: placeData.created_at || "N/A",
-        updatedDate: placeData.updated_at || "N/A",
+        createdDate: Datex(placeData.created_at) || "N/A",
+        updatedDate: Datex(placeData.updated_at) || "N/A",
         accessibility: placeData.accessibility || "Not specified",
         services: placeData.services || [],
     };

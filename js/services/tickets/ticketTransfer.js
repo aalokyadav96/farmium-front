@@ -1,6 +1,7 @@
 import Modal from '../../components/ui/Modal.mjs';
 import { apiFetch } from '../../api/api';
 import { createElement } from '../../components/createElement.js';
+import { listMyTickets } from './listmyTickets.js';
 
 // Generic function to handle ticket actions
 const handleTicketAction = async (action, eventId) => {
@@ -68,6 +69,7 @@ const handleTicketAction = async (action, eventId) => {
 const verifyTicketAndShowModal = (eventId) => handleTicketAction('verify', eventId);
 const cancelTicket = (eventId) => handleTicketAction('cancel', eventId);
 const transferTicket = (eventId) => handleTicketAction('transfer', eventId);
+const myTickets = (eventId) => listMyTickets(eventId);
 
 // API Functions
 const checkTicketValidity = async (eventId, uniqueCode) => {

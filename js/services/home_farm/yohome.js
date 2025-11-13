@@ -128,7 +128,7 @@ export function YoHome(isLoggedIn, container) {
   // --- HERO JUMBOTRON ---
   const alreadyOnboarded = !!localStorage.getItem("farmiumOnboarding");
 
-  const adspace = createElement("section", { class: "advert" }, [advertEmbed("home")]);
+  const adspace = createElement("section", { class: "advert" }, [advertEmbed("home", "top")]);
 
   const heroJumbotron = createElement(
     "section",

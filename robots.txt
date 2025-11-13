@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://------.com/sitemap.xml
+Sitemap: https://indium.netlify.app/sitemap.xml

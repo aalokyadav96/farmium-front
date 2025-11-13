@@ -1,5 +1,7 @@
 import "../../../css/ui/Sightbox.css";
+import { createIconButton } from "../../utils/svgIconButton";
 import Imagex from "../base/Imagex";
+import { xSVG } from "../svgs";
 
 const LightBox = (div) => {
   // prevent duplicate instance
@@ -19,13 +21,26 @@ const LightBox = (div) => {
 
   content.appendChild(div);
 
-  // close button
-  const closeButton = document.createElement("button");
-  closeButton.className = "sightbox-close";
-  closeButton.textContent = "×";
-  closeButton.setAttribute("aria-label", "Close");
-  closeButton.addEventListener("click", closeLightBox);
+  // // close button
+  // const closeButton = document.createElement("button");
+  // closeButton.className = "sightbox-close";
+  // closeButton.textContent = "×";
+  // closeButton.setAttribute("aria-label", "Close");
+  // closeButton.addEventListener("click", closeLightBox);
+  // content.appendChild(closeButton);
+
+
+  // --- close Button ---
+  const closeButton = createIconButton({
+    classSuffix: "sightbox-close",
+    svgMarkup: xSVG,
+    onClick: closeLightBox,
+    label: "",
+    ariaLabel: "Close"
+  });
+  // closeButton.addEventListener("click", closeLightBox);
   content.appendChild(closeButton);
+
 
   // append DOM
   lightbox.appendChild(overlay);

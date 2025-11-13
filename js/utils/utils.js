@@ -1,3 +1,4 @@
+import Datex from "../components/base/Datex";
 
 // Utility function to escape HTML to prevent XSS
 function escapeHTML(str) {
@@ -26,7 +27,7 @@ const isValidPassword = password => password.length >= 6;
 
 // Utility function to format dates
 function formatDate(dateString) {
-    return dateString ? new Date(dateString).toLocaleString() : null;
+    return dateString ? Datex(dateString) : null;
 }
 
 

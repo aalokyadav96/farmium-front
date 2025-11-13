@@ -1,5 +1,6 @@
 import { SRC_URL, apiFetch } from "../../../api/api.js";
 import Button from "../../../components/base/Button.js";
+import Datex from "../../../components/base/Datex.js";
 import { createElement } from "../../../components/createElement.js";
 import { resolveImagePath, EntityType, PictureType } from "../../../utils/imagePaths.js";
 
@@ -112,8 +113,10 @@ function renderEvents(container, events) {
         }
 
         const time = document.createElement('p');
-        const start = new Date(event.start_date_time).toLocaleString();
-        const end = new Date(event.end_date_time).toLocaleString();
+        // const start = new Date(event.start_date_time).toLocaleString();
+        const start = Datex(event.start_date_time);
+        // const end = new Date(event.end_date_time).toLocaleString();
+        const end = Datex(event.end_date_time);
         time.textContent = `From: ${start} To: ${end}`;
         card.appendChild(time);
 
@@ -161,7 +164,8 @@ function openEventModal(event) {
     content.appendChild(desc);
 
     const time = document.createElement('p');
-    time.textContent = `From ${new Date(event.start_date_time).toLocaleString()} to ${new Date(event.end_date_time).toLocaleString()}`;
+    // time.textContent = `From ${new Date(event.start_date_time).toLocaleString()} to ${new Date(event.end_date_time).toLocaleString()}`;
+    time.textContent = `From ${Datex(event.start_date_time)} to ${Datex(event.end_date_time)}`;
     content.appendChild(time);
 
     const category = document.createElement('p');

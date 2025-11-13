@@ -1,4 +1,4 @@
-import { getState, isAdmin, subscribeDeep } from "../state/state.js";
+import { getState, isAdmin, subscribeDeep, webSiteName } from "../state/state.js";
 import { navigate } from "../routes/index.js";
 import { logout } from "../services/auth/authService.js";
 import { settingsSVG, moonSVG, profileSVG, shopBagSVG, logoutSVG, cardSVG } from "./svgs.js";
@@ -44,7 +44,7 @@ function createDropdownMenu(id, labelText, items) {
   const menu = createElement("div", { class: "menu-content", "aria-label": labelText });
 
   items.forEach(({ href, text }) => {
-    const link = createElement("a", { class: "menu-item" }, [text]);
+    const link = createElement("a", { class: "menu-item", href:`${text}` }, [text]);
     link.addEventListener("click", (e) => {
       e.preventDefault();
       navigate(href);
@@ -86,7 +86,7 @@ export function createProfileSection(userId, username) {
     const iconSpan = createElement("span", {});
     if (icon) iconSpan.innerHTML = icon;
 
-    const link = createElement("a", { class: "menu-item" }, [iconSpan, label]);
+    const link = createElement("a", { class: "menu-item", href }, [iconSpan, label]);
     link.addEventListener("click", (e) => {
       e.preventDefault();
       navigate(href);
@@ -153,7 +153,7 @@ function createHeader() {
   header.className = "main-header";
 
   const logo = createElement("div", { class: "logo" }, [
-    createElement("a", { href: "/home", class: "logo-link" }, ["Farmium"])
+    createElement("a", { href: "/home", class: "logo-link" }, [webSiteName])
   ]);
 
   const sky = createElement("div", { class: "hflexcen" }, []);

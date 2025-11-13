@@ -1,6 +1,9 @@
+import Datex from "../../components/base/Datex";
+
 // Utility function to format dates
 function formatDate(dateString) {
-    return dateString ? new Date(dateString).toLocaleString() : null;
+    // return dateString ? new Date(dateString).toLocaleString() : null;
+    return dateString ? Datex(dateString) : null;
 }
 
 function showLoadingMessage(message) {

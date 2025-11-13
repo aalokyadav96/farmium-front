@@ -2,6 +2,7 @@ import { apiFetch } from "../../api/api.js";
 import { createElement } from "../../components/createElement.js";
 import { Button } from "../../components/base/Button.js";
 import { v4 as uuidv4 } from "https://jspm.dev/uuid";
+import Datex from "../../components/base/Datex.js";
 
 export function WalletTransactions({ onBalanceChange }) {
     const container = createElement("div", { id: "wallet-transactions", class: "wallet-card" }, [
@@ -40,7 +41,8 @@ export function WalletTransactions({ onBalanceChange }) {
                     ]),
                     createElement("div", { class: "txn-meta" }, [
                         renderStatusBadge(txn.state),
-                        ` ${new Date(txn.created_at).toLocaleString()}`
+                        // ` ${new Date(txn.created_at).toLocaleString()}`
+                        ` ${Datex(txn.created_at)}`
                     ])
                 ]);
 
