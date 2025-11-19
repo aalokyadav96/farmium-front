@@ -18,12 +18,12 @@ const MERE_URL = "http://localhost:3343";
 const MUSIC_URL = "http://localhost:3051/api/v1";
 
 const API_URL = `${MAIN_URL}/api/v1`;
+const STRIPE_URL = `${MAIN_URL}/api/v1/stripe`;
 const AD_URL = `${MAIN_URL}/api/sda`;
 const SEARCH_URL = `${MAIN_URL}/api/v1`;
 const SRC_URL = `${BANNERDROP_URL}/static`;
 const FILEDROP_URL = `${BANNERDROP_URL}/filedrop`;
 const CHATDROP_URL = `${BANNERDROP_URL}/api/v1/filedrop`;
-
 
 // --- Allowed and persisted keys ---
 const allowedKeys = new Set([
@@ -43,10 +43,12 @@ function globalSubscribe(eventName, callback) {
   globalEvents[eventName].push(callback);
 }
 
-// --- Safe JSON parse ---
+// --- Safe JSON parse (robust) ---
 function safeParse(key) {
   try {
-    return JSON.parse(sessionStorage.getItem(key) || localStorage.getItem(key)) || null;
+    const raw = sessionStorage.getItem(key) ?? localStorage.getItem(key);
+    if (!raw) return null;
+    return JSON.parse(raw);
   } catch {
     return null;
   }
@@ -56,31 +58,35 @@ function safeParse(key) {
 const listeners = new Map(); // top-level key => Set<callback>
 const deepListeners = new Map(); // deep path => Set<callback>
 
-// --- Batched notifications ---
-const notifyQueue = new Set();
+// --- Batched notifications (Map keyed by path for dedupe) ---
+const notifyQueue = new Map(); // key -> value
 let notifyPending = false;
 
 function getValueByPath(path) {
+  if (!path) return undefined;
   return path.split(".").reduce((acc, part) => acc?.[part], state);
 }
 
 function scheduleNotify(key, value) {
-  notifyQueue.add({ key, value });
+  if (!key) return;
+  notifyQueue.set(key, value);
   if (!notifyPending) {
     notifyPending = true;
     requestAnimationFrame(() => {
-      for (const { key, value } of notifyQueue) {
-        // top-level notifications
-        const fns = listeners.get(key);
-        if (fns) for (const fn of fns) fn(value);
-        publish(`${key}Changed`, value);
-        publish("stateChange", { [key]: value });
+      for (const [k, v] of notifyQueue.entries()) {
+        // top-level notifications (if key is deep path, derive top)
+        const top = k.includes(".") ? k.split(".")[0] : k;
+        const fns = listeners.get(top);
+        if (fns) for (const fn of fns) fn(getValueByPath(top));
+
+        publish(`${top}Changed`, getValueByPath(top));
+        publish("stateChange", { [top]: getValueByPath(top) });
 
         // deep path notifications
-        for (const [path, fns] of deepListeners) {
-          if (path === key || path.startsWith(key + ".")) {
+        for (const [path, fnsSet] of deepListeners) {
+          if (path === k || path.startsWith(top + ".")) {
             const val = getValueByPath(path);
-            for (const fn of fns) fn(val);
+            for (const fn of fnsSet) fn(val);
           }
         }
       }
@@ -92,29 +98,47 @@ function scheduleNotify(key, value) {
 
 // --- Deep proxy for reactivity (skips Map/Set) ---
 function reactive(obj, path = []) {
-  // Don't proxy Maps or Sets
   if (obj instanceof Map || obj instanceof Set) {
     return obj;
   }
+  if (obj === null || typeof obj !== "object") return obj;
 
   return new Proxy(obj, {
     get(target, prop) {
+      // skip symbol props and builtins
+      if (typeof prop === "symbol") return target[prop];
+
       const val = target[prop];
       if (val && typeof val === "object" && !(val instanceof Map) && !(val instanceof Set)) {
-        return reactive(val, path.concat(prop));
+        // ensure path component is string
+        const propStr = String(prop);
+        return reactive(val, path.concat(propStr));
       }
       return val;
     },
     set(target, prop, value) {
+      const propStr = String(prop);
       target[prop] = value;
-      scheduleNotify(path.concat(prop).join("."), value); // deep path
-      scheduleNotify(path[0], obj); // top-level key
+
+      const deepPath = path.concat(propStr).join(".");
+      // determine top-level key for convenience (use existing path[0] or propStr)
+      const topKey = path[0] ?? propStr;
+
+      scheduleNotify(deepPath, value); // deep path
+      scheduleNotify(topKey, target); // top-level key
+
       return true;
     },
     deleteProperty(target, prop) {
-      delete target[prop];
-      scheduleNotify(path.concat(prop).join("."));
-      scheduleNotify(path[0], obj);
+      const propStr = String(prop);
+      delete target[propStr];
+
+      const deepPath = path.concat(propStr).join(".");
+      const topKey = path[0] ?? propStr;
+
+      scheduleNotify(deepPath, undefined);
+      scheduleNotify(topKey, target);
+
       return true;
     }
   });
@@ -152,9 +176,13 @@ function setState(keyOrObj, persist = false, value = undefined) {
       state[key] = val;
 
       if (persist && PERSISTED_KEYS.includes(key)) {
-        const str = typeof val === "string" ? val : JSON.stringify(val);
-        sessionStorage.setItem(key, str);
-        localStorage.setItem(key, str);
+        try {
+          const str = typeof val === "string" ? val : JSON.stringify(val);
+          sessionStorage.setItem(key, str);
+          localStorage.setItem(key, str);
+        } catch {
+          // skip persisting non-serializable
+        }
       }
 
       scheduleNotify(key, val);
@@ -172,9 +200,13 @@ function setState(keyOrObj, persist = false, value = undefined) {
   state[key] = value;
 
   if (persist && PERSISTED_KEYS.includes(key)) {
-    const str = typeof value === "string" ? value : JSON.stringify(value);
-    sessionStorage.setItem(key, str);
-    localStorage.setItem(key, str);
+    try {
+      const str = typeof value === "string" ? value : JSON.stringify(value);
+      sessionStorage.setItem(key, str);
+      localStorage.setItem(key, str);
+    } catch {
+      // swallow
+    }
   }
 
   scheduleNotify(key, value);
@@ -204,8 +236,12 @@ function unsubscribeDeep(path, fn) {
 function initStore() {
   const saved = localStorage.getItem("user");
   if (saved) {
-    state.user = JSON.parse(saved);
-    scheduleNotify("user", state.user);
+    try {
+      state.user = JSON.parse(saved);
+      scheduleNotify("user", state.user);
+    } catch {
+      // ignore invalid JSON
+    }
   }
 }
 
@@ -227,19 +263,25 @@ function getRouteState(path) {
 function setRouteState(path, value) { state.routeState.set(path, value); }
 
 // --- Clear State ---
+// safer clearing: only remove known persisted keys instead of wiping all browser storage
 function clearState(preserveKeys = []) {
   const preserved = {};
   for (const key of preserveKeys) {
     if (PERSISTED_KEYS.includes(key)) {
-      preserved[key] = sessionStorage.getItem(key);
+      preserved[key] = sessionStorage.getItem(key) ?? localStorage.getItem(key);
     }
   }
 
-  sessionStorage.clear();
-  localStorage.clear();
+  // Only remove persisted keys (avoid wiping unrelated storage)
+  for (const k of PERSISTED_KEYS) {
+    sessionStorage.removeItem(k);
+    localStorage.removeItem(k);
+  }
 
+  // Reset in-memory state (skip routeCache/routeState or reinitialize them)
   for (const key of allowedKeys) {
     if (preserveKeys.includes(key) || key === "role") continue;
+
     if (key === "routeCache" || key === "routeState") {
       state[key].clear?.();
     } else {
@@ -248,19 +290,22 @@ function clearState(preserveKeys = []) {
     }
   }
 
+  // restore preserved items back into storage
   for (const [key, value] of Object.entries(preserved)) {
-    sessionStorage.setItem(key, value);
-    localStorage.setItem(key, value);
+    if (value != null) {
+      sessionStorage.setItem(key, value);
+      localStorage.setItem(key, value);
+    }
   }
 
-  // ✅ Ensure Maps always reinitialized safely
+  // Ensure Maps always reinitialized safely
   if (!(state.routeCache instanceof Map)) state.routeCache = new Map();
   if (!(state.routeState instanceof Map)) state.routeState = new Map();
 }
 
 // --- Scroll State ---
-function saveScroll(container, scrollState) { scrollState.scrollY = container?.scrollTop || 0; }
-function restoreScroll(container, scrollState) { if (scrollState?.scrollY) container.scrollTop = scrollState.scrollY; }
+function saveScroll(container, scrollState) { if (container && scrollState) scrollState.scrollY = container?.scrollTop || 0; }
+function restoreScroll(container, scrollState) { if (container && scrollState?.scrollY) container.scrollTop = scrollState.scrollY; }
 
 // --- Role helpers ---
 function hasRole(...roles) {
@@ -277,7 +322,7 @@ function setLoading(val) { setState("isLoading", val); }
 // --- Exports ---
 export {
   state,
-  API_URL, SRC_URL, SEARCH_URL, CHAT_URL, FILEDROP_URL, AD_URL, CHATDROP_URL, BANNERDROP_URL, LIVE_URL, MERE_URL, MUSIC_URL, MAIN_URL, EMBED_URL,
+  API_URL, SRC_URL, SEARCH_URL, CHAT_URL, FILEDROP_URL, AD_URL, CHATDROP_URL, BANNERDROP_URL, LIVE_URL, MERE_URL, MUSIC_URL, MAIN_URL, EMBED_URL, STRIPE_URL,
 
   // core
   getState, setState, clearState, getGlobalSnapshot,

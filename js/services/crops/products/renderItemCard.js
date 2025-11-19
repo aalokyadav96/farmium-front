@@ -64,19 +64,6 @@ export function renderItemCard(item, type, isLoggedIn, container, refresh) {
   }
 
 
-  // const imageGallery = item.imageUrls?.length
-  // ? createElement(
-  //     "div",
-  //     { class: "image-gallery" },
-  //     [
-  //       Imagex( {
-  //         src: resolveImagePath(EntityType.PRODUCT, PictureType.THUMB, item.imageUrls[0]),
-  //         alt: item.name,
-  //         classes: "thumbnail"
-  //       })]):"";
-
-
-
   const card = createElement("div", { class: `${type}-card` }, [
     gallerySection,
     createElement("h3", {}, [item.name]),

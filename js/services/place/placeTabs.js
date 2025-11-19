@@ -2,122 +2,156 @@ import { createElement } from "../../components/createElement.js";
 import Button from "../../components/base/Button.js";
 import Datex from "../../components/base/Datex.js";
 import Modal from "../../components/ui/Modal.mjs";
+import MultiSelect from "../../components/ui/MultiSelect.mjs";
+import { apiFetch } from "../../api/api.js";
 
-function displayPlaceHome(container, placeData, isCreator, isLoggedIn) {
-    container.replaceChildren();
+// Predefined options
+const defaultAccessibilityOptions = [
+  "Wheelchair accessible",
+  "Ramps available",
+  "Elevator",
+  "Visual aids",
+  "Hearing assistance"
+];
 
-    container.appendChild(createElement("h2", {}, [placeData.name]));
-    container.appendChild(
-        createElement("p", {}, [placeData.description || "No description available."])
-    );
-}
+const defaultAmenitiesOptions = [
+  "WiFi",
+  "Parking",
+  "Restrooms",
+  "Air Conditioning",
+  "Projector"
+];
 
+// ---------------------------------------
+// MAIN EXPORT
+// ---------------------------------------
 function displayPlaceInfo(container, placeData, isCreator) {
+  container.replaceChildren();
+
+  const info = {
+    category: placeData.category || "N/A",
+    description: placeData.description || "N/A",
+    capacity: placeData.capacity || "N/A",
+    createdDate: Datex(placeData.created_at) || "N/A",
+    updatedDate: Datex(placeData.updated_at) || "N/A",
+    accessibility: placeData.accessibility_info
+      ? placeData.accessibility_info.split(",").map(s => s.trim())
+      : [],
+    services: Array.isArray(placeData.amenities) ? [...placeData.amenities] : []
+  };
+
+  // RENDER INFO PANEL
+  const renderInfo = () => {
     container.replaceChildren();
 
-    const info = {
-        category: placeData.category || "N/A",
-        description: placeData.description || "N/A",
-        capacity: placeData.capacity || "N/A",
-        createdDate: Datex(placeData.created_at) || "N/A",
-        updatedDate: Datex(placeData.updated_at) || "N/A",
-        accessibility: placeData.accessibility || "Not specified",
-        services: placeData.services || [],
-    };
+    if (isCreator) {
+      const editBtn = Button(
+        "Edit Accessibility & Services",
+        "edit-info-btn",
+        { click: handleEditInfo },
+        "buttonx"
+      );
+      container.append(editBtn);
+    }
 
-    const renderInfo = () => {
-        container.replaceChildren();
+    const infoDisplay = createElement("div", { class: "place-info" }, [
+      row("Description", info.description),
+      row("Category", info.category),
+      row("Capacity", info.capacity),
+      row("Created On", info.createdDate),
+      row("Last Updated", info.updatedDate),
+      row("Accessibility", info.accessibility.length ? info.accessibility.join(", ") : "Not specified"),
+      row("Services", info.services.length ? info.services.join(", ") : "None")
+    ]);
 
-        if (isCreator) {
-            const addInfoButton = Button(
-                "Add Info",
-                "add-info-btn",
-                { click: handleAddInfo },
-                "buttonx"
-            );
-            container.appendChild(addInfoButton);
-        }
+    container.append(infoDisplay);
+  };
 
-        const infoDisplay = createElement("div", { class: "place-info" }, [
-            createElement("p", {}, [
-                createElement("strong", {}, ["Description: "]),
-                createElement("span", {}, [info.description]),
-            ]),
-            createElement("p", {}, [
-                createElement("strong", {}, ["Category: "]),
-                createElement("span", {}, [info.category]),
-            ]),
-            createElement("p", {}, [
-                createElement("strong", {}, ["Capacity: "]),
-                createElement("span", {}, [info.capacity]),
-            ]),
-            createElement("p", {}, [
-                createElement("strong", {}, ["Created On: "]),
-                createElement("span", {}, [info.createdDate]),
-            ]),
-            createElement("p", {}, [
-                createElement("strong", {}, ["Last Updated: "]),
-                createElement("span", {}, [info.updatedDate]),
-            ]),
-            createElement("p", {}, [
-                createElement("strong", {}, ["Accessibility: "]),
-                createElement("span", {}, [info.accessibility]),
-            ]),
-            createElement("p", {}, [
-                createElement("strong", {}, ["Services: "]),
-                createElement("span", {}, [
-                    info.services.length > 0 ? info.services.join(", ") : "None",
-                ]),
-            ]),
-        ]);
+  // SIMPLE UTIL
+  function row(label, val) {
+    return createElement("p", {}, [
+      createElement("strong", {}, [label + ": "]),
+      createElement("span", {}, [val])
+    ]);
+  }
 
-        container.appendChild(infoDisplay);
-    };
+  // ---------------------------------------
+  // HANDLE EDIT (OPEN MODAL)
+  // ---------------------------------------
+  const handleEditInfo = () => {
+    const form = createElement("form", { class: "modal-form" });
 
-    const handleAddInfo = () => {
-        const form = document.createElement("form");
+    // Accessibility selector
+    const accessibilityLabel = createElement("label", {}, ["Accessibility Info"]);
 
-        const accessibilityInput = document.createElement("input");
-        accessibilityInput.type = "text";
-        accessibilityInput.placeholder = "Accessibility Info";
-        accessibilityInput.value =
-            info.accessibility !== "Not specified" ? info.accessibility : "";
+    const accessibilityMulti = MultiSelect({
+      options: defaultAccessibilityOptions,
+      selected: [...info.accessibility],
+      placeholder: "Select accessibility features...",
+      wrapperClass: "multiselect-wrapper",
+      dropdownClass: "multiselect-dropdown",
+      itemClass: "multiselect-item",
+      chipsClass: "multiselect-chips",
+      chipClass: "chip",
+      removeBtnClass: "chip-remove-btn button",
+      onChange: sel => { info.accessibility = sel; }
+    });
 
-        const serviceInput = document.createElement("input");
-        serviceInput.type = "text";
-        serviceInput.placeholder = "Add a service";
+    // Services selector
+    const servicesLabel = createElement("label", {}, ["Services / Amenities"]);
 
-        const submitButton = document.createElement("button");
-        submitButton.type = "submit";
-        submitButton.textContent = "Save";
+    const servicesMulti = MultiSelect({
+      options: defaultAmenitiesOptions,
+      selected: [...info.services],
+      placeholder: "Select services...",
+      wrapperClass: "multiselect-wrapper",
+      dropdownClass: "multiselect-dropdown",
+      itemClass: "multiselect-item",
+      chipsClass: "multiselect-chips",
+      chipClass: "chip",
+      removeBtnClass: "chip-remove-btn button",
+      onChange: sel => { info.services = sel; }
+    });
 
-        const cancelButton = document.createElement("button");
-        cancelButton.type = "button";
-        cancelButton.textContent = "Cancel";
+    // Buttons
+    const saveBtn = Button("Save", "", { type: "submit" }, "buttonx");
+    const cancelBtn = Button("Cancel", "", {}, "buttonx");
 
-        form.append(accessibilityInput, serviceInput, submitButton, cancelButton);
+    form.append(
+      accessibilityLabel,
+      accessibilityMulti,
+      servicesLabel,
+      servicesMulti,
+      saveBtn,
+      cancelBtn
+    );
 
-        const { close } = Modal({
-            title: "Add Info",
-            content: form,
+    const { close } = Modal({
+      title: "Edit Accessibility & Services",
+      content: form,
+      size: "medium"
+    });
+
+    cancelBtn.addEventListener("click", () => close());
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      try {
+        await apiFetch(`/places/place/${placeData.placeid}/info`, "PUT", {
+          accessibility_info: info.accessibility.join(", "),
+          amenities: info.services
         });
+      } catch (err) {
+        console.error("Update failed:", err);
+      }
 
-        cancelButton.addEventListener("click", () => close());
+      close();
+      renderInfo();
+    });
+  };
 
-        form.addEventListener("submit", (e) => {
-            e.preventDefault();
-            const accValue = accessibilityInput.value.trim();
-            const serviceValue = serviceInput.value.trim();
-
-            if (accValue) info.accessibility = accValue;
-            if (serviceValue) info.services.push(serviceValue);
-
-            close();
-            renderInfo();
-        });
-    };
-
-    renderInfo();
+  renderInfo();
 }
 
-export { displayPlaceHome, displayPlaceInfo };
+export { displayPlaceInfo };

@@ -7,6 +7,12 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
     outDir: 'dist',
   },
+  server: {
+    // proxy: {
+    //   // Proxy /api/v1/* → http://localhost:4000/api/v1/*
+    // }
+    allowedHosts: ['.trycloudflare.com'] 
+  },
   rollupOptions: {
     treeshake: {
       moduleSideEffects: false,

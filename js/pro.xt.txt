@@ -1,0 +1,245 @@
+Direct, practical plan plus ready-to-drop-in code snippets and production checklist.
+
+# High-level approach (minimal words)
+
+1. Keep UI framework-free: small composable functions + a tiny router and state layer.
+2. Use single-responsibility components (pure render + events).
+3. Strict DOM-building helpers (your `createElement`) — no `innerHTML`, no `textContent` assignments, no `className`.
+4. CI checks, automated tests, static analysis, and a locked build (esbuild/Rollup/Vite) that outputs immutable assets with content hashes.
+5. Observability, error handling, and security headers in deployment.
+
+# Folder layout (recommended)
+
+```
+/src
+  /components
+    /base
+      Button.js
+      Icon.js
+    /ui
+      Header.js
+      LoginForm.js
+  /pages
+    Home.js
+    Dashboard.js
+  api.js        // wrapper around apiFetch
+  app.js
+  router.js
+  entry.js
+  styles.css
+/public
+  index.html
+```
+
+# Production checklist (non-exhaustive)
+
+* Linting: ESLint rules enforcing your patterns (no innerHTML, prefer createElement).
+* Formatting: Prettier.
+* Tests: unit (Jest), integration (jsdom), e2e (Playwright).
+* Accessibility: axe-core checks in CI, keyboard and screen-reader testing.
+* Performance: code-splitting (static imports only), lazy CSS, Brotli/Gzip, asset fingerprinting, critical CSS.
+* Security: CSP, HSTS, SRI for third-party scripts, strict cookie flags, remove sensitive data from bundle, audit dependencies.
+* Resilience: feature flags, circuit-breakers for flaky APIs, retry/backoff logic, graceful degradation.
+* Observability: Sentry (errors), metrics (Lighthouse, custom), structured logs, session sampling.
+* Deploy: immutable CI artifacts, CDN with origin protection, CI -> staging -> canary -> prod flows.
+* UX: loading states, skeletons, optimistic updates, offline fallback (Service Worker).
+* Secrets: never bundle credentials; use environment variables at build/deploy.
+
+# Key architectural rules (do this)
+
+* Always use `apiFetch(endpoint, method, body, options)` for network access.
+* Never mutate DOM outside `createElement` flows.
+* Components return DOM nodes (or arrays of nodes). Keep them pure where possible.
+* Keep state minimal and explicit; use small observable store or indexed data model and subscribe views.
+* Centralized error boundary component to catch and report runtime UI errors.
+
+---
+
+# Required utilities & examples (code inline)
+
+You said use `createElement` and `apiFetch`. Below are idiomatic, production-ready snippets that follow your constraints and are immediately usable.
+
+**`/src/components/base/Button.js`**
+
+```js
+// import signature you prefer (static import)
+const Button = (title = "Click Me", id = "", events = {}, classes = "", styles = {}) => {
+  // createElement assumed imported where used; this file returns a factory function
+  // It returns a DOM element built without innerHTML/textContent/className usage.
+  const attrs = { id, class: classes, style: Object.entries(styles).map(([k,v]) => `${k}:${v}`).join(';') };
+  const btn = createElement('button', attrs, [ title ]);
+  // attach events
+  Object.entries(events || {}).forEach(([ev, handler]) => btn.addEventListener(ev, handler));
+  return btn;
+};
+
+export default Button;
+```
+
+**Usage example (page component):**
+
+```js
+import { apiFetch } from "../../api/api";
+import { createElement } from "../../components/createElement";
+import Button from "../../components/base/Button.js";
+
+// simple login form component
+const LoginForm = (onSuccess) => {
+  const username = createElement('input', { id: 'username', type: 'text', placeholder: 'username' }, []);
+  const password = createElement('input', { id: 'password', type: 'password', placeholder: 'password' }, []);
+  const status = createElement('div', { id: 'login-status', role: 'status', 'aria-live': 'polite' }, []);
+
+  const submit = async (evt) => {
+    evt.preventDefault();
+    try {
+      // always use apiFetch
+      const res = await apiFetch('/auth/login', 'POST', { username: username.value, password: password.value });
+      if (res.ok) {
+        onSuccess(res.data);
+      } else {
+        status.append(`Login failed: ${res.error || res.status}`);
+      }
+    } catch (err) {
+      status.append('Network error');
+      // report to monitoring here
+    }
+  };
+
+  const submitBtn = Button('Sign in', 'login-btn', { click: submit }, 'btn btn-primary', {});
+  const form = createElement('form', { id: 'login-form', role: 'form' }, [
+    createElement('label', { for: 'username' }, ['Username']),
+    username,
+    createElement('label', { for: 'password' }, ['Password']),
+    password,
+    submitBtn,
+    status
+  ]);
+
+  return form;
+};
+
+export default LoginForm;
+```
+
+**`/src/components/createElement.js`**
+(If you need an implementation; otherwise keep your existing one. This respects your API.)
+
+```js
+export const createElement = (tag, attributes = {}, children = []) => {
+  const el = document.createElement(tag);
+  // set attributes safely (no className usage)
+  Object.entries(attributes || {}).forEach(([k, v]) => {
+    if (v === null || v === undefined) return;
+    // special handling for boolean attributes
+    if (typeof v === 'boolean') {
+      if (v) el.setAttribute(k, '');
+    } else {
+      el.setAttribute(k, String(v));
+    }
+  });
+  // append children: strings, nodes, arrays
+  const appendChild = (c) => {
+    if (c == null) return;
+    if (Array.isArray(c)) c.forEach(appendChild);
+    else if (typeof c === 'string' || typeof c === 'number') {
+      // do not use textContent property — create a text node
+      el.appendChild(document.createTextNode(String(c)));
+    } else {
+      el.appendChild(c);
+    }
+  };
+  (Array.isArray(children) ? children : [children]).forEach(appendChild);
+  return el;
+};
+```
+
+**`/src/api.js`** (wrapper around `apiFetch` with retries + timeouts)
+
+```js
+import { apiFetch } from "../api/api"; // adapt path to your structure
+
+export const fetchJson = async (endpoint, method = 'GET', body = null, options = {}) => {
+  const maxRetries = options.retries ?? 2;
+  let attempt = 0;
+  while (true) {
+    attempt++;
+    const ctrl = new AbortController();
+    const timeout = setTimeout(() => ctrl.abort(), options.timeout || 15000);
+    try {
+      const res = await apiFetch(endpoint, method, body, { signal: ctrl.signal, ...options });
+      clearTimeout(timeout);
+      return res;
+    } catch (err) {
+      clearTimeout(timeout);
+      if (attempt > maxRetries) throw err;
+      // exponential backoff
+      await new Promise(r => setTimeout(r, 200 * Math.pow(2, attempt)));
+    }
+  }
+};
+```
+
+**`/src/entry.js`** (mount + error boundary)
+
+```js
+import { createElement } from "./components/createElement.js";
+import LoginForm from "./components/ui/LoginForm.js";
+import Home from "./pages/Home.js";
+
+const mount = document.getElementById('app');
+
+const renderError = (err) => {
+  const node = createElement('div', { role: 'alert' }, ['An error occurred', createElement('pre', {}, [String(err)])]);
+  mount.replaceChildren(node);
+};
+
+// top-level try/catch to capture render errors and report
+try {
+  const onAuth = (user) => {
+    mount.replaceChildren(Home(user));
+  };
+  mount.replaceChildren(LoginForm(onAuth));
+} catch (err) {
+  // send to monitoring and show fallback UI
+  console.error(err);
+  renderError(err);
+}
+```
+
+# Build & deployment (concise)
+
+* Use esbuild or Rollup for deterministic builds. Configure to output hashed filenames (`app.[hash].js`) and generate an `index.html` with those entries.
+* Serve via CDN behind an origin with strict S3 or object-store rules. Set long cache for assets, short for HTML.
+* Add automatic invalidation (CDN purge) on deploy.
+* Provide deploy pipeline: tests -> build -> artifacts -> staging -> smoke tests -> canary -> promote.
+
+# Testing matrix
+
+* Unit: DOM-level components with jsdom (assert nodes structure and events).
+* Integration: test component interactions, form flows, network mocks.
+* E2E: real browser flows for critical paths (login, purchase, upload).
+* Accessibility: run axe in CI, test keyboard navigation and ARIA.
+* Performance: Lighthouse CI with budgets; fail build on regressions.
+
+# Observability & runtime safety
+
+* Global error handler: capture `window.onerror` and `unhandledrejection`.
+* Graceful feature toggles and kill-switch endpoints.
+* Session sampling for error metadata and performance traces.
+* Client-side rate-limiting for heavy operations and retry with jitter.
+
+# Minimal runtime policies
+
+* CSP header: deny `unsafe-inline`, allow only needed origins.
+* Subresource Integrity for third-party scripts/styles.
+* Strict-transport-security: enforce HTTPS.
+
+---
+
+If you want, I’ll do one of the following next (pick one; I’ll produce it immediately):
+
+* A complete, minimal starter `entry.js` + `createElement` + `Button` + `api` that you can drop into `/src` and build with esbuild (I’ll include build flags).
+* A CI job spec (GitHub Actions) that lints, tests, builds, and deploys to a CDN with canary.
+* A production checklist tailored to your stack (vanilla JS + Go backend + MongoDB), mapping endpoints and where to secure things.
+
+Pick one option and I’ll produce the code/config now.

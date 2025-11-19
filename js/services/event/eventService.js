@@ -97,29 +97,6 @@ const setupTabs = (eventData, eventId, isCreator, isLoggedIn) => {
     return tabs;
 };
 
-// Setup Event Tabs
-// const setupTabs = (eventData, eventId, isCreator, isLoggedIn) => {
-//     const tabs = [];
-//     const status = getEventStatus(eventData.date);
-
-//     if (status === "active") {
-//         tabs.push(
-//             { title: "Tickets", id: "tickets-tab", render: (c) => displayTickets(c, eventData.tickets, eventId, eventData.title, isCreator, isLoggedIn) },
-//             { title: "FAQ", id: "faq-tab", render: (c) => displayEventFAQ(c, isCreator, eventId, eventData.faqs) },
-//             { title: "Merchandise", id: "merch-tab", render: (c) => displayMerchandise(c, eventData.merch, "event", eventId, isCreator, isLoggedIn) },
-//         );
-//     } else {
-//         tabs.push(
-//             { title: "Reviews", id: "reviews-tab", render: (c) => displayEventReviews(c, eventId, isCreator, isLoggedIn) },
-//             { title: "Media", id: "media-tab", render: (c) => displayMedia(c, "event", eventId, isLoggedIn) },
-//             { title: "Lost & Found", id: "lnf-tab", render: (c) => displayLostAndFound(c, isCreator, eventId) },
-//             { title: "Contact", id: "contact-tab", render: (c) => displayContactDetails(c, eventData.contactInfo) }
-//         );
-//     }
-
-//     return tabs;
-// };
-
 async function displayEvent(isLoggedIn, eventId, content) {
     content.replaceChildren();
     const container = createElement('div', { class: "eventpage" }, []);

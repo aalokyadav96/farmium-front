@@ -54,7 +54,7 @@ export async function userProfileCard(profile = {
                     console.log("Funding cancelled or failed");
                 }
             }
-        });
+        },"buttonx");
 
         const count = createElement("p", { class: "post-count" }, [`Posts: ${profile.postCount}`]);
         elements.push(count);

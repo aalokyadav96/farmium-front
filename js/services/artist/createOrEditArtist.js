@@ -4,7 +4,6 @@ import Button from "../../components/base/Button.js";
 import { createFormGroup } from "../../components/createFormGroup.js";
 import { createElement } from "../../components/createElement.js";
 import Notify from "../../components/ui/Notify.mjs";
-import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePaths.js";
 
 // ------------------- CREATE ARTIST EXPORT -------------------
 export function createArtist(isLoggedIn, content) {
@@ -97,7 +96,7 @@ export async function createOrEditArtist({ isLoggedIn, content, mode = "create",
     const socialsSection = createElement("div", { class: "socials-section" }, [
         createElement("h3", {}, ["Social Links"]),
         socialsContainer,
-        Button("Add Social", "add-social-btn", { click: () => addSocialField(null, socialsContainer) })
+        Button("Add Social", "add-social-btn", { click: () => addSocialField(null, socialsContainer) },"buttonx secondary")
     ]);
     section.appendChild(socialsSection);
 
@@ -113,7 +112,7 @@ export async function createOrEditArtist({ isLoggedIn, content, mode = "create",
             if (mode === "create") await submitArtistForm(section);
             else await updateArtistForm(artistID, section);
         }
-    });
+    },"buttonx primary");
 
     section.appendChild(submitBtn);
     content.appendChild(section);
@@ -125,7 +124,7 @@ function addSocialField(existingSocial = null, container) {
 
     const platformField = createFormGroup({
         type: "text",
-        id: `social-platform-${Date.now()}`,
+        id: `social-platform-${existingSocial?.platform}`,
         label: "Platform",
         required: true,
         value: existingSocial?.platform || "",
@@ -134,7 +133,7 @@ function addSocialField(existingSocial = null, container) {
 
     const urlField = createFormGroup({
         type: "url",
-        id: `social-url-${Date.now()}`,
+        id: `social-url-${existingSocial?.platform}`,
         label: "URL",
         required: true,
         value: existingSocial?.url || "",
@@ -167,133 +166,6 @@ function collectFormData(section) {
     }
 
     return formData;
-}
-
-// ------------------- MANAGE BAND MEMBERS (new separate module) -------------------
-export async function manageBandMembers(artistID, container) {
-    container.replaceChildren();
-
-    const heading = createElement("h2", {}, ["Manage Band Members"]);
-    const membersContainer = createElement("div", { id: "band-members-container" });
-    const addBtn = Button("Add Member", "add-member-btn", { click: () => addBandMember(null, membersContainer) }, "buttonx");
-    const saveBtn = Button("Save Members", "save-members-btn", {
-        click: async () => {
-            const members = [];
-            membersContainer.querySelectorAll(".band-member").forEach(div => {
-                const artistid = div.querySelector("input[id^='member-id-']")?.value.trim();
-                const name = div.querySelector("input[id^='member-name-']")?.value.trim();
-                const role = div.querySelector("input[id^='member-role-']")?.value.trim();
-                const dob = div.querySelector("input[id^='member-dob-']")?.value;
-
-                if (artistid || name) {
-                    const m = { role, dob };
-                    if (artistid) m.artistid = artistid;
-                    else m.name = name;
-                    members.push(m);
-                }
-            });
-
-            try {
-                await apiFetch(`/artists/${artistID}/members`, "PUT", { members });
-                Notify("Members updated successfully.", { type: "success", duration: 3000 });
-                navigate(`/artist/${artistID}`);
-            } catch (err) {
-                Notify(`Failed to update members: ${err.message}`, { type: "error", duration: 3000 });
-            }
-        }
-    }, "buttonx");
-
-    container.appendChild(heading);
-    container.appendChild(membersContainer);
-    container.appendChild(addBtn);
-    container.appendChild(saveBtn);
-
-    // Fetch and populate existing members
-    try {
-        const artist = await apiFetch(`/artists/${artistID}`, "GET");
-        if (artist?.members) artist.members.forEach(m => addBandMember(m, membersContainer));
-    } catch (err) {
-        Notify("Failed to load members.", { type: "error", duration: 3000 });
-    }
-}
-
-// ------------------- BAND MEMBER HANDLER -------------------
-function addBandMember(existingMember = null, container) {
-    if (!container) return;
-    const memberDiv = createElement("div", { class: "band-member" });
-
-    const idField = createFormGroup({
-        type: "text",
-        id: `member-id-${Date.now()}`,
-        label: "Artist ID (optional)",
-        placeholder: "Paste artist ID to fetch data",
-        value: existingMember?.artistid || ""
-    });
-
-    const nameField = createFormGroup({
-        type: "text",
-        id: `member-name-${Date.now()}`,
-        label: "Member Name",
-        required: true,
-        value: existingMember?.name || "",
-        placeholder: "Member name"
-    });
-
-    const roleField = createFormGroup({
-        type: "text",
-        id: `member-role-${Date.now()}`,
-        label: "Role (optional)",
-        value: existingMember?.role || "",
-        placeholder: "Role or instrument"
-    });
-
-    const dobField = createFormGroup({
-        type: "date",
-        id: `member-dob-${Date.now()}`,
-        label: "DOB (optional)",
-        value: existingMember?.dob || ""
-    });
-
-    const fetchBtn = Button("Fetch Member", "", {
-        click: async () => {
-            const artistID = idField.querySelector("input")?.value.trim();
-            if (!artistID) {
-                Notify("Please enter a valid artist ID first.", { type: "warning", duration: 2000 });
-                return;
-            }
-
-            // --- DUPLICATE CHECK ---
-            const existingIDs = Array.from(container.querySelectorAll(".band-member input[id^='member-id-']"))
-                .map(el => el.value.trim())
-                .filter(Boolean);
-            const duplicate = existingIDs.filter(id => id === artistID).length > 1;
-            if (duplicate) {
-                Notify("This artist is already added as a member.", { type: "warning", duration: 3000 });
-                return;
-            }
-
-            try {
-                const artist = await apiFetch(`/artists/${artistID}`, "GET");
-                if (!artist || !artist.name) {
-                    Notify("Artist not found.", { type: "error", duration: 2000 });
-                    return;
-                }
-
-                nameField.querySelector("input").value = artist.name || "";
-                roleField.querySelector("input").value = artist.role || "";
-                dobField.querySelector("input").value = artist.dob || "";
-
-                Notify("Member data fetched.", { type: "success", duration: 1500 });
-            } catch (err) {
-                Notify(`Failed to fetch artist: ${err.message}`, { type: "error", duration: 3000 });
-            }
-        }
-    });
-
-    const removeBtn = Button("Remove", "", { click: () => container.removeChild(memberDiv) }, "remove-member-btn buttonx");
-    const idRow = createElement("div", { class: "member-id-row" }, [idField, fetchBtn]);
-    [idRow, nameField, roleField, dobField, removeBtn].forEach(el => memberDiv.appendChild(el));
-    container.appendChild(memberDiv);
 }
 
 // ------------------- DELETE ARTIST -------------------

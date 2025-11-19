@@ -4,7 +4,7 @@
     display: none;
     align-self: flex-start;
     padding: 0.6rem 1rem;
-    background: #007bff;
+    background: var(--color-btn-bg);
     border: none;
     border-radius: 4px;
     color: white;

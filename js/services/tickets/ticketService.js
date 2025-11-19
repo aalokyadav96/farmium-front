@@ -79,7 +79,7 @@ function addTicketForm(eventId, ticketList) {
   form.appendChild(currencyGroup);
 
   // Color
-  const colorInput = createElement("input", { type: "color", id: "ticket-color", value: "#3498db" });
+  const colorInput = createElement("input", { type: "color", id: "ticket-color", value: "var(--color-btn-bg)" });
   const colorLabel = createElement("label", { for: "ticket-color" }, ["Choose Ticket Color: "]);
   colorLabel.appendChild(colorInput);
   form.appendChild(colorLabel);

@@ -98,7 +98,7 @@ function createEntityLink(item, entityType) {
             break;
     }
     entityLink.textContent = "View Details";
-    entityLink.style.color = "#007bff";
+    entityLink.style.color = "var(--color-btn-bg)";
     entityLink.style.textDecoration = "none";
 
     // Add hover effect for link

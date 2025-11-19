@@ -67,10 +67,10 @@ export const createAddMediaButton = (
   entityId,
   list,
   showUploadForm,
-  classes = "button-primary"
+  classes = "buttonx primary"
 ) =>
   isLoggedIn
-    ? Button("Add Media", "", {
+    ? Button("Add Media", "add-media-btn", {
         click: () => showUploadForm(isLoggedIn, entityType, entityId, list),
       }, classes)
     : null;

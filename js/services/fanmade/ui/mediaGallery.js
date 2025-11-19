@@ -39,7 +39,9 @@ function buildMediaFragment(mediaData, entityType, entityId, isLoggedIn, prefix 
       // ✅ Only add caption + translation if caption exists
       if (media.caption && media.caption.trim() !== "") {
         const caption = createElement("figcaption", { class: `${prefix}-caption` }, [media.caption]);
-        const translation = buildTranslationSection(media.caption);
+        // const translation = buildTranslationSection(media.caption);
+        const translation = buildTranslationSection(media.caption, media.captionlang);
+
         figure.append(caption);
         if (translation) figure.append(...translation);
       }
@@ -56,41 +58,6 @@ function buildMediaFragment(mediaData, entityType, entityId, isLoggedIn, prefix 
   return frag;
 }
 
-// function buildMediaFragment(mediaData, entityType, entityId, isLoggedIn, prefix = "media") {
-//   const frag = document.createDocumentFragment();
-//   const grouped = groupMedia(mediaData);
-
-//   for (const group of grouped) {
-//     const wrapper = createElement("div", { class: `${prefix}-group` });
-
-//     group.forEach((media, i) => {
-//       if (!media.url) return;
-
-//       const figure = createElement("figure", {
-//         class: `${prefix}-item`,
-//         "data-id": media.mediaid
-//       });
-
-//       const thumbSrc = resolveImagePath(EntityType.MEDIA, PictureType.THUMB, `${media.url}.jpg`);
-//       const mediaEl = buildMediaElement(media, thumbSrc, i, prefix);
-//       const captionText = media.caption || "";
-//       const caption = createElement("figcaption", { class: `${prefix}-caption` }, [captionText]);
-
-//       const translation = buildTranslationSection(captionText);
-//       const actions = createMediaActions(media, entityType, entityId, isLoggedIn, confirmDelete, prefix);
-
-//       figure.append(mediaEl, caption);
-//       if (translation) figure.append(...translation);
-//       figure.append(actions);
-
-//       wrapper.append(figure);
-//     });
-
-//     frag.append(wrapper);
-//   }
-
-//   return frag;
-// }
 
 /* ------------------------------------------------------
    MEDIA ELEMENT BUILDER
@@ -116,11 +83,11 @@ function buildMediaElement(media, thumbSrc, index, prefix) {
       "data-index": index
     });
 
-    let vidEl = createElement("div",{},[]);
-    
-  generateVideoPlayer(videoSrc, thumbSrc, [], [], media.url).then(videoPlayer => {
-    vidEl.appendChild(videoPlayer);
-  });
+    let vidEl = createElement("div", {}, []);
+
+    generateVideoPlayer(videoSrc, thumbSrc, [], [], media.url).then(videoPlayer => {
+      vidEl.appendChild(videoPlayer);
+    });
 
     img.addEventListener("click", () => {
       const container = createElement("div", { class: "lightbox-video-container" }, [vidEl]);
@@ -136,20 +103,62 @@ function buildMediaElement(media, thumbSrc, index, prefix) {
 /* ------------------------------------------------------
    TRANSLATION TOGGLE BUILDER
 ------------------------------------------------------ */
-function buildTranslationSection(captionText) {
-  if (!captionText) return null;
+async function fetchTranslation(text, fromLang, toLang) {
+  try {
+    const res = await apiFetch(
+      `/translate?from=${fromLang}&to=${toLang}`,
+      "POST",
+      { text }
+    );
+    return res?.translated || "";
+  } catch {
+    return "";
+  }
+}
 
-  const translationBox = createElement("div", { class: "translation-container", style: "display:none;" });
-  const toggle = createElement("span", {
-    class: "translate-toggle",
-    "data-state": "original",
-    events: {
-      click: async (e) => {
-        e.stopPropagation();
-        await handleTranslationToggle(toggle, captionText, translationBox);
+async function handleTranslationToggle(toggle, originalText, translationBox, fromLang, toLang) {
+  const state = toggle.dataset.state;
+
+  if (state === "original") {
+    toggle.textContent = "Hide Translation";
+    toggle.dataset.state = "translated";
+
+    // lazy fetch translation
+    const translated = await fetchTranslation(originalText, fromLang, toLang);
+    translationBox.textContent = translated || "(Translation unavailable)";
+    translationBox.style.display = "block";
+  } else {
+    toggle.textContent = "See Translation";
+    toggle.dataset.state = "original";
+    translationBox.style.display = "none";
+  }
+}
+
+function buildTranslationSection(captionText, captionLang) {
+  const userLang = localStorage.getItem("lang") || "en";
+
+  // No translation toggle needed if languages match
+  if (!captionLang || captionLang === userLang) return null;
+
+  const translationBox = createElement("div", {
+    class: "translation-container",
+    style: "display:none;"
+  });
+
+  const toggle = createElement(
+    "span",
+    {
+      class: "translate-toggle",
+      "data-state": "original",
+      events: {
+        click: async (e) => {
+          e.stopPropagation();
+          await handleTranslationToggle(toggle, captionText, translationBox, captionLang, userLang);
+        }
       }
-    }
-  }, ["See Translation"]);
+    },
+    ["See Translation"]
+  );
 
   return [toggle, translationBox];
 }

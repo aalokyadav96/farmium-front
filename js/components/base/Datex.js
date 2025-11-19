@@ -23,22 +23,3 @@ const Datex = (DATE_TO_PRINT = "2026-01-03T12:39:00Z", asString = false) => {
 
 export default Datex;
 export { Datex };
-
-// import { createElement } from "../../components/createElement.js";
-
-// const Datex = (DATE_TO_PRINT = "2026-01-03T12:39:00Z") => {
-//   return createElement("span", {}, [
-//       new Date(DATE_TO_PRINT).toLocaleString("en-GB", {
-//         day: "2-digit",
-//         month: "2-digit",
-//         year: "numeric",
-//         hour: "2-digit",
-//         minute: "2-digit",
-//         second: "2-digit",
-//         hour12: true
-//       })
-//     ]);
-// };
-
-// export default Datex;
-// export { Datex };

@@ -45,7 +45,7 @@
 }
 
 .edit-review-btn {
-    background: #007bff;
+    background: var(--color-btn-bg);
     color: #fff;
 }
 

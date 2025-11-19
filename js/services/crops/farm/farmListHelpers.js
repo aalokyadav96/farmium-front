@@ -123,7 +123,7 @@ function renderCTAFarm(container) {
             click: () => { navigate('/tools') }
         }, "buttonx"),
         Button("Chats", "chatss-frm-btn", {
-            click: () => { navigate('/merechats') }
+            click: () => { navigate('/discord') }
         }, "buttonx"),
         Button("Create Farm", "crt-frm-btn", {
             click: () => { navigate('/create-farm') }

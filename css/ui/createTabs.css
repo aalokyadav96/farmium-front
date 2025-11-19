@@ -1,5 +1,5 @@
 :root {
-  --tab-accent: #007bff;
+  --tab-accent: var(--color-btn-bg);
   --tab-header-bg: #f8f8f8;
   --tab-border: #ddd;
 }
@@ -41,7 +41,7 @@
   color: var(--tab-hover-text, #000);
 }
 .tab-button.active {
-  border-bottom: 2px solid var(--tab-accent, #007bff);
+  border-bottom: 2px solid var(--tab-accent, var(--color-btn-bg));
 }
 
 /* --- Tab Content Area --- */
@@ -76,7 +76,7 @@
   border-radius: 4px;
 }
 .tab-content .tab-button.active {
-  border-bottom-color: var(--nested-tab-accent, #007bff);
+  border-bottom-color: var(--nested-tab-accent, var(--color-btn-bg));
 }
 
 /* --- Responsive Adjustments --- */

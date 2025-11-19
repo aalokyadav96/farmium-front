@@ -22,7 +22,7 @@
 }
 
 .filter-bar .filter-button.active {
-    background: #007bff;
+    background: var(--color-btn-bg);
     color: white;
 }
 
@@ -39,7 +39,7 @@
 }
 
 .view-toggle button.active {
-    background: #007bff;
+    background: var(--color-btn-bg);
     color: white;
 }
 /* Wrapper */

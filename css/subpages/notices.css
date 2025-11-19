@@ -28,7 +28,7 @@
 }
 
 .notice-item:hover {
-    background-color: var(--color-accent);
+    background-color: var(--color-surface);
 }
 
 .notice-item h4 {
@@ -68,7 +68,7 @@
 }
 
 .notice-edit-btn {
-    background-color: #007bff;
+    background-color: var(--color-btn-bg);
     color: white;
 }
 

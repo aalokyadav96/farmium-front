@@ -76,9 +76,9 @@ export async function displayPost(isLoggedIn, postId, container) {
   frag.append(renderComments(post));
 
   page.appendChild(frag);
-  container.appendChild(page);
   const relatedEl = await renderRelatedPosts(post);
-  container.appendChild(relatedEl);
+  page.appendChild(relatedEl);
+  container.appendChild(page);
 
 }
 
@@ -166,34 +166,6 @@ function renderImageGroup(images) {
 }
 
 
-// function renderImageGroup(images) {
-//   const group = createElement("div", { class: "image-group" });
-
-//   images.forEach(img => {
-//     const realSrc = resolveImagePath(EntityType.POST, PictureType.THUMB, img.url);
-//     console.log(realSrc);
-//     const imgEl = Imagex({
-//       src: realSrc,
-//       alt: img.alt || "Post Image",
-//       classes: "post-image"
-//     });
-
-//     // Delegate click later
-//     group.appendChild(imgEl);
-//   });
-
-
-//   // Delegate Sightbox click to the group
-//   group.addEventListener("click", e => {
-//     const img = e.target.closest(".post-image");
-//     if (!img) return;
-//     const src = img.dataset.src || img.src;
-//     // Sightbox(src, "image");
-//     ZoomBox(images, 1);
-//   });
-
-//   return group;
-// }
 
 function renderTags(tags) {
   return createElement("div", { class: "post-tags" },

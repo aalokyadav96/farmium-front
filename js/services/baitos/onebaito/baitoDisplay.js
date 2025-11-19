@@ -70,7 +70,10 @@ function renderOwnerControls(baito, container, isLoggedIn) {
         }
       }
     }, "buttonx btn-danger"),
-    Button("Chats", "chats-btn-baito", { click: () => navigate("/merechats") }, "buttonx btn-secondary")
+    Button("Chats", "chats-btn-baito", { click: () => navigate("/merechats") }, "buttonx btn-secondary"),
+    Button("Close job", "close-btn-baito", { click: () => {
+      alert("TODO close job");
+    } }, "buttonx btn-secondary"),
   ]);
 }
 
@@ -158,39 +161,6 @@ function createEmployerSection(employer, baito) {
   return createElement("div", { class: "baito-employer" }, [avatar, name, verifiedBadge].filter(Boolean));
 }
 
-// // /** Job meta info */
-// function createMetaSection(baito) {
-//   const wageText = isNaN(Number(baito.wage)) ? baito.wage : `¥${Number(baito.wage).toLocaleString()}/hour`;
-
-//   const metaLines = [
-//     baito.category && baito.subcategory
-//       ? `📂 ${baito.category} › ${baito.subcategory}`
-//       : baito.category
-//       ? `📂 ${baito.category}`
-//       : null,
-//     baito.wage ? `💴 Wage: ${wageText}` : null,
-//     baito.workHours ? `⏰ Hours: ${baito.workHours}` : null,
-//     baito.location ? `📍 Location: ${baito.location}` : null,
-//     baito.phone ? `📞 Contact: ${baito.phone}` : null,
-//     baito.lastdate ? Datex(baito.lastdate) : null,  // returns a DOM element
-//     baito.createdAt ? Datex(baito.createdAt) : null, // returns a DOM element
-//     typeof baito.applicationcount === "number" ? `👥 Applications: ${baito.applicationcount}` : null,
-//   ].filter(Boolean);
-
-//   return createElement(
-//     "div",
-//     { class: "baito-meta" },
-//     metaLines.map(line => {
-//       if (line instanceof Node) {
-//         // line is a DOM element (like Datex), append directly inside <p>
-//         return createElement("p", {}, [line]);
-//       } else {
-//         // line is a string
-//         return createElement("p", {}, [document.createTextNode(line)]);
-//       }
-//     })
-//   );
-// }
 
 /** Job meta info */
 function createMetaSection(baito) {

@@ -12,7 +12,7 @@ async function displayEventFAQs(isCreator, faqContainer, eventId, faques) {
   if (isCreator) {
     const addFaqButton = Button("Add FAQs", "add-faq-btn", {
       click: () => showFaqForm(faqContainer, eventId),
-    });
+    },"buttonx");
     faqContainer.appendChild(addFaqButton);
   }
 

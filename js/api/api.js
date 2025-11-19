@@ -1,153 +1,202 @@
-import { API_URL, SRC_URL, setState, getState, MERE_URL, CHAT_URL, BANNERDROP_URL, LIVE_URL, MUSIC_URL } from "../state/state.js";
+import {
+    API_URL,
+    SRC_URL,
+    setState,
+    getState,
+    MERE_URL,
+    CHAT_URL,
+    BANNERDROP_URL,
+    LIVE_URL,
+    MUSIC_URL,
+    STRIPE_URL
+} from "../state/state.js";
+
 import { logout } from "../services/auth/authService.js";
 import Notify from "../components/ui/Notify.mjs";
 
+/* ----------------------------- Cache Config ----------------------------- */
 const MAX_CACHE_ENTRIES = 100;
 const DEFAULT_TTL = 5 * 60 * 1000; // 5 minutes
-const NO_CACHE_ENDPOINTS = ["/auth/login", "/auth/register", "/auth/logout", "/events/event"];
+const NO_CACHE_ENDPOINTS = [
+    "/auth/login",
+    "/auth/register",
+    "/auth/logout",
+    "/events/event",
+];
+const PERSISTED_KEY = "__api_cache__";
 
-const apiCache = new Map(); // key -> { data, timestamp }
+const apiCache = new Map();
+let refreshInProgress = null;
 
-function shouldSkipCache(endpoint) {
-    return NO_CACHE_ENDPOINTS.some(path => endpoint === path || endpoint.startsWith(path));
-}
-
-function parseJwt(token) {
+/* ----------------------------- JWT Decode ----------------------------- */
+function parseJwt(token = "") {
     try {
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(
-            atob(base64)
-                .split('')
-                .map(c => `%${('00' + c.charCodeAt(0).toString(16)).slice(-2)}`)
-                .join('')
+        const parts = token.split(".");
+        if (parts.length < 2) return null;
+        const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+        const json = decodeURIComponent(
+            Array.prototype.map
+                .call(atob(base64), c => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+                .join("")
         );
-        return JSON.parse(jsonPayload);
-    } catch (e) {
-        console.warn("Failed to parse JWT", e);
+        return JSON.parse(json);
+    } catch {
         return null;
     }
 }
 
-let refreshInProgress = null;
+function isTokenNearExpiry(token, bufferMs = 2 * 60 * 1000) {
+    const payload = parseJwt(token);
+    return payload?.exp ? Date.now() > payload.exp * 1000 - bufferMs : false;
+}
 
-async function refreshToken() {
-    if (refreshInProgress) return refreshInProgress;
-
-    refreshInProgress = (async () => {
-        try {
-            // Call refresh endpoint; refresh token is in HttpOnly cookie so no body required.
-            const response = await fetch(`${API_URL}/auth/refresh`, {
-                method: "POST",
-                credentials: "include", // ensure cookie is sent
-                headers: {
-                    "Content-Type": "application/json"
-                },
-            });
-
-            const data = await response.json().catch(() => null);
-
-            if (response.ok && data?.data?.token) {
-                const newToken = data.data.token;
-                const parsed = parseJwt(newToken);
-                setState(
-                    {
-                        token: newToken,
-                        role: parsed?.role || [],
-                        userId: parsed?.userId || parsed?.userID || null,
-                        username: parsed?.username || null,
-                    },
-                    true
-                );
-                return true;
-            } else {
-                Notify("Session expired. Please log in again.", {type:"success",duration:3000, dismissible:true});
-                logout();
-                return false;
-            }
-        } catch (err) {
-            Notify("Error refreshing token.", {type:"success",duration:3000, dismissible:true});
-            logout();
-            return false;
-        } finally {
-            refreshInProgress = null;
-        }
-    })();
-
-    return refreshInProgress;
+/* ----------------------------- Cache Helpers ----------------------------- */
+function shouldSkipCache(endpoint) {
+    return NO_CACHE_ENDPOINTS.some(p => endpoint === p || endpoint.startsWith(p));
 }
 
 function getCacheKey(url, token) {
     return `${token || ""}:${url}`;
 }
 
-function isTokenNearExpiry(token, bufferMs = 30 * 1000) {
-    const payload = parseJwt(token);
-    if (!payload?.exp) return false;
-    const expiryMs = payload.exp * 1000;
-    return Date.now() > (expiryMs - bufferMs);
+function safeSetCache(key, data) {
+    apiCache.set(key, { data, timestamp: Date.now() });
+    if (apiCache.size > MAX_CACHE_ENTRIES) apiCache.delete(apiCache.keys().next().value);
+    persistCacheToSession();
 }
 
-async function apixFetch(endpoint, method = "GET", body = null, options = {}, isRetry = false) {
-    if (getState("token") && isTokenNearExpiry(getState("token")) && !isRetry) {
-        const refreshed = await refreshToken();
-        if (!refreshed) throw new Error("Session expired. Please log in again.");
+function clearApiCache() {
+    apiCache.clear();
+    sessionStorage.removeItem(PERSISTED_KEY);
+}
+
+function loadCacheFromSession() {
+    try {
+        const raw = sessionStorage.getItem(PERSISTED_KEY);
+        if (raw) {
+            const obj = JSON.parse(raw);
+            Object.entries(obj).forEach(([key, val]) => apiCache.set(key, val));
+        }
+    } catch {
+        console.warn("Failed to load persisted API cache.");
+    }
+}
+
+function persistCacheToSession() {
+    try {
+        sessionStorage.setItem(PERSISTED_KEY, JSON.stringify(Object.fromEntries(apiCache)));
+    } catch {
+        console.warn("Failed to persist API cache.");
+    }
+}
+
+/* ----------------------------- Token Handling ----------------------------- */
+function setToken(token) {
+    setState({ token }, true); // persist in state.js
+    if (token) localStorage.setItem("token", token);
+    else localStorage.removeItem("token");
+}
+
+/* ----------------------------- Token Refresh ----------------------------- */
+export async function refreshToken() {
+    if (refreshInProgress) return refreshInProgress;
+
+    refreshInProgress = (async () => {
+        try {
+            const response = await fetch(`${API_URL}/auth/refresh`, {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+            });
+
+            if (!response.ok) {
+                if (response.status === 401) return false;
+                return true;
+            }
+
+            const data = await response.json().catch(() => null);
+            if (data?.token) {
+                const newToken = data.token;
+                const parsed = parseJwt(newToken);
+
+                setToken(newToken);
+
+                setState({
+                    role: parsed?.role || [],
+                    username: parsed?.username || "",
+                    user: parsed?.userid || ""
+                }, true);
+
+                return true;
+            }
+
+            return false;
+        } catch {
+            return true;
+        } finally {
+            refreshInProgress = null;
+        }
+    })();
+
+    const success = await refreshInProgress;
+    if (!success) {
+        Notify("Session expired. Please log in again.", { type: "warning", duration: 5000 });
+        logout();
+    }
+
+    return success;
+}
+
+/* ----------------------------- Core Fetch ----------------------------- */
+async function coreFetch(baseUrl, endpoint, method = "GET", body = null, options = {}, isRetry = false) {
+    const token = getState("token");
+
+    if (token && isTokenNearExpiry(token) && !isRetry) {
+        const ok = await refreshToken();
+        if (!ok) throw new Error("Session expired.");
     }
 
     const fetchOptions = {
         method,
-        headers: {
-            ...(getState("token") && { Authorization: `Bearer ${getState("token")}` }),
-        },
-        signal: options.signal,
-        credentials: options.credentials ?? "include", // send cookies by default; override with options.credentials
+        headers: { ...(token && { Authorization: `Bearer ${token}` }) },
+        credentials: options.credentials ?? "include",
+        signal: options.signal
     };
 
     if (body) {
-        if (body instanceof FormData) {
-            fetchOptions.body = body;
-        } else if (typeof body === "object") {
+        if (body instanceof FormData) fetchOptions.body = body;
+        else if (typeof body === "object") {
             fetchOptions.headers["Content-Type"] = "application/json";
             fetchOptions.body = JSON.stringify(body);
         } else if (typeof body === "string") {
             fetchOptions.body = body;
-            if (!fetchOptions.headers["Content-Type"]) {
-                fetchOptions.headers["Content-Type"] = "text/plain";
-            }
+            fetchOptions.headers["Content-Type"] ||= "text/plain";
         }
     }
 
-    const isGet = method.toUpperCase() === "GET";
+    const isGet = method === "GET";
     const useCache = options.useCache !== false && isGet && !shouldSkipCache(endpoint);
-    const cacheKey = getCacheKey(endpoint, getState("token"));
+    const cacheKey = getCacheKey(`${baseUrl}${endpoint}`, token);
 
     if (useCache && apiCache.has(cacheKey)) {
         const { data, timestamp } = apiCache.get(cacheKey);
-        if (Date.now() - timestamp < DEFAULT_TTL) {
-            apiCache.set(cacheKey, { data, timestamp }); // Refresh LRU
-            return data;
-        } else {
-            apiCache.delete(cacheKey);
-        }
+        if (Date.now() - timestamp < DEFAULT_TTL) return data;
+        apiCache.delete(cacheKey);
     }
 
     try {
-        const response = await fetch(endpoint, fetchOptions);
+        const response = await fetch(`${baseUrl}${endpoint}`, fetchOptions);
 
         if (response.status === 409) {
-            Notify("Already exists.", {type:"success",duration:3000, dismissible:true});
+            Notify("Already exists.", { type: "warning", duration: 3000, dismissible: true });
             return;
         }
 
-        // optional retry on 401: commented out, kept for reference
-        // if (response.status === 401 && !isRetry) {
-        //     const refreshed = await refreshToken();
-        //     if (refreshed) {
-        //         return apixFetch(endpoint, method, body, options, true);
-        //     } else {
-        //         throw new Error("Session expired. Please log in again.");
-        //     }
-        // }
+        if (response.status === 401 && !isRetry) {
+            const ok = await refreshToken();
+            if (ok) return coreFetch(baseUrl, endpoint, method, body, options, true);
+            throw new Error("Session expired.");
+        }
 
         if (!response.ok) {
             const errorText = await response.text();
@@ -156,139 +205,64 @@ async function apixFetch(endpoint, method = "GET", body = null, options = {}, is
 
         if (options.responseType === "blob") return await response.blob();
         if (options.responseType === "arrayBuffer") return await response.arrayBuffer();
-        
-        // if (options.responseType === "blob") return response;
-        // if (options.responseType === "arrayBuffer") return await response.arrayBuffer();
 
         const text = await response.text();
         let result = null;
-        try {
-            result = text ? JSON.parse(text) : null;
-        } catch (err) {
-            console.warn("Invalid JSON from", endpoint);
-        }
+        try { result = text ? JSON.parse(text) : null; } catch { console.warn("Invalid JSON:", endpoint); }
 
-        if (useCache) {
-            safeSetCache(cacheKey, result);
-        }
-
+        if (useCache) safeSetCache(cacheKey, result);
         return result;
-    } catch (error) {
-        if (error.name === "AbortError") return;
-        console.error(`Error fetching ${endpoint}:`, error);
-        Notify(error.message || "Network error", {type:"error",duration:3000, dismissible:true});
-        throw error;
+    } catch (err) {
+        if (err.name === "AbortError") return;
+        Notify(err.message || "Network error", { type: "error", duration: 3000, dismissible: true });
+        throw err;
     }
 }
 
-async function apiFetch(endpoint, method = "GET", body = null, options = {}) {
-    const controller = options.controller || new AbortController();
-    const signal = controller.signal;
-    const fullUrl = `${API_URL}${endpoint}`;
-    return apixFetch(fullUrl, method, body, { ...options, signal });
+/* ----------------------------- API Fetchers ----------------------------- */
+function createFetcher(baseUrl, defaultOptions = {}) {
+    return (endpoint, method = "GET", body = null, options = {}) => {
+        const controller = options.controller || new AbortController();
+        return coreFetch(baseUrl, endpoint, method, body, { ...defaultOptions, ...options, signal: controller.signal });
+    };
 }
 
-async function liveFetch(endpoint, method = "GET", body = null, options = {}) {
-    const controller = options.controller || new AbortController();
-    const signal = controller.signal;
-    const fullUrl = `${LIVE_URL}${endpoint}`;
-    return apixFetch(fullUrl, method, body, { ...options, signal });
-}
+export const apiFetch = createFetcher(API_URL);
+export const liveFetch = createFetcher(LIVE_URL);
+export const bannerFetch = createFetcher(BANNERDROP_URL, { credentials: "omit" });
+export const chatFetch = createFetcher(CHAT_URL);
+export const mereFetch = createFetcher(MERE_URL, { credentials: "omit" });
+export const musicFetch = createFetcher(MUSIC_URL, { credentials: "omit" });
+export const stripeFetch = createFetcher(STRIPE_URL, { credentials: "omit" });
 
-async function bannerFetch(endpoint, method = "GET", body = null, options = {}) {
-    const controller = options.controller || new AbortController();
-    const signal = controller.signal;
-    options.credentials = 'omit';
-    const fullUrl = `${BANNERDROP_URL}${endpoint}`;
-    return apixFetch(fullUrl, method, body, { ...options, signal });
-}
-
-export async function chatFetch(endpoint, method = "GET", body = null, options = {}) {
-    const controller = options.controller || new AbortController();
-    const signal = controller.signal;
-    const fullUrl = `${CHAT_URL}${endpoint}`;
-    return apixFetch(fullUrl, method, body, { ...options, signal });
-}
-
-
-export async function mereFetch(endpoint, method = "GET", body = null, options = {}) {
-    const controller = options.controller || new AbortController();
-    const signal = controller.signal;
-    const fullUrl = `${MERE_URL}${endpoint}`;
-    options.credentials = 'omit';
-    return apixFetch(fullUrl, method, body, { ...options, signal });
-}
-
-export async function musicFetch(endpoint, method = "GET", body = null, options = {}) {
-    const controller = options.controller || new AbortController();
-    const signal = controller.signal;
-    const fullUrl = `${MUSIC_URL}${endpoint}`;
-    options.credentials = 'omit';
-    return apixFetch(fullUrl, method, body, { ...options, signal });
-}
-
-
-function clearApiCache() {
-    apiCache.clear();
-    sessionStorage.removeItem(PERSISTED_KEY);
-}
-
-// --- Session Cache Persistence ---
-
-const PERSISTED_KEY = "__api_cache__";
-
-function loadCacheFromSession() {
-    try {
-        const raw = sessionStorage.getItem(PERSISTED_KEY);
-        if (raw) {
-            const obj = JSON.parse(raw);
-            Object.entries(obj).forEach(([key, value]) => {
-                apiCache.set(key, value);
-            });
-        }
-    } catch (e) {
-        console.warn("Failed to load persisted API cache:", e);
-    }
-}
-
-function persistCacheToSession() {
-    try {
-        const obj = Object.fromEntries(apiCache);
-        sessionStorage.setItem(PERSISTED_KEY, JSON.stringify(obj));
-    } catch (e) {
-        console.warn("Failed to persist API cache:", e);
-    }
-}
-
-function safeSetCache(key, data) {
-    apiCache.set(key, { data, timestamp: Date.now() });
-
-    if (apiCache.size > MAX_CACHE_ENTRIES) {
-        const firstKey = apiCache.keys().next().value;
-        apiCache.delete(firstKey);
-    }
-
-    persistCacheToSession();
-}
-
-// --- Clear persisted cache on full reload ---
-
-const navEntry = performance.getEntriesByType("navigation")[0];
-if (navEntry && navEntry.type === "reload") {
-    sessionStorage.removeItem(PERSISTED_KEY);
-}
+/* ----------------------------- Startup & Cache Management ----------------------------- */
+const nav = performance.getEntriesByType("navigation")[0];
+if (nav && nav.type === "reload") sessionStorage.removeItem(PERSISTED_KEY);
 
 loadCacheFromSession();
 
-// --- Background Cache Cleanup (TTL Expiry) ---
 setInterval(() => {
     const now = Date.now();
-    for (const [key, { timestamp }] of apiCache.entries()) {
-        if (now - timestamp >= DEFAULT_TTL) {
-            apiCache.delete(key);
-        }
+    for (const [k, { timestamp }] of apiCache.entries()) {
+        if (now - timestamp >= DEFAULT_TTL) apiCache.delete(k);
     }
     persistCacheToSession();
-}, 60 * 1000); // Every 1 minute
+}, 60000);
 
-export { apiFetch, apixFetch, bannerFetch, liveFetch, API_URL, SRC_URL, clearApiCache };
+/* ----------------------------- Auto-refresh token ----------------------------- */
+function setupAutoRefresh(intervalMs = 60_000, bufferMs = 2 * 60_000) {
+    setInterval(async () => {
+        const token = getState("token");
+        if (!token) return;
+        if (isTokenNearExpiry(token, bufferMs)) {
+            try { await refreshToken(); } catch {}
+        }
+    }, intervalMs);
+
+    const initialToken = getState("token");
+    if (initialToken && isTokenNearExpiry(initialToken, bufferMs)) refreshToken();
+}
+
+setupAutoRefresh();
+
+export { API_URL, SRC_URL, clearApiCache, setToken };

@@ -13,51 +13,123 @@ async function fetchEventData(eventId) {
     return eventData;
 }
 
-async function renderTicksPage(isLoggedIn, eventId, container) {
+async function renderTicksPage(isLoggedIn, eventId, containerx) {
+    let container = createElement("div", { class: "tickscon" }, []);
+    containerx.append(container);
     try {
         container.replaceChildren();
         const eventData = await fetchEventData(eventId);
-        const isCreator = isLoggedIn && getState("user") === eventData.creatorid;
 
-        // === Event Header ===
-        const header = createElement("div", { class: "event-header" }, [
-            createElement("h1", { textContent: eventData.title }),
-            createElement("p", { textContent: eventData.description || "No description available." }),
-            createElement("div", { class: "event-meta" }, [
-                // createElement("p", { textContent: `📅 Date: ${new Date(eventData.date).toLocaleString()}` }),
-                createElement("p", { textContent: `📅 Date: ${Datex(eventData.date)}` }),
-                createElement("p", { textContent: `📍 Location: ${eventData.placename || eventData.location || "TBA"}` }),
-                createElement("p", { textContent: `🎟 Category: ${eventData.category || "Uncategorized"}` }),
-                createElement("p", { textContent: `💲 Currency: ${eventData.currency || "N/A"}` }),
-            ]),
-        ].filter(Boolean));
+        const isCreator =
+            isLoggedIn && getState("user") === eventData.creatorid;
 
-        // === Organizer Info ===
-        const organizer = (eventData.organizer_name || eventData.organizer_contact)
-            ? createElement("div", { class: "event-organizer" }, [
-                createElement("h3", { textContent: "Organizer" }),
-                createElement("p", { textContent: `Name: ${eventData.organizer_name || "Unknown"}` }),
-                createElement("p", { textContent: `Contact: ${eventData.organizer_contact || "Not Provided"}` }),
-            ])
-            : null;
+        // --- <header> ---
+        const header = createElement(
+            "header",
+            { class: "event-header" },
+            [
+                createElement(
+                    "h1",
+                    {},
+                    [eventData.title]
+                ),
 
-        // === Tickets Section ===
-        const tickcon = createElement("div", { class: "tickcon" }, []);
-        const editTabs = createElement("div", { id: "edittabs" }, []);
+                createElement(
+                    "p",
+                    { class: "event-description" },
+                    [eventData.description || "No description available."]
+                ),
 
-        container.appendChild(header);
-        if (organizer) container.appendChild(organizer);
-        container.appendChild(editTabs);
-        container.appendChild(tickcon);
+                createElement(
+                    "section",
+                    { class: "event-meta" },
+                    [
+                        createElement(
+                            "p",
+                            {},
+                            [`📅 Date: ${Datex(eventData.date, true)}`]
+                        ),
+                        createElement(
+                            "p",
+                            {},
+                            [`📍 Location: ${eventData.placename || eventData.location || "TBA"}`]
+                        ),
+                        createElement(
+                            "p",
+                            {},
+                            [`🎟 Category: ${eventData.category || "Uncategorized"}`]
+                        ),
+                        createElement(
+                            "p",
+                            {},
+                            [`💲 Currency: ${eventData.currency || "N/A"}`]
+                        )
+                    ]
+                )
+            ]
+        );
 
-        await displayTickets(tickcon, eventData.tickets, eventId, isCreator, isLoggedIn);
+        // --- <aside> Organizer ---
+        let organizer = null;
+        if (eventData.organizer_name || eventData.organizer_contact) {
+            organizer = createElement(
+                "aside",
+                { class: "event-organizer" },
+                [
+                    createElement("h2", {}, ["Organizer"]),
+                    createElement(
+                        "p",
+                        {},
+                        [`Name: ${eventData.organizer_name || "Unknown"}`]
+                    ),
+                    createElement(
+                        "p",
+                        {},
+                        [`Contact: ${eventData.organizer_contact || "Not Provided"}`]
+                    )
+                ]
+            );
+        }
 
+        // --- <main> Tickets ---
+        const main = createElement("div", { class: "event-main" });
+
+        // editing toolbar wrapper
+        const editTabs = createElement("nav", { id: "edittabs", class: "edit-tabs" }, []);
+
+        const tickcon = createElement("section", {
+            class: "ticket-section",
+            "aria-label": "Ticket List"
+        });
+
+        main.append(editTabs, tickcon);
+
+        // Append everything to container in semantic order
+        container.append(header);
+        if (organizer) container.append(organizer);
+        container.append(main);
+
+        await displayTickets(
+            tickcon,
+            eventData.tickets,
+            eventId,
+            isCreator,
+            isLoggedIn
+        );
     } catch (error) {
         container.replaceChildren();
-        container.appendChild(
-            createElement("h1", { textContent: `Error loading event details: ${error.message}` })
+        container.append(
+            createElement(
+                "h1",
+                {},
+                [`Error loading event details: ${error.message}`]
+            )
         );
-        Notify("Failed to load event details. Please try again later.", { type: "error", duration: 3000 });
+
+        Notify("Failed to load event details. Please try again later.", {
+            type: "error",
+            duration: 3000
+        });
     }
 }
 

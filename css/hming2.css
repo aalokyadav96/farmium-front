@@ -118,6 +118,7 @@
   .nav-icon:hover {
     transform: scale(1.05);
     background-color: #e6f0ff;
+    color: var(--color-bg);
   }
   
   /* Fade-in animation */
@@ -138,7 +139,7 @@
     cursor: pointer;
     font-weight: 600;
     padding: 10px;
-    color: #0078D4;
+    color: var(--color-fg);
     transition: color 0.3s ease;
   }
   

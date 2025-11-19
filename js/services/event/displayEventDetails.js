@@ -121,7 +121,7 @@ const createStatusBadge = eventDate => {
     const time = new Date(eventDate).getTime();
     const isPast = time < now;
     return createElement("span", {
-        style: `font-size:0.75rem;padding:2px 6px;border-radius:4px;background:${isPast ? "#999" : "#28a745"};color:white;margin-left:8px;`
+        style: `font-size:0.75rem;padding:2px 6px;border-radius:4px;background:${isPast ? "#999" : "darkgreen"};color:white;margin-left:8px;`
     }, [isPast ? "Past" : "Upcoming"]);
 };
 

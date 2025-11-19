@@ -3,16 +3,16 @@ import { setState } from "./state/state.js";
 import { detectLanguage, setLanguage } from "./i18n/i18n.js";
 
 // --- Register Service Worker ---
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/service-worker.js")
-      .then(async (reg) => {
-        await navigator.serviceWorker.ready;
-        console.log("🔌 Service worker active:", reg.scope);
-      })
-      .catch((err) => console.error("❌ Service worker registration failed:", err));
-  });
-}
+// if ("serviceWorker" in navigator) {
+//   window.addEventListener("load", () => {
+//     navigator.serviceWorker.register("/service-worker.js")
+//       .then(async (reg) => {
+//         await navigator.serviceWorker.ready;
+//         console.log("🔌 Service worker active:", reg.scope);
+//       })
+//       .catch((err) => console.error("❌ Service worker registration failed:", err));
+//   });
+// }
 
 // --- Environment Profiling ---
 async function measureEnvironment() {
@@ -147,49 +147,49 @@ async function init() {
   }
 }
 
-// --- PWA Install Prompt ---
-let deferredPrompt = null;
+// // --- PWA Install Prompt ---
+// let deferredPrompt = null;
 
-window.addEventListener("beforeinstallprompt", (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
+// window.addEventListener("beforeinstallprompt", (e) => {
+//   e.preventDefault();
+//   deferredPrompt = e;
 
-  if (localStorage.getItem("pwa-dismissed")) return;
+//   if (localStorage.getItem("pwa-dismissed")) return;
 
-  let installBtn = document.getElementById("install-pwa");
-  if (!installBtn) {
-    installBtn = document.createElement("button");
-    installBtn.id = "install-pwa";
-    installBtn.textContent = "Install App";
-    Object.assign(installBtn.style, {
-      position: "fixed",
-      top: "3rem",
-      right: "0",
-      zIndex: "10",
-      padding: "0.6rem 1rem",
-      background: "#1976d2",
-      color: "#fff",
-      border: "none",
-      borderRadius: "4px",
-      cursor: "pointer",
-    });
-    document.body.appendChild(installBtn);
-  }
+//   let installBtn = document.getElementById("install-pwa");
+//   if (!installBtn) {
+//     installBtn = document.createElement("button");
+//     installBtn.id = "install-pwa";
+//     installBtn.textContent = "Install App";
+//     Object.assign(installBtn.style, {
+//       position: "fixed",
+//       top: "3rem",
+//       right: "0",
+//       zIndex: "10",
+//       padding: "0.6rem 1rem",
+//       background: "#1976d2",
+//       color: "#fff",
+//       border: "none",
+//       borderRadius: "4px",
+//       cursor: "pointer",
+//     });
+//     document.body.appendChild(installBtn);
+//   }
 
-  installBtn.style.display = "block";
-  installBtn.addEventListener(
-    "click",
-    () => {
-      installBtn.style.display = "none";
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then(({ outcome }) => {
-        if (outcome !== "accepted") localStorage.setItem("pwa-dismissed", "1");
-        deferredPrompt = null;
-      });
-    },
-    { once: true }
-  );
-});
+//   installBtn.style.display = "block";
+//   installBtn.addEventListener(
+//     "click",
+//     () => {
+//       installBtn.style.display = "none";
+//       deferredPrompt.prompt();
+//       deferredPrompt.userChoice.then(({ outcome }) => {
+//         if (outcome !== "accepted") localStorage.setItem("pwa-dismissed", "1");
+//         deferredPrompt = null;
+//       });
+//     },
+//     { once: true }
+//   );
+// });
 
 // --- Start App ---
 window.addEventListener("DOMContentLoaded", init);

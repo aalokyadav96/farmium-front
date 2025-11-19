@@ -17,7 +17,7 @@ const Sightbox = (mediaSrc, mediaType = "image") => {
   
   // --- close Buttons ---
   const closeButton = createIconButton({
-    classSuffix: "sightboxz-close",
+    classSuffix: "sightboxz-close bonw",
     svgMarkup: xSVG,
     onClick: closeSightbox ,
     label: "",

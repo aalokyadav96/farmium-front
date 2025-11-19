@@ -4,135 +4,169 @@ import Button from "../../components/base/Button.js";
 import Modal from "../../components/ui/Modal.mjs";
 import Datex from "../../components/base/Datex.js";
 
-/**
- * Display a list of notices for an entity.
- * Shows "Add Notice" button if user is the creator.
- */
-export async function displayNotices(entityType, entityId, container, isCreator) {
-    container.replaceChildren();
-
-    const header = createElement("div", { id: "notice-header" }, [
-        createElement("h3", {}, [document.createTextNode("Notices")])
-    ]);
-    container.appendChild(header);
-
-    // Add Notice Button (for creator only)
-    if (isCreator) {
-        const addBtn = Button("➕ Add Notice", "addNoticeBtn", {
-            click: async () => {
-                const title = prompt("Enter notice title:");
-                if (!title) return;
-                const content = prompt("Enter notice content:");
-                if (!content) return;
-
-                const endpoint = `/notices/${entityType}/${entityId}`;
-                const res = await apiFetch(endpoint, "POST", { title, content });
-                if (res && res._id) {
-                    await displayNotices(entityType, entityId, container, isCreator);
-                } else {
-                    alert("Failed to create notice.");
-                }
-            }
-        }, "notice-add-btn");
-        header.appendChild(addBtn);
-    }
-
-    // Fetch all notices (list view uses summary)
-    const notices = await apiFetch(`/notices/${entityType}/${entityId}`, "GET");
-    if (!Array.isArray(notices)) {
-        container.appendChild(createElement("p", {}, [document.createTextNode("Failed to load notices.")]));
-        return;
-    }
-
-    if (notices.length === 0) {
-        container.appendChild(createElement("p", {}, [document.createTextNode("No notices yet.")]));
-        return;
-    }
-
-    const list = createElement("div", { id: "notice-list" });
-
-    notices.forEach(notice => {
-        const noticeBox = createElement("div", { class: "notice-item", tabindex: "0" }, [
-            createElement("h4", {}, [document.createTextNode(notice.title || "Untitled")]),
-            createElement("p", {}, [document.createTextNode(notice.summary.length > 80 ? notice.summary.slice(0, 80) + "..." : notice.summary)]),
-            // createElement("small", {}, [document.createTextNode(`Posted on ${new Date(notice.createdAt).toLocaleString()}`)])
-            createElement("small", {}, [document.createTextNode(`Posted on ${Datex(notice.createdAt, true)}`)])
-        ]);
-
-        // On click → fetch full notice and open modal
-        noticeBox.addEventListener("click", async () => {
-            const fullNotice = await apiFetch(`/notices/${entityType}/${entityId}/${notice._id}`, "GET");
-            if (fullNotice && fullNotice._id) {
-                openNoticeModal(fullNotice, entityType, entityId, isCreator, container);
-            } else {
-                alert("Failed to load notice.");
-            }
-        });
-
-        list.appendChild(noticeBox);
-    });
-
-    container.appendChild(list);
+/** --- API Helpers --- */
+async function fetchNotices(entityType, entityId) {
+  const res = await apiFetch(`/notices/${entityType}/${entityId}`, "GET");
+  return Array.isArray(res) ? res : [];
 }
 
-/**
- * Open a modal showing a single notice.
- */
-function openNoticeModal(notice, entityType, entityId, isCreator, container) {
-    const modalContent = createElement("div", { class: "notice-modal-content" });
+async function createNotice(entityType, entityId, data) {
+  return apiFetch(`/notices/${entityType}/${entityId}`, "POST", data);
+}
 
-    const titleEl = createElement("h3", {}, [document.createTextNode(notice.title || "Untitled Notice")]);
-    const contentEl = createElement("p", { class: "notice-modal-text" }, [document.createTextNode(notice.content)]);
-    // const dateEl = createElement("small", {}, [document.createTextNode(`Posted on ${new Date(notice.createdAt).toLocaleString()}`)]);
-    const dateEl = createElement("small", {}, [document.createTextNode(`Posted on ${Datex(notice.createdAt)}`)]);
+async function updateNotice(entityType, entityId, noticeId, data) {
+  return apiFetch(`/notices/${entityType}/${entityId}/${noticeId}`, "PUT", data);
+}
 
-    modalContent.appendChild(titleEl);
-    modalContent.appendChild(contentEl);
-    modalContent.appendChild(dateEl);
+async function deleteNotice(entityType, entityId, noticeId) {
+  return apiFetch(`/notices/${entityType}/${entityId}/${noticeId}`, "DELETE");
+}
 
-    if (isCreator) {
-        const actions = createElement("div", { class: "notice-modal-actions" });
+/** --- Modal Form for Add/Edit --- */
+function openNoticeForm({ notice = {}, entityType, entityId, container, isEdit = false }) {
+  const modalContent = createElement("div", { class: "notice-form" }, [
+    createElement("label", {}, ["Title:"]),
+    createElement("input", { type: "text", value: notice.title || "", id: "notice-title-input" }),
+    createElement("label", {}, ["Content:"]),
+    createElement("textarea", { id: "notice-content-input" }, [notice.content || ""]),
+  ]);
 
-        const editBtn = Button("✏️ Edit", "", {
-            click: async () => {
-                const newTitle = prompt("Edit title:", notice.title);
-                if (newTitle === null) return;
-                const newContent = prompt("Edit content:", notice.content);
-                if (newContent === null) return;
+  const saveBtn = Button(isEdit ? "Save Changes" : "Create Notice", "", {
+    click: async () => {
+      const title = modalContent.querySelector("#notice-title-input").value.trim();
+      const content = modalContent.querySelector("#notice-content-input").value.trim();
+      if (!title || !content) return alert("Both fields are required");
 
-                const endpoint = `/notices/${entityType}/${entityId}/${notice._id}`;
-                const res = await apiFetch(endpoint, "PUT", { title: newTitle, content: newContent });
-                if (res && res._id) {
-                    modal.close();
-                    await displayNotices(entityType, entityId, container, isCreator);
-                } else {
-                    alert("Failed to update notice.");
-                }
-            }
-        }, "notice-edit-btn buttonx");
+      let res;
+      if (isEdit) {
+        res = await updateNotice(entityType, entityId, notice._id, { title, content });
+      } else {
+        res = await createNotice(entityType, entityId, { title, content });
+      }
 
-        const delBtn = Button("🗑️ Delete", "", {
-            click: async () => {
-                if (!confirm("Delete this notice?")) return;
-                const endpoint = `/notices/${entityType}/${entityId}/${notice._id}`;
-                const res = await apiFetch(endpoint, "DELETE");
-                if (res === null) { // DELETE returns 204
-                    modal.close();
-                    await displayNotices(entityType, entityId, container, isCreator);
-                } else {
-                    alert("Failed to delete notice.");
-                }
-            }
-        }, "notice-delete-btn buttonx");
+      if (res && (res._id || res === null)) {
+        modal.close();
+        await displayNotices(entityType, entityId, container, true);
+      } else {
+        alert("Failed to save notice.");
+      }
+    }
+  }, "buttonx");
 
-        actions.appendChild(editBtn);
-        actions.appendChild(delBtn);
-        modalContent.appendChild(actions);
+  modalContent.appendChild(saveBtn);
+
+  const modal = Modal({
+    title: isEdit ? "Edit Notice" : "Add Notice",
+    content: modalContent,
+    size: "medium"
+  });
+}
+
+/** --- Single Notice Modal --- */
+function openNoticeModal(notice, { entityType, entityId, container, isCreator }) {
+  const modalContent = createElement("div", { class: "notice-modal-content" });
+
+  const titleEl = createElement("h3", {}, [document.createTextNode(notice.title || "Untitled Notice")]);
+  const contentEl = createElement("p", { class: "notice-modal-text" }, [document.createTextNode(notice.content || notice.summary || "")]);
+  const dateEl = createElement("small", {}, [document.createTextNode(`Posted on ${Datex(notice.createdAt, true)}`)]);
+
+  modalContent.append(titleEl, contentEl, dateEl);
+
+  if (isCreator) {
+    const actions = createElement("div", { class: "notice-modal-actions" });
+
+    const editBtn = Button("✏️ Edit", "", {
+      click: () => openNoticeForm({ notice, entityType, entityId, container, isEdit: true })
+    }, "buttonx");
+
+    const delBtn = Button("🗑️ Delete", "", {
+      click: async () => {
+        if (!confirm("Delete this notice?")) return;
+        const res = await deleteNotice(entityType, entityId, notice._id);
+        if (res === null) {
+          modal.close();
+          await displayNotices(entityType, entityId, container, isCreator);
+        } else {
+          alert("Failed to delete notice.");
+        }
+      }
+    }, "buttonx");
+
+    actions.append(editBtn, delBtn);
+    modalContent.appendChild(actions);
+  }
+
+  const modal = Modal({
+    title: "Notice",
+    content: modalContent,
+    size: "medium"
+  });
+}
+
+/** --- Display Notices with Search/Filter --- */
+export async function displayNotices(entityType, entityId, container, isCreator) {
+  container.replaceChildren();
+
+  // Header + Add button
+  const header = createElement("div", { id: "notice-header" }, [
+    createElement("h3", {}, [document.createTextNode("Notices")])
+  ]);
+  if (isCreator) {
+    const addBtn = Button("➕ Add Notice", "addNoticeBtn", { click: () => openNoticeForm({ entityType, entityId, container }) }, "notice-add-btn");
+    header.appendChild(addBtn);
+  }
+  container.appendChild(header);
+
+  // Search + filter inputs
+  const controls = createElement("div", { class: "notice-controls" });
+  const searchInput = createElement("input", { type: "text", placeholder: "Search title or summary...", class: "notice-search" });
+  const dateInput = createElement("input", { type: "date", class: "notice-date-filter" });
+  controls.append(searchInput, dateInput);
+  container.appendChild(controls);
+
+  // Loading indicator
+  const loading = createElement("p", {}, [document.createTextNode("Loading notices...")]);
+  container.appendChild(loading);
+
+  let notices = await fetchNotices(entityType, entityId);
+  loading.remove();
+
+  const list = createElement("div", { id: "notice-list" });
+  container.appendChild(list);
+
+  function renderList(filtered) {
+    list.replaceChildren();
+    if (filtered.length === 0) {
+      list.appendChild(createElement("p", {}, [document.createTextNode("No notices match the criteria.")]));
+      return;
     }
 
-    const modal = Modal({
-        title: "Notice",
-        content: modalContent,
-        size: "medium"
+    filtered.forEach(notice => {
+      const summaryText = notice.summary?.length > 80 ? notice.summary.slice(0, 80) + "..." : notice.summary || "";
+      const noticeBox = createElement("div", { class: "notice-item", tabindex: "0", role: "button" }, [
+        createElement("h4", {}, [document.createTextNode(notice.title || "Untitled")]),
+        createElement("p", {}, [document.createTextNode(summaryText)]),
+        createElement("small", {}, [document.createTextNode(`Posted on ${Datex(notice.createdAt, true)}`)])
+      ]);
+      noticeBox.addEventListener("click", () => openNoticeModal(notice, { entityType, entityId, container, isCreator }));
+      list.appendChild(noticeBox);
     });
+  }
+
+  renderList(notices);
+
+  // Filter function
+  function applyFilters() {
+    const search = searchInput.value.trim().toLowerCase();
+    const date = dateInput.value;
+    const filtered = notices.filter(n => {
+      const matchesText = !search || (n.title && n.title.toLowerCase().includes(search)) || (n.summary && n.summary.toLowerCase().includes(search));
+      const matchesDate = !date || (n.createdAt && n.createdAt.split("T")[0] === date);
+      return matchesText && matchesDate;
+    });
+    renderList(filtered);
+  }
+
+  searchInput.addEventListener("input", applyFilters);
+  dateInput.addEventListener("change", applyFilters);
 }

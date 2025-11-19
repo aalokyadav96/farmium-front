@@ -41,11 +41,11 @@ export function YoHome(isLoggedIn, container) {
 
   const fragment = document.createDocumentFragment();
   fragment.appendChild(homepageContent);
-  fragment.appendChild(
-    createElement("div", {}, [
-      createElement("button", { id: "install-pwa", style: "display:none;" }, ["Install App"]),
-    ])
-  );
+  // fragment.appendChild(
+  //   createElement("div", {}, [
+  //     createElement("button", { id: "install-pwa", style: "display:none;" }, ["Install App"]),
+  //   ])
+  // );
 
   container.appendChild(fragment);
 }

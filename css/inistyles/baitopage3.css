@@ -109,6 +109,7 @@
 /* Each related job card */
 .baito-related-card.card {
   display: flex;
+  max-width: 220px;
   flex-direction: column;
   border: 1px solid #e0e0e0;
   border-radius: 8px;

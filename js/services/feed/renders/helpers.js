@@ -35,20 +35,6 @@ export function createPostHeader(post) {
         formattedTime = Datex(post.timestamp);
     }
 
-    // if (post.timestamp) {
-    //     try {
-    //         const date = new Date(post.timestamp);
-    //         formattedTime = date.toLocaleString(undefined, {
-    //             year: "numeric",
-    //             month: "short",
-    //             day: "numeric",
-    //             hour: "2-digit",
-    //             minute: "2-digit"
-    //         });
-    //     } catch {
-    //         formattedTime = post.timestamp;
-    //     }
-    // }
 
     const usernameDiv = createElement("div", { class: "username" }, [post.username]);
     const timestampDiv = createElement("div", { class: "timestamp" }, [formattedTime]);
@@ -58,23 +44,6 @@ export function createPostHeader(post) {
         timestampDiv
     ]);
 
-    // // Post Header (Subscribe)
-    // const isLoggedIn = Boolean(getState("token"));
-    // const currentUser = getState("user");
-    // let subscribeBtn = null;
-    // if (isLoggedIn && post.username !== currentUser) {
-    //     subscribeBtn = Button(
-    //         post.isSubscribed ? "Unsubscribe" : "Subscribe",
-    //         "subscribe-btn",
-    //         {
-    //             click: () => SubscribeToFeedPost(subscribeBtn, post.userid)
-    //         },
-    //         "btn buttonx"
-    //     );
-    
-    //     subscribeBtn.dataset.action = "toggle-subscribe";
-    //     subscribeBtn.dataset.userid = post.userid;
-    // }
     
     const headerRow = createElement("div", { class: "post-header hflex" }, [
         userIconLink,
@@ -165,31 +134,3 @@ export async function deletePost(postId, postElement, posts) {
         }
     }
 }
-
-// /**
-//  * Delete a post
-//  */
-// export async function deletePost(postId, postElement, posts) {
-//     if (!getState("token")) {
-//         Notify("Please log in to delete your post.", { type: "warning", duration: 3000, dismissible: true });
-//         return;
-//     }
-
-//     if (confirm("Are you sure you want to delete this post?")) {
-//         try {
-//             await apiFetch(`/feed/post/${postId}`, "DELETE");
-//             Notify("Post deleted successfully.", { type: "success", duration: 3000, dismissible: true });
-
-//             if (postElement && postElement.parentNode) {
-//                 postElement.parentNode.removeChild(postElement);
-//             }
-
-//             const index = posts.findIndex(p => p.postid === postId);
-//             if (index !== -1) {
-//                 posts.splice(index, 1);
-//             }
-//         } catch (err) {
-//             Notify(`Error deleting post: ${err.message}`, { type: "error", duration: 3000, dismissible: true });
-//         }
-//     }
-// }

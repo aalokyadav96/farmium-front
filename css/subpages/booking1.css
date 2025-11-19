@@ -112,7 +112,7 @@
     transition: background 0.2s;
   }
   .btn-primary {
-    background: #007bff;
+    background: var(--color-btn-bg);
     color: #fff;
   }
   .btn-primary:hover {

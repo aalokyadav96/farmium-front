@@ -104,7 +104,7 @@ export default async function displayPlace(isLoggedIn, placeId, contentContainer
           maparea.appendChild(mapElement);
           mapButton.remove(); // optional: remove button after loading map
         }
-      });
+      },"buttonx secondary");
 
       contentContainer.appendChild(mapButton);
       contentContainer.appendChild(maparea);

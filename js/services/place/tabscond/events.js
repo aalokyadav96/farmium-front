@@ -114,9 +114,9 @@ function renderEvents(container, events) {
 
         const time = document.createElement('p');
         // const start = new Date(event.start_date_time).toLocaleString();
-        const start = Datex(event.start_date_time);
+        const start = Datex(event.start_date_time, true);
         // const end = new Date(event.end_date_time).toLocaleString();
-        const end = Datex(event.end_date_time);
+        const end = Datex(event.end_date_time, true);
         time.textContent = `From: ${start} To: ${end}`;
         card.appendChild(time);
 
@@ -165,7 +165,7 @@ function openEventModal(event) {
 
     const time = document.createElement('p');
     // time.textContent = `From ${new Date(event.start_date_time).toLocaleString()} to ${new Date(event.end_date_time).toLocaleString()}`;
-    time.textContent = `From ${Datex(event.start_date_time)} to ${Datex(event.end_date_time)}`;
+    time.textContent = `From ${Datex(event.start_date_time, true)} to ${Datex(event.end_date_time, true)}`;
     content.appendChild(time);
 
     const category = document.createElement('p');

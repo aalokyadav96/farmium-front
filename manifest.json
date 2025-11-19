@@ -7,7 +7,6 @@
   "orientation": "portrait",
   "theme_color": "#222222",
   "background_color": "#ffffff",
-
   "icons": [
     {
       "src": "/assets/icon-72.png",
@@ -35,40 +34,43 @@
       "type": "image/png"
     }
   ],
-
   "shortcuts": [
     {
       "name": "Dashboard",
       "short_name": "Dashboard",
       "url": "/dashboard",
-      "icons": [{ "src": "/assets/icon-96.png", "sizes": "96x96" }]
+      "icons": [
+        {
+          "src": "/assets/icon-96.png",
+          "sizes": "96x96"
+        }
+      ]
     },
     {
       "name": "Profile",
       "short_name": "Profile",
       "url": "/profile",
-      "icons": [{ "src": "/assets/icon-96.png", "sizes": "96x96" }]
+      "icons": [
+        {
+          "src": "/assets/icon-96.png",
+          "sizes": "96x96"
+        }
+      ]
     }
   ],
-
   "related_applications": [
     {
       "platform": "webapp",
-      "url": "https://yourdomain.com/manifest.json"
-    },
-    {
-      "platform": "play",
-      "id": "com.yourcompany.app"
+      "url": "https://indium.netlify.app/manifest.json"
     }
   ],
   "prefer_related_applications": false,
-
   "url_handlers": [
     {
-      "origin": "https://yourdomain.com"
+      "origin": "https://indium.netlify.app"
     },
     {
-      "origin": "https://*.yourdomain.com"
+      "origin": "https://*.indium.netlify.app"
     }
   ]
 }

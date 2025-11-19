@@ -15,7 +15,7 @@
   }
   
   .place-card button {
-    background-color: #007bff;
+    background-color: var(--color-btn-bg);
     color: white;
     padding: 8px 12px;
     border: none;

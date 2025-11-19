@@ -33,12 +33,15 @@ function ReviewItem(isCreator, { reviewerName, rating, comment, date, onEdit, on
     ]);
 }
 
+// Display all reviews
 async function displayReviews(reviewsContainer, isCreator, isLoggedIn, entityType, entityId) {
     clearElement(reviewsContainer);
+
     reviewsContainer.appendChild(createElement("h2", {}, ["Reviews"]));
 
     const actionContainer = createElement("div", { class: "review-action-container" });
 
+    // Show "Add Review" only if logged-in user is not the creator
     if (!isCreator && isLoggedIn) {
         const addButton = Button("Add Review", "add-review-btn", {
             click: () => handleAddReview(actionContainer, entityType, entityId)
@@ -50,31 +53,32 @@ async function displayReviews(reviewsContainer, isCreator, isLoggedIn, entityTyp
 
     try {
         const { reviews } = await apiFetch(`/reviews/${entityType}/${entityId}`);
-        if (Array.isArray(reviews) && reviews.length > 0) {
-            // Fetch usernames for all review user IDs
-            const userIds = reviews.map(r => r.userid);
-            const userMeta = await fetchUserMeta(userIds);
-
-            reviews.forEach((review) => {
-                const reviewerName = userMeta[review.userid]?.username || "Anonymous";
-
-                reviewsContainer.appendChild(
-                    ReviewItem(isCreator, {
-                        reviewerName,
-                        rating: review.rating,
-                        comment: review.comment,
-                        // date: review.date ? new Date(review.date).toLocaleString() : "",
-                        date: review.date ? Datex(review.date) : "",
-                        onEdit: () => handleEditReview(review.reviewid, entityType, entityId),
-                        onDelete: () => handleDeleteReview(review.reviewid, entityType, entityId)
-                    })
-                );
-            });
-        } else {
+        if (!Array.isArray(reviews) || reviews.length === 0) {
             reviewsContainer.appendChild(
                 createElement("p", { class: "no-reviews" }, ["No reviews yet."])
             );
+            return;
         }
+
+        // Fetch usernames for all review user IDs
+        const userIds = reviews.map(r => r.userid);
+        const userMeta = await fetchUserMeta(userIds);
+
+        reviews.forEach((review) => {
+            const reviewerName = userMeta[review.userid]?.username || "Anonymous";
+
+            reviewsContainer.appendChild(
+                ReviewItem(isCreator, {
+                    reviewerName,
+                    rating: review.rating,
+                    comment: review.comment,
+                    date: review.date ? Datex(review.date) : "",
+                    onEdit: () => handleEditReview(review.reviewid, entityType, entityId),
+                    onDelete: () => handleDeleteReview(review.reviewid, entityType, entityId)
+                })
+            );
+        });
+
     } catch (error) {
         console.error("Error fetching reviews:", error);
         reviewsContainer.appendChild(
@@ -82,49 +86,5 @@ async function displayReviews(reviewsContainer, isCreator, isLoggedIn, entityTyp
         );
     }
 }
-
-// // Display all reviews for an entity
-// async function displayReviews(reviewsContainer, isCreator, isLoggedIn, entityType, entityId) {
-//     clearElement(reviewsContainer);
-//     reviewsContainer.appendChild(createElement("h2", {}, ["Reviews"]));
-
-//     const actionContainer = createElement("div", { class: "review-action-container" });
-
-//     if (!isCreator && isLoggedIn) {
-//         const addButton = Button("Add Review", "add-review-btn", {
-//             click: () => handleAddReview(actionContainer, entityType, entityId)
-//         }, "buttonx");
-//         reviewsContainer.appendChild(addButton);
-//     }
-
-//     reviewsContainer.appendChild(actionContainer);
-
-//     try {
-//         const { reviews } = await apiFetch(`/reviews/${entityType}/${entityId}`);
-//         if (Array.isArray(reviews) && reviews.length > 0) {
-//             reviews.forEach((review) => {
-//                 reviewsContainer.appendChild(
-//                     ReviewItem(isCreator, {
-//                         reviewerName: review.userid || "Anonymous",
-//                         rating: review.rating,
-//                         comment: review.comment,
-//                         date: review.date ? new Date(review.date).toLocaleString() : "",
-//                         onEdit: () => handleEditReview(review.reviewid, entityType, entityId),
-//                         onDelete: () => handleDeleteReview(review.reviewid, entityType, entityId)
-//                     })
-//                 );
-//             });
-//         } else {
-//             reviewsContainer.appendChild(
-//                 createElement("p", { class: "no-reviews" }, ["No reviews yet."])
-//             );
-//         }
-//     } catch (error) {
-//         console.error("Error fetching reviews:", error);
-//         reviewsContainer.appendChild(
-//             createElement("p", { class: "error-message" }, ["Failed to load reviews."])
-//         );
-//     }
-// }
 
 export { displayReviews };

@@ -1,98 +1,124 @@
 import { SRC_URL, apiFetch } from "../../api/api.js";
 import { displayMerchandise } from "../merch/merchService.js";
-// import { displayMedia } from "../media/mediaService.js";
 import { createElement } from "../../components/createElement.js";
 import Modal from "../../components/ui/Modal.mjs";
 import Button from "../../components/base/Button.js";
 import { navigate } from "../../routes/index.js";
 
-async function renderAlbumsTab(container, artistID, isCreator) {
+
+export async function renderAlbumsTab(artistID, isCreator) {
+    const container = createElement("div", { class: "albums-container" }, []);
+
+    const heading = createElement("p", {}, [
+        createElement("strong", {}, ["🎶 Albums"])
+    ]);
+    container.append(heading);
+
+    let albums = [];
     try {
-        const albums = await apiFetch(`/artists/${artistID}/albums`);
-        if (!albums.length) {
-            container.innerHTML = "<p>No albums available.</p>";
-            return;
-        }
-
-        albums.forEach(album => {
-            if (!album.published && !isCreator) return;
-
-            const div = document.createElement("div");
-            div.className = "album-block";
-            div.innerHTML = `
-                <h3>${album.title}</h3>
-                <p><strong>Release:</strong> ${album.releaseDate}</p>
-                <p>${album.description}</p>
-            `;
-            container.appendChild(div);
-        });
-    } catch (err) {
-        container.innerHTML = "<p>Error loading albums.</p>";
+        albums = await apiFetch(`/artists/${artistID}/albums`);
+    } catch {
+        const msg = createElement("p", {}, ["Error loading albums."]);
+        container.append(msg);
+        return container;
     }
+
+    if (!albums.length) {
+        const msg = createElement("p", {}, ["No albums available."]);
+        container.append(msg);
+        return container;
+    }
+
+    const listWrapper = createElement("div", { class: "albums-wrapper" }, []);
+
+    albums.forEach(a => {
+        if (!a.published && !isCreator) return;
+
+        const title = createElement("h3", {}, [a.title || ""]);
+        const release = createElement("p", {}, [
+            createElement("strong", {}, ["Release:"]),
+            " ",
+            a.releaseDate || ""
+        ]);
+        const desc = createElement("p", {}, [a.description || ""]);
+
+        const block = createElement("div", { class: "album-block" }, [
+            title,
+            release,
+            desc
+        ]);
+
+        listWrapper.append(block);
+    });
+
+    container.append(listWrapper);
+    return container;
 }
+
 
 async function renderMerchTab(container, artistID, isCreator, isLoggedIn) {
     try {
         const merchItems = await apiFetch(`/artists/${artistID}/merch`);
-        container.appendChild(createElement('div', { "id": "edittabs" }));
+        const holder = createElement("div", { id: "edittabs" }, []);
+        container.append(holder);
         displayMerchandise(container, merchItems, "artist", artistID, isCreator, isLoggedIn);
-    } catch (err) {
-        container.innerHTML = "<p>Error loading merch.</p>";
+    } catch {
+        const msg = createElement("p", {}, ["Error loading merch."]);
+        container.replaceChildren(msg);
     }
 }
+
 
 async function renderEventsTab(container, artistID, isCreator) {
     try {
         const events = await apiFetch(`/artists/${artistID}/events`);
-
-        // Clear container
         container.replaceChildren();
 
-        // Creator-specific actions
         if (isCreator) {
-            const createEventBtn = createElement("button", { class: "create-event-btn action-btn buttonx" }, ["Create New Event"]);
-            createEventBtn.addEventListener("click", () => openEventModal(artistID));
-            container.appendChild(createEventBtn);
+            const createEventBtn = Button("Create New Event", "", {
+                click: () => openEventModal(artistID, container)
+            }, "action-btn buttonx");
 
-            const addArtistToEventBtn = createElement("button", { class: "action-btn buttonx" }, ["Add Artist to an Event"]);
-            addArtistToEventBtn.addEventListener("click", () => openAddToEventModal(artistID));
-            container.appendChild(addArtistToEventBtn);
+            const addArtistToEventBtn = Button("Add Artist to an Event", "", {
+                click: () => openAddToEventModal(artistID)
+            }, "action-btn buttonx");
+
+            container.append(createEventBtn, addArtistToEventBtn);
         }
 
-        // Events List
         if (!events || events.length === 0) {
-            container.appendChild(createElement("p", {}, ["No upcoming events."]));
+            container.append(createElement("p", {}, ["No upcoming events."]));
             return;
         }
 
-        const ul = createElement("ul");
+        const ul = createElement("ul", {}, []);
+
         events.forEach(eventx => {
+            const btn = eventx.eventid
+                ? Button("View Event", "", { click: () => navigate(`/event/${eventx.eventid}`) })
+                : createElement("span", {}, [""]);
+
             const li = createElement("li", {}, [
                 createElement("strong", {}, [eventx.title]),
                 createElement("br"),
                 `${eventx.date} at ${eventx.venue} — ${eventx.city}, ${eventx.country}`,
                 createElement("br"),
-                eventx.eventid
-                    ? Button("View Event", "", {
-                        click: () => { navigate(`/event/${eventx.eventid}`) }
-                    })
-                    : ""
+                btn
             ]);
-            ul.appendChild(li);
+
+            ul.append(li);
         });
 
-        container.appendChild(ul);
-    } catch (err) {
-        container.appendChild(createElement("p", {}, ["Error loading events."]));
+        container.append(ul);
+    } catch {
+        container.append(createElement("p", {}, ["Error loading events."]));
     }
 }
 
 
-
-// Open Event Creation Modal
-function openEventModal(artistID) {
-    const form = document.createElement("form");
-    form.className = "event-form";
+// EVENT CREATION MODAL
+function openEventModal(artistID, eventsContainer) {
+    const form = createElement("form", { class: "event-form" }, []);
 
     const fields = [
         { type: "text", name: "title", placeholder: "Event Title", required: true },
@@ -103,86 +129,80 @@ function openEventModal(artistID) {
         { type: "url", name: "ticketUrl", placeholder: "Ticket URL (optional)" }
     ];
 
-    fields.forEach(field => {
-        const input = document.createElement("input");
-        Object.entries(field).forEach(([key, value]) => input[key] = value);
-        form.appendChild(input);
+    fields.forEach(f => {
+        const input = createElement("input", {
+            type: f.type,
+            name: f.name,
+            placeholder: f.placeholder || "",
+            required: f.required || false
+        });
+        form.append(input);
     });
 
-    const submitButton = document.createElement("button");
-    submitButton.type = "submit";
-    submitButton.textContent = "Create Event";
-    form.appendChild(submitButton);
+    const submitBtn = createElement("button", { type: "submit" }, ["Create Event"]);
+    form.append(submitBtn);
 
-    form.addEventListener("submit", async (e) => {
+    const { close } = Modal({
+        title: "Create New Event",
+        content: form,
+        onClose: () => {},
+        autofocusSelector: "input[name='title']"
+    });
+
+    form.addEventListener("submit", async e => {
         e.preventDefault();
-        const formData = new FormData(form);
-        const eventData = Object.fromEntries(formData);
+        const data = Object.fromEntries(new FormData(form));
 
         try {
-            await apiFetch(`/artists/${artistID}/events`, "POST", eventData);
-            alert("Event created successfully!");
-            document.getElementById("app").removeChild(modal);
+            await apiFetch(`/artists/${artistID}/events`, "POST", data);
+            close();
 
-            // Re-fetch events and re-render using the actual container
-            const eventsContainer = document.getElementById("events-container");
             if (eventsContainer) {
-                await renderEventsTab(eventsContainer, artistID);
+                await renderEventsTab(eventsContainer, artistID, true);
             }
-        } catch (error) {
-            console.error("Failed to create event:", error);
-            alert("Error creating event. Please try again.");
+        } catch {
+            console.error("Failed to create event");
         }
     });
-
-
-    const modal = Modal({ title: "Create New Event", content: form, onClose: () => document.getElementById("app").removeChild(modal) });
 }
 
-// Open Event Creation Modal
+
+// ADD ARTIST TO EVENT MODAL
 function openAddToEventModal(artistID) {
-    const form = document.createElement("form");
-    form.className = "event-form";
+    const form = createElement("form", { class: "event-form" }, []);
 
-    const fields = [
-        { type: "text", name: "eventid", placeholder: "Event Id", required: true },
-    ];
-
-    fields.forEach(field => {
-        const input = document.createElement("input");
-        Object.entries(field).forEach(([key, value]) => input[key] = value);
-        form.appendChild(input);
+    const input = createElement("input", {
+        type: "text",
+        name: "eventid",
+        placeholder: "Event ID",
+        required: true
     });
 
-    const submitButton = document.createElement("button");
-    submitButton.type = "submit";
-    submitButton.textContent = "Add";
-    form.appendChild(submitButton);
+    const submitBtn = createElement("button", { type: "submit" }, ["Add"]);
+    form.append(input, submitBtn);
 
-    form.addEventListener("submit", async (e) => {
+    const { close } = Modal({
+        title: "Add Artist To Event",
+        content: form,
+        onClose: () => {},
+        autofocusSelector: "input[name='eventid']"
+    });
+
+    form.addEventListener("submit", async e => {
         e.preventDefault();
-        const formData = new FormData(form);
-        const eventData = Object.fromEntries(formData);
 
+        const data = Object.fromEntries(new FormData(form));
         try {
-            await apiFetch(`/artists/${artistID}/events/addtoevent`, "PUT", eventData);
-
-            alert("Artist added to event  successfully!");
-            document.getElementById("app").removeChild(modal);
-        } catch (error) {
-            console.error("Failed to add artist to event:", error);
-            alert("Error adding artist to event. Please try again.");
+            await apiFetch(`/artists/${artistID}/events/addtoevent`, "PUT", data);
+            close();
+        } catch {
+            console.error("Error adding artist to event");
         }
     });
-
-
-    const modal = Modal({ title: "Add Artist To Event", content: form, onClose: () => document.getElementById("app").removeChild(modal) });
 }
 
 
 export {
-    renderAlbumsTab,
     renderMerchTab,
-    // renderBehindTheScenesTab,
     renderEventsTab
 };

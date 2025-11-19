@@ -44,7 +44,7 @@
 
 .filter-option input[type="checkbox"]:checked + span {
   font-weight: bold;
-  color: #007bff;
+  color: var(--color-btn-bg);
 }
 
 /* Hover and focus effects for better UX */
@@ -54,7 +54,7 @@
 }
 
 .sort-option input[type="radio"]:focus, .filter-option input[type="checkbox"]:focus {
-  outline: 2px solid #007bff;
+  outline: 2px solid var(--color-btn-bg);
 }
 
 /* Responsiveness: Stacking vertically on smaller screens */

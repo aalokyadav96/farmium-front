@@ -200,7 +200,7 @@ async function displayMerchandise(container, merchData, entityType, eventId, isC
     container.appendChild(createElement("h2", {}, ["Merchandise"]));
 
     if (isCreator) {
-        const addBtn = Button("Add Merchandise", "", { click: () => addMerchForm(entityType, eventId, merchList) });
+        const addBtn = Button("Add Merchandise", "add-merch-btn", { click: () => addMerchForm(entityType, eventId, merchList) },"buttonx");
         container.appendChild(addBtn);
     }
     

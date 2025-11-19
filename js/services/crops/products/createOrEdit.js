@@ -103,8 +103,8 @@ export function renderItemForm(container, mode, itemData, type, onDone) {
   });
 
   form.append(
-    nameGroup,
     categoryGroup,
+    nameGroup,
     priceGroup,
     quantityGroup,
     unitGroup,

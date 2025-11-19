@@ -91,7 +91,7 @@
 }
 
 .block.drag-over {
-  border: 2px dashed #007bff;
+  border: 2px dashed var(--color-btn-bg);
 }
 
 .block-label {
@@ -108,6 +108,7 @@
   border: 1px solid #ccc;
   border-radius: 4px;
   padding: 6px;
+  background-color: var(--color-bg);
 }
 
 .block input[type="file"] {

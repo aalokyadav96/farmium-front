@@ -150,28 +150,7 @@ function displayItinerary(isLoggedIn, divContainerNode) {
       body.appendChild(document.createTextNode("Error loading itinerary details."));
     }
   }
-  
-  // async function openViewModal(id) {
-  //   const modalLoading = Modal({
-  //     title: 'Loading Itinerary Details…',
-  //     content: 'Loading...',
-  //     onClose: () => { },
-  //     size: 'large',
-  //     closeOnOverlayClick: true,
-  //   });
-
-  //   try {
-  //     const it = await apiFetch(`/itineraries/all/${id}`);
-  //     const contentNode = renderItineraryDetailsContent(it);
-  //     modalLoading.querySelector('.modal-body').replaceWith(contentNode);
-
-  //     const titleEl = modalLoading.querySelector('.modal-header h3');
-  //     titleEl.textContent = it.name;
-  //   } catch {
-  //     const body = modalLoading.querySelector('.modal-body');
-  //     body.textContent = 'Error loading itinerary details.';
-  //   }
-  // }
+   
   function renderItineraryDetailsContent(it) {
     const container = createElement('div', { class: 'itinerary-container' }, []);
   

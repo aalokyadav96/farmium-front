@@ -1,10 +1,11 @@
 import {
   renderMerchTab,
-  renderEventsTab
+  renderEventsTab,
+  renderAlbumsTab
 } from "./artistTabs.js";
 import { renderSongsTab } from "./artistSongsTab.js";
-import { SRC_URL, apiFetch } from "../../api/api.js";
-import { editArtist, deleteArtistForm, manageBandMembers } from "./createOrEditArtist.js";
+import { apiFetch } from "../../api/api.js";
+import { deleteArtistForm } from "./createOrEditArtist.js";
 import { createOrEditArtist } from "./createOrEditArtist.js";
 import { createElement } from "../../components/createElement.js";
 import { reportPost } from "../reporting/reporting.js";
@@ -16,10 +17,11 @@ import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePath
 import { updateImageWithCrop } from "../../utils/bannerEditor.js";
 import Imagex from "../../components/base/Imagex.js";
 import { renderPostsTab, renderLiveTab } from "./moretabs.js";
-import { uploadFile } from "../media/api/mediaApi.js";
-import { uid } from "../media/ui/mediaUploadForm.js";
 import { displayNotices } from "../notices/notices.js";
-
+import { renderBandMembers, renderManageMembersButton } from "./memberManage.js";
+import { blueskySVG, facebookSVG, instagramSVG, soundcloudSVG, spotifySVG, tiktokSVG, twitterSVG, xitterSVG, youtubeSVG } from "../../components/socialSVGs.js";
+import { createIconButton } from "../../utils/svgIconButton.js";
+import { payVia } from "../pay3/stripe.js";
 
 // --- CREATOR-ONLY BANNER SECTION ---
 function createArtistBannerSection(artist, isCreator) {
@@ -119,12 +121,25 @@ export async function displayArtist(content, artistID, isLoggedIn) {
     const subscribeButton = Button(isSubscribed ? "Unsubscribe" : "Subscribe", "", {
       click: () => SubscribeToArtist(subscribeButton, artist.artistid)
     }, "buttonx");
-    buttonRow.appendChild(subscribeButton);
+    // buttonRow.appendChild(subscribeButton);
 
     const reportButton = Button("Report", "report-btn", {
       click: () => reportPost(artistID, "artist")
     }, "buttonx");
-    buttonRow.appendChild(reportButton);
+    // buttonRow.appendChild(reportButton);
+
+    const fundBtn = Button("Fund Artist", "fund-artist-btn", {
+      click: () => payVia({
+        entityType: "funding",
+        entityId: "artist-5678",
+        type: "voluntary",
+        options: [500, 1000, 2000], // predefined amounts in cents
+        allowCustom: true,
+        description: "Support your favorite artist"
+      })
+    }, "buttonx secondary");
+
+    buttonRow.append(subscribeButton, reportButton, fundBtn);
 
     if (isCreator) {
       const editDiv = createElement("div", { class: "editdiv", id: "editevent" });
@@ -151,7 +166,6 @@ export async function displayArtist(content, artistID, isLoggedIn) {
       band: [
         { title: "Merch", id: "artist-merch", render: (c) => renderMerchTab(c, artistID, isCreator, isLoggedIn) },
         { title: "Songs", id: "songs", render: (c) => renderSongsTab(c, artistID, isCreator) },
-        // { title: "Members", id: "band-members", render: (c) => renderSongsTab(c, artistID, isCreator) },
       ],
       rapper: [
         { title: "Tracks", id: "songs", render: (c) => renderSongsTab(c, artistID, isCreator) },
@@ -186,17 +200,19 @@ export async function displayArtist(content, artistID, isLoggedIn) {
 }
 
 
-// --- SUPPORT ---
+// --- SOCIAL ICON ---
 function getSocialIcon(platform) {
   const lc = platform.toLowerCase();
   const icons = {
-    instagram: "📸",
-    twitter: "🐦",
-    youtube: "▶️",
-    facebook: "📘",
-    tiktok: "🎵",
-    spotify: "🎧",
-    soundcloud: "☁️",
+    instagram: instagramSVG,
+    twitter: twitterSVG,
+    youtube: youtubeSVG,
+    facebook: facebookSVG,
+    tiktok: tiktokSVG,
+    spotify: spotifySVG,
+    soundcloud: soundcloudSVG,
+    bluesky: blueskySVG,
+    x: xitterSVG,
     website: "🌐",
     link: "🔗"
   };
@@ -207,7 +223,7 @@ function getSocialIcon(platform) {
 }
 
 
-// --- SUBSCRIBE FUNCTION ---
+// --- SUBSCRIBE ---
 function SubscribeToArtist(followBtn, artistId) {
   toggleAction({
     entityId: artistId,
@@ -219,145 +235,92 @@ function SubscribeToArtist(followBtn, artistId) {
   });
 }
 
-
-// --- OVERVIEW TAB ---
 function renderOverviewTab(container, artist, isCreator, isLoggedIn) {
   const artistDiv = createElement("div", { class: "artist-container" });
-  artistDiv.appendChild(createElement("h2", { class: "artist-name" }, [artist.name || "Unknown Artist"]));
 
+  if (isCreator) artistDiv.appendChild(renderCreatorActions(artist, container, isLoggedIn));
+  artistDiv.appendChild(createElement("h2", { class: "artist-name" }, [artist.name || "Unknown Artist"]));
+  artistDiv.appendChild(renderArtistDetails(artist));
+  if (artist.socials) artistDiv.appendChild(renderSocialLinks(artist.socials));
+  if (isCreator && artist.category?.toLowerCase() === "band") artistDiv.appendChild(renderManageMembersButton(artist.artistid, container));
+  if (artist.members?.length > 0) artistDiv.appendChild(renderBandMembers(artist, isCreator));
+  renderAlbumsTab(artist.artistid, isCreator)
+    .then(c => {
+      artistDiv.appendChild(c);
+    });
+
+  container.appendChild(artistDiv);
+}
+
+function renderArtistDetails(artist) {
   const detailsDiv = createElement("div", { class: "artist-details" });
-  [
+
+  const fields = [
     { label: "🎨 Artist Type", value: artist.category || "Unknown" },
     { label: "📖 Biography", value: artist.bio || "No biography available" },
     { label: "🎂 Date of Birth", value: artist.dob || "" },
     { label: "📍 Place", value: [artist.place, artist.country].filter(Boolean).join(", ") },
-    { label: "🎶 Genres", value: Array.isArray(artist.genres) && artist.genres.length > 0 ? artist.genres.join(", ") : "None" }
-  ].forEach(({ label, value }) =>
-    detailsDiv.appendChild(createElement("p", {}, [createElement("strong", {}, [`${label}:`]), ` ${value}`]))
-  );
-  artistDiv.appendChild(detailsDiv);
-
-  // --- BAND MEMBERS ---
-  if (artist.members?.length > 0) {
-    const memberItems = artist.members.map(member => {
-      const photoSrc = resolveImagePath(EntityType.ARTIST, PictureType.THUMB, member.image);
-      const img = Imagex({ src: photoSrc, alt: member.name, classes: "member-photo" });
-
-      let uploadBtn, fileInput;
-
-      if (isCreator) {
-        fileInput = createElement("input", {
-          type: "file",
-          accept: "image/*",
-          style: "display:none"
-        });
-
-        uploadBtn = Button("📸 Upload New Photo", "", {
-          click: () => fileInput.click()
-        }, "upload-member-btn buttonx secondary");
-
-        fileInput.addEventListener("change", async () => {
-          const file = fileInput.files[0];
-          if (!file) return;
-
-          try {
-            const uploadConfig = {
-              mediaEntity: "artist",
-              fileType: "member",
-              id: uid(),
-              file
-            };
-
-            const uploaded = await uploadFile(uploadConfig);
-            if (!uploaded?.filename) {
-              throw new Error("Invalid upload response");
-            }
-
-            const updatedMembers = artist.members.map(m =>
-              m.artistid === member.artistid ? { ...m, image: uploaded.filename } : m
-            );
-
-            await apiFetch(`/artists/${artist.artistid}/members`, "PUT", { members: updatedMembers });
-
-            const newSrc = resolveImagePath(EntityType.ARTIST, PictureType.THUMB, uploaded.filename);
-            img.src = newSrc + `?t=${Date.now()}`;
-            Notify(`${member.name}'s photo updated`, { type: "success", duration: 2500 });
-          } catch (err) {
-            Notify(`Failed to upload photo: ${err.message}`, { type: "error", duration: 2500 });
-          }
-        });
-      }
-
-      const text = createElement("div", { class: "member-text" }, [
-        createElement("span", {}, [
-          `${member.name}${member.role ? " - " + member.role : ""}${member.dob ? " (DOB: " + member.dob + ")" : ""}`
-        ])
-      ]);
-
-      return createElement("li", { class: "member-item" }, [
-        img,
-        text,
-        ...(isCreator ? [uploadBtn, fileInput] : [])
-      ]);
-    });
-
-    artistDiv.appendChild(
-      createElement("div", { class: "band-members" }, [
-        createElement("p", {}, [createElement("strong", {}, ["👥 Band Members:"])]),
-        createElement("ul", {}, memberItems)
-      ])
-    );
-  }
-
-  // --- MANAGE MEMBERS BUTTON ---
-  if (isCreator && artist.category?.toLowerCase() === "band") {
-    artistDiv.appendChild(Button("👥 Manage Band Members", "", {
-      click: () => {
-        const container = document.getElementById("editartist") || container;
-        manageBandMembers(artist.artistid, container);
-      }
-    }, "manage-members-btn buttonx secondary"));
-  }
-
-  // --- SOCIAL LINKS ---
-  if (artist.socials && typeof artist.socials === "object") {
-    const socialLinks = Object.entries(artist.socials).map(([platform, url]) =>
-      createElement("a", { href: url, target: "_blank", class: "social-link", rel: "noopener noreferrer" },
-        [`${getSocialIcon(platform)} ${platform}`])
-    );
-    artistDiv.appendChild(
-      createElement("div", { class: "socials" }, [
-        createElement("p", {}, [createElement("strong", {}, ["🔗 Socials:"])]),
-        ...socialLinks
-      ])
-    );
-  }
-
-  // --- CREATOR-ONLY ACTIONS ---
-  if (isCreator) {
-    artistDiv.appendChild(Button("✏️ Edit Artist", "", {
-      click: async () => {
-        const existingArtist = await apiFetch(`/artists/${artist.artistid}`);
-        const editContainer = document.getElementById("editartist") || container;
-        createOrEditArtist({
-          isLoggedIn,
-          content: editContainer,
-          mode: "edit",
-          artistID: artist.artistid,
-          existingArtist,
-          isCreator
-        });
-      }
-    }, "edit-artist-btn buttonx"));
-
-    artistDiv.appendChild(Button("🗑️ Request Deletion", "", {
-      click: () => deleteArtistForm(isLoggedIn, artist.artistid, isCreator)
-    }, "del-artist-btn buttonx"));
-
-    if (!document.getElementById("editartist")) {
-      container.appendChild(createElement("div", { class: "editform", id: "editartist" }));
+    {
+      label: "🎶 Genres",
+      value: Array.isArray(artist.genres) && artist.genres.length > 0
+        ? artist.genres.join(", ")
+        : "None"
     }
+  ];
+
+  fields.forEach(({ label, value }) =>
+    detailsDiv.appendChild(createElement("p", {}, [
+      createElement("strong", {}, [`${label}:`]),
+      ` ${value}`
+    ]))
+  );
+
+  return detailsDiv;
+}
+
+
+function renderSocialLinks(socials) {
+  const links = Object.entries(socials).map(([platform, url]) =>
+    createElement("a", {
+      href: url,
+      target: "_blank",
+      class: "social-link",
+      rel: "noopener noreferrer"
+    }, [createIconButton({ svgMarkup: getSocialIcon(platform), classSuffix: "", label: platform })])
+  );
+
+  return createElement("div", { class: "socials" }, [
+    createElement("p", {}, [createElement("strong", {}, ["🔗 Socials:"])]),
+    ...links
+  ]);
+}
+
+function renderCreatorActions(artist, container, isLoggedIn) {
+  const actions = [];
+
+  actions.push(Button("✏️ Edit Artist", "", {
+    click: async () => {
+      const existingArtist = await apiFetch(`/artists/${artist.artistid}`);
+      const editContainer = document.getElementById("editartist") || container;
+      createOrEditArtist({
+        isLoggedIn,
+        content: editContainer,
+        mode: "edit",
+        artistID: artist.artistid,
+        existingArtist,
+        isCreator: true
+      });
+    }
+  }, "edit-artist-btn buttonx"));
+
+  actions.push(Button("🗑️ Request Deletion", "", {
+    click: () => deleteArtistForm(isLoggedIn, artist.artistid, true)
+  }, "del-artist-btn buttonx"));
+
+  if (!document.getElementById("editartist")) {
+    actions.push(createElement("div", { class: "editform", id: "editartist" }));
   }
 
-  container.appendChild(artistDiv);
+  return createElement("div", { class: "creator-actions" }, actions);
 }
+

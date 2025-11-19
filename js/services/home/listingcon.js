@@ -7,11 +7,10 @@ import { resolveImagePath, EntityType, PictureType } from "../../utils/imagePath
 import Imagex from "../../components/base/Imagex.js";
 import { createTabs } from "../../components/ui/createTabs.js";
 
-export const clearElement = (el) => {
-  while (el.firstChild) el.removeChild(el.firstChild);
-};
+// Clear all children of an element
+export const clearElement = (el) => { while (el.firstChild) el.removeChild(el.firstChild); };
 
-// 🔗 Category → EntityType mapping
+// 🔗 Category → EntityType
 const categoryMap = {
   Places: EntityType.PLACE,
   Events: EntityType.EVENT,
@@ -20,47 +19,47 @@ const categoryMap = {
   Posts: EntityType.POST,
 };
 const getEntityByCategory = (category) => categoryMap[category];
-
-// 🖼️ Image Card
+// 🖼️ Create a clickable image card
 function createImageCard({ banner, title, description, href }, entitytype) {
-  const bannerURL = resolveImagePath(entitytype, PictureType.THUMB, banner);
   const safeTitle = title || "Untitled";
+  const bannerURL = resolveImagePath(entitytype, PictureType.THUMB, banner);
 
   const card = createElement("div", {
     class: "image-card",
-    role: "article",
-    "aria-label": safeTitle,
+    role: "button",
+    tabIndex: 0, // makes it focusable for keyboard users
+    "aria-label": `Open ${safeTitle}`,
   }, [
     Imagex({ src: bannerURL, alt: safeTitle }),
     createElement("div", { class: "card-info" }, [
       createElement("h4", {}, [safeTitle]),
       createElement("p", {}, [description || ""]),
-      createElement("button", {
-        class: "card-link",
-        type: "button",
-        "aria-label": `Open ${safeTitle}`,
-      }, ["Explore"]),
+      Button("Explore", "button", { click: (e) => { e.stopPropagation(); navigate(href); } }, "card-link"),
     ]),
   ]);
 
-  const linkBtn = card.querySelector(".card-link");
-  if (linkBtn) linkBtn.addEventListener("click", () => navigate(href));
+  // Click anywhere on the card navigates
+  card.addEventListener("click", () => navigate(href));
+
+  // Keyboard accessibility
+  card.addEventListener("keypress", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      navigate(href);
+    }
+  });
 
   return card;
 }
 
-// 🗂️ Cards + pagination
+// 🗂️ Cards + Pagination Handler
 function createCardSection() {
   const cardGrid = createElement("div", { class: "card-grid" });
   const loadMoreWrapper = createElement("div", { class: "load-more-wrap" });
-
   const pagingState = {};
   const DEFAULT_LIMIT = 20;
 
-  const fetchPage = async (category, skip, limit) => {
-    const url = `/homecards?category=${encodeURIComponent(category)}&skip=${skip}&limit=${limit}`;
-    return apiFetch(url);
-  };
+  const fetchPage = async (category, skip, limit) =>
+    apiFetch(`/homecards?category=${encodeURIComponent(category)}&skip=${skip}&limit=${limit}`);
 
   const showMessage = (msg) => createElement("p", { class: "status-message" }, [msg]);
 
@@ -68,43 +67,36 @@ function createCardSection() {
     Button("Load more", "home-load-more", { click: () => renderCardsPage(category, false) }, "load-more-btn");
 
   const renderCardsPage = async (category, initial = false) => {
-    if (!pagingState[category]) {
-      pagingState[category] = { skip: 0, limit: DEFAULT_LIMIT, done: false, loading: false };
-    }
+    if (!pagingState[category]) pagingState[category] = { skip: 0, limit: DEFAULT_LIMIT, done: false, loading: false };
     const state = pagingState[category];
     if (state.loading || state.done) return;
 
     state.loading = true;
-
     if (initial) {
       clearElement(cardGrid);
       cardGrid.appendChild(showMessage("Loading..."));
-    } else {
-      loadMoreWrapper.setAttribute("data-loading", "true");
-    }
+    } else loadMoreWrapper.setAttribute("data-loading", "true");
 
     try {
       const data = await fetchPage(category, state.skip, state.limit);
-
       if (initial) clearElement(cardGrid);
       loadMoreWrapper.removeAttribute("data-loading");
 
-      if (!data || !data.length) {
+      if (!data?.length) {
         if (initial) cardGrid.appendChild(showMessage("No results found."));
         state.done = true;
         clearElement(loadMoreWrapper);
         return;
       }
 
-      data.forEach((c) => cardGrid.appendChild(createImageCard(c, getEntityByCategory(category))));
+      const fragment = document.createDocumentFragment();
+      data.forEach((c) => fragment.appendChild(createImageCard(c, getEntityByCategory(category))));
+      cardGrid.appendChild(fragment);
       state.skip += data.length;
 
       clearElement(loadMoreWrapper);
-      if (data.length === state.limit) {
-        loadMoreWrapper.appendChild(makeLoadMoreButton(category));
-      } else {
-        state.done = true;
-      }
+      if (data.length === state.limit) loadMoreWrapper.appendChild(makeLoadMoreButton(category));
+      else state.done = true;
     } catch {
       if (initial) {
         clearElement(cardGrid);
@@ -118,7 +110,7 @@ function createCardSection() {
   return { cardGrid, loadMoreWrapper, renderCardsPage, pagingState };
 }
 
-// 🔄 Use createTabs for listings
+// 🔄 Create Tabs for Listings
 export function createListingTabs() {
   const categories = Object.keys(categoryMap);
 
@@ -127,8 +119,7 @@ export function createListingTabs() {
     title: id,
     render: (container) => {
       const section = createCardSection();
-      container.appendChild(section.cardGrid);
-      container.appendChild(section.loadMoreWrapper);
+      container.append(section.cardGrid, section.loadMoreWrapper);
       section.renderCardsPage(id, true);
     },
   }));

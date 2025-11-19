@@ -24,14 +24,14 @@
   right: 0;
   width: 0;
   height: 0;
-  border-top: 40px solid #3498db;
+  border-top: 40px solid var(--color-btn-bg);
   border-left: 40px solid transparent;
 }
 
 /* Stripe */
 .stripe-container {
   height: 8px;
-  background-color: #3498db;
+  background-color: var(--color-btn-bg);
 }
 
 /* Perforation */
@@ -50,7 +50,7 @@
 .ticket-card h2 {
   margin: 0 0 0.5rem;
   font-size: 1.5rem;
-  color: #3498db;
+  color: var(--color-btn-bg);
 }
 
 .ticket-card p {

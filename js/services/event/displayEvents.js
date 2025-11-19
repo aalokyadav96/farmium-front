@@ -77,19 +77,7 @@ function createEventCard(ev) {
       statusLabel,
       saveToggle
     ]),
-    // createElement("p", {}, [
-    //   createElement("strong", {}, ["Date: "]),
-    //   new Date(ev.date).toLocaleString("en-GB", {
-    //     day: "2-digit",
-    //     month: "2-digit",
-    //     year: "numeric",
-    //     hour: "2-digit",
-    //     minute: "2-digit",
-    //     second: "2-digit",
-    //     hour12: true
-    //   })
-    // ]),    
-    // // createElement("p", {}, [createElement("strong", {}, ["Date: "]), new Date(ev.date).toLocaleString()]),
+    
     createElement("p", {}, [createElement("strong", {}, ["Date: "]), Datex(ev.date)]),
     createElement("p", {}, [createElement("strong", {}, ["Place: "]), ev.placename || "-"]),
     createElement("p", {}, [createElement("strong", {}, ["Category: "]), ev.category || "-"]),

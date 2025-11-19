@@ -86,11 +86,10 @@
 
 /* --- Submit button --- */
 .create-section button[type="submit"] {
-  background-color: #007bff;
+  background-color: var(--color-btn-bg);
   color: white;
-  padding: 0.7rem;
-  font-size: 1rem;
-  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  border-radius: 4px;
   margin-top: 1rem;
 }
 

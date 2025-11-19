@@ -5,7 +5,7 @@
 // --- Configurable defaults ---
 const defaultPriceRanges = [
   { min: 0, max: 100, color: "#2ecc71" },
-  { min: 101, max: 200, color: "#3498db" },
+  { min: 101, max: 200, color: "#009c3e" },
   { min: 201, max: 300, color: "#9b59b6" },
   { min: 301, max: 400, color: "#e67e22" }
 ];

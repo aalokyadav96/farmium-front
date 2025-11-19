@@ -61,7 +61,7 @@
 }
 
 #lyrics-container p.active {
-  color: #007bff;
+  color: var(--color-btn-bg);
   font-weight: bold;
 }
 

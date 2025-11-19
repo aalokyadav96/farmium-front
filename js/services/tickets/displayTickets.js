@@ -55,7 +55,7 @@ export async function displayTickets(ticketContainer, tickets, eventId, eventNam
     const ticketListDiv = createElement("div", { class: "hvflex gap20" });
 
     if (isCreator) {
-        const addBtn = Button("Add Tickets", "add-ticket-btn", { click: () => addTicketForm(eventId, ticketListDiv) });
+        const addBtn = Button("Add Tickets", "add-ticket-btn", { click: () => addTicketForm(eventId, ticketListDiv) }, "buttonx");
         ticketContainer.appendChild(addBtn);
     }
 

@@ -20,7 +20,7 @@ const Bannerx = ({
   const altText = banneraltkey || `${bannerentitytype} banner`;
 
   const bannerImage = Imagex({
-    id: `${stateentitykey}-banner-img`,
+    id: `${stateentitykey}${bannerentityid}-banner-img`,
     src: bannerSrc,
     alt: altText,
     loading: "lazy",
@@ -41,7 +41,7 @@ const Bannerx = ({
         imageType: "banner",
         stateKey: "banner",
         stateEntityKey: stateentitykey,
-        previewElementId: `${stateentitykey}-banner-img`,
+        previewElementId: `${stateentitykey}${bannerentityid}-banner-img`,
         pictureType: PictureType.BANNER,
         entityId: bannerentityid
       });
